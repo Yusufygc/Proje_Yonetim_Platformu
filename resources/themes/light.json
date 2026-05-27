@@ -1,0 +1,18 @@
+{
+  "background": "#F8F9FC",
+  "surface": "#FFFFFF",
+  "surface_raised": "#F0F2F8",
+  "text_primary": "#1A1D2E",
+  "text_secondary": "#5A5E78",
+  "text_muted": "#9CA3B8",
+  "accent_start": "#6366F1",
+  "accent_end": "#8B5CF6",
+  "success": "#16A34A",
+  "warning": "#D97706",
+  "danger": "#DC2626",
+  "border": "#E2E6F0",
+  "scrollbar_bg": "#F0F2F8",
+  "scrollbar_handle": "#C8CEDE",
+  "sidebar_bg": "#EDEEF5",
+  "sidebar_active": "#6366F1"
+}

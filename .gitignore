@@ -1,0 +1,120 @@
+# ==============================================================================
+# PROJE YÖNETİM VE TAKİP PLATFORMU - RESMİ .GITIGNORE DOSYASI
+# ==============================================================================
+# Bu dosya RULES.md, 15_ALTYAPI_VE_DAGITIM_PLANI.md ve 16_SENIOR_MIMARI_STANDARTLAR.md
+# standartlarına uygun olarak, Anaconda ortamları, Poetry/uv bağımlılıkları,
+# yerel veritabanları, PySide6 derleme çıktıları ve IDE konfigürasyonlarının
+# Git sürüm kontrol sistemine sızmasını engellemek için yapılandırılmıştır.
+
+# --- ANACONDA / CONDA ORTAM KISITLAMALARI ---
+# Projenin çalıştırıldığı yerel Conda ortam klasörleri ve meta verileri
+.conda/
+conda-meta/
+envs/
+env/
+lib/
+lib64/
+share/
+include/
+bin/
+condarc
+kubernetes/
+
+# --- PYTHON DERLEME VE ÖNBELLEK ÇIKTILARI (CLEAN CODE) ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- STATİK ANALİZ, LİNTİNG VE TEST ÖNBELLEKLERİ (RUFF / MYPY / PYTEST) ---
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.htmlcov/
+.rupl/
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.pylint.d/
+
+# --- POETRY VE UV SANAL ORTAM ÇIKTILARI ---
+# RULES.md: pyproject.toml ve poetry.lock/uv.lock Git'e EKLENMELİDİR.
+# Ancak yerel .venv klasörleri kesinlikle yoksayılmalıdır.
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- ALTYAPI: YEREL VERİTABANLARI, YEDEKLER VE LOGLAR ---
+# 13_KALITE_VE_PERFORMANS_YONETIMI.md & 15_ALTYAPI_VE_DAGITIM_PLANI.md uyarınca
+*.db
+*.sqlite
+*.sqlite3
+.backups/
+*.log
+logs/
+
+# --- PAKETLEME VE DAĞITIM (PYINSTALLER / NUITKA) ---
+# 15_ALTYAPI_VE_DAGITIM_PLANI.md paketleme çıktıları
+*.spec
+pyinstaller/
+.nuitka/
+
+# --- POPÜLER IDE VE EDİTÖR KONFİGÜRASYONLARI ---
+# PyCharm
+.idea/
+*.iml
+# VS Code
+.vscode/
+.history/
+*.code-workspace
+# Temiz çalışma alanı için yerel araç ayarları
+.env
+.venv
+.project
+.pydevproject
+
+# --- İŞLETİM SİSTEMİ ÖZEL DOSYALARI (OS SPECIFIC) ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# --- GEÇİCİ TASARIM VE DOKÜMANTASYON ARTIKLARI ---
+*.bak
+*.swp
+*.tmp
+*~

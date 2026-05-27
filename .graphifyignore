@@ -1,0 +1,67 @@
+# ==============================================================================
+# PROJE YÖNETİM VE TAKİP PLATFORMU - RESMİ .GRAPHIFYIGNORE DOSYASI
+# ==============================================================================
+# Bu dosya, projenin modül bağımlılıklarını, mimari şemalarını ve süreç akışlarını
+# görselleştiren Graphify aracının, mimari haritayı gereksiz düğümlerle (nodes)
+# şişirmesini, haritayı okunmaz hale getirmesini engellemek için yapılandırılmıştır.
+# RULES.md ve 16_SENIOR_MIMARI_STANDARTLAR.md katmanlı mimari kurallarına uygundur.
+
+# --- DIŞ BAĞIMLILIKLAR VE SAKLAMA ALANLARI (GRAFİK DIŞI) ---
+# Üçüncü parti kütüphanelerin mimari şemaya dahil edilmesi grafiği tamamen çökertir.
+.conda/
+conda-meta/
+envs/
+env/
+.venv/
+venv/
+ENV/
+lib/
+lib64/
+include/
+bin/
+share/
+
+# --- TEST KATMANI (OPSİYONEL KISITLAMA) ---
+# İş mantığı (Business Logic) ve sunum katmanı dışındaki test dosyaları mimari bağımlılık
+# haritasında karmaşıklık yaratmaması adına grafik analizine dahil edilmez.
+tests/
+.pytest_cache/
+.coverage
+.htmlcov/
+
+# --- ÖNBELLEKLER VE OTOMATİK ÜRETİLEN ARTIKLAR ---
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# --- VERİTABANI, LOG VE YEDEKLEME DİZİNLERİ ---
+# Veri dosyaları kod bağımlılığı içermediğinden grafikte düğüm oluşturmamalıdır.
+*.db
+*.sqlite
+*.sqlite3
+.backups/
+*.log
+logs/
+
+# --- DERLEME VE PAKETLEME KATMANLARI ---
+build/
+dist/
+*.spec
+.nuitka/
+pyinstaller/
+*.egg-info/
+.eggs/
+
+# --- IDE VE EDİTÖR AYARLARI ---
+.idea/
+.vscode/
+
+# --- STATİK VE MEDYA VARLIKLARI ---
+# Kod hiyerarşisi içermeyen kaynaklar yoksayılır.
+resources/icons/
+resources/fonts/
+resources/themes/
+resources/locales/

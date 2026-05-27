@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "proje-takip-platformu"
+version = "0.1.0"
+description = "Premium UI/UX tasarımlı, WBS destekli hiyerarşik proje ve görev takip platformu"
+authors = ["Yusuf <candidate.engineer@sakarya.edu.tr>"]
+readme = "README.md"
+packages = [{include = "new_project_app"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+PySide6 = "^6.7.0"          # Modern ve premium UI bileşenleri ve animasyonlar için
+SQLAlchemy = "^2.0.29"      # Platform bağımsız ORM katmanı (Database-Agnostic)
+alembic = "^1.13.1"         # Veritabanı şema versiyon kontrolü ve otomatik göçler
+pydantic = "^2.7.1"         # Katı veri doğrulama ve DTO katmanı yönetimi
+keyring = "^25.2.1"         # İşletim sistemi güvenli kasası entegrasyonu (API Anahtarları için)
+requests = "^2.31.0"        # Eksik SVG ikonlarını dinamik olarak API'den indirmek için
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"           # Birim ve entegrasyon test altyapısı
+pytest-qt = "^4.4.0"        # PySide6 arayüz ve sinyal mekanizmaları otomatik test aracı
+ruff = "^0.4.4"             # Clean Code ve PEP 8 standartları için ultra hızlı linter/formatter
+mypy = "^1.10.0"            # Strict Type Hinting (Katı Tip Doğrulama) denetleyicisi
+pyinstaller = "^6.6.0"      # Uygulamayı son kullanıcı için bağımsız çalıştırılabilir (.exe) yapma aracı
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# --- RUFF LINTER & FORMATTER KONFİGÜRASYONU ---
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # Style errors (PEP 8)
+    "W",   # Style warnings (PEP 8)
+    "F",   # Pyflakes (Mantıksal hatalar)
+    "I",   # Isort (Düzenli import sıralaması)
+    "B",   # Bugbear (Potansiyel tasarım hataları)
+    "C90"  # Karmaşıklık kontrolü (Fonksiyonların şişmesini engeller)
+]
+ignore = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10 # RULES.md: Fonksiyonlarımızın aşırı dallanıp karmaşıklaşmasını engeller
+
+# --- MYPY STRICT TYPE CHECKING KONFİGÜRASYONU ---
+[tool.mypy]
+python_version = "3.10"
+strict = true # 16_SENIOR_MIMARI_STANDARTLAR.md: Katı tip belirtimi zorunluluğuaktif
+ignore_missing_imports = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "PySide6.*"
+ignore_missing_imports = true
