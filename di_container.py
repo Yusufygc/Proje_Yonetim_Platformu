@@ -24,6 +24,9 @@ from infrastructure.repositories.idea_repository import IdeaRepository
 from infrastructure.repositories.decision_repository import DecisionRepository
 from infrastructure.repositories.note_repository import NoteRepository
 from infrastructure.repositories.resource_repository import ResourceRepository
+
+from services.dashboard_service import DashboardService
+from services.search_service import SearchService
 from services.project_service import ProjectService
 from services.stage_service import StageService
 from services.task_service import TaskService
@@ -36,6 +39,8 @@ from controllers.idea_controller import IdeaController
 from controllers.decision_controller import DecisionController
 from controllers.note_controller import NoteController
 from controllers.resource_controller import ResourceController
+from controllers.dashboard_controller import DashboardController
+from controllers.search_controller import SearchController
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +123,12 @@ class DIContainer:
         self._resource_service = ResourceService(repository=self._resource_repo)
         self._resource_controller = ResourceController(service=self._resource_service)
 
+        self._dashboard_service = DashboardService(db=self._db)
+        self._dashboard_controller = DashboardController(service=self._dashboard_service)
+
+        self._search_service = SearchService(db=self._db)
+        self._search_controller = SearchController(service=self._search_service)
+
         self._initialized = True
         logger.info("DI Container başarıyla kuruldu.")
 
@@ -170,3 +181,11 @@ class DIContainer:
     @property
     def resource_controller(self) -> ResourceController:
         return self._resource_controller
+
+    @property
+    def dashboard_controller(self) -> DashboardController:
+        return self._dashboard_controller
+
+    @property
+    def search_controller(self) -> SearchController:
+        return self._search_controller

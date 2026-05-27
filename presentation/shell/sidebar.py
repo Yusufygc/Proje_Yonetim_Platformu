@@ -95,6 +95,7 @@ class Sidebar(QFrame):
     """
 
     page_requested = Signal(str)
+    search_requested = Signal()
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent=parent)
@@ -142,6 +143,26 @@ class Sidebar(QFrame):
         header.addWidget(self._toggle_btn)
         layout.addLayout(header)
 
+        # Search Button
+        self._search_btn = QPushButton("🔍 Ara (Ctrl+F)", parent=self)
+        self._search_btn.setFixedHeight(36)
+        self._search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._search_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #1C1F26;
+                color: #8B8FA8;
+                border: 1px solid #2A2D38;
+                border-radius: 6px;
+                text-align: left;
+                padding-left: 12px;
+                font-size: 13px;
+                margin-top: 8px;
+            }
+            QPushButton:hover { background-color: #2A2D38; color: #E8EAF0; }
+        """)
+        self._search_btn.clicked.connect(self.search_requested.emit)
+        layout.addWidget(self._search_btn)
+
         # Ayırıcı
         separator = QFrame(parent=self)
         separator.setFrameShape(QFrame.Shape.HLine)
@@ -185,6 +206,7 @@ class Sidebar(QFrame):
         self._toggle_btn.setText("▶")
         self._title_label.hide()
         self._version_label.hide()
+        self._search_btn.setText("🔍")
         for btn in self._nav_buttons.values():
             btn.setText("")
 
@@ -195,6 +217,7 @@ class Sidebar(QFrame):
         self._toggle_btn.setText("◀")
         self._title_label.show()
         self._version_label.show()
+        self._search_btn.setText("🔍 Ara (Ctrl+F)")
         for page_name, btn in self._nav_buttons.items():
             label = next(lbl for pn, lbl in NAV_ITEMS if pn == page_name)
             btn.setText(label)

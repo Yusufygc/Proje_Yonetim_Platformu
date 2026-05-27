@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QMainWindow,
@@ -24,6 +25,8 @@ from presentation.pages.projects_page import ProjectsPage
 from presentation.pages.settings_page import SettingsPage
 from presentation.pages.tasks_page import TasksPage
 from presentation.shell.sidebar import Sidebar
+
+from presentation.dialogs.search_dialog import SearchDialog
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +50,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._prefs = PreferenceManager.instance()
         self._theme = ThemeManager.instance()
+        self._di = DIContainer.instance()
 
         self._setup_window()
         self._setup_ui()
+        self._setup_shortcuts()
         self._restore_geometry()
         self._navigate_to("dashboard")
 
@@ -71,12 +76,18 @@ class MainWindow(QMainWindow):
         # Sol panel: Sidebar
         self._sidebar = Sidebar(parent=central)
         self._sidebar.page_requested.connect(self._navigate_to)
+        self._sidebar.search_requested.connect(self._open_search_dialog)
         root_layout.addWidget(self._sidebar)
 
         # Sağ panel: Sayfalar
         self._stack = QStackedWidget(parent=central)
         _container = DIContainer.instance()
-        self._stack.addWidget(DashboardPage(parent=self._stack))   # 0
+        self._stack.addWidget(
+            DashboardPage(
+                parent=self._stack,
+                controller=_container.dashboard_controller
+            )
+        )   # 0
         self._projects_page = ProjectsPage(
             parent=self._stack,
             di_container=_container
@@ -105,6 +116,26 @@ class MainWindow(QMainWindow):
         self._stack.setCurrentIndex(index)
         self._sidebar.set_active_page(page_name)
         logger.debug("Sayfa değiştirildi: %s (index=%d)", page_name, index)
+
+    def _setup_shortcuts(self) -> None:
+        shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
+        shortcut.activated.connect(self._open_search_dialog)
+
+    def _open_search_dialog(self) -> None:
+        dialog = SearchDialog(controller=self._di.search_controller, parent=self)
+        dialog.item_selected.connect(self._on_search_item_selected)
+        dialog.exec()
+
+    def _on_search_item_selected(self, type_str: str, item_id: int) -> None:
+        if type_str == "Proje":
+            self._navigate_to("projects")
+            # Proje detayını açmak için projeler sayfasına ID göndermeliyiz
+            # Fakat şu an projects_page'e direct erişimimiz self._projects_page üzerinden var:
+            self._projects_page._on_item_clicked(item_id)
+        elif type_str == "Görev":
+            self._navigate_to("tasks")
+        elif type_str == "Fikir":
+            self._navigate_to("ideas")
 
     def _restore_geometry(self) -> None:
         geometry = self._prefs.load_window_geometry()
