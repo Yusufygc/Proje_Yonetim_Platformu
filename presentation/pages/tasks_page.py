@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Optional
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
@@ -168,11 +169,12 @@ class TasksPage(QWidget):
             item.setData(0, Qt.ItemDataRole.UserRole, t.id)
             
             # Styling status
-            color = _STATUS_COLOR.get(t.status, "#E8EAF0")
-            item.setForeground(1, color)
+            color = _STATUS_COLOR.get(t.status, "#8B8FA8")
+            item.setForeground(1, QColor(color))
             
             if t.status == "DONE":
-                item.setForeground(0, "#6B7280")
+                item.setForeground(0, QColor("#6B7280"))
+                item.setForeground(1, QColor("#6B7280"))
             
             items_dict[t.id] = item
 
