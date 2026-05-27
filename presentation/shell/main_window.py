@@ -107,7 +107,12 @@ class MainWindow(QMainWindow):
                 project_controller=_container.project_controller,
             )
         )
-        self._stack.addWidget(SettingsPage(parent=self._stack))    # 4
+        self._stack.addWidget(
+            SettingsPage(
+                parent=self._stack,
+                controller=_container.settings_controller
+            )
+        )   # 4
         root_layout.addWidget(self._stack)
 
     def _navigate_to(self, page_name: str) -> None:

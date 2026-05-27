@@ -95,6 +95,13 @@ class ProjectsPage(QWidget):
         self._list_layout = QVBoxLayout(self._list_container)
         self._list_layout.setContentsMargins(8, 0, 8, 8)
         self._list_layout.setSpacing(4)
+
+        self._empty_label = QLabel("Henüz proje yok.\nYeni oluşturmak için\n+'ya basın.", parent=self._list_container)
+        self._empty_label.setStyleSheet("color: #8B8FA8; font-size: 13px;")
+        self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._empty_label.hide()
+        self._list_layout.addWidget(self._empty_label)
+
         self._list_layout.addStretch()
 
         scroll.setWidget(self._list_container)
@@ -138,8 +145,14 @@ class ProjectsPage(QWidget):
 
     def _on_projects_loaded(self, projects: list[Project]) -> None:
         self._clear_list()
-        for project in projects:
-            self._add_item(project)
+        
+        if not projects:
+            self._empty_label.show()
+        else:
+            self._empty_label.hide()
+            for project in projects:
+                self._add_item(project)
+                
         if self._selected_project_id in self._list_items:
             item = self._list_items[self._selected_project_id]
             item.set_selected(True)

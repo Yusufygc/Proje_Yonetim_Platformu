@@ -109,6 +109,12 @@ class IdeasPage(QWidget):
         self._list_widget.itemSelectionChanged.connect(self._on_selection_changed)
         list_layout.addWidget(self._list_widget)
 
+        self._empty_label = QLabel("Henüz fikir yok.\nYeni oluşturmak için\n+ Yeni Fikir'e basın.", parent=list_container)
+        self._empty_label.setStyleSheet("color: #8B8FA8; font-size: 13px;")
+        self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._empty_label.hide()
+        list_layout.addWidget(self._empty_label)
+
         # Sağ Detay Paneli
         self._detail_panel = QFrame(parent=splitter)
         self._detail_panel.setStyleSheet(
@@ -182,9 +188,16 @@ class IdeasPage(QWidget):
 
     def _on_ideas_loaded(self, ideas: list[Idea]) -> None:
         self._list_widget.clear()
-        for idea in ideas:
-            item = IdeaListItem(idea)
-            self._list_widget.addItem(item)
+        
+        if not ideas:
+            self._list_widget.hide()
+            self._empty_label.show()
+        else:
+            self._empty_label.hide()
+            self._list_widget.show()
+            for idea in ideas:
+                item = IdeaListItem(idea)
+                self._list_widget.addItem(item)
             
             if self._selected_idea_id == idea.id:
                 item.setSelected(True)

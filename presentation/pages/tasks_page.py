@@ -78,6 +78,12 @@ class TasksPage(QWidget):
         self._tree.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self._tree, 1)
 
+        self._empty_label = QLabel("", parent=self)
+        self._empty_label.setStyleSheet("color: #8B8FA8; font-size: 14px;")
+        self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._empty_label.hide()
+        layout.addWidget(self._empty_label, 1)
+
     def _build_header(self) -> QWidget:
         header = QWidget(parent=self)
         layout = QHBoxLayout(header)
@@ -115,24 +121,30 @@ class TasksPage(QWidget):
         self._task_controller.task_deleted.connect(self._on_task_changed)
 
     def _on_projects_loaded(self, projects: list[Project]) -> None:
-        self._all_projects = projects
         self._project_combo.blockSignals(True)
         self._project_combo.clear()
+        self._all_projects = projects
+        
         if not projects:
-            self._project_combo.addItem("Proje Bulunamadı", None)
-            self._selected_project_id = None
-            self._tree.clear()
+            self._project_combo.addItem("Proje Bulunamadı")
+            self._tree.hide()
+            self._empty_label.setText("Görüntülenecek proje yok.\nÖnce 'Projeler' sayfasından yeni bir proje oluşturun.")
+            self._empty_label.show()
         else:
             for p in projects:
                 self._project_combo.addItem(p.title, p.id)
-            if self._selected_project_id is None:
+                
+            if self._selected_project_id:
+                idx = self._project_combo.findData(self._selected_project_id)
+                if idx >= 0:
+                    self._project_combo.setCurrentIndex(idx)
+            else:
                 self._selected_project_id = projects[0].id
                 
-            idx = self._project_combo.findData(self._selected_project_id)
-            if idx >= 0:
-                self._project_combo.setCurrentIndex(idx)
-            self._task_controller.load_tasks(self._selected_project_id)
         self._project_combo.blockSignals(False)
+        
+        if self._selected_project_id:
+            self._task_controller.load_tasks(self._selected_project_id)
 
     def _on_project_changed(self, index: int) -> None:
         project_id = self._project_combo.itemData(index)
@@ -143,7 +155,17 @@ class TasksPage(QWidget):
             self._tree.clear()
 
     def _on_tasks_loaded(self, tasks: list[Task]) -> None:
+        self._tree.clear()
         self._tasks = tasks
+        
+        if not tasks and self._selected_project_id:
+            self._tree.hide()
+            self._empty_label.setText("Bu projede henüz görev bulunmuyor.\nYeni Görev Ekle butonuyla WBS oluşturabilirsiniz.")
+            self._empty_label.show()
+            return
+            
+        self._empty_label.hide()
+        self._tree.show()
         self._render_tree()
 
     def _on_task_changed(self, _task_or_id: object) -> None:
@@ -152,10 +174,6 @@ class TasksPage(QWidget):
 
     def _render_tree(self) -> None:
         self._tree.clear()
-        if not self._tasks:
-            return
-
-        task_dict = {t.id: t for t in self._tasks}
         items_dict: dict[int, QTreeWidgetItem] = {}
 
         # First pass: create all items
