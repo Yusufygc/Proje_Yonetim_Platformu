@@ -118,3 +118,7 @@ Desktop.ini
 *.swp
 *.tmp
 *~
+
+# --- GRAPHIFY ÇIKTI DOSYALARI ---
+# Mimari bilgi grafiği çıktıları; yerel analiz aracı, versiyon kontrolüne alınmaz
+graphify-out/
