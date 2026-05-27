@@ -7,10 +7,11 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QThreadPool
 
 from core.events.event_bus import EventBus
 from core.exceptions.base_exception import AppBaseException
+from core.workers.worker import Worker
 from domain.models.project import Project
 from services.project_service import ProjectService
 
@@ -38,12 +39,17 @@ class ProjectController(QObject):
         self._event_bus = event_bus
 
     def load_projects(self, include_archived: bool = False) -> None:
-        try:
-            projects = self._service.get_all_projects(include_archived=include_archived)
-            self.projects_loaded.emit(projects)
-        except AppBaseException as exc:
-            logger.error("Projeler yüklenemedi: %s", exc)
-            self.error_occurred.emit(str(exc))
+        def _fetch() -> list[Project]:
+            return self._service.get_all_projects(include_archived=include_archived)
+            
+        def _on_error(err: str) -> None:
+            logger.error("Projeler yüklenemedi: %s", err)
+            self.error_occurred.emit(str(err))
+            
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.projects_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        QThreadPool.globalInstance().start(worker)
 
     def get_project_sync(self, project_id: int) -> Optional[Project]:
         """Senkron proje sorgulama — yalnızca UI thread'inden küçük veri seti için çağrılır."""

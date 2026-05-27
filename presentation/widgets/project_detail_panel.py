@@ -28,21 +28,21 @@ from presentation.widgets.resource_list_widget import ResourceListWidget
 from presentation.widgets.stage_timeline_widget import StageTimelineWidget
 from presentation.widgets.task_list_widget import TaskListWidget
 
-_STATUS_TR: dict[str, tuple[str, str]] = {
-    "PLANNED": ("Planlandı", "#8B8FA8"),
-    "ACTIVE": ("Aktif", "#22C55E"),
-    "ON_HOLD": ("Beklemede", "#F59E0B"),
-    "BLOCKED": ("Engellendi", "#EF4444"),
-    "COMPLETED": ("Tamamlandı", "#22C55E"),
-    "ARCHIVED": ("Arşivlendi", "#4A4D5C"),
-    "CANCELLED": ("İptal Edildi", "#EF4444"),
+_STATUS_THEME_KEYS: dict[str, tuple[str, str]] = {
+    "PLANNED": ("Planlandı", "text_secondary"),
+    "ACTIVE": ("Aktif", "success"),
+    "ON_HOLD": ("Beklemede", "warning"),
+    "BLOCKED": ("Engellendi", "danger"),
+    "COMPLETED": ("Tamamlandı", "success"),
+    "ARCHIVED": ("Arşivlendi", "text_muted"),
+    "CANCELLED": ("İptal Edildi", "danger"),
 }
 
-_PRIORITY_TR: dict[str, tuple[str, str]] = {
-    "LOW": ("Düşük", "#4A4D5C"),
-    "MEDIUM": ("Orta", "#6366F1"),
-    "HIGH": ("Yüksek", "#F59E0B"),
-    "CRITICAL": ("Kritik", "#EF4444"),
+_PRIORITY_THEME_KEYS: dict[str, tuple[str, str]] = {
+    "LOW": ("Düşük", "text_secondary"),
+    "MEDIUM": ("Orta", "accent_start"),
+    "HIGH": ("Yüksek", "warning"),
+    "CRITICAL": ("Kritik", "danger"),
 }
 
 
@@ -79,12 +79,12 @@ class ProjectDetailPanel(QWidget):
         layout.addStretch()
 
         icon_lbl = QLabel("◈", parent=page)
-        icon_lbl.setStyleSheet("font-size: 48px; color: #2A2D38;")
+        icon_lbl.setProperty("cssClass", "text-muted")
         icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(icon_lbl)
 
         msg_lbl = QLabel("Bir proje seçin\nveya yeni proje oluşturun", parent=page)
-        msg_lbl.setStyleSheet("font-size: 14px; color: #4A4D5C; line-height: 1.6;")
+        msg_lbl.setProperty("cssClass", "text-muted")
         msg_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(msg_lbl)
         layout.addStretch()
@@ -108,14 +108,12 @@ class ProjectDetailPanel(QWidget):
         layout.addSpacing(24)
 
         self._desc_header = QLabel("AÇIKLAMA", parent=container)
-        self._desc_header.setStyleSheet(
-            "font-size: 11px; font-weight: 600; color: #4A4D5C; letter-spacing: 1px;"
-        )
+        self._desc_header.setProperty("cssClass", "section-header")
         layout.addWidget(self._desc_header)
         layout.addSpacing(8)
 
         self._desc_lbl = QLabel("", parent=container)
-        self._desc_lbl.setStyleSheet("font-size: 14px; color: #8B8FA8; line-height: 1.6;")
+        self._desc_lbl.setProperty("cssClass", "text-secondary")
         self._desc_lbl.setWordWrap(True)
         layout.addWidget(self._desc_lbl)
         layout.addSpacing(20)
@@ -125,9 +123,7 @@ class ProjectDetailPanel(QWidget):
         layout.addSpacing(28)
 
         stages_header = QLabel("SÜREÇ AŞAMALARI", parent=container)
-        stages_header.setStyleSheet(
-            "font-size: 11px; font-weight: 600; color: #4A4D5C; letter-spacing: 1px;"
-        )
+        stages_header.setProperty("cssClass", "section-header")
         layout.addWidget(stages_header)
         layout.addSpacing(8)
 
@@ -138,12 +134,7 @@ class ProjectDetailPanel(QWidget):
         layout.addSpacing(28)
 
         self._tab_widget = QTabWidget(parent=container)
-        self._tab_widget.setStyleSheet(
-            "QTabWidget::pane { border: none; background: transparent; }"
-            "QTabBar::tab { background: #2A2D38; color: #8B8FA8; padding: 10px 20px; border-radius: 6px; margin-right: 4px; font-weight: bold; }"
-            "QTabBar::tab:selected { background: #6366F1; color: white; }"
-            "QTabBar::tab:hover:!selected { background: #3B3E4D; }"
-        )
+        # QTabWidget stilleri global QSS içinde yönetiliyor
 
         self._tasks_page = TasksPage(
             parent=self._tab_widget,
@@ -182,13 +173,13 @@ class ProjectDetailPanel(QWidget):
         layout.setSpacing(10)
 
         self._title_lbl = QLabel("", parent=row)
-        self._title_lbl.setStyleSheet("font-size: 22px; font-weight: 700; color: #E8EAF0;")
+        self._title_lbl.setProperty("cssClass", "title-medium")
         self._title_lbl.setWordWrap(True)
         layout.addWidget(self._title_lbl, 1)
 
         self._edit_btn = QPushButton("Düzenle", parent=row)
         self._edit_btn.setMinimumSize(80, 32)
-        self._edit_btn.setObjectName("accent_button")
+        self._edit_btn.setProperty("cssClass", "btn-primary")
         self._edit_btn.clicked.connect(self._on_edit)
         layout.addWidget(self._edit_btn)
 
@@ -219,13 +210,11 @@ class ProjectDetailPanel(QWidget):
         layout.setSpacing(10)
 
         lbl = QLabel("GitHub:", parent=row)
-        lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 600; color: #4A4D5C; min-width: 60px;"
-        )
+        lbl.setProperty("cssClass", "text-secondary")
         layout.addWidget(lbl)
 
         self._github_lbl = QLabel("", parent=row)
-        self._github_lbl.setStyleSheet("font-size: 12px; color: #6366F1;")
+        self._github_lbl.setProperty("cssClass", "text-accent")
         self._github_lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         layout.addWidget(self._github_lbl, 1)
         return row
@@ -235,16 +224,21 @@ class ProjectDetailPanel(QWidget):
         self._project_id = project.id
         self._title_lbl.setText(project.title)
 
-        status_text, status_color = _STATUS_TR.get(project.status, (project.status, "#8B8FA8"))
+        from core.managers.theme_manager import ThemeManager
+        theme_mgr = ThemeManager.instance()
+
+        status_text, theme_key = _STATUS_THEME_KEYS.get(project.status, (project.status, "text_secondary"))
+        status_color = theme_mgr.color(theme_key)
         self._status_badge.setText(status_text)
         self._status_badge.setStyleSheet(
             f"font-size: 11px; font-weight: 600; color: {status_color};"
             f" background: {status_color}22; padding: 4px 10px; border-radius: 10px;"
         )
 
-        priority_text, priority_color = _PRIORITY_TR.get(
-            project.priority, (project.priority, "#6366F1")
+        priority_text, theme_key = _PRIORITY_THEME_KEYS.get(
+            project.priority, (project.priority, "accent_start")
         )
+        priority_color = theme_mgr.color(theme_key)
         self._priority_badge.setText(f"● {priority_text} Öncelik")
         self._priority_badge.setStyleSheet(
             f"font-size: 11px; font-weight: 600; color: {priority_color};"

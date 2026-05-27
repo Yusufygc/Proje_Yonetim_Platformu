@@ -25,8 +25,8 @@ from presentation.pages.projects_page import ProjectsPage
 from presentation.pages.settings_page import SettingsPage
 from presentation.pages.tasks_page import TasksPage
 from presentation.shell.sidebar import Sidebar
-
 from presentation.dialogs.search_dialog import SearchDialog
+from presentation.widgets.toast import Toast
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(config.APP_NAME)
         self.setMinimumSize(1024, 680)
         self.resize(1280, 800)
+        self.setStyleSheet(self._theme.build_global_qss())
+        self._theme.theme_changed.connect(self._on_theme_changed)
+
+    def _on_theme_changed(self, theme_name: str) -> None:
         self.setStyleSheet(self._theme.build_global_qss())
 
     def _setup_ui(self) -> None:
@@ -114,6 +118,9 @@ class MainWindow(QMainWindow):
             )
         )   # 4
         root_layout.addWidget(self._stack)
+        
+        # Toast bildirimleri pencerenin üstünde yer alır
+        self._toast = Toast(parent=central)
 
     def _navigate_to(self, page_name: str) -> None:
         """Sidebar navigasyon sinyalini alarak ilgili sayfayı gösterir."""
@@ -123,8 +130,18 @@ class MainWindow(QMainWindow):
         logger.debug("Sayfa değiştirildi: %s (index=%d)", page_name, index)
 
     def _setup_shortcuts(self) -> None:
-        shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
-        shortcut.activated.connect(self._open_search_dialog)
+        shortcut_f = QShortcut(QKeySequence("Ctrl+F"), self)
+        shortcut_f.activated.connect(self._open_search_dialog)
+        
+        shortcut_k = QShortcut(QKeySequence("Ctrl+K"), self)
+        shortcut_k.activated.connect(self._open_search_dialog)
+        
+        shortcut_n = QShortcut(QKeySequence("Ctrl+N"), self)
+        shortcut_n.activated.connect(self._create_new_project)
+
+    def _create_new_project(self) -> None:
+        self._navigate_to("projects")
+        self._projects_page._show_new_project_dialog()
 
     def _open_search_dialog(self) -> None:
         dialog = SearchDialog(controller=self._di.search_controller, parent=self)

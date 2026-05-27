@@ -25,13 +25,13 @@ from domain.models.idea import Idea
 from domain.enums.idea_status import IdeaStatus
 from presentation.dialogs.idea_dialog import IdeaDialog
 
-_STATUS_COLORS = {
-    IdeaStatus.DRAFT.value: "#4A4D5C",
-    IdeaStatus.REVIEWING.value: "#F59E0B",
-    IdeaStatus.VALIDATING.value: "#6366F1",
-    IdeaStatus.CONVERTED.value: "#22C55E",
-    IdeaStatus.POSTPONED.value: "#8B8FA8",
-    IdeaStatus.REJECTED.value: "#EF4444",
+_STATUS_THEME_KEYS = {
+    IdeaStatus.DRAFT.value: "text_muted",
+    IdeaStatus.REVIEWING.value: "warning",
+    IdeaStatus.VALIDATING.value: "accent_start",
+    IdeaStatus.CONVERTED.value: "success",
+    IdeaStatus.POSTPONED.value: "text_secondary",
+    IdeaStatus.REJECTED.value: "danger",
 }
 
 class IdeaListItem(QListWidgetItem):
@@ -72,18 +72,14 @@ class IdeasPage(QWidget):
         header_layout.setContentsMargins(0, 0, 0, 0)
 
         title = QLabel("Fikir Havuzu", parent=header)
-        title.setStyleSheet("font-size: 24px; font-weight: 700; color: #E8EAF0;")
+        title.setProperty("cssClass", "title-medium")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
 
         add_btn = QPushButton("+ Yeni Fikir", parent=header)
         add_btn.setMinimumSize(140, 40)
-        add_btn.setObjectName("accent_button")
-        add_btn.setStyleSheet(
-            "QPushButton { background-color: #6366F1; color: white; border: none; border-radius: 6px; font-weight: 600; }"
-            "QPushButton:hover { background-color: #4F46E5; }"
-        )
+        add_btn.setProperty("cssClass", "btn-primary")
         add_btn.clicked.connect(self._on_add_idea)
         header_layout.addWidget(add_btn)
 
@@ -95,31 +91,23 @@ class IdeasPage(QWidget):
 
         # Sol Liste
         list_container = QFrame(parent=splitter)
-        list_container.setStyleSheet(
-            "QFrame { background-color: #1E2130; border: 1px solid #2A2D38; border-radius: 12px; }"
-        )
+        list_container.setProperty("cssClass", "panel")
         list_layout = QVBoxLayout(list_container)
         
         self._list_widget = QListWidget(parent=list_container)
-        self._list_widget.setStyleSheet(
-            "QListWidget { background: transparent; border: none; color: #E8EAF0; font-size: 14px; }"
-            "QListWidget::item { padding: 12px; border-bottom: 1px solid #2A2D38; }"
-            "QListWidget::item:selected { background-color: #2A2D38; border-radius: 6px; }"
-        )
+        # QListWidget stili artık global QSS içinde
         self._list_widget.itemSelectionChanged.connect(self._on_selection_changed)
         list_layout.addWidget(self._list_widget)
 
         self._empty_label = QLabel("Henüz fikir yok.\nYeni oluşturmak için\n+ Yeni Fikir'e basın.", parent=list_container)
-        self._empty_label.setStyleSheet("color: #8B8FA8; font-size: 13px;")
+        self._empty_label.setProperty("cssClass", "text-secondary")
         self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._empty_label.hide()
         list_layout.addWidget(self._empty_label)
 
         # Sağ Detay Paneli
         self._detail_panel = QFrame(parent=splitter)
-        self._detail_panel.setStyleSheet(
-            "QFrame { background-color: #1E2130; border: 1px solid #2A2D38; border-radius: 12px; }"
-        )
+        self._detail_panel.setProperty("cssClass", "panel")
         self._detail_layout = QVBoxLayout(self._detail_panel)
         self._detail_layout.setContentsMargins(32, 32, 32, 32)
         self._detail_layout.setSpacing(16)
@@ -141,7 +129,7 @@ class IdeasPage(QWidget):
         dh_layout.setContentsMargins(0,0,0,0)
         
         self._idea_title = QLabel("", parent=self._detail_header)
-        self._idea_title.setStyleSheet("font-size: 20px; font-weight: bold; color: white;")
+        self._idea_title.setProperty("cssClass", "title-small")
         self._idea_title.setWordWrap(True)
         dh_layout.addWidget(self._idea_title, 1)
         
@@ -154,7 +142,7 @@ class IdeasPage(QWidget):
 
         # Detay alanları
         self._desc_lbl = QLabel("", parent=self._detail_panel)
-        self._desc_lbl.setStyleSheet("color: #8B8FA8; font-size: 14px; line-height: 1.5;")
+        self._desc_lbl.setProperty("cssClass", "text-secondary")
         self._desc_lbl.setWordWrap(True)
         self._detail_layout.addWidget(self._desc_lbl)
         
@@ -167,13 +155,13 @@ class IdeasPage(QWidget):
         
         self._edit_btn = QPushButton("Düzenle", parent=btn_row)
         self._edit_btn.setMinimumHeight(36)
-        self._edit_btn.setStyleSheet("background-color: #2A2D38; color: white; border-radius: 6px;")
+        self._edit_btn.setProperty("cssClass", "btn-secondary")
         self._edit_btn.clicked.connect(self._on_edit_idea)
         btn_layout.addWidget(self._edit_btn)
         
         self._convert_btn = QPushButton("Projeye Dönüştür", parent=btn_row)
         self._convert_btn.setMinimumHeight(36)
-        self._convert_btn.setStyleSheet("background-color: #22C55E; color: white; border-radius: 6px; font-weight: bold;")
+        self._convert_btn.setProperty("cssClass", "btn-primary")
         self._convert_btn.clicked.connect(self._on_convert_to_project)
         btn_layout.addWidget(self._convert_btn)
         
@@ -227,9 +215,14 @@ class IdeasPage(QWidget):
         
         self._idea_title.setText(idea.title)
         
-        color = _STATUS_COLORS.get(idea.status, "#8B8FA8")
+        from core.managers.theme_manager import ThemeManager
+        theme_key = _STATUS_THEME_KEYS.get(idea.status, "text_secondary")
+        color = ThemeManager.instance().color(theme_key)
         self._idea_status.setText(idea.status)
-        self._idea_status.setStyleSheet(f"background-color: {color}22; color: {color}; padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;")
+        self._idea_status.setStyleSheet(
+            f"background-color: {color}22; color: {color};"
+            f" padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;"
+        )
         
         desc = ""
         if idea.problem:

@@ -17,11 +17,11 @@ from PySide6.QtWidgets import (
 from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
 
-_STATUS_TR: dict[str, tuple[str, str]] = {
-    StageStatus.PENDING.value: ("Bekliyor", "#4A4D5C"),
-    StageStatus.ACTIVE.value: ("Aktif", "#22C55E"),
-    StageStatus.COMPLETED.value: ("Tamamlandı", "#6366F1"),
-    StageStatus.SKIPPED.value: ("Atlandı", "#8B8FA8"),
+_STATUS_THEME_KEYS: dict[str, tuple[str, str]] = {
+    StageStatus.PENDING.value: ("Bekliyor", "text_secondary"),
+    StageStatus.ACTIVE.value: ("Aktif", "success"),
+    StageStatus.COMPLETED.value: ("Tamamlandı", "accent_start"),
+    StageStatus.SKIPPED.value: ("Atlandı", "text_muted"),
 }
 
 
@@ -49,6 +49,9 @@ class StageTimelineWidget(QWidget):
 
     def _build_row(self, stage: ProjectStage, has_active: bool) -> QFrame:
         """Tek bir aşama satırı oluşturur; duruma göre buton ve stil uygular."""
+        from core.managers.theme_manager import ThemeManager
+        theme_mgr = ThemeManager.instance()
+
         is_active = stage.status == StageStatus.ACTIVE.value
         is_completed = stage.status == StageStatus.COMPLETED.value
         is_pending = stage.status == StageStatus.PENDING.value
@@ -58,12 +61,12 @@ class StageTimelineWidget(QWidget):
         layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(10)
 
-        dot_color = stage.color if (is_active or is_completed) else "#2A2D38"
+        dot_color = stage.color if (is_active or is_completed) else theme_mgr.color("border")
         dot = QLabel("●", parent=card)
         dot.setStyleSheet(f"font-size: 10px; color: {dot_color};")
         layout.addWidget(dot)
 
-        name_color = "#E8EAF0" if is_active else ("#6366F1" if is_completed else "#4A4D5C")
+        name_color = theme_mgr.color("text_primary") if is_active else (theme_mgr.color("accent_start") if is_completed else theme_mgr.color("text_secondary"))
         name_weight = "700" if is_active else "500"
         name_lbl = QLabel(stage.name, parent=card)
         name_lbl.setStyleSheet(
@@ -71,7 +74,8 @@ class StageTimelineWidget(QWidget):
         )
         layout.addWidget(name_lbl, 1)
 
-        status_text, status_color = _STATUS_TR.get(stage.status, (stage.status, "#4A4D5C"))
+        status_text, theme_key = _STATUS_THEME_KEYS.get(stage.status, (stage.status, "text_secondary"))
+        status_color = theme_mgr.color(theme_key)
         badge = QLabel(status_text, parent=card)
         badge.setStyleSheet(
             f"font-size: 10px; font-weight: 600; color: {status_color};"
@@ -81,7 +85,7 @@ class StageTimelineWidget(QWidget):
 
         if is_active:
             btn = QPushButton("Tamamla", parent=card)
-            btn.setObjectName("accent_button")
+            btn.setProperty("cssClass", "btn-primary")
             btn.setMinimumSize(80, 28)
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.complete_requested.emit(sid)
@@ -89,14 +93,15 @@ class StageTimelineWidget(QWidget):
             layout.addWidget(btn)
         elif is_pending and not has_active:
             btn = QPushButton("Aktif Et", parent=card)
+            btn.setProperty("cssClass", "btn-secondary")
             btn.setMinimumSize(80, 28)
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.activate_requested.emit(sid)
             )
             layout.addWidget(btn)
 
-        border_color = stage.color if is_active else "#2A2D38"
-        bg_color = "#1A1D2E" if is_active else "transparent"
+        border_color = stage.color if is_active else theme_mgr.color("border")
+        bg_color = f"{stage.color}15" if is_active else "transparent"
         card.setStyleSheet(
             f"QFrame {{ background: {bg_color}; border-left: 2px solid {border_color};"
             f" border-radius: 4px; }}"

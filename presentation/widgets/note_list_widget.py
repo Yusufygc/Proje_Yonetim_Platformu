@@ -36,24 +36,20 @@ class NoteListWidget(QWidget):
 
         header = QHBoxLayout()
         title = QLabel("Proje Notları", parent=self)
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
+        title.setProperty("cssClass", "title-small")
         header.addWidget(title)
         
         header.addStretch()
         
         self._add_btn = QPushButton("+ Not Ekle", parent=self)
-        self._add_btn.setStyleSheet("background-color: #6366F1; color: white; border-radius: 4px; padding: 6px 12px; font-weight: bold;")
+        self._add_btn.setProperty("cssClass", "btn-primary")
         self._add_btn.clicked.connect(self._on_add_note)
         header.addWidget(self._add_btn)
         
         layout.addLayout(header)
 
         self._list_widget = QListWidget(parent=self)
-        self._list_widget.setStyleSheet(
-            "QListWidget { background: transparent; border: 1px solid #2A2D38; border-radius: 8px; padding: 8px; }"
-            "QListWidget::item { border-bottom: 1px solid #2A2D38; padding: 12px; }"
-            "QListWidget::item:selected { background-color: #2A2D38; border-radius: 4px; }"
-        )
+        self._list_widget.setProperty("cssClass", "panel")
         self._list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._list_widget.customContextMenuRequested.connect(self._on_context_menu)
         layout.addWidget(self._list_widget)
@@ -101,9 +97,6 @@ class NoteListWidget(QWidget):
         note_id = item.data(Qt.ItemDataRole.UserRole)
         
         menu = QMenu(self)
-        menu.setStyleSheet("QMenu { background-color: #1E2130; border: 1px solid #2A2D38; }"
-                           "QMenu::item { color: white; padding: 6px 24px; }"
-                           "QMenu::item:selected { background-color: #2A2D38; }")
                            
         edit_action = menu.addAction("Düzenle")
         delete_action = menu.addAction("Sil")

@@ -34,34 +34,24 @@ class SettingsPage(QWidget):
 
         # Header
         title = QLabel("Ayarlar ve Veri Yönetimi", parent=self)
-        title.setStyleSheet("font-size: 26px; font-weight: 800; color: #FFFFFF;")
+        title.setProperty("cssClass", "title-large")
         layout.addWidget(title)
 
         # Data Management Section
         data_lbl = QLabel("Veri Yönetimi", parent=self)
-        data_lbl.setStyleSheet("font-size: 18px; font-weight: bold; color: #E8EAF0;")
+        data_lbl.setProperty("cssClass", "title-small")
         layout.addWidget(data_lbl)
 
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(16)
         
         self._btn_backup = QPushButton("💾 Veritabanını Yedekle (.db)", parent=self)
-        self._btn_backup.setStyleSheet("""
-            QPushButton {
-                background-color: #3B3E4D; color: white; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: bold;
-            }
-            QPushButton:hover { background-color: #4A4D5C; }
-        """)
+        self._btn_backup.setProperty("cssClass", "btn-secondary")
         self._btn_backup.clicked.connect(self._on_backup_clicked)
         btn_layout.addWidget(self._btn_backup)
 
         self._btn_export = QPushButton("📤 Tüm Veriyi Dışa Aktar (.json)", parent=self)
-        self._btn_export.setStyleSheet("""
-            QPushButton {
-                background-color: #6366F1; color: white; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: bold;
-            }
-            QPushButton:hover { background-color: #8B5CF6; }
-        """)
+        self._btn_export.setProperty("cssClass", "btn-primary")
         self._btn_export.clicked.connect(self._on_export_clicked)
         btn_layout.addWidget(self._btn_export)
         
@@ -74,7 +64,7 @@ class SettingsPage(QWidget):
         version_label = QLabel(
             f"{config.APP_NAME}  —  v{config.APP_VERSION}", parent=self
         )
-        version_label.setStyleSheet("font-size: 13px; color: #8B8FA8;")
+        version_label.setProperty("cssClass", "text-secondary")
         layout.addWidget(version_label)
 
     def _connect_signals(self) -> None:

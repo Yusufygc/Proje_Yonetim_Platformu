@@ -26,14 +26,15 @@ from controllers.project_controller import ProjectController
 from controllers.task_controller import TaskController
 from domain.models.project import Project
 from domain.models.task import Task
+from presentation.widgets.skeleton_loader import SkeletonLoader
 
-_STATUS_COLOR: dict[str, str] = {
-    "TODO": "#4A4D5C",
-    "IN_PROGRESS": "#6366F1",
-    "WAITING": "#F59E0B",
-    "BLOCKED": "#EF4444",
-    "DONE": "#22C55E",
-    "CANCELLED": "#6B7280",
+_STATUS_THEME_KEYS: dict[str, str] = {
+    "TODO": "text_secondary",
+    "IN_PROGRESS": "accent_start",
+    "WAITING": "warning",
+    "BLOCKED": "danger",
+    "DONE": "success",
+    "CANCELLED": "text_muted",
 }
 
 
@@ -68,21 +69,22 @@ class TasksPage(QWidget):
         self._tree = QTreeWidget(parent=self)
         self._tree.setHeaderLabels(["Görev Başlığı", "Durum", "Öncelik", "Tip"])
         self._tree.setColumnWidth(0, 400)
-        self._tree.setStyleSheet(
-            "QTreeWidget { background: #161820; border: 1px solid #2A2D38; border-radius: 8px; color: #E8EAF0; font-size: 13px; }"
-            "QTreeWidget::item { padding: 4px; }"
-            "QHeaderView::section { background: #1E2130; color: #8B8FA8; border: none; padding: 8px; font-weight: bold; }"
-        )
+        self._tree.setHeaderLabels(["Görev Başlığı", "Durum", "Öncelik", "Tip"])
+        self._tree.setColumnWidth(0, 400)
+        # Ağaç ve başlık stilleri artık global QSS içinde
         self._tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._tree.customContextMenuRequested.connect(self._on_context_menu)
         self._tree.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self._tree, 1)
 
         self._empty_label = QLabel("", parent=self)
-        self._empty_label.setStyleSheet("color: #8B8FA8; font-size: 14px;")
+        self._empty_label.setProperty("cssClass", "text-secondary")
         self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._empty_label.hide()
         layout.addWidget(self._empty_label, 1)
+        
+        self._skeleton = SkeletonLoader(parent=self)
+        layout.addWidget(self._skeleton, 1)
 
     def _build_header(self) -> QWidget:
         header = QWidget(parent=self)
@@ -90,13 +92,13 @@ class TasksPage(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         
         title = QLabel("İş Kırılım Yapısı (WBS)", parent=header)
-        title.setStyleSheet("font-size: 22px; font-weight: 700; color: #E8EAF0;")
+        title.setProperty("cssClass", "title-medium")
         layout.addWidget(title)
         
         layout.addStretch()
 
         lbl = QLabel("Proje:", parent=header)
-        lbl.setStyleSheet("color: #8B8FA8; font-weight: 600;")
+        lbl.setProperty("cssClass", "text-secondary")
         layout.addWidget(lbl)
 
         self._project_combo = QComboBox(parent=header)
@@ -106,7 +108,7 @@ class TasksPage(QWidget):
         layout.addWidget(self._project_combo)
 
         add_btn = QPushButton("+ Ana Görev Ekle", parent=header)
-        add_btn.setObjectName("accent_button")
+        add_btn.setProperty("cssClass", "btn-primary")
         add_btn.setMinimumSize(140, 36)
         add_btn.clicked.connect(self._on_add_root_task)
         layout.addWidget(add_btn)
@@ -144,6 +146,9 @@ class TasksPage(QWidget):
         self._project_combo.blockSignals(False)
         
         if self._selected_project_id:
+            self._tree.hide()
+            self._empty_label.hide()
+            self._skeleton.show()
             self._task_controller.load_tasks(self._selected_project_id)
 
     def _on_project_changed(self, index: int) -> None:
@@ -155,6 +160,7 @@ class TasksPage(QWidget):
             self._tree.clear()
 
     def _on_tasks_loaded(self, tasks: list[Task]) -> None:
+        self._skeleton.hide()
         self._tree.clear()
         self._tasks = tasks
         
@@ -186,13 +192,16 @@ class TasksPage(QWidget):
             ])
             item.setData(0, Qt.ItemDataRole.UserRole, t.id)
             
-            # Styling status
-            color = _STATUS_COLOR.get(t.status, "#8B8FA8")
-            item.setForeground(1, QColor(color))
+            from core.managers.theme_manager import ThemeManager
+            theme_mgr = ThemeManager.instance()
+            theme_key = _STATUS_THEME_KEYS.get(t.status, "text_secondary")
+            color_str = theme_mgr.color(theme_key)
+            item.setForeground(1, QColor(color_str))
             
             if t.status == "DONE":
-                item.setForeground(0, QColor("#6B7280"))
-                item.setForeground(1, QColor("#6B7280"))
+                muted_color = QColor(theme_mgr.color("text_muted"))
+                item.setForeground(0, muted_color)
+                item.setForeground(1, muted_color)
             
             items_dict[t.id] = item
 

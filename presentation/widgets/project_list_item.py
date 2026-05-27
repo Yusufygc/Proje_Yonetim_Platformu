@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from domain.models.project import Project
+from presentation.utils.ui_utils import apply_shadow
 
 _STATUS_TR: dict[str, str] = {
     "PLANNED": "Planlandı",
@@ -67,6 +68,7 @@ class ProjectListItem(QFrame):
     def _setup_ui(self, project: Project) -> None:
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumHeight(72)
+        apply_shadow(self, blur_radius=15, y_offset=3, alpha=30)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 10, 14, 10)
@@ -79,7 +81,7 @@ class ProjectListItem(QFrame):
         top_layout.setSpacing(8)
 
         title_lbl = QLabel(project.title, parent=top_row)
-        title_lbl.setStyleSheet("font-size: 13px; font-weight: 600; color: #E8EAF0;")
+        title_lbl.setProperty("cssClass", "text-primary")
         top_layout.addWidget(title_lbl, 1)
 
         status_text = _STATUS_TR.get(project.status, project.status)
@@ -108,26 +110,14 @@ class ProjectListItem(QFrame):
         progress.setMaximumWidth(80)
         progress.setMaximumHeight(4)
         progress.setTextVisible(False)
-        progress.setStyleSheet(
-            "QProgressBar { background: #2A2D38; border-radius: 2px; border: none; }"
-            "QProgressBar::chunk { background: qlineargradient("
-            "x1:0,y1:0,x2:1,y2:0,stop:0 #6366F1,stop:1 #8B5CF6); border-radius: 2px; }"
-        )
+        # QProgressBar stili global QSS içinde yönetilir
         bottom_layout.addWidget(progress)
         layout.addWidget(bottom_row)
 
     def _apply_style(self, selected: bool) -> None:
-        if selected:
-            self.setStyleSheet(
-                "ProjectListItem { background: #22263A; border-left: 3px solid #6366F1;"
-                " border-radius: 8px; }"
-            )
-        else:
-            self.setStyleSheet(
-                "ProjectListItem { background: transparent; border-left: 3px solid transparent;"
-                " border-radius: 8px; }"
-                "ProjectListItem:hover { background: #1C1F26; }"
-            )
+        self.setProperty("selected", "true" if selected else "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def set_selected(self, selected: bool) -> None:
         self._apply_style(selected)

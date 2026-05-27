@@ -13,6 +13,8 @@ from controllers.project_controller import ProjectController
 from controllers.stage_controller import StageController
 from core.events.event_bus import EventBus
 from core.managers.font_manager import FontManager
+from core.managers.icon_manager import IconManager
+from core.managers.string_manager import StringManager
 from core.managers.log_manager import install_global_exception_hook, setup_logging
 from core.managers.preference_manager import PreferenceManager
 from core.managers.theme_manager import ThemeManager
@@ -85,7 +87,9 @@ class DIContainer:
 
         self._theme = ThemeManager.instance(config.THEMES_DIR)
         self._fonts = FontManager.instance(config.FONTS_DIR)
-        self._fonts.load_all()
+        
+        self._icons = IconManager.instance(config.RESOURCES_DIR / "icons")
+        self._strings = StringManager.instance(config.RESOURCES_DIR / "locales")
 
         self._prefs = PreferenceManager.instance()
         self._event_bus = EventBus.instance()
@@ -136,6 +140,13 @@ class DIContainer:
 
         self._initialized = True
         logger.info("DI Container başarıyla kuruldu.")
+        
+        # Onboarding: İlk açılışta örnek proje oluşturma
+        if not self._project_service.get_all_projects():
+            self._project_service.create_project(
+                "Hoş Geldiniz 🎉",
+                description="Proje Takip Platformuna hoş geldiniz. Bu örnek bir projedir."
+            )
 
     # --- Yönetici erişim noktaları ---
 

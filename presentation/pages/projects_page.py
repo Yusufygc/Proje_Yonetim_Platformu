@@ -24,6 +24,7 @@ from controllers.task_controller import TaskController
 from domain.models.project import Project
 from presentation.dialogs.project_dialog import ProjectDialog
 from presentation.widgets.project_detail_panel import ProjectDetailPanel
+from presentation.widgets.skeleton_loader import SkeletonLoader
 from presentation.widgets.project_list_item import ProjectListItem
 
 
@@ -59,7 +60,7 @@ class ProjectsPage(QWidget):
 
         divider = QFrame(parent=self)
         divider.setFrameShape(QFrame.Shape.VLine)
-        divider.setStyleSheet("background: #2A2D38; max-width: 1px; border: none;")
+        divider.setProperty("cssClass", "divider")
         layout.addWidget(divider)
 
         self._detail_panel = ProjectDetailPanel(parent=self, di=self._di)
@@ -68,7 +69,7 @@ class ProjectsPage(QWidget):
     def _build_left_panel(self) -> QWidget:
         panel = QWidget(parent=self)
         panel.setFixedWidth(280)
-        panel.setStyleSheet("background: #161820;")
+        panel.setProperty("cssClass", "surface-panel")
 
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -78,10 +79,7 @@ class ProjectsPage(QWidget):
 
         self._search_edit = QLineEdit(parent=panel)
         self._search_edit.setPlaceholderText("Proje ara...")
-        self._search_edit.setStyleSheet(
-            "margin: 0 12px 12px 12px; padding: 8px 12px;"
-            " border-radius: 8px; border: 1px solid #2A2D38;"
-        )
+        # Arama kutusu stili zaten global QLineEdit QSS içinde var
         self._search_edit.textChanged.connect(self._on_search)
         layout.addWidget(self._search_edit)
 
@@ -97,10 +95,13 @@ class ProjectsPage(QWidget):
         self._list_layout.setSpacing(4)
 
         self._empty_label = QLabel("Henüz proje yok.\nYeni oluşturmak için\n+'ya basın.", parent=self._list_container)
-        self._empty_label.setStyleSheet("color: #8B8FA8; font-size: 13px;")
+        self._empty_label.setProperty("cssClass", "text-secondary")
         self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._empty_label.hide()
         self._list_layout.addWidget(self._empty_label)
+        
+        self._skeleton = SkeletonLoader(parent=self._list_container)
+        self._list_layout.addWidget(self._skeleton)
 
         self._list_layout.addStretch()
 
@@ -115,7 +116,7 @@ class ProjectsPage(QWidget):
         layout.setContentsMargins(16, 16, 12, 12)
 
         title = QLabel("Projeler", parent=header)
-        title.setStyleSheet("font-size: 16px; font-weight: 700; color: #E8EAF0;")
+        title.setProperty("cssClass", "title-small")
         layout.addWidget(title, 1)
 
         new_btn = QPushButton("+", parent=header)
@@ -144,6 +145,7 @@ class ProjectsPage(QWidget):
         self._stage_controller.error_occurred.connect(self._on_error)
 
     def _on_projects_loaded(self, projects: list[Project]) -> None:
+        self._skeleton.hide()
         self._clear_list()
         
         if not projects:

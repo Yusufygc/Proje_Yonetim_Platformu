@@ -5,6 +5,7 @@ Faz 7 kapsamında DashboardController ile veri çeker.
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -16,6 +17,8 @@ from PySide6.QtWidgets import (
 )
 
 from controllers.dashboard_controller import DashboardController
+from core.managers.theme_manager import ThemeManager
+from presentation.utils.ui_utils import apply_shadow
 
 
 class DashboardPage(QWidget):
@@ -34,7 +37,7 @@ class DashboardPage(QWidget):
 
         # Header
         title = QLabel("Dashboard", parent=self)
-        title.setStyleSheet("font-size: 26px; font-weight: 800; color: #FFFFFF;")
+        title.setProperty("cssClass", "title-large")
         layout.addWidget(title)
 
         # Stats Cards
@@ -54,14 +57,12 @@ class DashboardPage(QWidget):
         blocked_layout.setContentsMargins(0, 0, 0, 0)
         
         lbl_blocked = QLabel("Tıkanan / Riskli Projeler")
-        lbl_blocked.setStyleSheet("font-size: 16px; font-weight: bold; color: #E8EAF0;")
+        lbl_blocked.setProperty("cssClass", "title-small")
         blocked_layout.addWidget(lbl_blocked)
 
         self._blocked_list = QListWidget(parent=blocked_container)
-        self._blocked_list.setStyleSheet(
-            "QListWidget { background-color: #1E2130; border: 1px solid #2A2D38; border-radius: 8px; padding: 8px; }"
-            "QListWidget::item { color: #F87171; padding: 12px; border-bottom: 1px solid #2A2D38; }"
-        )
+        self._blocked_list.setProperty("cssClass", "panel")
+        apply_shadow(self._blocked_list, blur_radius=15, y_offset=3, alpha=15)
         blocked_layout.addWidget(self._blocked_list)
         lists_layout.addWidget(blocked_container)
 
@@ -71,14 +72,12 @@ class DashboardPage(QWidget):
         recent_layout.setContentsMargins(0, 0, 0, 0)
 
         lbl_recent = QLabel("Son Aktiviteler (Görevler)")
-        lbl_recent.setStyleSheet("font-size: 16px; font-weight: bold; color: #E8EAF0;")
+        lbl_recent.setProperty("cssClass", "title-small")
         recent_layout.addWidget(lbl_recent)
 
         self._recent_list = QListWidget(parent=recent_container)
-        self._recent_list.setStyleSheet(
-            "QListWidget { background-color: #1E2130; border: 1px solid #2A2D38; border-radius: 8px; padding: 8px; }"
-            "QListWidget::item { color: #8B8FA8; padding: 12px; border-bottom: 1px solid #2A2D38; }"
-        )
+        self._recent_list.setProperty("cssClass", "panel")
+        apply_shadow(self._recent_list, blur_radius=15, y_offset=3, alpha=15)
         recent_layout.addWidget(self._recent_list)
         lists_layout.addWidget(recent_container)
 
@@ -86,16 +85,20 @@ class DashboardPage(QWidget):
 
     def _create_stat_card(self, layout: QHBoxLayout, title: str, initial_val: str) -> QLabel:
         card = QFrame(parent=self)
-        card.setStyleSheet("background-color: #1E2130; border: 1px solid #2A2D38; border-radius: 8px;")
+        card.setProperty("cssClass", "panel")
+        apply_shadow(card, blur_radius=15, y_offset=3, alpha=20)
+        
         card_layout = QVBoxLayout(card)
         card_layout.setContentsMargins(20, 20, 20, 20)
 
         lbl_title = QLabel(title, parent=card)
-        lbl_title.setStyleSheet("color: #8B8FA8; font-size: 14px; font-weight: bold;")
+        lbl_title.setProperty("cssClass", "text-secondary")
+        lbl_title.setStyleSheet("font-weight: bold;")
         card_layout.addWidget(lbl_title)
 
         lbl_val = QLabel(initial_val, parent=card)
-        lbl_val.setStyleSheet("color: #FFFFFF; font-size: 32px; font-weight: 800;")
+        lbl_val.setProperty("cssClass", "text-primary")
+        lbl_val.setStyleSheet("font-size: 32px; font-weight: 800;")
         card_layout.addWidget(lbl_val)
 
         layout.addWidget(card)
@@ -110,15 +113,20 @@ class DashboardPage(QWidget):
         self._lbl_tasks.setText(str(stats.get("total_tasks", 0)))
 
         self._blocked_list.clear()
+        theme_mgr = ThemeManager.instance()
+        danger_color = theme_mgr.color("danger")
         for p in stats.get("blocked_projects", []):
             item = QListWidgetItem()
             item.setText(f"{p['name']} ({p['status']})")
+            item.setForeground(QColor(danger_color))
             self._blocked_list.addItem(item)
 
         self._recent_list.clear()
+        text_sec_color = theme_mgr.color("text_secondary")
         for t in stats.get("recent_tasks", []):
             item = QListWidgetItem()
             item.setText(f"[{t['project_name']}] {t['title']} ({t['status']})")
+            item.setForeground(QColor(text_sec_color))
             self._recent_list.addItem(item)
 
     def showEvent(self, event):

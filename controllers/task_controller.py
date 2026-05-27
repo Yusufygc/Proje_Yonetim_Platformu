@@ -7,9 +7,10 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QThreadPool
 
 from core.exceptions.base_exception import AppBaseException
+from core.workers.worker import Worker
 from domain.models.task import Task
 from services.task_service import TaskService
 
@@ -35,20 +36,30 @@ class TaskController(QObject):
         self._service = service
 
     def load_tasks(self, project_id: int) -> None:
-        try:
-            tasks = self._service.get_tasks(project_id)
-            self.tasks_loaded.emit(tasks)
-        except AppBaseException as exc:
-            logger.error("Görevler yüklenemedi: %s", exc)
-            self.error_occurred.emit(str(exc))
+        def _fetch() -> list[Task]:
+            return self._service.get_tasks(project_id)
+            
+        def _on_error(err: str) -> None:
+            logger.error("Görevler yüklenemedi: %s", err)
+            self.error_occurred.emit(str(err))
+            
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.tasks_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        QThreadPool.globalInstance().start(worker)
 
     def load_all_tasks(self) -> None:
-        try:
-            tasks = self._service.get_all_tasks()
-            self.all_tasks_loaded.emit(tasks)
-        except AppBaseException as exc:
-            logger.error("Tüm görevler yüklenemedi: %s", exc)
-            self.error_occurred.emit(str(exc))
+        def _fetch() -> list[Task]:
+            return self._service.get_all_tasks()
+            
+        def _on_error(err: str) -> None:
+            logger.error("Tüm görevler yüklenemedi: %s", err)
+            self.error_occurred.emit(str(err))
+            
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.all_tasks_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        QThreadPool.globalInstance().start(worker)
 
     def create_task(self, project_id: int, title: str, **kwargs: object) -> None:
         try:
