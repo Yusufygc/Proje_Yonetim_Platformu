@@ -20,10 +20,13 @@ from infrastructure.database.db_manager import DatabaseManager
 from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.stage_repository import StageRepository
 from infrastructure.repositories.task_repository import TaskRepository
+from infrastructure.repositories.idea_repository import IdeaRepository
 from services.project_service import ProjectService
 from services.stage_service import StageService
 from services.task_service import TaskService
+from services.idea_service import IdeaService
 from controllers.task_controller import TaskController
+from controllers.idea_controller import IdeaController
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +93,10 @@ class DIContainer:
         self._task_service = TaskService(repository=self._task_repo)
         self._task_controller = TaskController(service=self._task_service)
 
+        self._idea_repo = IdeaRepository(db=self._db)
+        self._idea_service = IdeaService(repository=self._idea_repo, project_service=self._project_service)
+        self._idea_controller = IdeaController(service=self._idea_service)
+
         self._initialized = True
         logger.info("DI Container başarıyla kuruldu.")
 
@@ -126,3 +133,7 @@ class DIContainer:
     @property
     def task_controller(self) -> TaskController:
         return self._task_controller
+
+    @property
+    def idea_controller(self) -> IdeaController:
+        return self._idea_controller

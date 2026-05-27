@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 _MAX_TITLE_LEN = 255
 _MAX_SHORT_DESC_LEN = 500
-_OPTIONAL_FIELDS = ("short_description", "github_url", "demo_url", "project_type")
+_OPTIONAL_FIELDS = ("short_description", "github_url", "demo_url", "project_type", "full_description", "problem_statement", "target_outcome")
 
 
 class ProjectService:

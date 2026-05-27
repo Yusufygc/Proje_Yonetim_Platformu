@@ -85,7 +85,13 @@ class MainWindow(QMainWindow):
                 task_controller=_container.task_controller,
             )
         )
-        self._stack.addWidget(IdeasPage(parent=self._stack))       # 2
+        self._stack.addWidget(                                     # 2
+            IdeasPage(
+                parent=self._stack,
+                idea_controller=_container.idea_controller,
+                project_controller=_container.project_controller,
+            )
+        )
         self._stack.addWidget(                                     # 3
             TasksPage(
                 parent=self._stack,
