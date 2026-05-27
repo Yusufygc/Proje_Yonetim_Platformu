@@ -77,14 +77,11 @@ class MainWindow(QMainWindow):
         self._stack = QStackedWidget(parent=central)
         _container = DIContainer.instance()
         self._stack.addWidget(DashboardPage(parent=self._stack))   # 0
-        self._stack.addWidget(                                      # 1
-            ProjectsPage(
-                parent=self._stack,
-                controller=_container.project_controller,
-                stage_controller=_container.stage_controller,
-                task_controller=_container.task_controller,
-            )
+        self._projects_page = ProjectsPage(
+            parent=self._stack,
+            di_container=_container
         )
+        self._stack.addWidget(self._projects_page)
         self._stack.addWidget(                                     # 2
             IdeasPage(
                 parent=self._stack,

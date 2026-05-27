@@ -13,12 +13,18 @@ from PySide6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QStackedWidget,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
+from di_container import DIContainer
 from domain.models.project import Project
 from domain.models.project_stage import ProjectStage
+from presentation.pages.tasks_page import TasksPage
+from presentation.widgets.decision_list_widget import DecisionListWidget
+from presentation.widgets.note_list_widget import NoteListWidget
+from presentation.widgets.resource_list_widget import ResourceListWidget
 from presentation.widgets.stage_timeline_widget import StageTimelineWidget
 from presentation.widgets.task_list_widget import TaskListWidget
 
@@ -48,12 +54,10 @@ class ProjectDetailPanel(QWidget):
     delete_requested = Signal(int)
     complete_stage_requested = Signal(int)
     activate_stage_requested = Signal(int)
-    add_task_requested = Signal()
-    edit_task_requested = Signal(int)
-    toggle_task_status_requested = Signal(int)
 
-    def __init__(self, parent: QWidget) -> None:
+    def __init__(self, parent: QWidget, di: DIContainer) -> None:
         super().__init__(parent=parent)
+        self._di = di
         self._project_id: int | None = None
         self._setup_ui()
 
@@ -133,11 +137,40 @@ class ProjectDetailPanel(QWidget):
         layout.addWidget(self._stage_timeline)
         layout.addSpacing(28)
 
-        self._task_list = TaskListWidget(parent=container)
-        self._task_list.add_task_requested.connect(self.add_task_requested)
-        self._task_list.edit_task_requested.connect(self.edit_task_requested)
-        self._task_list.toggle_status_requested.connect(self.toggle_task_status_requested)
-        layout.addWidget(self._task_list)
+        self._tab_widget = QTabWidget(parent=container)
+        self._tab_widget.setStyleSheet(
+            "QTabWidget::pane { border: none; background: transparent; }"
+            "QTabBar::tab { background: #2A2D38; color: #8B8FA8; padding: 10px 20px; border-radius: 6px; margin-right: 4px; font-weight: bold; }"
+            "QTabBar::tab:selected { background: #6366F1; color: white; }"
+            "QTabBar::tab:hover:!selected { background: #3B3E4D; }"
+        )
+
+        self._tasks_page = TasksPage(
+            parent=self._tab_widget,
+            controller=self._di.task_controller,
+            project_controller=self._di.project_controller,
+        )
+        self._tab_widget.addTab(self._tasks_page, "Görevler")
+
+        self._decisions_page = DecisionListWidget(
+            controller=self._di.decision_controller,
+            parent=self._tab_widget
+        )
+        self._tab_widget.addTab(self._decisions_page, "Kararlar")
+
+        self._notes_page = NoteListWidget(
+            controller=self._di.note_controller,
+            parent=self._tab_widget
+        )
+        self._tab_widget.addTab(self._notes_page, "Notlar")
+
+        self._resources_page = ResourceListWidget(
+            controller=self._di.resource_controller,
+            parent=self._tab_widget
+        )
+        self._tab_widget.addTab(self._resources_page, "Kaynaklar")
+
+        layout.addWidget(self._tab_widget, 1)
         layout.addStretch()
 
         return scroll
@@ -223,6 +256,10 @@ class ProjectDetailPanel(QWidget):
         self._desc_lbl.setVisible(has_desc)
         if has_desc:
             self._desc_lbl.setText(project.short_description)
+        self._tasks_page.set_project(project.id)
+        self._decisions_page.set_project(project.id)
+        self._notes_page.set_project(project.id)
+        self._resources_page.set_project(project.id)
 
         has_github = bool(project.github_url)
         self._github_row.setVisible(has_github)
@@ -234,10 +271,6 @@ class ProjectDetailPanel(QWidget):
     def update_stages(self, stages: list[ProjectStage]) -> None:
         """Aşama zaman çizelgesini verilen liste ile yeniler."""
         self._stage_timeline.update_stages(stages)
-
-    def update_tasks(self, tasks: list) -> None:
-        """Görev listesini yeniler."""
-        self._task_list.update_tasks(tasks)
 
     def show_empty_state(self) -> None:
         self._project_id = None

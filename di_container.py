@@ -21,12 +21,21 @@ from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.stage_repository import StageRepository
 from infrastructure.repositories.task_repository import TaskRepository
 from infrastructure.repositories.idea_repository import IdeaRepository
+from infrastructure.repositories.decision_repository import DecisionRepository
+from infrastructure.repositories.note_repository import NoteRepository
+from infrastructure.repositories.resource_repository import ResourceRepository
 from services.project_service import ProjectService
 from services.stage_service import StageService
 from services.task_service import TaskService
 from services.idea_service import IdeaService
+from services.decision_service import DecisionService
+from services.note_service import NoteService
+from services.resource_service import ResourceService
 from controllers.task_controller import TaskController
 from controllers.idea_controller import IdeaController
+from controllers.decision_controller import DecisionController
+from controllers.note_controller import NoteController
+from controllers.resource_controller import ResourceController
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +106,18 @@ class DIContainer:
         self._idea_service = IdeaService(repository=self._idea_repo, project_service=self._project_service)
         self._idea_controller = IdeaController(service=self._idea_service)
 
+        self._decision_repo = DecisionRepository(db=self._db)
+        self._decision_service = DecisionService(repository=self._decision_repo)
+        self._decision_controller = DecisionController(service=self._decision_service)
+
+        self._note_repo = NoteRepository(db=self._db)
+        self._note_service = NoteService(repository=self._note_repo)
+        self._note_controller = NoteController(service=self._note_service)
+
+        self._resource_repo = ResourceRepository(db=self._db)
+        self._resource_service = ResourceService(repository=self._resource_repo)
+        self._resource_controller = ResourceController(service=self._resource_service)
+
         self._initialized = True
         logger.info("DI Container başarıyla kuruldu.")
 
@@ -137,3 +158,15 @@ class DIContainer:
     @property
     def idea_controller(self) -> IdeaController:
         return self._idea_controller
+
+    @property
+    def decision_controller(self) -> DecisionController:
+        return self._decision_controller
+
+    @property
+    def note_controller(self) -> NoteController:
+        return self._note_controller
+
+    @property
+    def resource_controller(self) -> ResourceController:
+        return self._resource_controller
