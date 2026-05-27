@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 from domain.models.project import Project
 from domain.models.project_stage import ProjectStage
 from presentation.widgets.stage_timeline_widget import StageTimelineWidget
+from presentation.widgets.task_list_widget import TaskListWidget
 
 _STATUS_TR: dict[str, tuple[str, str]] = {
     "PLANNED": ("Planlandı", "#8B8FA8"),
@@ -47,6 +48,9 @@ class ProjectDetailPanel(QWidget):
     delete_requested = Signal(int)
     complete_stage_requested = Signal(int)
     activate_stage_requested = Signal(int)
+    add_task_requested = Signal()
+    edit_task_requested = Signal(int)
+    toggle_task_status_requested = Signal(int)
 
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent=parent)
@@ -127,6 +131,13 @@ class ProjectDetailPanel(QWidget):
         self._stage_timeline.complete_requested.connect(self.complete_stage_requested)
         self._stage_timeline.activate_requested.connect(self.activate_stage_requested)
         layout.addWidget(self._stage_timeline)
+        layout.addSpacing(28)
+
+        self._task_list = TaskListWidget(parent=container)
+        self._task_list.add_task_requested.connect(self.add_task_requested)
+        self._task_list.edit_task_requested.connect(self.edit_task_requested)
+        self._task_list.toggle_status_requested.connect(self.toggle_task_status_requested)
+        layout.addWidget(self._task_list)
         layout.addStretch()
 
         return scroll
@@ -223,6 +234,10 @@ class ProjectDetailPanel(QWidget):
     def update_stages(self, stages: list[ProjectStage]) -> None:
         """Aşama zaman çizelgesini verilen liste ile yeniler."""
         self._stage_timeline.update_stages(stages)
+
+    def update_tasks(self, tasks: list) -> None:
+        """Görev listesini yeniler."""
+        self._task_list.update_tasks(tasks)
 
     def show_empty_state(self) -> None:
         self._project_id = None

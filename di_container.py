@@ -19,8 +19,11 @@ from core.managers.theme_manager import ThemeManager
 from infrastructure.database.db_manager import DatabaseManager
 from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.stage_repository import StageRepository
+from infrastructure.repositories.task_repository import TaskRepository
 from services.project_service import ProjectService
 from services.stage_service import StageService
+from services.task_service import TaskService
+from controllers.task_controller import TaskController
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +86,10 @@ class DIContainer:
             event_bus=self._event_bus,
         )
 
+        self._task_repo = TaskRepository(db=self._db)
+        self._task_service = TaskService(repository=self._task_repo)
+        self._task_controller = TaskController(service=self._task_service)
+
         self._initialized = True
         logger.info("DI Container başarıyla kuruldu.")
 
@@ -115,3 +122,7 @@ class DIContainer:
     @property
     def stage_controller(self) -> StageController:
         return self._stage_controller
+
+    @property
+    def task_controller(self) -> TaskController:
+        return self._task_controller

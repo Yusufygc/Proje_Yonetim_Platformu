@@ -16,6 +16,7 @@ from infrastructure.database.base_model import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from domain.models.project_stage import ProjectStage
+    from domain.models.task import Task
 
 
 class Project(Base, TimestampMixin):
@@ -55,7 +56,7 @@ class Project(Base, TimestampMixin):
 
     # İlişkiler (diğer modeller eklendikçe aktif edilecek)
     # tags: Mapped[list["ProjectTag"]] = relationship("ProjectTag", back_populates="project", cascade="all, delete-orphan")
-    # tasks: Mapped[list["Task"]] = relationship("Task", back_populates="project", cascade="all, delete-orphan")
+    tasks: Mapped[list["Task"]] = relationship("Task", back_populates="project", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<Project id={self.id} title='{self.title}' status={self.status}>"

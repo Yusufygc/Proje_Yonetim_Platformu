@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 
 from controllers.project_controller import ProjectController
 from controllers.stage_controller import StageController
+from controllers.task_controller import TaskController
 from domain.models.project import Project
 from presentation.dialogs.project_dialog import ProjectDialog
 from presentation.widgets.project_detail_panel import ProjectDetailPanel
@@ -34,13 +35,16 @@ class ProjectsPage(QWidget):
         parent: QWidget,
         controller: ProjectController,
         stage_controller: StageController,
+        task_controller: TaskController,
     ) -> None:
         super().__init__(parent=parent)
         self._controller = controller
         self._stage_controller = stage_controller
+        self._task_controller = task_controller
         self._selected_project_id: int | None = None
         self._selected_item: ProjectListItem | None = None
         self._list_items: dict[int, ProjectListItem] = {}
+        self._stages = []
         self._setup_ui()
         self._connect_signals()
         self._controller.load_projects()
@@ -127,9 +131,21 @@ class ProjectsPage(QWidget):
         self._detail_panel.delete_requested.connect(self._on_delete_project_confirm)
         self._detail_panel.complete_stage_requested.connect(self._stage_controller.complete_stage)
         self._detail_panel.activate_stage_requested.connect(self._stage_controller.activate_stage)
-        self._stage_controller.stages_loaded.connect(self._detail_panel.update_stages)
+        
+        # Task List Widget signals from Detail Panel
+        self._detail_panel.add_task_requested.connect(self._on_add_task)
+        self._detail_panel.edit_task_requested.connect(self._on_edit_task)
+        self._detail_panel.toggle_task_status_requested.connect(self._task_controller.toggle_status)
+
+        self._stage_controller.stages_loaded.connect(self._on_stages_loaded)
         self._stage_controller.stage_updated.connect(self._on_stage_updated)
         self._stage_controller.error_occurred.connect(self._on_error)
+        
+        self._task_controller.tasks_loaded.connect(self._detail_panel.update_tasks)
+        self._task_controller.task_created.connect(self._on_task_updated)
+        self._task_controller.task_updated.connect(self._on_task_updated)
+        self._task_controller.task_deleted.connect(self._on_task_updated)
+        self._task_controller.error_occurred.connect(self._on_error)
 
     def _on_projects_loaded(self, projects: list[Project]) -> None:
         self._clear_list()
@@ -143,6 +159,7 @@ class ProjectsPage(QWidget):
             if project:
                 self._detail_panel.show_project(project)
                 self._stage_controller.load_stages(self._selected_project_id)
+                self._task_controller.load_tasks(self._selected_project_id)
         else:
             self._selected_project_id = None
             self._detail_panel.show_empty_state()
@@ -174,6 +191,7 @@ class ProjectsPage(QWidget):
         if project:
             self._detail_panel.show_project(project)
             self._stage_controller.load_stages(project_id)
+            self._task_controller.load_tasks(project_id)
 
     def _on_new_project(self) -> None:
         dialog = ProjectDialog(parent=self)
@@ -221,5 +239,43 @@ class ProjectsPage(QWidget):
         if self._selected_project_id is not None:
             self._stage_controller.load_stages(self._selected_project_id)
 
+    def _on_stages_loaded(self, stages: list) -> None:
+        self._stages = stages
+        self._detail_panel.update_stages(stages)
+
+    def _on_task_updated(self, _task: object) -> None:
+        if self._selected_project_id is not None:
+            self._task_controller.load_tasks(self._selected_project_id)
+
+    def _on_add_task(self) -> None:
+        if self._selected_project_id is None:
+            return
+        from presentation.dialogs.task_dialog import TaskDialog
+        dialog = TaskDialog(parent=self, task=None, stages=self._stages)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            data = dialog.get_data()
+            title = str(data.pop("title"))
+            self._task_controller.create_task(self._selected_project_id, title, **data)
+
+    def _on_edit_task(self, task_id: int) -> None:
+        task = self._task_controller.get_task_sync(task_id)
+        if task is None:
+            return
+        from presentation.dialogs.task_dialog import TaskDialog
+        dialog = TaskDialog(parent=self, task=task, stages=self._stages, task_controller=self._task_controller)
+        result = dialog.exec()
+        if result == QDialog.DialogCode.Accepted:
+            self._task_controller.update_task(task_id, **dialog.get_data())
+        elif result == 2:  # Delete requested
+            reply = QMessageBox.question(
+                self,
+                "Görevi Sil",
+                "Bu görevi kalıcı olarak silmek istediğinizden emin misiniz?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self._task_controller.delete_task(task_id)
+
     def _on_error(self, message: str) -> None:
         QMessageBox.critical(self, "Hata", message)
+
