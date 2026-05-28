@@ -146,15 +146,19 @@ class ProjectsPage(QWidget):
 
     def _on_projects_loaded(self, projects: list[Project]) -> None:
         self._skeleton.hide()
-        self._clear_list()
-        
-        if not projects:
-            self._empty_label.show()
-        else:
-            self._empty_label.hide()
-            for project in projects:
-                self._add_item(project)
-                
+        # Widget güncellemelerini toplu yap — tek tek repaint'i önle
+        self._list_container.setUpdatesEnabled(False)
+        try:
+            self._clear_list()
+            if not projects:
+                self._empty_label.show()
+            else:
+                self._empty_label.hide()
+                for project in projects:
+                    self._add_item(project)
+        finally:
+            self._list_container.setUpdatesEnabled(True)
+
         if self._selected_project_id in self._list_items:
             item = self._list_items[self._selected_project_id]
             item.set_selected(True)
@@ -176,10 +180,9 @@ class ProjectsPage(QWidget):
         self._list_items[project.id] = item
 
     def _clear_list(self) -> None:
-        while self._list_layout.count() > 1:
-            child = self._list_layout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
+        for item in self._list_items.values():
+            self._list_layout.removeWidget(item)
+            item.deleteLater()
         self._list_items.clear()
         self._selected_item = None
 
@@ -198,7 +201,12 @@ class ProjectsPage(QWidget):
             self._task_controller.load_tasks(project_id)
 
     def _on_new_project(self) -> None:
+        self.open_new_project_dialog()
+
+    def open_new_project_dialog(self, prefill: dict | None = None) -> None:
         dialog = ProjectDialog(parent=self)
+        if prefill:
+            dialog.set_prefill(prefill)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             data = dialog.get_data()
             title = str(data.pop("title"))
