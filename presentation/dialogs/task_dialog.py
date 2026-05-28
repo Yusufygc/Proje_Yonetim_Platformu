@@ -47,8 +47,11 @@ _TYPE_LABELS: dict[str, str] = {
     TaskType.TASK.value: "Görev",
     TaskType.GROUP.value: "Grup",
     TaskType.BUG.value: "Hata",
+    TaskType.IMPROVEMENT.value: "İyileştirme",
     TaskType.RESEARCH.value: "Araştırma",
+    TaskType.DOCUMENTATION.value: "Dokümantasyon",
     TaskType.DESIGN.value: "Tasarım",
+    TaskType.TEST.value: "Test",
     TaskType.REVIEW.value: "İnceleme",
 }
 
