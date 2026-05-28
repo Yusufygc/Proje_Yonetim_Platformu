@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Optional
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from domain.models.checklist_item import ChecklistItem
 from domain.models.task import Task
@@ -18,21 +19,31 @@ class TaskRepository:
 
     def get_all(self) -> list[Task]:
         with self._db.session() as sess:
-            stmt = select(Task).order_by(Task.project_id, Task.order_index, Task.id)
+            stmt = (
+                select(Task)
+                .options(selectinload(Task.checklist_items))
+                .order_by(Task.project_id, Task.order_index, Task.id)
+            )
             return list(sess.scalars(stmt).all())
 
     def get_by_project(self, project_id: int) -> list[Task]:
         with self._db.session() as sess:
             stmt = (
                 select(Task)
+                .options(selectinload(Task.checklist_items))
                 .where(Task.project_id == project_id)
-                .order_by(Task.order_index, Task.id)
+                .order_by(Task.parent_task_id.is_not(None), Task.parent_task_id, Task.order_index, Task.id)
             )
             return list(sess.scalars(stmt).all())
 
     def get_by_id(self, task_id: int) -> Optional[Task]:
         with self._db.session() as sess:
-            return sess.get(Task, task_id)
+            stmt = (
+                select(Task)
+                .options(selectinload(Task.checklist_items))
+                .where(Task.id == task_id)
+            )
+            return sess.scalar(stmt)
 
     def create(self, task: Task) -> Task:
         with self._db.session() as sess:
@@ -49,6 +60,15 @@ class TaskRepository:
             sess.refresh(merged)
             sess.expunge(merged)
             return merged
+
+    def update_many(self, tasks: list[Task]) -> list[Task]:
+        with self._db.session() as sess:
+            merged_tasks = [sess.merge(task) for task in tasks]
+            sess.flush()
+            for task in merged_tasks:
+                sess.refresh(task)
+                sess.expunge(task)
+            return merged_tasks
 
     def delete(self, task_id: int) -> None:
         with self._db.session() as sess:
@@ -67,6 +87,13 @@ class TaskRepository:
     def get_checklist_item(self, item_id: int) -> Optional[ChecklistItem]:
         with self._db.session() as sess:
             return sess.get(ChecklistItem, item_id)
+
+    def get_task_for_checklist_item(self, item_id: int) -> Optional[Task]:
+        with self._db.session() as sess:
+            item = sess.get(ChecklistItem, item_id)
+            if item is None:
+                return None
+            return sess.get(Task, item.task_id)
 
     def update_checklist_item(self, item: ChecklistItem) -> ChecklistItem:
         with self._db.session() as sess:
