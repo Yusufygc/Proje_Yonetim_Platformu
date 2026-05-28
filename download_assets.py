@@ -1,7 +1,7 @@
-import urllib.request
-import os
-import zipfile
 import io
+import os
+import urllib.request
+import zipfile
 from pathlib import Path
 
 icons_dir = Path("resources/icons")
