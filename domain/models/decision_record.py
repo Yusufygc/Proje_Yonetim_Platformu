@@ -32,10 +32,17 @@ class DecisionRecord(Base, TimestampMixin):
     )
 
     # Optional bindings (For MVP, just project is enough, but adding columns for future)
-    stage_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    task_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    stage_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("project_stages.id", ondelete="SET NULL"), nullable=True
+    )
+    task_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("tasks.id", ondelete="SET NULL"), nullable=True
+    )
+    superseded_by_decision_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("decision_records.id", ondelete="SET NULL"), nullable=True
+    )
 
-    project: Mapped["Project"] = relationship("Project")
+    project: Mapped["Project"] = relationship("Project", back_populates="decisions")
 
     def __repr__(self) -> str:
         return f"<DecisionRecord id={self.id} title='{self.title}' status={self.status}>"
