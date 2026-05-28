@@ -29,10 +29,14 @@ class Resource(Base, TimestampMixin):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Optional bindings
-    idea_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    task_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    idea_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("ideas.id", ondelete="SET NULL"), nullable=True
+    )
+    task_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("tasks.id", ondelete="SET NULL"), nullable=True
+    )
 
-    project: Mapped["Project"] = relationship("Project")
+    project: Mapped["Project"] = relationship("Project", back_populates="resources")
 
     def __repr__(self) -> str:
         return f"<Resource id={self.id} title='{self.title}' type={self.resource_type}>"
