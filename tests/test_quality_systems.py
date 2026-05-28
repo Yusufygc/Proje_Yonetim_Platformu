@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core.managers.log_manager import install_global_exception_hook, setup_logging
 from core.managers.backup_manager import BackupManager
+from core.managers.log_manager import install_global_exception_hook, setup_logging
 from core.managers.secret_manager import SecretManager
 from core.workers.worker import Worker
 from infrastructure.database.alembic_runner import HEAD_REVISION
