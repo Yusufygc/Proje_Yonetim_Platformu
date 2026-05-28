@@ -10,25 +10,37 @@ from datetime import datetime, timezone
 from core.exceptions.stage_exceptions import StageNotFoundError, StageValidationError
 from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
+from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.stage_repository import StageRepository
+from infrastructure.repositories.workflow_stage_repository import WorkflowStageRepository
 
 logger = logging.getLogger(__name__)
 
-# İlk aşama ACTIVE, geri kalanlar PENDING olarak başlar
+# İlk aşama ACTIVE, geri kalanlar NOT_STARTED olarak başlar
 DEFAULT_STAGES: list[dict] = [
-    {"name": "Planlama", "description": "Proje hedefleri ve kapsam belirleme", "color": "#6366F1"},
+    {"name": "Fikir", "description": "Fikir ve ihtiyaç netleştirme", "color": "#6366F1"},
+    {"name": "Analiz", "description": "Kapsam, problem ve çözüm analizi", "color": "#0EA5E9"},
     {"name": "Tasarım", "description": "Mimari ve UI/UX tasarımı", "color": "#8B5CF6"},
     {"name": "Geliştirme", "description": "Kodlama ve implementasyon", "color": "#22C55E"},
     {"name": "Test", "description": "Test ve kalite güvencesi", "color": "#F59E0B"},
-    {"name": "Yayınlama", "description": "Deployment ve yayına alma", "color": "#EF4444"},
+    {"name": "Yayın", "description": "Yayına alma ve paketleme", "color": "#EF4444"},
+    {"name": "Bakım", "description": "İyileştirme ve takip", "color": "#14B8A6"},
+    {"name": "Tamamlandı", "description": "Proje kapanışı", "color": "#64748B"},
 ]
 
 
 class StageService:
     """Proje aşaması oluşturma, tamamlama ve aktivasyon iş kurallarını yönetir."""
 
-    def __init__(self, repository: StageRepository) -> None:
+    def __init__(
+        self,
+        repository: StageRepository,
+        workflow_repository: WorkflowStageRepository | None = None,
+        activity_log_repository: ActivityLogRepository | None = None,
+    ) -> None:
         self._repo = repository
+        self._workflow_repo = workflow_repository
+        self._activity_logs = activity_log_repository
 
     def get_stages(self, project_id: int) -> list[ProjectStage]:
         return self._repo.get_by_project(project_id)
@@ -41,9 +53,26 @@ class StageService:
 
     def create_default_stages(self, project_id: int) -> list[ProjectStage]:
         """Yeni proje için varsayılan aşamaları oluşturur; ilk aşama aktif başlar."""
+        existing = self._repo.get_by_project(project_id)
+        if existing:
+            return existing
+
+        templates = DEFAULT_STAGES
+        if self._workflow_repo is not None:
+            workflow_stages = self._workflow_repo.get_defaults()
+            if workflow_stages:
+                templates = [
+                    {
+                        "name": stage.name,
+                        "description": stage.description,
+                        "color": DEFAULT_STAGES[i % len(DEFAULT_STAGES)]["color"],
+                    }
+                    for i, stage in enumerate(workflow_stages)
+                ]
+
         stages = []
-        for i, template in enumerate(DEFAULT_STAGES):
-            status = StageStatus.ACTIVE.value if i == 0 else StageStatus.PENDING.value
+        for i, template in enumerate(templates):
+            status = StageStatus.ACTIVE.value if i == 0 else StageStatus.NOT_STARTED.value
             stages.append(
                 ProjectStage(
                     project_id=project_id,
@@ -52,9 +81,18 @@ class StageService:
                     color=template["color"],
                     order_index=i,
                     status=status,
+                    started_at=datetime.now(timezone.utc) if i == 0 else None,
                 )
             )
         created = self._repo.create_many(stages)
+        if self._activity_logs is not None:
+            self._activity_logs.create(
+                project_id=project_id,
+                action="STAGES_CREATED",
+                summary="Varsayılan süreç aşamaları oluşturuldu.",
+                entity_type="project",
+                entity_id=project_id,
+            )
         logger.info("Proje %d için %d varsayılan aşama oluşturuldu.", project_id, len(created))
         return created
 
@@ -63,21 +101,56 @@ class StageService:
         stage = self.get_stage(stage_id)
         if stage.status != StageStatus.ACTIVE.value:
             raise StageValidationError("Yalnızca aktif aşama tamamlanabilir.")
-        stage.status = StageStatus.COMPLETED.value
+        stage.status = StageStatus.DONE.value
         stage.completed_at = datetime.now(timezone.utc)
         updated = self._repo.update(stage)
+        self._activate_next_stage(updated)
+        if self._activity_logs is not None:
+            self._activity_logs.create(
+                project_id=updated.project_id,
+                action="STAGE_COMPLETED",
+                summary=f"{updated.name} aşaması tamamlandı.",
+                entity_type="stage",
+                entity_id=updated.id,
+            )
         logger.info("Aşama tamamlandı: id=%d name='%s'", stage_id, stage.name)
         return updated
 
     def activate_stage(self, stage_id: int) -> ProjectStage:
         """Bekleyen aşamayı aktif eder; aynı projede zaten aktif aşama varsa hata verir."""
         stage = self.get_stage(stage_id)
-        if stage.status != StageStatus.PENDING.value:
+        if stage.status != StageStatus.NOT_STARTED.value:
             raise StageValidationError("Yalnızca bekleyen aşama aktif edilebilir.")
         existing = self._repo.get_by_project(stage.project_id)
         if any(s.status == StageStatus.ACTIVE.value for s in existing):
             raise StageValidationError("Projenin zaten aktif bir aşaması var.")
         stage.status = StageStatus.ACTIVE.value
+        stage.started_at = datetime.now(timezone.utc)
         updated = self._repo.update(stage)
+        if self._activity_logs is not None:
+            self._activity_logs.create(
+                project_id=updated.project_id,
+                action="STAGE_ACTIVATED",
+                summary=f"{updated.name} aşaması aktif edildi.",
+                entity_type="stage",
+                entity_id=updated.id,
+            )
         logger.info("Aşama aktif edildi: id=%d name='%s'", stage_id, stage.name)
         return updated
+
+    def _activate_next_stage(self, completed_stage: ProjectStage) -> None:
+        stages = self._repo.get_by_project(completed_stage.project_id)
+        for stage in stages:
+            if stage.order_index > completed_stage.order_index and stage.status == StageStatus.NOT_STARTED.value:
+                stage.status = StageStatus.ACTIVE.value
+                stage.started_at = datetime.now(timezone.utc)
+                self._repo.update(stage)
+                if self._activity_logs is not None:
+                    self._activity_logs.create(
+                        project_id=stage.project_id,
+                        action="STAGE_ACTIVATED",
+                        summary=f"{stage.name} aşaması otomatik aktif edildi.",
+                        entity_type="stage",
+                        entity_id=stage.id,
+                    )
+                break
