@@ -11,12 +11,20 @@ from sqlalchemy import Boolean, Date, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.enums.priority import Priority
+from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
 from infrastructure.database.base_model import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from domain.models.project_stage import ProjectStage
     from domain.models.task import Task
+    from domain.models.project_tag import ProjectTag
+    from domain.models.project_idea import ProjectIdea
+    from domain.models.decision_record import DecisionRecord
+    from domain.models.note import Note
+    from domain.models.resource import Resource
+    from domain.models.attachment import Attachment
+    from domain.models.activity_log import ActivityLog
 
 
 class Project(Base, TimestampMixin):
@@ -38,8 +46,11 @@ class Project(Base, TimestampMixin):
     priority: Mapped[str] = mapped_column(
         String(20), nullable=False, default=Priority.MEDIUM.value
     )
-    health: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    health: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=ProjectHealth.UNKNOWN.value
+    )
     progress_percent: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    manual_progress_percent: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     github_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     demo_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     docs_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
@@ -54,9 +65,28 @@ class Project(Base, TimestampMixin):
         "ProjectStage", back_populates="project", cascade="all, delete-orphan"
     )
 
-    # İlişkiler (diğer modeller eklendikçe aktif edilecek)
-    # tags: Mapped[list["ProjectTag"]] = relationship("ProjectTag", back_populates="project", cascade="all, delete-orphan")
     tasks: Mapped[list["Task"]] = relationship("Task", back_populates="project", cascade="all, delete-orphan")
+    tags: Mapped[list["ProjectTag"]] = relationship(
+        "ProjectTag", back_populates="project", cascade="all, delete-orphan"
+    )
+    project_ideas: Mapped[list["ProjectIdea"]] = relationship(
+        "ProjectIdea", back_populates="project", cascade="all, delete-orphan"
+    )
+    decisions: Mapped[list["DecisionRecord"]] = relationship(
+        "DecisionRecord", back_populates="project", cascade="all, delete-orphan"
+    )
+    notes: Mapped[list["Note"]] = relationship(
+        "Note", back_populates="project", cascade="all, delete-orphan"
+    )
+    resources: Mapped[list["Resource"]] = relationship(
+        "Resource", back_populates="project", cascade="all, delete-orphan"
+    )
+    attachments: Mapped[list["Attachment"]] = relationship(
+        "Attachment", back_populates="project", cascade="all, delete-orphan"
+    )
+    activity_logs: Mapped[list["ActivityLog"]] = relationship(
+        "ActivityLog", back_populates="project", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Project id={self.id} title='{self.title}' status={self.status}>"
