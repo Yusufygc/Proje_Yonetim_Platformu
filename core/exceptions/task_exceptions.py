@@ -11,6 +11,13 @@ class TaskValidationError(AppBaseException):
         super().__init__(message, code="TASK_VALIDATION_ERROR")
 
 
+class TaskHierarchyError(AppBaseException):
+    """Görev hiyerarşisi kural ihlallerinde fırlatılır."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message, code="TASK_HIERARCHY_ERROR")
+
+
 class TaskNotFoundError(AppBaseException):
     """Belirtilen ID'ye sahip görev bulunamadığında fırlatılır."""
 
