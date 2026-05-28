@@ -15,8 +15,9 @@ class DecisionRepository:
     def create(self, decision: DecisionRecord) -> DecisionRecord:
         with self._db.session() as sess:
             sess.add(decision)
-            sess.commit()
+            sess.flush()
             sess.refresh(decision)
+            sess.expunge(decision)
             return decision
 
     def get_by_id(self, decision_id: int) -> Optional[DecisionRecord]:
@@ -31,8 +32,9 @@ class DecisionRepository:
     def update(self, decision: DecisionRecord) -> DecisionRecord:
         with self._db.session() as sess:
             merged = sess.merge(decision)
-            sess.commit()
+            sess.flush()
             sess.refresh(merged)
+            sess.expunge(merged)
             return merged
 
     def delete(self, decision_id: int) -> None:
@@ -40,4 +42,3 @@ class DecisionRepository:
             decision = sess.get(DecisionRecord, decision_id)
             if decision:
                 sess.delete(decision)
-                sess.commit()
