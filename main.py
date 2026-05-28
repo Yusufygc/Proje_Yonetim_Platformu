@@ -9,8 +9,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 import config  # noqa: E402 — sys.path ayarından sonra import edilmeli
-from di_container import DIContainer  # noqa: E402
 from core.logger import setup_global_exception_handler, setup_logging
+from di_container import DIContainer, OnboardingService  # noqa: E402
+
 
 def main() -> None:
     """Uygulamayı başlatan ana fonksiyon."""
@@ -18,12 +19,16 @@ def main() -> None:
     setup_logging()
     setup_global_exception_handler()
 
-    # DI Container tüm altyapıyı (log, DB, tema, font) başlatır
+    # DI Container yalnızca infrastructure'ı (DB, tema, font) başlatır
     container = DIContainer.instance()
     container.bootstrap()
 
+    # İlk açılışta örnek veri oluştur (DI Container'dan ayrılmış iş mantığı)
+    OnboardingService(container).run_if_needed()
+
     # PySide6'yı burada import ediyoruz; QApplication log kurulumundan sonra oluşmalı
     from PySide6.QtWidgets import QApplication  # noqa: PLC0415
+
     from presentation.shell.main_window import MainWindow  # noqa: PLC0415
 
     app = QApplication(sys.argv)
