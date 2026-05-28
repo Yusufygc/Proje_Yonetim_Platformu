@@ -4,7 +4,9 @@ Yeni proje için boş, var olan proje için alanlar dolu gelir.
 """
 from __future__ import annotations
 
+from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import (
+    QApplication,
     QCheckBox,
     QComboBox,
     QDateEdit,
@@ -20,8 +22,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtCore import QDate, Qt
-from PySide6.QtWidgets import QApplication
 
 from domain.enums.priority import Priority
 from domain.enums.project_health import ProjectHealth
@@ -87,14 +87,16 @@ class ProjectDialog(QDialog):
 
         # Kaydırılabilir form alanları
         scroll = QScrollArea(parent=self)
-        scroll.setStyleSheet("QScrollArea { background: transparent; }")
+        scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
         scroll.viewport().setStyleSheet("background: transparent;")
+        scroll.viewport().setAutoFillBackground(False)
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         form_widget = QWidget(parent=scroll)
         form_widget.setStyleSheet("background: transparent;")
+        form_widget.setAutoFillBackground(False)
         layout = QVBoxLayout(form_widget)
         layout.setContentsMargins(0, 4, 12, 4)
         layout.setSpacing(0)
