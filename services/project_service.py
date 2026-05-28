@@ -10,25 +10,69 @@ from typing import Any
 
 from core.exceptions.project_exceptions import ProjectNotFoundError, ProjectValidationError
 from domain.enums.priority import Priority
+from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
+from domain.enums.task_status import TaskStatus
+from domain.enums.task_type import TaskType
 from domain.models.project import Project
+from domain.models.task import Task
+from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.project_repository import ProjectRepository
+from infrastructure.repositories.project_tag_repository import ProjectTagRepository
+from infrastructure.repositories.task_repository import TaskRepository
+from services.stage_service import StageService
 
 logger = logging.getLogger(__name__)
 
 _MAX_TITLE_LEN = 255
 _MAX_SHORT_DESC_LEN = 500
-_OPTIONAL_FIELDS = ("short_description", "github_url", "demo_url", "project_type", "full_description", "problem_statement", "target_outcome")
+_OPTIONAL_FIELDS = (
+    "short_description",
+    "full_description",
+    "problem_statement",
+    "target_outcome",
+    "project_type",
+    "status",
+    "priority",
+    "health",
+    "progress_percent",
+    "manual_progress_percent",
+    "github_url",
+    "demo_url",
+    "docs_url",
+    "start_date",
+    "target_end_date",
+    "completed_at",
+    "is_featured",
+    "is_archived",
+    "display_order",
+)
 
 
 class ProjectService:
     """Proje oluşturma, güncelleme ve silme iş kurallarını yönetir."""
 
-    def __init__(self, repository: ProjectRepository) -> None:
+    def __init__(
+        self,
+        repository: ProjectRepository,
+        stage_service: StageService | None = None,
+        activity_log_repository: ActivityLogRepository | None = None,
+        tag_repository: ProjectTagRepository | None = None,
+        task_repository: TaskRepository | None = None,
+    ) -> None:
         self._repo = repository
+        self._stage_service = stage_service
+        self._activity_logs = activity_log_repository
+        self._tag_repo = tag_repository
+        self._task_repo = task_repository
 
-    def get_all_projects(self, include_archived: bool = False) -> list[Project]:
-        return self._repo.get_all(include_archived=include_archived)
+    def get_all_projects(
+        self,
+        include_archived: bool = False,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[Project]:
+        return self._repo.get_all(include_archived=include_archived, limit=limit, offset=offset)
 
     def get_project(self, project_id: int) -> Project:
         project = self._repo.get_by_id(project_id)
@@ -39,41 +83,144 @@ class ProjectService:
     def create_project(self, title: str, **kwargs: Any) -> Project:
         self._validate_title(title)
         self._validate_optional_fields(kwargs)
+        status = kwargs.get("status", ProjectStatus.PLANNED.value)
+        health = kwargs.get("health", ProjectHealth.UNKNOWN.value)
+        if status == ProjectStatus.BLOCKED.value:
+            health = ProjectHealth.BLOCKED.value
+            kwargs["health"] = health
         data: dict[str, Any] = {
             "title": title.strip(),
             "slug": self._build_unique_slug(title),
-            "status": kwargs.get("status", ProjectStatus.PLANNED.value),
+            "status": status,
             "priority": kwargs.get("priority", Priority.MEDIUM.value),
+            "health": health,
         }
+        tags = list(kwargs.pop("tags", []) or [])
         for key in _OPTIONAL_FIELDS:
             if kwargs.get(key) is not None:
                 data[key] = kwargs[key]
         project = Project(**data)
         created = self._repo.create(project)
+        try:
+            if self._stage_service is not None:
+                self._stage_service.create_default_stages(created.id)
+            if self._tag_repo is not None and tags:
+                self._tag_repo.replace_for_project(created.id, tags)
+            if self._activity_logs is not None:
+                self._activity_logs.create(
+                    project_id=created.id,
+                    action="PROJECT_CREATED",
+                    summary=f"{created.title} projesi oluşturuldu.",
+                    entity_type="project",
+                    entity_id=created.id,
+                )
+        except Exception as exc:
+            # Proje zaten kaydedildi; ek kurulum hatası oluşsa da signal'in emitlenmesini engelleme
+            logger.warning(
+                "Proje '%s' (id=%d) oluşturuldu ancak ek kurulum tamamlanamadı: %s",
+                created.title, created.id, exc,
+            )
         logger.info("Yeni proje oluşturuldu: id=%d title='%s'", created.id, created.title)
         return created
 
     def update_project(self, project_id: int, **kwargs: Any) -> Project:
         project = self.get_project(project_id)
+        tags = kwargs.pop("tags", None)
         if "title" in kwargs:
             self._validate_title(kwargs["title"])
             kwargs["title"] = kwargs["title"].strip()
         self._validate_optional_fields(kwargs)
+        if kwargs.get("status") == ProjectStatus.BLOCKED.value:
+            kwargs["health"] = ProjectHealth.BLOCKED.value
         for key, value in kwargs.items():
             setattr(project, key, value)
         updated = self._repo.update(project)
+        if self._tag_repo is not None and tags is not None:
+            self._tag_repo.replace_for_project(project_id, list(tags))
+        if self._activity_logs is not None:
+            self._activity_logs.create(
+                project_id=project_id,
+                action="PROJECT_UPDATED",
+                summary=f"{updated.title} projesi güncellendi.",
+                entity_type="project",
+                entity_id=project_id,
+            )
         logger.info("Proje güncellendi: id=%d", project_id)
         return updated
 
     def archive_project(self, project_id: int) -> None:
         self.get_project(project_id)
         self._repo.set_archived(project_id, archived=True)
+        if self._activity_logs is not None:
+            self._activity_logs.create(
+                project_id=project_id,
+                action="PROJECT_ARCHIVED",
+                summary="Proje arşivlendi.",
+                entity_type="project",
+                entity_id=project_id,
+            )
         logger.info("Proje arşivlendi: id=%d", project_id)
+
+    def restore_archived_project(self, project_id: int) -> None:
+        self.get_project(project_id)
+        self._repo.set_archived(project_id, archived=False)
+        if self._activity_logs is not None:
+            self._activity_logs.create(
+                project_id=project_id,
+                action="PROJECT_RESTORED",
+                summary="Proje arsivden geri alindi.",
+                entity_type="project",
+                entity_id=project_id,
+            )
+        logger.info("Proje arsivden geri alindi: id=%d", project_id)
 
     def delete_project(self, project_id: int) -> None:
         self.get_project(project_id)
         self._repo.delete(project_id)
         logger.info("Proje silindi: id=%d", project_id)
+
+    def recalculate_progress(self, project_id: int) -> Project:
+        """Görev tamamlanma oranından proje ilerlemesini günceller."""
+        project = self.get_project(project_id)
+        if project.manual_progress_percent is not None:
+            project.progress_percent = project.manual_progress_percent
+            return self._repo.update(project)
+        if self._task_repo is None:
+            return project
+        tasks = self._task_repo.get_by_project(project_id)
+        children: dict[int, list[Task]] = {}
+        for task in tasks:
+            if task.parent_task_id is not None:
+                children.setdefault(task.parent_task_id, []).append(task)
+        top_level = [task for task in tasks if task.parent_task_id is None]
+        scores = [
+            score
+            for score in (self._task_progress_score(task, children) for task in top_level)
+            if score is not None
+        ]
+        if not scores:
+            project.progress_percent = 0
+        else:
+            project.progress_percent = round((sum(scores) / len(scores)) * 100)
+        return self._repo.update(project)
+
+    def _task_progress_score(self, task: Task, children: dict[int, list[Task]]) -> float | None:
+        child_tasks = children.get(task.id, [])
+        if child_tasks:
+            scores = [
+                score
+                for score in (self._task_progress_score(child, children) for child in child_tasks)
+                if score is not None
+            ]
+            return sum(scores) / len(scores) if scores else None
+        if task.task_type == TaskType.GROUP.value:
+            return None
+        if task.status == TaskStatus.DONE.value:
+            return 1.0
+        if task.checklist_items:
+            done_items = len([item for item in task.checklist_items if item.is_done])
+            return done_items / len(task.checklist_items)
+        return 0.0
 
     def _validate_title(self, title: str) -> None:
         if not title or not title.strip():
