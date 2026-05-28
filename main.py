@@ -3,7 +3,6 @@ Uygulama giriş noktası.
 DI Container'ı kurar, global exception hook'u bağlar ve pencereyi açar.
 """
 import sys
-import logging
 from pathlib import Path
 
 # Proje kökünü import path'e ekle
@@ -11,14 +10,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import config  # noqa: E402 — sys.path ayarından sonra import edilmeli
 from di_container import DIContainer  # noqa: E402
-from core.logger import setup_logging, setup_global_exception_handler
+from core.logger import setup_global_exception_handler, setup_logging
 
 def main() -> None:
     """Uygulamayı başlatan ana fonksiyon."""
     # 1. Loglama ve Hata Yönetimini Kur
     setup_logging()
     setup_global_exception_handler()
-    logger = logging.getLogger(__name__)
 
     # DI Container tüm altyapıyı (log, DB, tema, font) başlatır
     container = DIContainer.instance()
