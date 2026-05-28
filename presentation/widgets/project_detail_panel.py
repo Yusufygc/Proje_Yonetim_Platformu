@@ -9,7 +9,10 @@ from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QListWidget,
+    QListWidgetItem,
     QMenu,
+    QInputDialog,
     QPushButton,
     QScrollArea,
     QStackedWidget,
@@ -19,6 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from di_container import DIContainer
+from domain.models.attachment import Attachment
 from domain.models.project import Project
 from domain.models.project_stage import ProjectStage
 from presentation.pages.tasks_page import TasksPage
@@ -136,6 +140,9 @@ class ProjectDetailPanel(QWidget):
         self._tab_widget = QTabWidget(parent=container)
         # QTabWidget stilleri global QSS içinde yönetiliyor
 
+        self._summary_page = self._build_summary_tab()
+        self._tab_widget.addTab(self._summary_page, "Özet")
+
         self._tasks_page = TasksPage(
             parent=self._tab_widget,
             controller=self._di.task_controller,
@@ -161,10 +168,70 @@ class ProjectDetailPanel(QWidget):
         )
         self._tab_widget.addTab(self._resources_page, "Kaynaklar")
 
+        self._ideas_page = self._build_simple_text_tab(
+            "Projeye bağlı fikirler ProjectIdea ilişkisiyle saklanır."
+        )
+        self._tab_widget.addTab(self._ideas_page, "Fikirler")
+
+        self._outputs_page = self._build_outputs_tab()
+        self._tab_widget.addTab(self._outputs_page, "Çıktılar")
+
+        self._activity_page = self._build_activity_tab()
+        self._tab_widget.addTab(self._activity_page, "Aktivite")
+
         layout.addWidget(self._tab_widget, 1)
         layout.addStretch()
 
         return scroll
+
+    def _build_summary_tab(self) -> QWidget:
+        page = QWidget(parent=self._tab_widget)
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(10)
+        self._summary_problem = QLabel("", parent=page)
+        self._summary_problem.setWordWrap(True)
+        self._summary_target = QLabel("", parent=page)
+        self._summary_target.setWordWrap(True)
+        self._summary_progress = QLabel("", parent=page)
+        for widget in (self._summary_problem, self._summary_target, self._summary_progress):
+            widget.setProperty("cssClass", "text-secondary")
+            layout.addWidget(widget)
+        layout.addStretch()
+        return page
+
+    def _build_simple_text_tab(self, text: str) -> QWidget:
+        page = QWidget(parent=self._tab_widget)
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(16, 16, 16, 16)
+        label = QLabel(text, parent=page)
+        label.setProperty("cssClass", "text-muted")
+        label.setWordWrap(True)
+        layout.addWidget(label)
+        layout.addStretch()
+        return page
+
+    def _build_outputs_tab(self) -> QWidget:
+        page = QWidget(parent=self._tab_widget)
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(16, 16, 16, 16)
+        add_btn = QPushButton("+ Çıktı / Dosya Yolu Ekle", parent=page)
+        add_btn.setProperty("cssClass", "btn-primary")
+        add_btn.clicked.connect(self._on_add_output)
+        layout.addWidget(add_btn)
+        self._outputs_list = QListWidget(parent=page)
+        self._outputs_list.setProperty("cssClass", "panel")
+        layout.addWidget(self._outputs_list)
+        return page
+
+    def _build_activity_tab(self) -> QWidget:
+        page = QWidget(parent=self._tab_widget)
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(16, 16, 16, 16)
+        self._activity_list = QListWidget(parent=page)
+        self._activity_list.setProperty("cssClass", "panel")
+        layout.addWidget(self._activity_list)
+        return page
 
     def _build_header_row(self, parent: QWidget) -> QWidget:
         row = QWidget(parent=parent)
@@ -254,6 +321,14 @@ class ProjectDetailPanel(QWidget):
         self._decisions_page.set_project(project.id)
         self._notes_page.set_project(project.id)
         self._resources_page.set_project(project.id)
+        self._summary_problem.setText(f"Problem: {project.problem_statement or '-'}")
+        self._summary_target.setText(f"Hedef çıktı: {project.target_outcome or '-'}")
+        target_date = project.target_end_date.isoformat() if project.target_end_date else "-"
+        self._summary_progress.setText(
+            f"İlerleme: %{project.progress_percent}  |  Hedef tarih: {target_date}"
+        )
+        self._refresh_outputs()
+        self._refresh_activity()
 
         has_github = bool(project.github_url)
         self._github_row.setVisible(has_github)
@@ -286,3 +361,34 @@ class ProjectDetailPanel(QWidget):
             lambda: self.delete_requested.emit(self._project_id)
         )
         menu.exec(self._more_btn.mapToGlobal(self._more_btn.rect().bottomLeft()))
+
+    def _refresh_outputs(self) -> None:
+        self._outputs_list.clear()
+        if self._project_id is None:
+            return
+        for item in self._di.attachment_repository.get_by_project(self._project_id):
+            self._outputs_list.addItem(QListWidgetItem(f"{item.file_path}\n{item.caption or ''}"))
+
+    def _refresh_activity(self) -> None:
+        self._activity_list.clear()
+        if self._project_id is None:
+            return
+        for log in self._di.activity_log_repository.get_by_project(self._project_id):
+            self._activity_list.addItem(QListWidgetItem(f"{log.created_at} · {log.summary}"))
+
+    def _on_add_output(self) -> None:
+        if self._project_id is None:
+            return
+        path, ok = QInputDialog.getText(self, "Çıktı Ekle", "Dosya yolu veya bağlantı:")
+        if not ok or not path.strip():
+            return
+        caption, _ = QInputDialog.getText(self, "Çıktı Açıklaması", "Kısa açıklama:")
+        self._di.attachment_repository.create(
+            Attachment(
+                project_id=self._project_id,
+                file_path=path.strip(),
+                caption=caption.strip() or None,
+                attachment_type="OUTPUT",
+            )
+        )
+        self._refresh_outputs()
