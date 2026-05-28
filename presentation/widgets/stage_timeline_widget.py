@@ -19,8 +19,8 @@ from domain.models.project_stage import ProjectStage
 
 _STATUS_THEME_KEYS: dict[str, tuple[str, str]] = {
     StageStatus.NOT_STARTED.value: ("Bekliyor", "text_secondary"),
-    StageStatus.ACTIVE.value: ("Aktif", "success"),
-    StageStatus.DONE.value: ("Tamamlandı", "accent_start"),
+    StageStatus.ACTIVE.value: ("Aktif", "stage_active"),
+    StageStatus.DONE.value: ("Tamamlandı", "stage_done"),
     StageStatus.SKIPPED.value: ("Atlandı", "text_muted"),
 }
 
@@ -36,9 +36,17 @@ class StageTimelineWidget(QWidget):
         self._rows_layout = QVBoxLayout(self)
         self._rows_layout.setContentsMargins(0, 0, 0, 0)
         self._rows_layout.setSpacing(4)
+        self._stages: list[ProjectStage] = []
+        from core.managers.theme_manager import ThemeManager
+        ThemeManager.instance().theme_changed.connect(self._on_theme_changed)
+
+    def _on_theme_changed(self, _theme_name: str) -> None:
+        if self._stages:
+            self.update_stages(self._stages)
 
     def update_stages(self, stages: list[ProjectStage]) -> None:
         """Aşama listesini temizler ve yeniden oluşturur."""
+        self._stages = stages
         while self._rows_layout.count() > 0:
             item = self._rows_layout.takeAt(0)
             if item.widget():
@@ -61,12 +69,18 @@ class StageTimelineWidget(QWidget):
         layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(10)
 
-        dot_color = stage.color if (is_active or is_completed) else theme_mgr.color("border")
+        dot_color = (
+            theme_mgr.color("stage_active") if is_active
+            else (theme_mgr.color("stage_done") if is_completed else theme_mgr.color("border"))
+        )
         dot = QLabel("●", parent=card)
         dot.setStyleSheet(f"font-size: 10px; color: {dot_color};")
         layout.addWidget(dot)
 
-        name_color = theme_mgr.color("text_primary") if is_active else (theme_mgr.color("accent_start") if is_completed else theme_mgr.color("text_secondary"))
+        name_color = (
+            theme_mgr.color("text_primary") if is_active
+            else (theme_mgr.color("stage_done") if is_completed else theme_mgr.color("text_secondary"))
+        )
         name_weight = "700" if is_active else "500"
         name_lbl = QLabel(stage.name, parent=card)
         name_lbl.setStyleSheet(
@@ -100,10 +114,21 @@ class StageTimelineWidget(QWidget):
             )
             layout.addWidget(btn)
 
-        border_color = stage.color if is_active else theme_mgr.color("border")
-        bg_color = f"{stage.color}15" if is_active else "transparent"
-        card.setStyleSheet(
-            f"QFrame {{ background: {bg_color}; border-left: 2px solid {border_color};"
-            f" border-radius: 4px; }}"
-        )
+        surface_raised = theme_mgr.color("surface_raised")
+        if is_active:
+            active_color = theme_mgr.color("stage_active")
+            card.setStyleSheet(
+                f"QFrame {{ background: {surface_raised}; border-left: 3px solid {active_color};"
+                f" border-radius: 4px; }}"
+            )
+        elif is_completed:
+            done_color = theme_mgr.color("stage_done")
+            card.setStyleSheet(
+                f"QFrame {{ background: {surface_raised}; border-left: 2px solid {done_color};"
+                f" border-radius: 4px; }}"
+            )
+        else:
+            card.setStyleSheet(
+                f"QFrame {{ background: {surface_raised}; border-radius: 4px; }}"
+            )
         return card
