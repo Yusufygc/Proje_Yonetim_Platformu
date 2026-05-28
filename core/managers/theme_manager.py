@@ -57,6 +57,10 @@ class ThemeManager(QObject):
         self._load_theme(theme_name)
         self.theme_changed.emit(theme_name)
 
+    @property
+    def current_theme(self) -> str:
+        return self._current_theme
+
     def color(self, key: str) -> str:
         """Palet sözlüğünden renk kodu döndürür."""
         return str(self._palette.get(key, "#FFFFFF"))
@@ -113,6 +117,9 @@ QPushButton:hover {{
     border-color: {accent_start};
     color: #FFFFFF;
 }}
+QPushButton:focus, QComboBox:focus, QTreeWidget:focus {{
+    border: 1px solid {accent_start};
+}}
 QPushButton[primary="true"] {{
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
         stop:0 {accent_start}, stop:1 {accent_end});
@@ -123,6 +130,17 @@ QPushButton[primary="true"] {{
     font-weight: 600;
 }}
 QPushButton[primary="true"]:hover {{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 {accent_end}, stop:1 {accent_start});
+}}
+QPushButton#accent_button {{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 {accent_start}, stop:1 {accent_end});
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
+}}
+QPushButton#accent_button:hover {{
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
         stop:0 {accent_end}, stop:1 {accent_start});
 }}
@@ -181,6 +199,27 @@ QComboBox QAbstractItemView {{
     border-radius: 8px;
     selection-background-color: {accent_start};
 }}
+QSpinBox, QDoubleSpinBox {{
+    background-color: {surface};
+    color: {text_primary};
+    border: 1px solid {border};
+    border-radius: 8px;
+    padding: 6px 10px;
+}}
+QSpinBox:focus, QDoubleSpinBox:focus {{
+    border: 1px solid {accent_start};
+}}
+QSpinBox::up-button, QSpinBox::down-button,
+QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{
+    background-color: {surface_raised};
+    border: none;
+    width: 18px;
+    border-radius: 4px;
+}}
+QSpinBox::up-button:hover, QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover {{
+    background-color: {accent_start};
+}}
 QToolTip {{
     background-color: {surface};
     color: {text_primary};
@@ -203,6 +242,16 @@ QTreeWidget::item:hover {{
 QTreeWidget::item:selected {{
     background-color: {surface_raised};
     color: {accent_start};
+}}
+QTreeWidget::indicator {{
+    width: 16px;
+    height: 16px;
+}}
+QAbstractItemView {{
+    outline: 1px solid transparent;
+}}
+QAbstractItemView:focus {{
+    outline: 1px solid {accent_start};
 }}
 QHeaderView::section {{
     background-color: {surface_raised};
