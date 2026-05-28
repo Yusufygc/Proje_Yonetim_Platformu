@@ -4,28 +4,28 @@ Yeni görev için boş, var olan görev için alanlar dolu gelir.
 """
 from __future__ import annotations
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QTextEdit,
     QVBoxLayout,
     QWidget,
-    QScrollArea,
-    QFrame,
 )
-from PySide6.QtCore import Qt
 
+from controllers.task_controller import TaskController
 from domain.enums.priority import Priority
 from domain.enums.task_status import TaskStatus
 from domain.enums.task_type import TaskType
-from domain.models.task import Task
 from domain.models.project_stage import ProjectStage
-from controllers.task_controller import TaskController
+from domain.models.task import Task
 
 _STATUS_LABELS: dict[str, str] = {
     TaskStatus.TODO.value: "Yapılacak",
@@ -88,8 +88,10 @@ class TaskDialog(QDialog):
         layout.setContentsMargins(28, 28, 28, 24)
         layout.setSpacing(0)
 
+        from core.managers.theme_manager import ThemeManager
+        _text_primary = ThemeManager.instance().color("text_primary")
         dialog_title = QLabel(title_text, parent=self)
-        dialog_title.setStyleSheet("font-size: 16px; font-weight: 700; color: #E8EAF0;")
+        dialog_title.setStyleSheet(f"font-size: 16px; font-weight: 700; color: {_text_primary};")
         layout.addWidget(dialog_title)
         layout.addSpacing(20)
 
@@ -119,9 +121,11 @@ class TaskDialog(QDialog):
         layout.addWidget(self._build_button_row())
 
     def _make_field_label(self, text: str) -> QLabel:
+        from core.managers.theme_manager import ThemeManager
+        color = ThemeManager.instance().color("text_primary")
         lbl = QLabel(text, parent=self)
         lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 600; color: #8B8FA8; letter-spacing: 0.5px;"
+            f"font-size: 12px; font-weight: 700; color: {color}; letter-spacing: 0.5px;"
         )
         return lbl
 
@@ -193,9 +197,11 @@ class TaskDialog(QDialog):
         layout.setSpacing(10)
 
         if self._is_edit:
+            from core.managers.theme_manager import ThemeManager
+            danger = ThemeManager.instance().color("danger")
             delete_btn = QPushButton("Sil", parent=row)
             delete_btn.setMinimumSize(80, 38)
-            delete_btn.setStyleSheet("color: #EF4444;")
+            delete_btn.setStyleSheet(f"color: {danger};")
             delete_btn.clicked.connect(self._on_delete)
             layout.addWidget(delete_btn)
 
@@ -253,6 +259,14 @@ class TaskDialog(QDialog):
         if not self._task or not hasattr(self._task, 'checklist_items'):
             return
 
+        from core.managers.theme_manager import ThemeManager
+        _tm = ThemeManager.instance()
+        _success = _tm.color("success")
+        _text_muted = _tm.color("text_muted")
+        _text_secondary = _tm.color("text_secondary")
+        _danger = _tm.color("danger")
+        _surface_raised = _tm.color("surface_raised")
+
         for item in self._task.checklist_items:
             row = QWidget(parent=self._chk_container)
             rl = QHBoxLayout(row)
@@ -260,7 +274,7 @@ class TaskDialog(QDialog):
             rl.setSpacing(8)
 
             status_char = "●" if item.is_done else "○"
-            status_color = "#22C55E" if item.is_done else "#4A4D5C"
+            status_color = _success if item.is_done else _text_muted
             chk_btn = QPushButton(status_char, parent=row)
             chk_btn.setFixedSize(20, 20)
             chk_btn.setStyleSheet(f"color: {status_color}; font-size: 14px; border: none; background: transparent;")
@@ -268,17 +282,17 @@ class TaskDialog(QDialog):
             rl.addWidget(chk_btn)
 
             lbl = QLabel(item.text, parent=row)
-            text_color = "#6B7280" if item.is_done else "#C8CAD4"
+            text_color = _text_muted if item.is_done else _text_secondary
             lbl.setStyleSheet(f"color: {text_color}; font-size: 13px;")
             rl.addWidget(lbl, 1)
 
             del_btn = QPushButton("×", parent=row)
             del_btn.setFixedSize(20, 20)
-            del_btn.setStyleSheet("color: #EF4444; border: none; background: transparent; font-weight: bold; font-size: 16px;")
+            del_btn.setStyleSheet(f"color: {_danger}; border: none; background: transparent; font-weight: bold; font-size: 16px;")
             del_btn.clicked.connect(lambda checked=False, i_id=item.id: self._on_delete_checklist_item(i_id))
             rl.addWidget(del_btn)
 
-            row.setStyleSheet("QWidget { background: #1E2130; border-radius: 4px; }")
+            row.setStyleSheet(f"QWidget {{ background: {_surface_raised}; border-radius: 4px; }}")
             self._chk_layout.addWidget(row)
 
     def _on_add_checklist_item(self) -> None:
