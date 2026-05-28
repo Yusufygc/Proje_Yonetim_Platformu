@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class NoteType(Enum):
     """Proje Not (Note) türleri"""
     GENERAL = "GENERAL"                 # Genel not

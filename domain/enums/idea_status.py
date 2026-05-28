@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class IdeaStatus(Enum):
     """Fikir durumları."""
     RAW = "RAW"                 # Ham fikir

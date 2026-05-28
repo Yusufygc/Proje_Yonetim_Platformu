@@ -8,6 +8,7 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, Date, Integer, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.enums.priority import Priority
@@ -16,15 +17,15 @@ from domain.enums.project_status import ProjectStatus
 from infrastructure.database.base_model import Base, TimestampMixin
 
 if TYPE_CHECKING:
-    from domain.models.project_stage import ProjectStage
-    from domain.models.task import Task
-    from domain.models.project_tag import ProjectTag
-    from domain.models.project_idea import ProjectIdea
+    from domain.models.activity_log import ActivityLog
+    from domain.models.attachment import Attachment
     from domain.models.decision_record import DecisionRecord
     from domain.models.note import Note
+    from domain.models.project_idea import ProjectIdea
+    from domain.models.project_stage import ProjectStage
+    from domain.models.project_tag import ProjectTag
     from domain.models.resource import Resource
-    from domain.models.attachment import Attachment
-    from domain.models.activity_log import ActivityLog
+    from domain.models.task import Task
 
 
 class Project(Base, TimestampMixin):
@@ -41,13 +42,13 @@ class Project(Base, TimestampMixin):
     target_outcome: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     project_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default=ProjectStatus.PLANNED.value
+        SAEnum(ProjectStatus, native_enum=False), nullable=False, default=ProjectStatus.PLANNED.value
     )
     priority: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=Priority.MEDIUM.value
+        SAEnum(Priority, native_enum=False), nullable=False, default=Priority.MEDIUM.value
     )
     health: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=ProjectHealth.UNKNOWN.value
+        SAEnum(ProjectHealth, native_enum=False), nullable=False, default=ProjectHealth.UNKNOWN.value
     )
     progress_percent: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     manual_progress_percent: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

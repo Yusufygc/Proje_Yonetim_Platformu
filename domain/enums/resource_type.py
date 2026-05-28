@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ResourceType(Enum):
     """Proje Kaynak (Resource) türleri"""
     DOCUMENT = "DOCUMENT"   # Doküman
