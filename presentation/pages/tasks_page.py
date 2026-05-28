@@ -9,7 +9,9 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QDialog,
+    QGraphicsOpacityEffect,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QMenu,
@@ -19,7 +21,6 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
-    QGraphicsOpacityEffect,
 )
 
 from controllers.project_controller import ProjectController
@@ -114,8 +115,8 @@ class TasksPage(QWidget):
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 32, 32, 32)
-        layout.setSpacing(16)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
 
         layout.addWidget(self._build_header())
 
@@ -126,7 +127,7 @@ class TasksPage(QWidget):
             _tr("task_tree_priority", "Öncelik"),
             _tr("task_tree_type", "Tip"),
         ])
-        self._tree.setColumnWidth(0, 400)
+        self._tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self._tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._tree.setDragEnabled(True)
         self._tree.setAcceptDrops(True)
@@ -177,45 +178,58 @@ class TasksPage(QWidget):
 
     def _build_header(self) -> QWidget:
         header = QWidget(parent=self)
-        layout = QHBoxLayout(header)
-        layout.setContentsMargins(0, 0, 0, 0)
+        outer = QVBoxLayout(header)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(8)
 
-        title = QLabel(_tr("tasks_wbs_title", "İş Kırılım Yapısı (WBS)"), parent=header)
+        row1 = QWidget(parent=header)
+        r1 = QHBoxLayout(row1)
+        r1.setContentsMargins(0, 0, 0, 0)
+        title = QLabel(_tr("tasks_wbs_title", "İş Kırılım Yapısı (WBS)"), parent=row1)
         title.setProperty("cssClass", "title-medium")
-        layout.addWidget(title)
-        layout.addStretch()
-
-        lbl = QLabel(_tr("label_project", "Proje:"), parent=header)
-        lbl.setProperty("cssClass", "text-secondary")
-        layout.addWidget(lbl)
-
-        self._project_combo = QComboBox(parent=header)
-        self._project_combo.setMinimumWidth(200)
-        self._project_combo.setMinimumHeight(36)
-        self._project_combo.currentIndexChanged.connect(self._on_project_changed)
-        layout.addWidget(self._project_combo)
-
-        self._status_filter = self._make_filter_combo(_tr("filter_status", "Durum"), [(s.value, s.value) for s in TaskStatus])
-        layout.addWidget(self._status_filter)
-        self._priority_filter = self._make_filter_combo(_tr("filter_priority", "Öncelik"), [(p.value, p.value) for p in Priority])
-        layout.addWidget(self._priority_filter)
-        self._type_filter = self._make_filter_combo(_tr("filter_type", "Tür"), [(t.value, t.value) for t in TaskType])
-        layout.addWidget(self._type_filter)
-        self._stage_filter = self._make_filter_combo(_tr("filter_stage", "Aşama"), [])
-        layout.addWidget(self._stage_filter)
-
-        add_btn = QPushButton(_tr("task_add_root", "+ Ana Görev Ekle"), parent=header)
+        r1.addWidget(title)
+        r1.addStretch()
+        add_btn = QPushButton(_tr("task_add_root", "+ Ana Görev Ekle"), parent=row1)
         add_btn.setProperty("cssClass", "btn-primary")
-        add_btn.setMinimumSize(140, 36)
+        add_btn.setMinimumSize(120, 32)
         add_btn.clicked.connect(self._on_add_root_task)
-        layout.addWidget(add_btn)
+        r1.addWidget(add_btn)
+        outer.addWidget(row1)
+
+        row2 = QWidget(parent=header)
+        r2 = QHBoxLayout(row2)
+        r2.setContentsMargins(0, 0, 0, 0)
+        r2.setSpacing(6)
+        lbl = QLabel(_tr("label_project", "Proje:"), parent=row2)
+        lbl.setProperty("cssClass", "text-secondary")
+        r2.addWidget(lbl)
+        self._project_combo = QComboBox(parent=row2)
+        self._project_combo.setMinimumWidth(120)
+        self._project_combo.setMinimumHeight(32)
+        self._project_combo.currentIndexChanged.connect(self._on_project_changed)
+        r2.addWidget(self._project_combo, 1)
+        self._status_filter = self._make_filter_combo(
+            _tr("filter_status", "Durum"), [(s.value, s.value) for s in TaskStatus]
+        )
+        r2.addWidget(self._status_filter)
+        self._priority_filter = self._make_filter_combo(
+            _tr("filter_priority", "Öncelik"), [(p.value, p.value) for p in Priority]
+        )
+        r2.addWidget(self._priority_filter)
+        self._type_filter = self._make_filter_combo(
+            _tr("filter_type", "Tür"), [(t.value, t.value) for t in TaskType]
+        )
+        r2.addWidget(self._type_filter)
+        self._stage_filter = self._make_filter_combo(_tr("filter_stage", "Aşama"), [])
+        r2.addWidget(self._stage_filter)
+        outer.addWidget(row2)
 
         return header
 
     def _make_filter_combo(self, label: str, values: list[tuple[str, str]]) -> QComboBox:
         combo = QComboBox(parent=self)
-        combo.setMinimumHeight(36)
-        combo.setMinimumWidth(110)
+        combo.setMinimumHeight(32)
+        combo.setMinimumWidth(70)
         combo.addItem(label, None)
         for text, value in values:
             combo.addItem(text, value)
