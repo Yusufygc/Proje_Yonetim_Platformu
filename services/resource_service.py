@@ -11,15 +11,15 @@ class ResourceService:
         self._repo = repository
 
     def create_resource(self, project_id: int, title: str, url: str, **kwargs: Any) -> Resource:
-        if not title or not title.strip():
-            raise ValueError("Kaynak başlığı boş olamaz.")
         if not url or not url.strip():
             raise ValueError("Kaynak URL boş olamaz.")
+        cleaned_url = url.strip()
+        cleaned_title = title.strip() if title and title.strip() else cleaned_url
             
         resource = Resource(
             project_id=project_id,
-            title=title.strip(),
-            url=url.strip()
+            title=cleaned_title,
+            url=cleaned_url
         )
         
         for key, value in kwargs.items():
@@ -33,10 +33,10 @@ class ResourceService:
         if not resource:
             raise ValueError("Kaynak bulunamadı.")
             
-        if "title" in kwargs and not str(kwargs["title"]).strip():
-            raise ValueError("Kaynak başlığı boş olamaz.")
         if "url" in kwargs and not str(kwargs["url"]).strip():
             raise ValueError("Kaynak URL boş olamaz.")
+        if "title" in kwargs and not str(kwargs["title"]).strip():
+            kwargs["title"] = kwargs.get("url", resource.url)
             
         for key, value in kwargs.items():
             if hasattr(resource, key):
