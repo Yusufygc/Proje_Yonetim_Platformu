@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
 )
 
 from domain.models.project import Project
-from presentation.utils.ui_utils import apply_shadow
 
 _STATUS_TR: dict[str, str] = {
     "PLANNED": "Planlandı",
@@ -68,7 +67,7 @@ class ProjectListItem(QFrame):
     def _setup_ui(self, project: Project) -> None:
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumHeight(72)
-        apply_shadow(self, blur_radius=15, y_offset=3, alpha=30)
+        # Not: QGraphicsDropShadowEffect kaldırıldı — hover ile yanmasönmede neden oluyordu
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 10, 14, 10)
@@ -82,14 +81,24 @@ class ProjectListItem(QFrame):
 
         title_lbl = QLabel(project.title, parent=top_row)
         title_lbl.setProperty("cssClass", "text-primary")
+        title_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         top_layout.addWidget(title_lbl, 1)
 
         status_text = _STATUS_TR.get(project.status, project.status)
         status_color = _STATUS_COLORS.get(project.status, "#8B8FA8")
         status_lbl = QLabel(status_text, parent=top_row)
         status_lbl.setStyleSheet(f"font-size: 10px; font-weight: 600; color: {status_color};")
+        status_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         top_layout.addWidget(status_lbl)
         layout.addWidget(top_row)
+
+        if project.short_description:
+            desc_lbl = QLabel(project.short_description, parent=self)
+            desc_lbl.setProperty("cssClass", "text-secondary")
+            desc_lbl.setWordWrap(True)
+            desc_lbl.setStyleSheet("font-size: 11px;")
+            desc_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+            layout.addWidget(desc_lbl)
 
         # Öncelik + progress satırı
         bottom_row = QWidget(parent=self)
@@ -101,6 +110,7 @@ class ProjectListItem(QFrame):
         priority_color = _PRIORITY_COLORS.get(project.priority, "#6366F1")
         priority_lbl = QLabel(f"● {priority_text}", parent=bottom_row)
         priority_lbl.setStyleSheet(f"font-size: 11px; color: {priority_color};")
+        priority_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         bottom_layout.addWidget(priority_lbl)
         bottom_layout.addStretch()
 
@@ -110,9 +120,36 @@ class ProjectListItem(QFrame):
         progress.setMaximumWidth(80)
         progress.setMaximumHeight(4)
         progress.setTextVisible(False)
+        progress.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         # QProgressBar stili global QSS içinde yönetilir
         bottom_layout.addWidget(progress)
         layout.addWidget(bottom_row)
+
+        meta_parts = []
+        try:
+            active_stage = next((s.name for s in project.stages if s.status == "ACTIVE"), None)
+            if active_stage:
+                meta_parts.append(f"Aşama: {active_stage}")
+        except Exception:
+            pass
+        try:
+            open_tasks = len([t for t in project.tasks if t.status not in {"DONE", "CANCELLED"}])
+            meta_parts.append(f"Açık görev: {open_tasks}")
+        except Exception:
+            pass
+        meta_parts.append(f"Güncellendi: {project.updated_at.date()}")
+        try:
+            tags = [tag.tag_name for tag in project.tags[:3]]
+            if tags:
+                meta_parts.append("Etiket: " + ", ".join(tags))
+        except Exception:
+            pass
+        meta_lbl = QLabel(" · ".join(meta_parts), parent=self)
+        meta_lbl.setProperty("cssClass", "text-muted")
+        meta_lbl.setWordWrap(True)
+        meta_lbl.setStyleSheet("font-size: 10px;")
+        meta_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        layout.addWidget(meta_lbl)
 
     def _apply_style(self, selected: bool) -> None:
         self.setProperty("selected", "true" if selected else "false")
