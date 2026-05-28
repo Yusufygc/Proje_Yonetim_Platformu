@@ -18,9 +18,9 @@ from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
 
 _STATUS_THEME_KEYS: dict[str, tuple[str, str]] = {
-    StageStatus.PENDING.value: ("Bekliyor", "text_secondary"),
+    StageStatus.NOT_STARTED.value: ("Bekliyor", "text_secondary"),
     StageStatus.ACTIVE.value: ("Aktif", "success"),
-    StageStatus.COMPLETED.value: ("Tamamlandı", "accent_start"),
+    StageStatus.DONE.value: ("Tamamlandı", "accent_start"),
     StageStatus.SKIPPED.value: ("Atlandı", "text_muted"),
 }
 
@@ -53,8 +53,8 @@ class StageTimelineWidget(QWidget):
         theme_mgr = ThemeManager.instance()
 
         is_active = stage.status == StageStatus.ACTIVE.value
-        is_completed = stage.status == StageStatus.COMPLETED.value
-        is_pending = stage.status == StageStatus.PENDING.value
+        is_completed = stage.status == StageStatus.DONE.value
+        is_pending = stage.status == StageStatus.NOT_STARTED.value
 
         card = QFrame(parent=self)
         layout = QHBoxLayout(card)
