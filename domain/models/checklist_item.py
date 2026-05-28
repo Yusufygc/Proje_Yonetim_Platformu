@@ -4,9 +4,10 @@ Bir göreve ait tamamlanabilir alt maddeyi temsil eder.
 """
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from infrastructure.database.base_model import Base, TimestampMixin
@@ -30,6 +31,7 @@ class ChecklistItem(Base, TimestampMixin):
     text: Mapped[str] = mapped_column(String(500), nullable=False)
     is_done: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     task: Mapped["Task"] = relationship("Task", back_populates="checklist_items")
 
