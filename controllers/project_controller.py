@@ -7,11 +7,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from PySide6.QtCore import QObject, Signal, QThreadPool
+from PySide6.QtCore import QObject, Signal
 
 from core.events.event_bus import EventBus
 from core.exceptions.base_exception import AppBaseException
 from core.workers.worker import Worker
+from domain.dtos.forms import ProjectCreateDTO, ProjectUpdateDTO
 from domain.models.project import Project
 from services.project_service import ProjectService
 
@@ -38,9 +39,18 @@ class ProjectController(QObject):
         self._service = service
         self._event_bus = event_bus
 
-    def load_projects(self, include_archived: bool = False) -> None:
+    def load_projects(
+        self,
+        include_archived: bool = False,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> None:
         def _fetch() -> list[Project]:
-            return self._service.get_all_projects(include_archived=include_archived)
+            return self._service.get_all_projects(
+                include_archived=include_archived,
+                limit=limit,
+                offset=offset,
+            )
             
         def _on_error(err: str) -> None:
             logger.error("Projeler yüklenemedi: %s", err)
@@ -49,7 +59,7 @@ class ProjectController(QObject):
         worker = Worker(_fetch)
         worker.signals.result.connect(self.projects_loaded.emit)
         worker.signals.error.connect(_on_error)
-        QThreadPool.globalInstance().start(worker)
+        worker.start()
 
     def get_project_sync(self, project_id: int) -> Optional[Project]:
         """Senkron proje sorgulama — yalnızca UI thread'inden küçük veri seti için çağrılır."""
@@ -60,19 +70,21 @@ class ProjectController(QObject):
 
     def create_project(self, title: str, **kwargs: Any) -> None:
         try:
-            project = self._service.create_project(title, **kwargs)
+            dto = ProjectCreateDTO(title=title, values=kwargs)
+            project = self._service.create_project(dto.title, **dto.values)
             self.project_created.emit(project)
-            self._event_bus.publish("project.created", project_id=project.id)
-        except AppBaseException as exc:
+            self._event_bus.publish("project.created", project_id=project.id, project=project)
+        except (AppBaseException, ValueError) as exc:
             logger.error("Proje oluşturulamadı: %s", exc)
             self.error_occurred.emit(str(exc))
 
     def update_project(self, project_id: int, **kwargs: Any) -> None:
         try:
-            project = self._service.update_project(project_id, **kwargs)
+            dto = ProjectUpdateDTO(values=kwargs)
+            project = self._service.update_project(project_id, **dto.values)
             self.project_updated.emit(project)
-            self._event_bus.publish("project.updated", project_id=project.id)
-        except AppBaseException as exc:
+            self._event_bus.publish("project.updated", project_id=project.id, project=project)
+        except (AppBaseException, ValueError) as exc:
             logger.error("Proje güncellenemedi: %s", exc)
             self.error_occurred.emit(str(exc))
 
@@ -81,8 +93,24 @@ class ProjectController(QObject):
             self._service.archive_project(project_id)
             self.project_archived.emit(project_id)
             self._event_bus.publish("project.archived", project_id=project_id)
+            self._event_bus.publish(
+                "toast.show",
+                message="Proje arsivlendi.",
+                type_="info",
+                undo_label="Geri Al",
+                undo_callback=lambda: self.restore_archived_project(project_id),
+            )
         except AppBaseException as exc:
             logger.error("Proje arşivlenemedi: %s", exc)
+            self.error_occurred.emit(str(exc))
+
+    def restore_archived_project(self, project_id: int) -> None:
+        try:
+            self._service.restore_archived_project(project_id)
+            self._event_bus.publish("project.restored", project_id=project_id)
+            self.load_projects()
+        except AppBaseException as exc:
+            logger.error("Proje arsivden geri alinamadi: %s", exc)
             self.error_occurred.emit(str(exc))
 
     def delete_project(self, project_id: int) -> None:
