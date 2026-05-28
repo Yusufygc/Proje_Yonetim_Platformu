@@ -73,8 +73,9 @@ class ResourceListWidget(QWidget):
 
     def _on_resources_loaded(self, resources: list[Resource]) -> None:
         self._list_widget.clear()
-        from core.managers.theme_manager import ThemeManager
         from PySide6.QtGui import QColor
+
+        from core.managers.theme_manager import ThemeManager
         theme_mgr = ThemeManager.instance()
         link_color = theme_mgr.color("accent_start")
 
