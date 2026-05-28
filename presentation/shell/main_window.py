@@ -20,13 +20,13 @@ from core.managers.preference_manager import PreferenceManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
 from di_container import DIContainer
+from presentation.dialogs.search_dialog import SearchDialog
 from presentation.pages.dashboard_page import DashboardPage
 from presentation.pages.ideas_page import IdeasPage
 from presentation.pages.projects_page import ProjectsPage
 from presentation.pages.settings_page import SettingsPage
 from presentation.pages.tasks_page import TasksPage
 from presentation.shell.sidebar import Sidebar
-from presentation.dialogs.search_dialog import SearchDialog
 from presentation.widgets.toast import Toast
 
 logger = logging.getLogger(__name__)
@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
             self._navigate_to("projects")
             # Proje detayını açmak için projeler sayfasına ID göndermeliyiz
             # Fakat şu an projects_page'e direct erişimimiz self._projects_page üzerinden var:
-            self._projects_page._on_item_clicked(item_id)
+            self._projects_page.open_project_detail(item_id)
         elif type_str == "Görev":
             self._navigate_to("tasks")
         elif type_str == "Fikir":
