@@ -12,11 +12,13 @@ import config
 from controllers.project_controller import ProjectController
 from controllers.stage_controller import StageController
 from core.events.event_bus import EventBus
+from core.managers.backup_manager import BackupManager
 from core.managers.font_manager import FontManager
 from core.managers.icon_manager import IconManager
 from core.managers.string_manager import StringManager
 from core.managers.log_manager import install_global_exception_hook, setup_logging
 from core.managers.preference_manager import PreferenceManager
+from core.managers.secret_manager import SecretManager
 from core.managers.theme_manager import ThemeManager
 from infrastructure.database.db_manager import DatabaseManager
 from infrastructure.repositories.project_repository import ProjectRepository
@@ -26,6 +28,11 @@ from infrastructure.repositories.idea_repository import IdeaRepository
 from infrastructure.repositories.decision_repository import DecisionRepository
 from infrastructure.repositories.note_repository import NoteRepository
 from infrastructure.repositories.resource_repository import ResourceRepository
+from infrastructure.repositories.activity_log_repository import ActivityLogRepository
+from infrastructure.repositories.attachment_repository import AttachmentRepository
+from infrastructure.repositories.project_idea_repository import ProjectIdeaRepository
+from infrastructure.repositories.project_tag_repository import ProjectTagRepository
+from infrastructure.repositories.workflow_stage_repository import WorkflowStageRepository
 
 from services.dashboard_service import DashboardService
 from services.search_service import SearchService
@@ -78,44 +85,78 @@ class DIContainer:
 
         config.ensure_data_dirs()
         setup_logging(config.LOG_FILE, config.LOG_MAX_BYTES, config.LOG_BACKUP_COUNT)
-        install_global_exception_hook()
+        install_global_exception_hook(show_dialog=True)
 
         logger.info("%s v%s başlatılıyor...", config.APP_NAME, config.APP_VERSION)
 
-        self._db = DatabaseManager.instance(str(config.DATABASE_URL))
-        self._db.create_all_tables()
+        self._backup_manager = BackupManager(config.DATABASE_PATH, config.BACKUPS_DIR)
+        self._backup_manager.run_startup_backup()
 
+        self._db = DatabaseManager.instance(str(config.DATABASE_URL))
+        self._db.run_migrations()
+
+        self._prefs = PreferenceManager.instance()
+        self._secrets = SecretManager.instance()
         self._theme = ThemeManager.instance(config.THEMES_DIR)
+        saved_theme = self._prefs.load_theme()
+        if saved_theme != self._theme.current_theme:
+            self._theme.switch_theme(saved_theme)
         self._fonts = FontManager.instance(config.FONTS_DIR)
-        
+
         self._icons = IconManager.instance(config.RESOURCES_DIR / "icons")
         self._strings = StringManager.instance(config.RESOURCES_DIR / "locales")
 
-        self._prefs = PreferenceManager.instance()
         self._event_bus = EventBus.instance()
 
+        self._activity_log_repo = ActivityLogRepository(db=self._db)
+        self._workflow_stage_repo = WorkflowStageRepository(db=self._db)
+        self._project_tag_repo = ProjectTagRepository(db=self._db)
+        self._project_idea_repo = ProjectIdeaRepository(db=self._db)
+        self._attachment_repo = AttachmentRepository(db=self._db)
+
+        self._stage_repo = StageRepository(db=self._db)
+        self._stage_service = StageService(
+            repository=self._stage_repo,
+            workflow_repository=self._workflow_stage_repo,
+            activity_log_repository=self._activity_log_repo,
+        )
+
+        self._task_repo = TaskRepository(db=self._db)
+
         self._project_repo = ProjectRepository(db=self._db)
-        self._project_service = ProjectService(repository=self._project_repo)
+        self._project_service = ProjectService(
+            repository=self._project_repo,
+            stage_service=self._stage_service,
+            activity_log_repository=self._activity_log_repo,
+            tag_repository=self._project_tag_repo,
+            task_repository=self._task_repo,
+        )
         self._project_controller = ProjectController(
             service=self._project_service,
             event_bus=self._event_bus,
         )
 
-        self._stage_repo = StageRepository(db=self._db)
-        self._stage_service = StageService(repository=self._stage_repo)
         # StageController proje oluşturma olayına abone olur; ProjectController'dan sonra kurulmalı
         self._stage_controller = StageController(
             service=self._stage_service,
             event_bus=self._event_bus,
         )
 
-        self._task_repo = TaskRepository(db=self._db)
-        self._task_service = TaskService(repository=self._task_repo)
+        self._task_service = TaskService(
+            repository=self._task_repo,
+            project_service=self._project_service,
+            activity_log_repository=self._activity_log_repo,
+        )
         self._task_controller = TaskController(service=self._task_service)
 
         self._idea_repo = IdeaRepository(db=self._db)
-        self._idea_service = IdeaService(repository=self._idea_repo, project_service=self._project_service)
-        self._idea_controller = IdeaController(service=self._idea_service)
+        self._idea_service = IdeaService(
+            repository=self._idea_repo,
+            project_service=self._project_service,
+            project_idea_repository=self._project_idea_repo,
+            activity_log_repository=self._activity_log_repo,
+        )
+        self._idea_controller = IdeaController(service=self._idea_service, event_bus=self._event_bus)
 
         self._decision_repo = DecisionRepository(db=self._db)
         self._decision_service = DecisionService(repository=self._decision_repo)
@@ -130,7 +171,10 @@ class DIContainer:
         self._resource_controller = ResourceController(service=self._resource_service)
 
         self._dashboard_service = DashboardService(db=self._db)
-        self._dashboard_controller = DashboardController(service=self._dashboard_service)
+        self._dashboard_controller = DashboardController(
+            service=self._dashboard_service,
+            event_bus=self._event_bus,
+        )
 
         self._search_service = SearchService(db=self._db)
         self._search_controller = SearchController(service=self._search_service)
@@ -142,11 +186,14 @@ class DIContainer:
         logger.info("DI Container başarıyla kuruldu.")
         
         # Onboarding: İlk açılışta örnek proje oluşturma
-        if not self._project_service.get_all_projects():
-            self._project_service.create_project(
-                "Hoş Geldiniz 🎉",
-                description="Proje Takip Platformuna hoş geldiniz. Bu örnek bir projedir."
-            )
+        try:
+            if not self._project_service.get_all_projects():
+                self._project_service.create_project(
+                    "Hoş Geldiniz 🎉",
+                    short_description="Proje Takip Platformuna hoş geldiniz. Bu örnek bir projedir.",
+                )
+        except Exception as exc:
+            logger.warning("Onboarding örnek projesi oluşturulamadı: %s", exc)
 
     # --- Yönetici erişim noktaları ---
 
@@ -165,6 +212,10 @@ class DIContainer:
     @property
     def prefs(self) -> PreferenceManager:
         return self._prefs
+
+    @property
+    def secrets(self) -> SecretManager:
+        return self._secrets
 
     @property
     def event_bus(self) -> EventBus:
@@ -197,6 +248,14 @@ class DIContainer:
     @property
     def resource_controller(self) -> ResourceController:
         return self._resource_controller
+
+    @property
+    def activity_log_repository(self) -> ActivityLogRepository:
+        return self._activity_log_repo
+
+    @property
+    def attachment_repository(self) -> AttachmentRepository:
+        return self._attachment_repo
 
     @property
     def dashboard_controller(self) -> DashboardController:
