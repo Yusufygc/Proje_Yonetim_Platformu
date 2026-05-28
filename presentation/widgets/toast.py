@@ -4,11 +4,12 @@ Kısa süreli (ephemeral) mesajları ekranda gösterip otomatik kaybolan widget.
 """
 from collections.abc import Callable
 
-from PySide6.QtCore import QPropertyAnimation, QTimer, Qt, QRect
-from PySide6.QtWidgets import QLabel, QWidget, QHBoxLayout, QPushButton
+from PySide6.QtCore import QPropertyAnimation, QRect, Qt, QTimer
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 from core.events.event_bus import EventBus
 from presentation.utils.ui_utils import apply_shadow
+
 
 class Toast(QWidget):
     """Ekranda geçici olarak beliren şık bildirim mesajı."""
