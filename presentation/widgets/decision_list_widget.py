@@ -79,7 +79,7 @@ class DecisionListWidget(QWidget):
             status_text = d.status
             if d.status == DecisionStatus.ACCEPTED.value:
                 status_text = "✅ KABUL"
-            elif d.status == DecisionStatus.CANCELED.value:
+            elif d.status == DecisionStatus.CANCELLED.value:
                 status_text = "❌ İPTAL"
                 
             text = f"{d.title}\nDurum: {status_text}\nKarar: {d.decision}"
@@ -107,7 +107,7 @@ class DecisionListWidget(QWidget):
         menu = QMenu(self)
                            
         edit_action = menu.addAction("Düzenle")
-        delete_action = menu.addAction("Sil")
+        delete_action = menu.addAction("İptal Et")
         
         action = menu.exec(self._list_widget.mapToGlobal(pos))
         if action == edit_action:
@@ -117,7 +117,7 @@ class DecisionListWidget(QWidget):
                 if dialog.exec() == QDialog.DialogCode.Accepted:
                     self._controller.update_decision(decision_id, **dialog.get_data())
         elif action == delete_action:
-            reply = QMessageBox.question(self, "Sil", "Bu kararı silmek istediğinize emin misiniz?",
+            reply = QMessageBox.question(self, "İptal Et", "Bu kararı iptal etmek istediğinize emin misiniz?",
                                          QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self._controller.delete_decision(decision_id)
