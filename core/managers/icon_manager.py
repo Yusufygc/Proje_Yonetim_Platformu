@@ -5,8 +5,8 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from PySide6.QtGui import QIcon, QPixmap, QImage
 from PySide6.QtCore import QByteArray, QSize
+from PySide6.QtGui import QIcon, QImage, QPixmap
 
 logger = logging.getLogger(__name__)
 
