@@ -21,9 +21,9 @@ from PySide6.QtWidgets import (
 
 from controllers.idea_controller import IdeaController
 from controllers.project_controller import ProjectController
-from domain.models.idea import Idea
 from domain.enums.idea_status import IdeaStatus
-from presentation.dialogs.idea_dialog import IdeaDialog
+from domain.models.idea import Idea
+from presentation.dialogs.idea_dialog import IdeaDialog, _IDEA_STATUS_LABELS
 from presentation.dialogs.project_dialog import ProjectDialog
 
 _STATUS_THEME_KEYS = {
@@ -218,7 +218,8 @@ class IdeasPage(QWidget):
         from core.managers.theme_manager import ThemeManager
         theme_key = _STATUS_THEME_KEYS.get(idea.status, "text_secondary")
         color = ThemeManager.instance().color(theme_key)
-        self._idea_status.setText(idea.status)
+        status_label = _IDEA_STATUS_LABELS.get(idea.status, idea.status)
+        self._idea_status.setText(status_label)
         self._idea_status.setStyleSheet(
             f"background-color: {color}22; color: {color};"
             f" padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;"
