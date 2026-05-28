@@ -15,8 +15,9 @@ class NoteRepository:
     def create(self, note: Note) -> Note:
         with self._db.session() as sess:
             sess.add(note)
-            sess.commit()
+            sess.flush()
             sess.refresh(note)
+            sess.expunge(note)
             return note
 
     def get_by_id(self, note_id: int) -> Optional[Note]:
@@ -31,8 +32,9 @@ class NoteRepository:
     def update(self, note: Note) -> Note:
         with self._db.session() as sess:
             merged = sess.merge(note)
-            sess.commit()
+            sess.flush()
             sess.refresh(merged)
+            sess.expunge(merged)
             return merged
 
     def delete(self, note_id: int) -> None:
@@ -40,4 +42,3 @@ class NoteRepository:
             note = sess.get(Note, note_id)
             if note:
                 sess.delete(note)
-                sess.commit()
