@@ -4,7 +4,8 @@ from __future__ import annotations
 from types import TracebackType
 
 import config
-from core.managers.log_manager import install_global_exception_hook, setup_logging as _setup_logging
+from core.managers.log_manager import install_global_exception_hook
+from core.managers.log_manager import setup_logging as _setup_logging
 
 
 def setup_logging() -> None:
