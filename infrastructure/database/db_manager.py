@@ -5,8 +5,8 @@ SQLAlchemy 2.0 style kullanılır; ham SQL yasaktır (RULES.md gereği).
 from __future__ import annotations
 
 import logging
-from contextlib import contextmanager
 from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 
 from sqlalchemy import create_engine, event, text

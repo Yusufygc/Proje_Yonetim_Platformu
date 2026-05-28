@@ -108,3 +108,65 @@ class TaskRepository:
             item = sess.get(ChecklistItem, item_id)
             if item:
                 sess.delete(item)
+
+    def calculate_progress_percent(self, project_id: int) -> int:
+        """
+        Yaprak task'ların tamamlanma yüzdesini tek SQL sorgusuyla hesaplar.
+        GROUP tipindeki ve alt task'ı olan (parent) task'lar hesaba katılmaz.
+        Checklist içeren task'larda tamamlanan madde oranı skor olarak kullanılır.
+        """
+        from sqlalchemy import Float, case, cast, func, literal
+
+        from domain.enums.task_status import TaskStatus
+        from domain.enums.task_type import TaskType
+        from domain.models.checklist_item import ChecklistItem
+
+        with self._db.session() as sess:
+            # Başka task'ların parent'ı olan task id'leri — bunlar yaprak değil
+            parent_ids_subq = (
+                select(Task.parent_task_id)
+                .where(Task.project_id == project_id)
+                .where(Task.parent_task_id.is_not(None))
+            )
+
+            ci_total_sub = (
+                select(ChecklistItem.task_id, func.count().label("total"))
+                .group_by(ChecklistItem.task_id)
+                .subquery("ci_total")
+            )
+            ci_done_sub = (
+                select(ChecklistItem.task_id, func.count().label("done"))
+                .where(ChecklistItem.is_done.is_(True))
+                .group_by(ChecklistItem.task_id)
+                .subquery("ci_done")
+            )
+
+            # Her yaprak task için: DONE=1.0, checklist varsa oran, yoksa 0.0
+            score_expr = case(
+                (Task.status == TaskStatus.DONE.value, literal(1.0)),
+                (
+                    ci_total_sub.c.total > 0,
+                    cast(func.coalesce(ci_done_sub.c.done, 0), Float)
+                    / cast(ci_total_sub.c.total, Float),
+                ),
+                else_=literal(0.0),
+            )
+
+            stmt = (
+                select(
+                    func.count().label("total"),
+                    func.sum(score_expr).label("score_sum"),
+                )
+                .outerjoin(ci_total_sub, ci_total_sub.c.task_id == Task.id)
+                .outerjoin(ci_done_sub, ci_done_sub.c.task_id == Task.id)
+                .where(Task.project_id == project_id)
+                .where(Task.task_type != TaskType.GROUP.value)
+                .where(Task.id.not_in(parent_ids_subq))
+            )
+
+            row = sess.execute(stmt).one()
+            total: int = row.total
+            score_sum: float | None = row.score_sum
+            if not total or score_sum is None:
+                return 0
+            return round((score_sum / total) * 100)

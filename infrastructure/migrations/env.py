@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import logging
+import sys
 from logging.config import fileConfig
 from pathlib import Path
-import sys
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
@@ -13,8 +13,8 @@ PROJECT_DIR = Path(__file__).resolve().parents[2]
 if str(PROJECT_DIR) not in sys.path:
     sys.path.insert(0, str(PROJECT_DIR))
 
-from infrastructure.database.base_model import Base  # noqa: E402
 import domain.models  # noqa: F401,E402
+from infrastructure.database.base_model import Base  # noqa: E402
 
 config = context.config
 
