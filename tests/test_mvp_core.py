@@ -9,11 +9,11 @@ from sqlalchemy import inspect, text
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from core.exceptions.task_exceptions import TaskHierarchyError
 from domain.enums.idea_status import IdeaStatus
 from domain.enums.stage_status import StageStatus
 from domain.enums.task_status import TaskStatus
 from domain.enums.task_type import TaskType
-from core.exceptions.task_exceptions import TaskHierarchyError
 from infrastructure.database.db_manager import DatabaseManager
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.idea_repository import IdeaRepository
@@ -23,8 +23,8 @@ from infrastructure.repositories.project_tag_repository import ProjectTagReposit
 from infrastructure.repositories.stage_repository import StageRepository
 from infrastructure.repositories.task_repository import TaskRepository
 from infrastructure.repositories.workflow_stage_repository import WorkflowStageRepository
-from services.idea_service import IdeaService
 from services.export_service import ExportService
+from services.idea_service import IdeaService
 from services.project_service import ProjectService
 from services.stage_service import StageService
 from services.task_service import TaskService
