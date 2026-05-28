@@ -1,5 +1,6 @@
 from typing import Any, Optional
 
+from domain.enums.decision_status import DecisionStatus
 from domain.models.decision_record import DecisionRecord
 from infrastructure.repositories.decision_repository import DecisionRepository
 
@@ -45,7 +46,19 @@ class DecisionService:
         return self._repo.update(record)
 
     def delete_decision(self, decision_id: int) -> None:
-        self._repo.delete(decision_id)
+        record = self.get_decision(decision_id)
+        if not record:
+            raise ValueError("Karar bulunamadı.")
+        record.status = DecisionStatus.CANCELLED.value
+        self._repo.update(record)
+
+    def supersede_decision(self, decision_id: int, new_decision_id: int) -> DecisionRecord:
+        record = self.get_decision(decision_id)
+        if not record:
+            raise ValueError("Karar bulunamadı.")
+        record.status = DecisionStatus.SUPERSEDED.value
+        record.superseded_by_decision_id = new_decision_id
+        return self._repo.update(record)
 
     def get_decision(self, decision_id: int) -> Optional[DecisionRecord]:
         return self._repo.get_by_id(decision_id)
