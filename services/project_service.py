@@ -12,10 +12,7 @@ from core.exceptions.project_exceptions import ProjectNotFoundError, ProjectVali
 from domain.enums.priority import Priority
 from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
-from domain.enums.task_status import TaskStatus
-from domain.enums.task_type import TaskType
 from domain.models.project import Project
-from domain.models.task import Task
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.project_tag_repository import ProjectTagRepository
@@ -187,40 +184,8 @@ class ProjectService:
             return self._repo.update(project)
         if self._task_repo is None:
             return project
-        tasks = self._task_repo.get_by_project(project_id)
-        children: dict[int, list[Task]] = {}
-        for task in tasks:
-            if task.parent_task_id is not None:
-                children.setdefault(task.parent_task_id, []).append(task)
-        top_level = [task for task in tasks if task.parent_task_id is None]
-        scores = [
-            score
-            for score in (self._task_progress_score(task, children) for task in top_level)
-            if score is not None
-        ]
-        if not scores:
-            project.progress_percent = 0
-        else:
-            project.progress_percent = round((sum(scores) / len(scores)) * 100)
+        project.progress_percent = self._task_repo.calculate_progress_percent(project_id)
         return self._repo.update(project)
-
-    def _task_progress_score(self, task: Task, children: dict[int, list[Task]]) -> float | None:
-        child_tasks = children.get(task.id, [])
-        if child_tasks:
-            scores = [
-                score
-                for score in (self._task_progress_score(child, children) for child in child_tasks)
-                if score is not None
-            ]
-            return sum(scores) / len(scores) if scores else None
-        if task.task_type == TaskType.GROUP.value:
-            return None
-        if task.status == TaskStatus.DONE.value:
-            return 1.0
-        if task.checklist_items:
-            done_items = len([item for item in task.checklist_items if item.is_done])
-            return done_items / len(task.checklist_items)
-        return 0.0
 
     def _validate_title(self, title: str) -> None:
         if not title or not title.strip():

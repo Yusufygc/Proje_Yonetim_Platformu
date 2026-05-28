@@ -4,7 +4,11 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from core.exceptions.task_exceptions import TaskHierarchyError, TaskNotFoundError, TaskValidationError
+from core.exceptions.task_exceptions import (
+    TaskHierarchyError,
+    TaskNotFoundError,
+    TaskValidationError,
+)
 from domain.enums.task_status import TaskStatus
 from domain.enums.task_type import TaskType
 from domain.models.checklist_item import ChecklistItem
