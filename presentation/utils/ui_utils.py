@@ -2,7 +2,8 @@
 UI bileşenleri için görsel yardımcı fonksiyonlar (Gölge, Animasyon vb.).
 """
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QWidget, QGraphicsDropShadowEffect
+from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget
+
 
 def apply_shadow(widget: QWidget, blur_radius: int = 20, y_offset: int = 4, alpha: int = 40) -> None:
     """
