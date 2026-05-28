@@ -5,7 +5,7 @@ import enum
 
 
 class StageStatus(str, enum.Enum):
-    PENDING = "PENDING"
+    NOT_STARTED = "NOT_STARTED"
     ACTIVE = "ACTIVE"
-    COMPLETED = "COMPLETED"
+    DONE = "DONE"
     SKIPPED = "SKIPPED"
