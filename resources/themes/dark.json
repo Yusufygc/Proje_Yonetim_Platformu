@@ -10,9 +10,11 @@
   "success": "#22C55E",
   "warning": "#F59E0B",
   "danger": "#EF4444",
-  "border": "#2A2D38",
+  "border": "#3A3E52",
   "scrollbar_bg": "#1C1F26",
   "scrollbar_handle": "#3A3D4A",
   "sidebar_bg": "#0F1117",
-  "sidebar_active": "#6366F1"
+  "sidebar_active": "#6366F1",
+  "stage_active": "#26C6DA",
+  "stage_done": "#4DD0E1"
 }

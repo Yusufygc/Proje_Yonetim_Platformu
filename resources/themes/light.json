@@ -13,6 +13,8 @@
   "border": "#E2E6F0",
   "scrollbar_bg": "#F0F2F8",
   "scrollbar_handle": "#C8CEDE",
-  "sidebar_bg": "#EDEEF5",
-  "sidebar_active": "#6366F1"
+  "sidebar_bg": "#E3E6F0",
+  "sidebar_active": "#6366F1",
+  "stage_active": "#0097A7",
+  "stage_done": "#00838F"
 }
