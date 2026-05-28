@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from sqlalchemy import Integer, String, Text
+from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.enums.idea_priority import IdeaPriority
@@ -23,7 +23,7 @@ class Idea(Base, TimestampMixin):
     expected_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     status: Mapped[str] = mapped_column(
-        String(30), nullable=False, default=IdeaStatus.DRAFT.value
+        String(30), nullable=False, default=IdeaStatus.RAW.value
     )
     priority: Mapped[str] = mapped_column(
         String(20), nullable=False, default=IdeaPriority.MEDIUM.value
@@ -38,7 +38,13 @@ class Idea(Base, TimestampMixin):
     source_link: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     
     # Eğer bu fikir bir projeye dönüştüyse o projenin ID'sini tutar
-    converted_project_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    converted_project_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("projects.id", ondelete="SET NULL"), nullable=True
+    )
+
+    project_links: Mapped[list["ProjectIdea"]] = relationship(
+        "ProjectIdea", back_populates="idea", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Idea id={self.id} title='{self.title}' status={self.status}>"
