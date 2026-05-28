@@ -2,9 +2,10 @@
 Premium bildirim sistemi (Toast / Snackbar).
 Kısa süreli (ephemeral) mesajları ekranda gösterip otomatik kaybolan widget.
 """
+from collections.abc import Callable
+
 from PySide6.QtCore import QPropertyAnimation, QTimer, Qt, QRect
-from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QLabel, QWidget, QHBoxLayout, QGraphicsDropShadowEffect
+from PySide6.QtWidgets import QLabel, QWidget, QHBoxLayout, QPushButton
 
 from core.events.event_bus import EventBus
 from presentation.utils.ui_utils import apply_shadow
@@ -13,8 +14,8 @@ class Toast(QWidget):
     """Ekranda geçici olarak beliren şık bildirim mesajı."""
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
-        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.hide()
+        self._undo_callback: Callable[[], None] | None = None
         
         self._setup_ui()
         self._anim = QPropertyAnimation(self, b"geometry")
@@ -38,15 +39,44 @@ class Toast(QWidget):
         self._label = QLabel(self)
         self._label.setStyleSheet("color: white; font-weight: 500; font-size: 13px;")
         layout.addWidget(self._label, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self._undo_btn = QPushButton(parent=self)
+        self._undo_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._undo_btn.setStyleSheet(
+            "QPushButton { color: white; background: rgba(255,255,255,0.18); "
+            "border-radius: 6px; padding: 6px 10px; font-weight: 600; }"
+            "QPushButton:hover { background: rgba(255,255,255,0.28); }"
+        )
+        self._undo_btn.clicked.connect(self._on_undo_clicked)
+        self._undo_btn.hide()
+        layout.addWidget(self._undo_btn)
         
         self.setStyleSheet("Toast { background-color: #22C55E; border-radius: 8px; }")
         apply_shadow(self, blur_radius=20, y_offset=6, alpha=40)
 
-    def _on_toast_requested(self, message: str, type_: str = "success") -> None:
-        self.show_toast(message, type_)
+    def _on_toast_requested(
+        self,
+        message: str,
+        type_: str = "success",
+        undo_label: str | None = None,
+        undo_callback: Callable[[], None] | None = None,
+    ) -> None:
+        self.show_toast(message, type_, undo_label=undo_label, undo_callback=undo_callback)
         
-    def show_toast(self, message: str, type_: str = "success") -> None:
+    def show_toast(
+        self,
+        message: str,
+        type_: str = "success",
+        undo_label: str | None = None,
+        undo_callback: Callable[[], None] | None = None,
+    ) -> None:
         self._label.setText(message)
+        self._undo_callback = undo_callback
+        if undo_callback is not None:
+            self._undo_btn.setText(undo_label or "Geri Al")
+            self._undo_btn.show()
+        else:
+            self._undo_btn.hide()
         
         from core.managers.theme_manager import ThemeManager
         theme_mgr = ThemeManager.instance()
@@ -69,6 +99,13 @@ class Toast(QWidget):
         self.raise_()
         self._anim.start()
         self._timer.start(3000)
+
+    def _on_undo_clicked(self) -> None:
+        callback = self._undo_callback
+        self._undo_callback = None
+        self.hide()
+        if callback is not None:
+            callback()
 
     def hide_toast(self) -> None:
         if self.parent():
