@@ -34,11 +34,15 @@ class ProjectStage(Base, TimestampMixin):
     color: Mapped[str] = mapped_column(String(20), nullable=False, default="#6366F1")
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=StageStatus.PENDING.value
+        String(20), nullable=False, default=StageStatus.NOT_STARTED.value
+    )
+    started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
     completed_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    acceptance_criteria: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     project: Mapped["Project"] = relationship("Project", back_populates="stages")
 
