@@ -45,7 +45,10 @@ class ExportService:
                 export_data["ideas"].append({
                     "id": idea.id,
                     "title": idea.title,
-                    "description": idea.description,
+                    "problem": idea.problem,
+                    "solution": idea.solution,
+                    "expected_value": idea.expected_value,
+                    "notes": idea.notes,
                     "created_at": idea.created_at.isoformat() if idea.created_at else None
                 })
 
@@ -68,7 +71,9 @@ class ExportService:
                     proj_data["tasks"].append({
                         "id": t.id,
                         "title": t.title,
-                        "status": t.status
+                        "status": t.status,
+                        "parent_task_id": t.parent_task_id,
+                        "order_index": t.order_index
                     })
                     
                 # Kararlar
