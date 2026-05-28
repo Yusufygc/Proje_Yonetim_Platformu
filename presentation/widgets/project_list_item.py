@@ -66,12 +66,12 @@ class ProjectListItem(QFrame):
 
     def _setup_ui(self, project: Project) -> None:
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setMinimumHeight(72)
+        self.setMinimumHeight(58)
         # Not: QGraphicsDropShadowEffect kaldırıldı — hover ile yanmasönmede neden oluyordu
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 10, 14, 10)
-        layout.setSpacing(5)
+        layout.setContentsMargins(12, 8, 12, 8)
+        layout.setSpacing(4)
 
         # Başlık + durum satırı
         top_row = QWidget(parent=self)
