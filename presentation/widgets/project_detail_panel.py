@@ -8,11 +8,11 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QListWidget,
     QListWidgetItem,
     QMenu,
-    QInputDialog,
     QPushButton,
     QScrollArea,
     QStackedWidget,
@@ -103,39 +103,39 @@ class ProjectDetailPanel(QWidget):
         scroll.setWidget(container)
 
         layout = QVBoxLayout(container)
-        layout.setContentsMargins(40, 32, 40, 32)
+        layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(0)
 
         layout.addWidget(self._build_header_row(container))
-        layout.addSpacing(20)
+        layout.addSpacing(12)
         layout.addWidget(self._build_badges_row(container))
-        layout.addSpacing(24)
+        layout.addSpacing(16)
 
         self._desc_header = QLabel("AÇIKLAMA", parent=container)
         self._desc_header.setProperty("cssClass", "section-header")
         layout.addWidget(self._desc_header)
-        layout.addSpacing(8)
+        layout.addSpacing(6)
 
         self._desc_lbl = QLabel("", parent=container)
         self._desc_lbl.setProperty("cssClass", "text-secondary")
         self._desc_lbl.setWordWrap(True)
         layout.addWidget(self._desc_lbl)
-        layout.addSpacing(20)
+        layout.addSpacing(12)
 
         self._github_row = self._build_github_row(container)
         layout.addWidget(self._github_row)
-        layout.addSpacing(28)
+        layout.addSpacing(16)
 
         stages_header = QLabel("SÜREÇ AŞAMALARI", parent=container)
         stages_header.setProperty("cssClass", "section-header")
         layout.addWidget(stages_header)
-        layout.addSpacing(8)
+        layout.addSpacing(6)
 
         self._stage_timeline = StageTimelineWidget(parent=container)
         self._stage_timeline.complete_requested.connect(self.complete_stage_requested)
         self._stage_timeline.activate_requested.connect(self.activate_stage_requested)
         layout.addWidget(self._stage_timeline)
-        layout.addSpacing(28)
+        layout.addSpacing(16)
 
         self._tab_widget = QTabWidget(parent=container)
         # QTabWidget stilleri global QSS içinde yönetiliyor
@@ -220,7 +220,7 @@ class ProjectDetailPanel(QWidget):
         add_btn.clicked.connect(self._on_add_output)
         layout.addWidget(add_btn)
         self._outputs_list = QListWidget(parent=page)
-        self._outputs_list.setProperty("cssClass", "panel")
+        self._outputs_list.setProperty("cssClass", "panel-raised")
         layout.addWidget(self._outputs_list)
         return page
 
@@ -229,7 +229,7 @@ class ProjectDetailPanel(QWidget):
         layout = QVBoxLayout(page)
         layout.setContentsMargins(16, 16, 16, 16)
         self._activity_list = QListWidget(parent=page)
-        self._activity_list.setProperty("cssClass", "panel")
+        self._activity_list.setProperty("cssClass", "panel-raised")
         layout.addWidget(self._activity_list)
         return page
 
