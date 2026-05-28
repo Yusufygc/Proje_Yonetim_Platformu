@@ -15,8 +15,9 @@ class IdeaRepository:
     def create(self, idea: Idea) -> Idea:
         with self._db.session() as sess:
             sess.add(idea)
-            sess.commit()
+            sess.flush()
             sess.refresh(idea)
+            sess.expunge(idea)
             return idea
 
     def get_by_id(self, idea_id: int) -> Optional[Idea]:
@@ -33,8 +34,9 @@ class IdeaRepository:
     def update(self, idea: Idea) -> Idea:
         with self._db.session() as sess:
             merged = sess.merge(idea)
-            sess.commit()
+            sess.flush()
             sess.refresh(merged)
+            sess.expunge(merged)
             return merged
 
     def delete(self, idea_id: int) -> None:
@@ -42,4 +44,3 @@ class IdeaRepository:
             idea = sess.get(Idea, idea_id)
             if idea:
                 sess.delete(idea)
-                sess.commit()
