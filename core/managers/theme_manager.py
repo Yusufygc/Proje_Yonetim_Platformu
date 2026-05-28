@@ -100,6 +100,7 @@ QFrame {{
 QLabel {{
     background-color: transparent;
     color: {text_primary};
+    border: none;
 }}
 QLabel[secondary="true"] {{
     color: {text_secondary};
@@ -248,10 +249,10 @@ QTreeWidget::indicator {{
     height: 16px;
 }}
 QAbstractItemView {{
-    outline: 1px solid transparent;
+    outline: 0;
 }}
 QAbstractItemView:focus {{
-    outline: 1px solid {accent_start};
+    outline: 0;
 }}
 QHeaderView::section {{
     background-color: {surface_raised};
@@ -274,14 +275,23 @@ QListWidget {{
     border: none;
     color: {text_primary};
     font-size: 14px;
+    outline: 0;
 }}
 QListWidget::item {{
     padding: 12px;
     border-bottom: 1px solid {border};
+    outline: 0;
 }}
 QListWidget::item:selected {{
     background-color: {surface_raised};
+    color: {text_primary};
     border-radius: 6px;
+    outline: 0;
+}}
+QListWidget::item:focus {{
+    outline: 0;
+    border: none;
+    border-bottom: 1px solid {border};
 }}
 QTabWidget::pane {{
     border: none;
@@ -320,13 +330,16 @@ QTabBar::tab:hover:!selected {{
 *[cssClass="surface-panel"] {{ background-color: {sidebar_bg}; }}
 *[cssClass="panel"] {{ background-color: {surface}; border-radius: 12px; border: 1px solid {border}; }}
 *[cssClass="panel-raised"] {{ background-color: {surface_raised}; border-radius: 8px; }}
-*[cssClass="divider"] {{ background-color: {border}; max-height: 1px; border: none; }}
+*[cssClass="divider"] {{ background-color: {border}; max-width: 1px; border: none; }}
 
 /* Buton Sınıfları */
 *[cssClass="btn-primary"] {{ background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 {accent_start}, stop:1 {accent_end}); color: #FFFFFF; font-weight: bold; border-radius: 6px; padding: 6px 12px; }}
 *[cssClass="btn-primary"]:hover {{ background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 {accent_end}, stop:1 {accent_start}); }}
 *[cssClass="btn-secondary"] {{ background-color: {surface_raised}; color: {text_primary}; border-radius: 6px; padding: 6px 12px; }}
 *[cssClass="btn-secondary"]:hover {{ background-color: {border}; }}
+
+/* Sidebar arka planı — QFrame global transparent kuralını override eder */
+QFrame#sidebar {{ background-color: {sidebar_bg}; }}
 
 /* Özel Bileşen Sınıfları */
 ProjectListItem {{ background: transparent; border-left: 3px solid transparent; border-radius: 8px; }}
@@ -341,6 +354,27 @@ QListWidget[cssClass="panel"] {{
     background-color: {surface};
     border: 1px solid {border};
     border-radius: 12px;
+}}
+
+QMenu {{
+    background-color: {surface};
+    color: {text_primary};
+    border: 1px solid {border};
+    border-radius: 8px;
+    padding: 4px;
+}}
+QMenu::item {{
+    padding: 8px 24px;
+    border-radius: 4px;
+}}
+QMenu::item:selected {{
+    background-color: {surface_raised};
+    color: {text_primary};
+}}
+QMenu::separator {{
+    height: 1px;
+    background-color: {border};
+    margin: 4px 8px;
 }}
 
 QPushButton[cssClass="theme-collapsed-btn"] {{
