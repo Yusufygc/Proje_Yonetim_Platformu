@@ -4,10 +4,10 @@ Bir projeye bağlı iş birimini temsil eder; isteğe bağlı olarak aşamaya da
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Date, ForeignKey, Integer, String, Text
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.enums.priority import Priority
@@ -57,6 +57,10 @@ class Task(Base, TimestampMixin):
         String(30), nullable=False, default=TaskType.TASK.value
     )
     due_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    estimated_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    spent_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    blocked_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     project: Mapped["Project"] = relationship("Project", back_populates="tasks")
