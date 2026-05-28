@@ -2,12 +2,16 @@ from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QApplication,
     QComboBox,
     QDialog,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton,
+    QScrollArea,
+    QSpinBox,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -33,92 +37,170 @@ class IdeaDialog(QDialog):
         title = "Fikri Düzenle" if self._is_edit else "Yeni Fikir Ekle"
         self.setWindowTitle(title)
         self.setMinimumWidth(500)
-        self.setStyleSheet(
-            "QDialog { background-color: #1E2130; }"
-            "QLabel { color: #8B8FA8; font-weight: 600; font-size: 13px; }"
-            "QLineEdit, QTextEdit { background-color: #161820; border: 1px solid #2A2D38; border-radius: 6px; padding: 8px; color: #E8EAF0; }"
-            "QLineEdit:focus, QTextEdit:focus { border: 1px solid #6366F1; }"
-            "QComboBox { background-color: #161820; border: 1px solid #2A2D38; border-radius: 6px; padding: 8px; color: #E8EAF0; }"
-            "QPushButton { background-color: #2A2D38; color: #E8EAF0; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 600; }"
-            "QPushButton:hover { background-color: #3B3E4D; }"
-            "QPushButton#accent_button { background-color: #6366F1; color: white; }"
-            "QPushButton#accent_button:hover { background-color: #4F46E5; }"
-        )
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(16)
+        # Ekran yüksekliğine göre maksimum yükseklik sınırı
+        screen = QApplication.primaryScreen()
+        if screen:
+            screen_height = screen.availableGeometry().height()
+            self.setMaximumHeight(int(screen_height * 0.85))
+
+        # Ana layout: başlık + scroll + butonlar
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(24, 20, 24, 16)
+        outer_layout.setSpacing(0)
+
+        dialog_title = QLabel(title, parent=self)
+        dialog_title.setProperty("cssClass", "title-small")
+        outer_layout.addWidget(dialog_title)
+        outer_layout.addSpacing(14)
+
+        # Kaydırılabilir form alanı
+        scroll = QScrollArea(parent=self)
+        scroll.setStyleSheet("QScrollArea { background: transparent; }")
+        scroll.viewport().setStyleSheet("background: transparent;")
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        form_widget = QWidget(parent=scroll)
+        form_widget.setStyleSheet("background: transparent;")
+        layout = QVBoxLayout(form_widget)
+        layout.setContentsMargins(0, 4, 12, 4)
+        layout.setSpacing(14)
 
         # Başlık
-        layout.addWidget(QLabel("Fikir Başlığı *", parent=self))
-        self._title_edit = QLineEdit(parent=self)
+        layout.addWidget(self._make_label("Fikir Başlığı *"))
+        self._title_edit = QLineEdit(parent=form_widget)
         self._title_edit.setPlaceholderText("Örn: Yeni mobil uygulama fikri...")
+        self._title_edit.setMinimumHeight(36)
         layout.addWidget(self._title_edit)
 
         # Durum ve Öncelik Yan Yana
-        combo_row = QHBoxLayout()
-        combo_row.setSpacing(16)
-        
-        status_col = QVBoxLayout()
-        status_col.addWidget(QLabel("Durum", parent=self))
-        self._status_combo = QComboBox(parent=self)
+        combo_row = QWidget(parent=form_widget)
+        combo_row_layout = QHBoxLayout(combo_row)
+        combo_row_layout.setContentsMargins(0, 0, 0, 0)
+        combo_row_layout.setSpacing(16)
+
+        status_col = QWidget(parent=combo_row)
+        sc_layout = QVBoxLayout(status_col)
+        sc_layout.setContentsMargins(0, 0, 0, 0)
+        sc_layout.setSpacing(6)
+        sc_layout.addWidget(self._make_label("Durum"))
+        self._status_combo = QComboBox(parent=status_col)
+        self._status_combo.setMinimumHeight(36)
         for s in IdeaStatus:
             self._status_combo.addItem(s.value, s.value)
-        status_col.addWidget(self._status_combo)
-        combo_row.addLayout(status_col)
+        sc_layout.addWidget(self._status_combo)
+        combo_row_layout.addWidget(status_col)
 
-        priority_col = QVBoxLayout()
-        priority_col.addWidget(QLabel("Öncelik", parent=self))
-        self._priority_combo = QComboBox(parent=self)
+        priority_col = QWidget(parent=combo_row)
+        pc_layout = QVBoxLayout(priority_col)
+        pc_layout.setContentsMargins(0, 0, 0, 0)
+        pc_layout.setSpacing(6)
+        pc_layout.addWidget(self._make_label("Öncelik"))
+        self._priority_combo = QComboBox(parent=priority_col)
+        self._priority_combo.setMinimumHeight(36)
         for p in IdeaPriority:
             self._priority_combo.addItem(p.value, p.value)
-        priority_col.addWidget(self._priority_combo)
-        combo_row.addLayout(priority_col)
+        pc_layout.addWidget(self._priority_combo)
+        combo_row_layout.addWidget(priority_col)
 
-        layout.addLayout(combo_row)
+        layout.addWidget(combo_row)
 
-        # Problem
-        layout.addWidget(QLabel("Çözülen Problem", parent=self))
-        self._problem_edit = QTextEdit(parent=self)
+        # Hedef Kullanıcı
+        layout.addWidget(self._make_label("Hedef Kullanıcı"))
+        self._target_user_edit = QLineEdit(parent=form_widget)
+        self._target_user_edit.setPlaceholderText("Kim için?")
+        self._target_user_edit.setMinimumHeight(36)
+        layout.addWidget(self._target_user_edit)
+
+        layout.addWidget(self._make_label("Çözülen Problem"))
+        self._problem_edit = QTextEdit(parent=form_widget)
         self._problem_edit.setPlaceholderText("Bu fikir hangi problemi çözüyor?")
         self._problem_edit.setMaximumHeight(80)
         layout.addWidget(self._problem_edit)
 
-        # Çözüm (Solution)
-        layout.addWidget(QLabel("Önerilen Çözüm", parent=self))
-        self._solution_edit = QTextEdit(parent=self)
+        # Çözüm
+        layout.addWidget(self._make_label("Önerilen Çözüm"))
+        self._solution_edit = QTextEdit(parent=form_widget)
         self._solution_edit.setPlaceholderText("Önerdiğiniz çözüm detayları...")
         self._solution_edit.setMaximumHeight(80)
         layout.addWidget(self._solution_edit)
 
-        # Hedef Çıktı / Değer (Expected Value)
-        layout.addWidget(QLabel("Beklenen Değer / Çıktı", parent=self))
-        self._expected_edit = QLineEdit(parent=self)
+        # Beklenen Değer
+        layout.addWidget(self._make_label("Beklenen Değer / Çıktı"))
+        self._expected_edit = QLineEdit(parent=form_widget)
         self._expected_edit.setPlaceholderText("Örn: Aylık %10 ciro artışı")
+        self._expected_edit.setMinimumHeight(36)
         layout.addWidget(self._expected_edit)
 
-        # Kaynak URL
-        layout.addWidget(QLabel("Kaynak URL", parent=self))
-        self._source_edit = QLineEdit(parent=self)
+        # Skor satırı
+        score_row = QWidget(parent=form_widget)
+        score_row_layout = QHBoxLayout(score_row)
+        score_row_layout.setContentsMargins(0, 0, 0, 0)
+        score_row_layout.setSpacing(16)
+        self._difficulty_spin = self._make_score_spin("Zorluk", score_row_layout, score_row)
+        self._effort_spin = self._make_score_spin("Efor", score_row_layout, score_row)
+        self._confidence_spin = self._make_score_spin("Güven", score_row_layout, score_row)
+        layout.addWidget(score_row)
+
+        layout.addWidget(self._make_label("Notlar"))
+        self._notes_edit = QTextEdit(parent=form_widget)
+        self._notes_edit.setMaximumHeight(70)
+        layout.addWidget(self._notes_edit)
+
+        layout.addWidget(self._make_label("Kaynak URL"))
+        self._source_edit = QLineEdit(parent=form_widget)
         self._source_edit.setPlaceholderText("Örn: https://github.com/ornek")
+        self._source_edit.setMinimumHeight(36)
         layout.addWidget(self._source_edit)
 
         layout.addStretch()
 
-        # Butonlar
+        scroll.setWidget(form_widget)
+        outer_layout.addWidget(scroll, 1)
+        outer_layout.addSpacing(10)
+
+        # Ayraç
+        sep = QFrame(parent=self)
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setProperty("cssClass", "divider")
+        outer_layout.addWidget(sep)
+        outer_layout.addSpacing(10)
+
+        # Butonlar — her zaman görünür
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
-        
+
         cancel_btn = QPushButton("İptal", parent=self)
+        cancel_btn.setMinimumSize(90, 36)
         cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(cancel_btn)
-        
+
         save_btn = QPushButton("Kaydet", parent=self)
         save_btn.setObjectName("accent_button")
+        save_btn.setMinimumSize(90, 36)
         save_btn.clicked.connect(self.accept)
         btn_layout.addWidget(save_btn)
-        
-        layout.addLayout(btn_layout)
+
+        outer_layout.addLayout(btn_layout)
+
+    def _make_label(self, text: str) -> QLabel:
+        lbl = QLabel(text, parent=self)
+        lbl.setProperty("cssClass", "text-secondary")
+        lbl.setStyleSheet("font-size: 12px; font-weight: 600; letter-spacing: 0.3px;")
+        return lbl
+
+    def _make_score_spin(self, label: str, row: QHBoxLayout, parent: QWidget | None = None) -> QSpinBox:
+        col = QVBoxLayout()
+        col.addWidget(self._make_label(label))
+        spin = QSpinBox(parent=parent or self)
+        spin.setRange(0, 10)
+        spin.setSpecialValueText("-")
+        spin.setMinimumHeight(36)
+        col.addWidget(spin)
+        row.addLayout(col)
+        return spin
 
     def _populate_fields(self) -> None:
         if not self._idea:
@@ -126,12 +208,19 @@ class IdeaDialog(QDialog):
         self._title_edit.setText(self._idea.title)
         if self._idea.problem:
             self._problem_edit.setText(self._idea.problem)
+        if self._idea.target_user:
+            self._target_user_edit.setText(self._idea.target_user)
         if self._idea.solution:
             self._solution_edit.setText(self._idea.solution)
         if self._idea.expected_value:
             self._expected_edit.setText(self._idea.expected_value)
         if self._idea.source_link:
             self._source_edit.setText(self._idea.source_link)
+        if self._idea.notes:
+            self._notes_edit.setText(self._idea.notes)
+        self._difficulty_spin.setValue(self._idea.difficulty or 0)
+        self._effort_spin.setValue(self._idea.effort or 0)
+        self._confidence_spin.setValue(self._idea.confidence or 0)
         
         self._status_combo.setCurrentText(self._idea.status)
         self._priority_combo.setCurrentText(self._idea.priority)
@@ -141,8 +230,13 @@ class IdeaDialog(QDialog):
             "title": self._title_edit.text(),
             "problem": self._problem_edit.toPlainText(),
             "solution": self._solution_edit.toPlainText(),
+            "target_user": self._target_user_edit.text(),
             "expected_value": self._expected_edit.text(),
             "source_link": self._source_edit.text(),
+            "difficulty": self._difficulty_spin.value() or None,
+            "effort": self._effort_spin.value() or None,
+            "confidence": self._confidence_spin.value() or None,
+            "notes": self._notes_edit.toPlainText(),
             "status": self._status_combo.currentText(),
             "priority": self._priority_combo.currentText(),
         }
