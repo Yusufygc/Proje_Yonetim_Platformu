@@ -2,7 +2,7 @@
 Veri yükleme esnasında gösterilen parlayıp sönen iskelet yükleyici.
 Skeleton Screens, geleneksel 'kum saati' yerine modern UX sağlar.
 """
-from PySide6.QtCore import QPropertyAnimation, QVariantAnimation, Qt
+from PySide6.QtCore import QPropertyAnimation, Qt, QVariantAnimation
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QWidget
 
