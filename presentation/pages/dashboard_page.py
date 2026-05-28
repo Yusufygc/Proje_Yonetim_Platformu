@@ -45,7 +45,7 @@ class DashboardPage(QWidget):
         layout.setSpacing(24)
 
         # Header
-        title = QLabel("Dashboard", parent=self)
+        title = QLabel("Ana Panel", parent=self)
         title.setProperty("cssClass", "title-large")
         layout.addWidget(title)
 
