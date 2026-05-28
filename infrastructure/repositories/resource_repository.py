@@ -15,8 +15,9 @@ class ResourceRepository:
     def create(self, resource: Resource) -> Resource:
         with self._db.session() as sess:
             sess.add(resource)
-            sess.commit()
+            sess.flush()
             sess.refresh(resource)
+            sess.expunge(resource)
             return resource
 
     def get_by_id(self, resource_id: int) -> Optional[Resource]:
@@ -31,8 +32,9 @@ class ResourceRepository:
     def update(self, resource: Resource) -> Resource:
         with self._db.session() as sess:
             merged = sess.merge(resource)
-            sess.commit()
+            sess.flush()
             sess.refresh(merged)
+            sess.expunge(merged)
             return merged
 
     def delete(self, resource_id: int) -> None:
@@ -40,4 +42,3 @@ class ResourceRepository:
             resource = sess.get(Resource, resource_id)
             if resource:
                 sess.delete(resource)
-                sess.commit()
