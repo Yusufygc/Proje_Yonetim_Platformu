@@ -144,11 +144,14 @@ class Sidebar(QFrame):
         header.addWidget(self._title_label)
         header.addStretch()
 
-        self._toggle_btn = QPushButton("◀", parent=self)
+        self._toggle_btn = QPushButton("", parent=self)
         self._toggle_btn.setFixedSize(28, 28)
         self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._toggle_btn.setProperty("cssClass", "btn-secondary")
         self._toggle_btn.clicked.connect(self.toggle_collapse)
+        self._toggle_btn.setIcon(
+            IconManager.instance().get_icon("menu", self._theme.color("text_secondary"))
+        )
         header.addWidget(self._toggle_btn)
         layout.addLayout(header)
 
@@ -211,6 +214,9 @@ class Sidebar(QFrame):
         self._apply_theme_labels(animate=True)
         for btn in self._nav_buttons.values():
             btn.refresh_theme()
+        self._toggle_btn.setIcon(
+            IconManager.instance().get_icon("menu", self._theme.color("text_secondary"))
+        )
 
     def _apply_theme_labels(self, animate: bool) -> None:
         is_light = self._theme.current_theme == "light"
@@ -246,7 +252,6 @@ class Sidebar(QFrame):
     def _collapse(self, animate: bool = True) -> None:
         self._collapsed = True
         self._prefs.save_sidebar_collapsed(True)
-        self._toggle_btn.setText("▶")
         self._title_label.hide()
         self._version_label.hide()
         self._search_btn.setText("🔍")
@@ -262,7 +267,6 @@ class Sidebar(QFrame):
     def _expand(self, animate: bool = True) -> None:
         self._collapsed = False
         self._prefs.save_sidebar_collapsed(False)
-        self._toggle_btn.setText("◀")
         self._title_label.show()
         self._version_label.show()
         self._search_btn.setText(_tr("sidebar_search", "🔍 Ara (Ctrl+F)"))
