@@ -24,13 +24,14 @@ from controllers.project_controller import ProjectController
 from domain.models.idea import Idea
 from domain.enums.idea_status import IdeaStatus
 from presentation.dialogs.idea_dialog import IdeaDialog
+from presentation.dialogs.project_dialog import ProjectDialog
 
 _STATUS_THEME_KEYS = {
-    IdeaStatus.DRAFT.value: "text_muted",
+    IdeaStatus.RAW.value: "text_muted",
     IdeaStatus.REVIEWING.value: "warning",
     IdeaStatus.VALIDATING.value: "accent_start",
     IdeaStatus.CONVERTED.value: "success",
-    IdeaStatus.POSTPONED.value: "text_secondary",
+    IdeaStatus.DEFERRED.value: "text_secondary",
     IdeaStatus.REJECTED.value: "danger",
 }
 
@@ -186,9 +187,8 @@ class IdeasPage(QWidget):
             for idea in ideas:
                 item = IdeaListItem(idea)
                 self._list_widget.addItem(item)
-            
-            if self._selected_idea_id == idea.id:
-                item.setSelected(True)
+                if self._selected_idea_id == idea.id:
+                    item.setSelected(True)
                 
         if not self._selected_idea_id or not self._list_widget.selectedItems():
             self._show_empty_state()
@@ -259,19 +259,37 @@ class IdeasPage(QWidget):
     def _on_convert_to_project(self) -> None:
         if not self._selected_idea_id:
             return
+        idea = self._controller.get_idea_sync(self._selected_idea_id)
+        if not idea:
+            return
             
         reply = QMessageBox.question(
             self,
             "Projeye Dönüştür",
-            "Bu fikir için yeni bir proje oluşturulacak. Onaylıyor musunuz?",
+            "Bu fikir için proje formu açılacak. Bilgileri kontrol edip onaylayın.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            self._controller.convert_to_project(self._selected_idea_id)
-            # Projeler yenilenmeli
-            self._project_controller.load_projects()
+            dialog = ProjectDialog(parent=self)
+            prefill = {
+                "title": idea.title,
+                "short_description": idea.expected_value or idea.problem,
+                "problem_statement": idea.problem,
+                "full_description": idea.solution,
+                "target_outcome": idea.expected_value,
+                "docs_url": idea.source_link,
+            }
+            dialog.set_prefill(prefill)
+            if dialog.exec() == QDialog.DialogCode.Accepted:
+                data = dialog.get_data()
+                self._controller.convert_to_project(self._selected_idea_id, **data)
+                self._project_controller.load_projects()
 
     def _on_idea_changed(self, *args) -> None:
+        if args:
+            first = args[0]
+            if hasattr(first, "id"):
+                self._selected_idea_id = first.id
         self._controller.load_ideas()
 
     def _on_error(self, msg: str) -> None:
