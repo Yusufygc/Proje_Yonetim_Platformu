@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
-    QPushButton,
     QScrollArea,
     QVBoxLayout,
     QWidget,
@@ -21,14 +20,14 @@ from PySide6.QtWidgets import (
 from controllers.project_controller import ProjectController
 from controllers.stage_controller import StageController
 from controllers.task_controller import TaskController
+from di_container import DIContainer
 from domain.models.project import Project
 from presentation.dialogs.project_dialog import ProjectDialog
+from presentation.widgets.animated_button import AnimatedButton
 from presentation.widgets.project_detail_panel import ProjectDetailPanel
-from presentation.widgets.skeleton_loader import SkeletonLoader
 from presentation.widgets.project_list_item import ProjectListItem
+from presentation.widgets.skeleton_loader import SkeletonLoader
 
-
-from di_container import DIContainer
 
 class ProjectsPage(QWidget):
     """Sol liste + sağ detay görünümünü barındıran proje yönetim sayfası."""
@@ -119,8 +118,8 @@ class ProjectsPage(QWidget):
         title.setProperty("cssClass", "title-small")
         layout.addWidget(title, 1)
 
-        new_btn = QPushButton("+", parent=header)
-        new_btn.setFixedSize(28, 28)
+        new_btn = AnimatedButton("+", parent=header)
+        new_btn.setFixedSize(32, 32)
         new_btn.setObjectName("accent_button")
         new_btn.setToolTip("Yeni Proje Oluştur")
         new_btn.clicked.connect(self._on_new_project)
@@ -199,6 +198,9 @@ class ProjectsPage(QWidget):
             self._detail_panel.show_project(project)
             self._stage_controller.load_stages(project_id)
             self._task_controller.load_tasks(project_id)
+
+    def open_project_detail(self, project_id: int) -> None:
+        self._on_item_clicked(project_id)
 
     def _on_new_project(self) -> None:
         self.open_new_project_dialog()
