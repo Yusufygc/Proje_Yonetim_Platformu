@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 
 import config
 from core.managers.preference_manager import PreferenceManager
+from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
 from di_container import DIContainer
 from presentation.pages.dashboard_page import DashboardPage
@@ -59,7 +60,7 @@ class MainWindow(QMainWindow):
         self._navigate_to("dashboard")
 
     def _setup_window(self) -> None:
-        self.setWindowTitle(config.APP_NAME)
+        self.setWindowTitle(StringManager.get("app_name", config.APP_NAME))
         self.setMinimumSize(1024, 680)
         self.resize(1280, 800)
         self.setStyleSheet(self._theme.build_global_qss())
@@ -67,6 +68,11 @@ class MainWindow(QMainWindow):
 
     def _on_theme_changed(self, theme_name: str) -> None:
         self.setStyleSheet(self._theme.build_global_qss())
+
+    def resizeEvent(self, event: object) -> None:  # type: ignore[override]
+        super().resizeEvent(event)  # type: ignore[arg-type]
+        if hasattr(self, "_sidebar"):
+            self._sidebar.set_collapsed(self.width() < 980, animate=True)
 
     def _setup_ui(self) -> None:
         central = QWidget(parent=self)
@@ -89,7 +95,8 @@ class MainWindow(QMainWindow):
         self._stack.addWidget(
             DashboardPage(
                 parent=self._stack,
-                controller=_container.dashboard_controller
+                controller=_container.dashboard_controller,
+                idea_controller=_container.idea_controller,
             )
         )   # 0
         self._projects_page = ProjectsPage(
@@ -141,7 +148,7 @@ class MainWindow(QMainWindow):
 
     def _create_new_project(self) -> None:
         self._navigate_to("projects")
-        self._projects_page._show_new_project_dialog()
+        self._projects_page.open_new_project_dialog()
 
     def _open_search_dialog(self) -> None:
         dialog = SearchDialog(controller=self._di.search_controller, parent=self)
