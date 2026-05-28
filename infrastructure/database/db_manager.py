@@ -13,7 +13,8 @@ from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
-from infrastructure.database.base_model import Base
+from core.exceptions.base_exception import DatabaseConnectionError
+from infrastructure.database.alembic_runner import run_alembic_migrations
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class DatabaseManager:
     _instance: DatabaseManager | None = None
 
     def __init__(self, database_url: str) -> None:
+        self._database_url = database_url
         self._engine: Engine = create_engine(
             database_url,
             echo=False,
@@ -51,9 +53,16 @@ class DatabaseManager:
             conn.commit()
 
     def create_all_tables(self) -> None:
-        """Tüm tanımlı modellere karşılık gelen tabloları oluşturur (yoksa)."""
-        Base.metadata.create_all(self._engine)
-        logger.info("Veritabanı tabloları doğrulandı.")
+        """Geriye dönük ad: migration runner'ı çalıştırır."""
+        self.run_migrations()
+
+    def run_migrations(self) -> None:
+        """Tüm idempotent migration'ları çalıştırır."""
+        try:
+            run_alembic_migrations(self._engine, self._database_url)
+        except Exception as exc:
+            raise DatabaseConnectionError(f"Veritabani migration baslatilamadi: {exc}") from exc
+        logger.info("Veritabanı migration'ları doğrulandı.")
 
     @contextmanager
     def session(self) -> Generator[Session, None, None]:
