@@ -21,6 +21,22 @@ from domain.enums.idea_priority import IdeaPriority
 from domain.enums.idea_status import IdeaStatus
 from domain.models.idea import Idea
 
+_IDEA_STATUS_LABELS: dict[str, str] = {
+    IdeaStatus.RAW.value: "Ham Fikir",
+    IdeaStatus.REVIEWING.value: "İnceleniyor",
+    IdeaStatus.VALIDATING.value: "Doğrulanıyor",
+    IdeaStatus.CONVERTED.value: "Projeye Dönüştürüldü",
+    IdeaStatus.DEFERRED.value: "Ertelendi",
+    IdeaStatus.REJECTED.value: "Reddedildi",
+}
+
+_IDEA_PRIORITY_LABELS: dict[str, str] = {
+    IdeaPriority.LOW.value: "Düşük",
+    IdeaPriority.MEDIUM.value: "Orta",
+    IdeaPriority.HIGH.value: "Yüksek",
+    IdeaPriority.CRITICAL.value: "Kritik",
+}
+
 
 class IdeaDialog(QDialog):
     """Yeni fikir ekleme veya düzenleme penceresi."""
@@ -56,14 +72,16 @@ class IdeaDialog(QDialog):
 
         # Kaydırılabilir form alanı
         scroll = QScrollArea(parent=self)
-        scroll.setStyleSheet("QScrollArea { background: transparent; }")
+        scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
         scroll.viewport().setStyleSheet("background: transparent;")
+        scroll.viewport().setAutoFillBackground(False)
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         form_widget = QWidget(parent=scroll)
         form_widget.setStyleSheet("background: transparent;")
+        form_widget.setAutoFillBackground(False)
         layout = QVBoxLayout(form_widget)
         layout.setContentsMargins(0, 4, 12, 4)
         layout.setSpacing(14)
@@ -89,7 +107,7 @@ class IdeaDialog(QDialog):
         self._status_combo = QComboBox(parent=status_col)
         self._status_combo.setMinimumHeight(36)
         for s in IdeaStatus:
-            self._status_combo.addItem(s.value, s.value)
+            self._status_combo.addItem(_IDEA_STATUS_LABELS.get(s.value, s.value), s.value)
         sc_layout.addWidget(self._status_combo)
         combo_row_layout.addWidget(status_col)
 
@@ -101,7 +119,7 @@ class IdeaDialog(QDialog):
         self._priority_combo = QComboBox(parent=priority_col)
         self._priority_combo.setMinimumHeight(36)
         for p in IdeaPriority:
-            self._priority_combo.addItem(p.value, p.value)
+            self._priority_combo.addItem(_IDEA_PRIORITY_LABELS.get(p.value, p.value), p.value)
         pc_layout.addWidget(self._priority_combo)
         combo_row_layout.addWidget(priority_col)
 
@@ -170,6 +188,7 @@ class IdeaDialog(QDialog):
 
         # Butonlar — her zaman görünür
         btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(10)
         btn_layout.addStretch()
 
         cancel_btn = QPushButton("İptal", parent=self)
@@ -222,8 +241,14 @@ class IdeaDialog(QDialog):
         self._effort_spin.setValue(self._idea.effort or 0)
         self._confidence_spin.setValue(self._idea.confidence or 0)
         
-        self._status_combo.setCurrentText(self._idea.status)
-        self._priority_combo.setCurrentText(self._idea.priority)
+        for i in range(self._status_combo.count()):
+            if self._status_combo.itemData(i) == self._idea.status:
+                self._status_combo.setCurrentIndex(i)
+                break
+        for i in range(self._priority_combo.count()):
+            if self._priority_combo.itemData(i) == self._idea.priority:
+                self._priority_combo.setCurrentIndex(i)
+                break
 
     def get_data(self) -> dict:
         return {
@@ -237,6 +262,6 @@ class IdeaDialog(QDialog):
             "effort": self._effort_spin.value() or None,
             "confidence": self._confidence_spin.value() or None,
             "notes": self._notes_edit.toPlainText(),
-            "status": self._status_combo.currentText(),
-            "priority": self._priority_combo.currentText(),
+            "status": self._status_combo.currentData(),
+            "priority": self._priority_combo.currentData(),
         }
