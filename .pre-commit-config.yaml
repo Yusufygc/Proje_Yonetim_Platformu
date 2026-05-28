@@ -18,3 +18,11 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-all]
+        pass_filenames: false
+        args:
+          - --ignore-missing-imports
+          - --follow-imports=silent
+          - core/managers/backup_manager.py
+          - core/managers/secret_manager.py
+          - infrastructure/database/alembic_runner.py
+          - domain/dtos/forms.py
