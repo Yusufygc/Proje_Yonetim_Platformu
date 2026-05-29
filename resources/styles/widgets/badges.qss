@@ -1,0 +1,69 @@
+/* ================================================================
+   BADGES — Durum ve oncelik rozeti stilleri
+   Token'lar ThemeManager tarafindan hex degere donusturulur.
+   ================================================================ */
+
+/* ── Proje Durum Rozeti (project_detail_panel) ── */
+QLabel[badge-type="proj-status"] {
+    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 10px;
+}
+QLabel[badge-type="proj-status"][badge-value="PLANNED"]   { color: @text_secondary; background: @secondary_alpha; }
+QLabel[badge-type="proj-status"][badge-value="ACTIVE"]    { color: @success;        background: @success_alpha;   }
+QLabel[badge-type="proj-status"][badge-value="ON_HOLD"]   { color: @warning;        background: @warning_alpha;   }
+QLabel[badge-type="proj-status"][badge-value="BLOCKED"]   { color: @danger;         background: @danger_alpha;    }
+QLabel[badge-type="proj-status"][badge-value="COMPLETED"] { color: @success;        background: @success_alpha;   }
+QLabel[badge-type="proj-status"][badge-value="ARCHIVED"]  { color: @text_muted;     background: @muted_alpha;     }
+QLabel[badge-type="proj-status"][badge-value="CANCELLED"] { color: @danger;         background: @danger_alpha;    }
+
+/* ── Proje Oncelik Rozeti (project_detail_panel) ── */
+QLabel[badge-type="proj-priority"] {
+    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 10px;
+}
+QLabel[badge-type="proj-priority"][badge-value="LOW"]      { color: @text_secondary; background: @secondary_alpha; }
+QLabel[badge-type="proj-priority"][badge-value="MEDIUM"]   { color: @accent_start;   background: @accent_alpha;    }
+QLabel[badge-type="proj-priority"][badge-value="HIGH"]     { color: @warning;        background: @warning_alpha;   }
+QLabel[badge-type="proj-priority"][badge-value="CRITICAL"] { color: @danger;         background: @danger_alpha;    }
+
+/* ── Satirici durum etiketi (ProjectListItem) ── */
+QLabel[inline-status="PLANNED"]   { font-size: 10px; font-weight: 600; color: @text_secondary; }
+QLabel[inline-status="ACTIVE"]    { font-size: 10px; font-weight: 600; color: @success;        }
+QLabel[inline-status="ON_HOLD"]   { font-size: 10px; font-weight: 600; color: @warning;        }
+QLabel[inline-status="BLOCKED"]   { font-size: 10px; font-weight: 600; color: @danger;         }
+QLabel[inline-status="COMPLETED"] { font-size: 10px; font-weight: 600; color: @success;        }
+QLabel[inline-status="ARCHIVED"]  { font-size: 10px; font-weight: 600; color: @text_muted;     }
+QLabel[inline-status="CANCELLED"] { font-size: 10px; font-weight: 600; color: @danger;         }
+
+/* ── Satirici oncelik etiketi (ProjectListItem) ── */
+QLabel[inline-priority="LOW"]      { font-size: 11px; color: @text_muted;     }
+QLabel[inline-priority="MEDIUM"]   { font-size: 11px; color: @accent_start;   }
+QLabel[inline-priority="HIGH"]     { font-size: 11px; color: @warning;        }
+QLabel[inline-priority="CRITICAL"] { font-size: 11px; color: @danger;         }
+
+/* ── ProjectListItem ozel satirici etiketler ── */
+QLabel[cssClass="project-list-title"] { color: @text_primary; font-size: 14px; font-weight: bold; }
+QLabel[cssClass="project-list-desc"]  { color: @text_secondary; font-size: 11px; }
+QLabel[cssClass="project-list-meta"]  { color: @text_muted; font-size: 10px; }
+
+/* ── Fikir Durum Rozeti (ideas_page) ── */
+QLabel[badge-type="idea-status"] {
+    padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;
+}
+QLabel[badge-type="idea-status"][badge-value="RAW"]        { color: @text_muted;     background: @muted_alpha;     }
+QLabel[badge-type="idea-status"][badge-value="REVIEWING"]  { color: @warning;        background: @warning_alpha;   }
+QLabel[badge-type="idea-status"][badge-value="VALIDATING"] { color: @accent_start;   background: @accent_alpha;    }
+QLabel[badge-type="idea-status"][badge-value="CONVERTED"]  { color: @success;        background: @success_alpha;   }
+QLabel[badge-type="idea-status"][badge-value="DEFERRED"]   { color: @text_secondary; background: @secondary_alpha; }
+QLabel[badge-type="idea-status"][badge-value="REJECTED"]   { color: @danger;         background: @danger_alpha;    }
+
+/* ── Gorev Oncelik Rozeti (task_list_widget) ── */
+QLabel[badge-type="task-priority"] {
+    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 7px;
+}
+QLabel[badge-type="task-priority"][badge-value="LOW"]      { color: @text_secondary; background: @secondary_alpha; }
+QLabel[badge-type="task-priority"][badge-value="MEDIUM"]   { color: @accent_start;   background: @accent_alpha;    }
+QLabel[badge-type="task-priority"][badge-value="HIGH"]     { color: @warning;        background: @warning_alpha;   }
+QLabel[badge-type="task-priority"][badge-value="CRITICAL"] { color: @danger;         background: @danger_alpha;    }
+
+/* ── Dashboard istatistik karti ── */
+QLabel[cssClass="stat-card-title"] { font-size: 13px; font-weight: bold; }
+QLabel[cssClass="stat-card-value"] { font-size: 32px; font-weight: 800; }

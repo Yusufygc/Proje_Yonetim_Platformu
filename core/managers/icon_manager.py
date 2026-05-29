@@ -26,6 +26,17 @@ class IconManager:
             cls._instance = cls(icons_dir)
         return cls._instance
 
+    def get_svg_content(self, icon_name: str, color: str) -> str:
+        """SVG içeriğini renklendirerek döndürür; dosya yoksa boş string."""
+        icon_path = self._icons_dir / f"{icon_name}.svg"
+        if not icon_path.exists():
+            logger.warning("İkon bulunamadı: %s", icon_path)
+            return ""
+        content = icon_path.read_text(encoding="utf-8")
+        content = content.replace('fill="currentColor"', f'fill="{color}"')
+        content = content.replace('stroke="currentColor"', f'stroke="{color}"')
+        return content
+
     def get_icon(self, icon_name: str, color: Optional[str] = None) -> QIcon:
         """
         SVG ikonunu döndürür. Eğer color verilirse SVG içindeki

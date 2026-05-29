@@ -1,0 +1,55 @@
+/* ================================================================
+   BASE DIALOG — Tüm dialog'larda ortak stil kuralları
+   ================================================================ */
+
+/* Kaydırılabilir form alanı — şeffaf arka plan */
+QScrollArea#dialog_scroll {
+    background: transparent;
+    border: none;
+}
+QScrollArea#dialog_scroll > QWidget > QWidget {
+    background: transparent;
+}
+
+/* Form container widget */
+QWidget#form_container {
+    background: transparent;
+}
+
+/* Hata etiketi */
+*[cssClass="text-danger"] {
+    color: @danger;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Hata durumundaki input alanları */
+QLineEdit[error="true"] {
+    border: 1px solid @danger;
+}
+QTextEdit[error="true"] {
+    border: 1px solid @danger;
+}
+
+/* Search dialog */
+QDialog#search_dialog {
+    background-color: @surface;
+    border-radius: 12px;
+    border: 1px solid @border;
+}
+QLineEdit#search_input {
+    background-color: @surface_raised;
+    border: 1px solid @border;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+}
+QLineEdit#search_input:focus {
+    border: 1px solid @accent_start;
+}
+QLabel#search_type_label {
+    color: @text_muted;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}

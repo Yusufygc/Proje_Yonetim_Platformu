@@ -1,0 +1,40 @@
+/* ================================================================
+   STAGE TIMELINE — Asama zaman cizelgesi stilleri
+   ================================================================ */
+
+QFrame#stage_card {
+    background: @surface_raised;
+    border-radius: 4px;
+}
+QFrame#stage_card[stage-status="ACTIVE"]      { border-left: 3px solid @stage_active; }
+QFrame#stage_card[stage-status="DONE"]        { border-left: 2px solid @stage_done;   }
+QFrame#stage_card[stage-status="NOT_STARTED"] { border: none; }
+QFrame#stage_card[stage-status="SKIPPED"]     { border: none; }
+
+QLabel#stage_dot { font-size: 10px; }
+QLabel#stage_dot[stage-status="ACTIVE"]      { color: @stage_active; }
+QLabel#stage_dot[stage-status="DONE"]        { color: @stage_done;   }
+QLabel#stage_dot[stage-status="NOT_STARTED"] { color: @border;       }
+QLabel#stage_dot[stage-status="SKIPPED"]     { color: @border;       }
+
+QLabel#stage_name { font-size: 13px; font-weight: 500; }
+QLabel#stage_name[stage-status="ACTIVE"]      { color: @text_primary;   font-weight: 700; }
+QLabel#stage_name[stage-status="DONE"]        { color: @stage_done;                       }
+QLabel#stage_name[stage-status="NOT_STARTED"] { color: @text_secondary;                   }
+QLabel#stage_name[stage-status="SKIPPED"]     { color: @text_muted;                       }
+
+QLabel#stage_badge {
+    font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 8px;
+}
+QLabel#stage_badge[stage-status="ACTIVE"] {
+    color: @stage_active; background: @stage_active_alpha; border: 1px solid @stage_active;
+}
+QLabel#stage_badge[stage-status="DONE"] {
+    color: @stage_done; background: @stage_done_alpha; border: 1px solid @stage_done;
+}
+QLabel#stage_badge[stage-status="NOT_STARTED"] {
+    color: @text_secondary; background: @secondary_alpha; border: 1px solid @text_secondary;
+}
+QLabel#stage_badge[stage-status="SKIPPED"] {
+    color: @text_muted; background: @muted_alpha; border: 1px solid @text_muted;
+}

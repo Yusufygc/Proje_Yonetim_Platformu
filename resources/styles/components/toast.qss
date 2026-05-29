@@ -1,0 +1,27 @@
+/* ================================================================
+   TOAST — Bildirim widget stilleri
+   ================================================================ */
+
+Toast {
+    background-color: @success;
+    border-radius: 8px;
+}
+Toast[type="error"] {
+    background-color: @danger;
+    border-radius: 8px;
+}
+Toast[type="info"] {
+    background-color: @accent_start;
+    border-radius: 8px;
+}
+Toast[type="warning"] {
+    background-color: @warning;
+    border-radius: 8px;
+}
+
+QLabel#toast_label { color: #FFFFFF; font-weight: 500; font-size: 13px; }
+QPushButton#toast_undo_btn {
+    color: #FFFFFF; background: rgba(255, 255, 255, 0.18);
+    border-radius: 6px; padding: 6px 10px; font-weight: 600; border: none;
+}
+QPushButton#toast_undo_btn:hover { background: rgba(255, 255, 255, 0.28); }

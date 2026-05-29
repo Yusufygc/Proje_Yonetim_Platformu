@@ -17,11 +17,11 @@ from PySide6.QtWidgets import (
 from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
 
-_STATUS_THEME_KEYS: dict[str, tuple[str, str]] = {
-    StageStatus.NOT_STARTED.value: ("Bekliyor", "text_secondary"),
-    StageStatus.ACTIVE.value: ("Aktif", "stage_active"),
-    StageStatus.DONE.value: ("Tamamlandı", "stage_done"),
-    StageStatus.SKIPPED.value: ("Atlandı", "text_muted"),
+_STATUS_TR: dict[str, str] = {
+    StageStatus.NOT_STARTED.value: "Bekliyor",
+    StageStatus.ACTIVE.value: "Aktif",
+    StageStatus.DONE.value: "Tamamlandı",
+    StageStatus.SKIPPED.value: "Atlandı",
 }
 
 
@@ -56,45 +56,32 @@ class StageTimelineWidget(QWidget):
             self._rows_layout.addWidget(self._build_row(stage, has_active))
 
     def _build_row(self, stage: ProjectStage, has_active: bool) -> QFrame:
-        """Tek bir aşama satırı oluşturur; duruma göre buton ve stil uygular."""
-        from core.managers.theme_manager import ThemeManager
-        theme_mgr = ThemeManager.instance()
-
+        """Tek bir aşama satırı oluşturur; duruma göre buton ve QSS property uygular."""
         is_active = stage.status == StageStatus.ACTIVE.value
         is_completed = stage.status == StageStatus.DONE.value
         is_pending = stage.status == StageStatus.NOT_STARTED.value
 
         card = QFrame(parent=self)
+        card.setObjectName("stage_card")
+        card.setProperty("stage-status", stage.status)
         layout = QHBoxLayout(card)
         layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(10)
 
-        dot_color = (
-            theme_mgr.color("stage_active") if is_active
-            else (theme_mgr.color("stage_done") if is_completed else theme_mgr.color("border"))
-        )
         dot = QLabel("●", parent=card)
-        dot.setStyleSheet(f"font-size: 10px; color: {dot_color};")
+        dot.setObjectName("stage_dot")
+        dot.setProperty("stage-status", stage.status)
         layout.addWidget(dot)
 
-        name_color = (
-            theme_mgr.color("text_primary") if is_active
-            else (theme_mgr.color("stage_done") if is_completed else theme_mgr.color("text_secondary"))
-        )
-        name_weight = "700" if is_active else "500"
         name_lbl = QLabel(stage.name, parent=card)
-        name_lbl.setStyleSheet(
-            f"font-size: 13px; font-weight: {name_weight}; color: {name_color};"
-        )
+        name_lbl.setObjectName("stage_name")
+        name_lbl.setProperty("stage-status", stage.status)
         layout.addWidget(name_lbl, 1)
 
-        status_text, theme_key = _STATUS_THEME_KEYS.get(stage.status, (stage.status, "text_secondary"))
-        status_color = theme_mgr.color(theme_key)
+        status_text = _STATUS_TR.get(stage.status, stage.status)
         badge = QLabel(status_text, parent=card)
-        badge.setStyleSheet(
-            f"font-size: 10px; font-weight: 600; color: {status_color};"
-            f" background: {status_color}22; padding: 3px 8px; border-radius: 8px;"
-        )
+        badge.setObjectName("stage_badge")
+        badge.setProperty("stage-status", stage.status)
         layout.addWidget(badge)
 
         if is_active:
@@ -114,21 +101,4 @@ class StageTimelineWidget(QWidget):
             )
             layout.addWidget(btn)
 
-        surface_raised = theme_mgr.color("surface_raised")
-        if is_active:
-            active_color = theme_mgr.color("stage_active")
-            card.setStyleSheet(
-                f"QFrame {{ background: {surface_raised}; border-left: 3px solid {active_color};"
-                f" border-radius: 4px; }}"
-            )
-        elif is_completed:
-            done_color = theme_mgr.color("stage_done")
-            card.setStyleSheet(
-                f"QFrame {{ background: {surface_raised}; border-left: 2px solid {done_color};"
-                f" border-radius: 4px; }}"
-            )
-        else:
-            card.setStyleSheet(
-                f"QFrame {{ background: {surface_raised}; border-radius: 4px; }}"
-            )
         return card

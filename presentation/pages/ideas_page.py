@@ -88,7 +88,7 @@ class IdeasPage(QWidget):
 
         # Splitter
         splitter = QSplitter(Qt.Orientation.Horizontal, parent=self)
-        splitter.setStyleSheet("QSplitter::handle { background: transparent; }")
+        splitter.setObjectName("ideas_splitter")
 
         # Sol Liste
         list_container = QFrame(parent=splitter)
@@ -135,7 +135,7 @@ class IdeasPage(QWidget):
         dh_layout.addWidget(self._idea_title, 1)
         
         self._idea_status = QLabel("", parent=self._detail_header)
-        self._idea_status.setStyleSheet("padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;")
+        self._idea_status.setProperty("badge-type", "idea-status")
         dh_layout.addWidget(self._idea_status)
         
         self._detail_layout.addWidget(self._detail_header)
@@ -215,15 +215,11 @@ class IdeasPage(QWidget):
         
         self._idea_title.setText(idea.title)
         
-        from core.managers.theme_manager import ThemeManager
-        theme_key = _STATUS_THEME_KEYS.get(idea.status, "text_secondary")
-        color = ThemeManager.instance().color(theme_key)
         status_label = _IDEA_STATUS_LABELS.get(idea.status, idea.status)
         self._idea_status.setText(status_label)
-        self._idea_status.setStyleSheet(
-            f"background-color: {color}22; color: {color};"
-            f" padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;"
-        )
+        self._idea_status.setProperty("badge-value", idea.status)
+        self._idea_status.style().unpolish(self._idea_status)
+        self._idea_status.style().polish(self._idea_status)
         
         desc = ""
         if idea.problem:

@@ -16,6 +16,7 @@ LOGS_DIR = DATA_DIR / "logs"
 # --- Kaynak Dizinleri ---
 RESOURCES_DIR = APP_DIR / "resources"
 THEMES_DIR = RESOURCES_DIR / "themes"
+STYLES_DIR = RESOURCES_DIR / "styles"
 FONTS_DIR = RESOURCES_DIR / "fonts"
 ICONS_DIR = RESOURCES_DIR / "icons"
 LOCALES_DIR = RESOURCES_DIR / "locales"

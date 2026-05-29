@@ -109,7 +109,7 @@ class DIContainer:
 
         self._prefs = PreferenceManager.instance()
         self._secrets = SecretManager.instance()
-        self._theme = ThemeManager.instance(config.THEMES_DIR)
+        self._theme = ThemeManager.instance(config.THEMES_DIR, config.STYLES_DIR)
         saved_theme = self._prefs.load_theme()
         if saved_theme != self._theme.current_theme:
             self._theme.switch_theme(saved_theme)
@@ -236,6 +236,7 @@ class DIContainer:
             activity_log_repository=self._activity_log_repo,
             tag_repository=self._project_tag_repo,
             task_repository=self._task_repo,
+            attachment_repository=self._attachment_repo,
         )
 
     @cached_property
@@ -350,15 +351,7 @@ class DIContainer:
         from controllers.settings_controller import SettingsController
         return SettingsController(service=self._export_service)
 
-    # ── Public repository accessors (widget'ların doğrudan ihtiyaç duyduğu) ──
-
-    @property
-    def activity_log_repository(self) -> ActivityLogRepository:
-        return self._activity_log_repo
-
-    @property
-    def attachment_repository(self) -> AttachmentRepository:
-        return self._attachment_repo
+    # No public repository accessors - UI should use controllers
 
 
 class OnboardingService:

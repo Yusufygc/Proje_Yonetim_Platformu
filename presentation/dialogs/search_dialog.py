@@ -43,62 +43,22 @@ class SearchDialog(QDialog):
 
     def _setup_ui(self) -> None:
         main_widget = QWidget(self)
+        main_widget.setObjectName("search_container")
         main_widget.setFixedSize(self.size())
-        main_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E2130;
-                border: 1px solid #3B3E4D;
-                border-radius: 12px;
-            }
-            """
-        )
 
         layout = QVBoxLayout(main_widget)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(12)
 
-        # Search Input
         self._search_input = QLineEdit(parent=self)
+        self._search_input.setObjectName("search_input")
         self._search_input.setPlaceholderText("Projelerde, fikirlerde ve görevlerde ara...")
-        self._search_input.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: #0F1117;
-                color: #FFFFFF;
-                border: 1px solid #6366F1;
-                border-radius: 8px;
-                padding: 12px;
-                font-size: 16px;
-            }
-            """
-        )
         layout.addWidget(self._search_input)
 
-        # Results List
         self._list_widget = QListWidget(parent=self)
-        self._list_widget.setStyleSheet(
-            """
-            QListWidget {
-                background: transparent;
-                border: none;
-                outline: none;
-            }
-            QListWidget::item {
-                padding: 12px;
-                border-radius: 6px;
-                color: #8B8FA8;
-                border-bottom: 1px solid #2A2D38;
-            }
-            QListWidget::item:selected {
-                background-color: #2A2D38;
-                color: #FFFFFF;
-            }
-            """
-        )
+        self._list_widget.setObjectName("search_results")
         layout.addWidget(self._list_widget)
 
-        # Close on Escape
         QShortcut(QKeySequence("Esc"), self).activated.connect(self.close)
 
     def _connect_signals(self) -> None:

@@ -31,17 +31,6 @@ class DecisionDialog(QDialog):
         title = "Kararı Düzenle" if self._is_edit else "Yeni Karar Ekle"
         self.setWindowTitle(title)
         self.setMinimumWidth(500)
-        self.setStyleSheet(
-            "QDialog { background-color: #1E2130; }"
-            "QLabel { color: #8B8FA8; font-weight: 600; font-size: 13px; }"
-            "QLineEdit, QTextEdit { background-color: #161820; border: 1px solid #2A2D38; border-radius: 6px; padding: 8px; color: #E8EAF0; }"
-            "QLineEdit:focus, QTextEdit:focus { border: 1px solid #6366F1; }"
-            "QComboBox { background-color: #161820; border: 1px solid #2A2D38; border-radius: 6px; padding: 8px; color: #E8EAF0; }"
-            "QPushButton { background-color: #2A2D38; color: #E8EAF0; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 600; }"
-            "QPushButton:hover { background-color: #3B3E4D; }"
-            "QPushButton#accent_button { background-color: #6366F1; color: white; }"
-            "QPushButton#accent_button:hover { background-color: #4F46E5; }"
-        )
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)

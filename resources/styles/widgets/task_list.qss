@@ -1,0 +1,31 @@
+/* ================================================================
+   TASK LIST — Gorev listesi widget stilleri
+   ================================================================ */
+
+QWidget#task_row { border-radius: 6px; }
+QWidget#task_row:hover { background-color: @surface_raised; }
+
+QPushButton#task_status_btn {
+    font-size: 13px; border: none; background: transparent; padding: 0;
+}
+QPushButton#task_status_btn[task-status="TODO"]        { color: @text_secondary; }
+QPushButton#task_status_btn[task-status="IN_PROGRESS"] { color: @accent_start;   }
+QPushButton#task_status_btn[task-status="WAITING"]     { color: @warning;        }
+QPushButton#task_status_btn[task-status="BLOCKED"]     { color: @danger;         }
+QPushButton#task_status_btn[task-status="DONE"]        { color: @success;        }
+QPushButton#task_status_btn[task-status="CANCELLED"]   { color: @text_muted;     }
+QPushButton#task_status_btn:hover                      { color: @success;        }
+
+QPushButton#task_title_btn {
+    font-size: 13px; border: none; background: transparent; text-align: left; padding: 0;
+}
+QPushButton#task_title_btn[task-done="False"] { color: @text_primary; }
+QPushButton#task_title_btn[task-done="True"]  { color: @text_muted;   }
+QPushButton#task_title_btn:hover              { color: @accent_start; }
+
+QLabel#task_count_badge {
+    font-size: 10px; font-weight: 600; color: @accent_start;
+    background: @accent_alpha; padding: 1px 6px; border-radius: 8px;
+}
+
+QLabel#task_empty_msg { font-size: 12px; padding: 10px 4px; }

@@ -291,26 +291,21 @@ class ProjectDetailPanel(QWidget):
         self._project_id = project.id
         self._title_lbl.setText(project.title)
 
-        from core.managers.theme_manager import ThemeManager
-        theme_mgr = ThemeManager.instance()
-
-        status_text, theme_key = _STATUS_THEME_KEYS.get(project.status, (project.status, "text_secondary"))
-        status_color = theme_mgr.color(theme_key)
+        status_text, _theme_key = _STATUS_THEME_KEYS.get(project.status, (project.status, "text_secondary"))
         self._status_badge.setText(status_text)
-        self._status_badge.setStyleSheet(
-            f"font-size: 11px; font-weight: 600; color: {status_color};"
-            f" background: {status_color}22; padding: 4px 10px; border-radius: 10px;"
-        )
+        self._status_badge.setProperty("badge-type", "proj-status")
+        self._status_badge.setProperty("badge-value", project.status)
+        self._status_badge.style().unpolish(self._status_badge)
+        self._status_badge.style().polish(self._status_badge)
 
-        priority_text, theme_key = _PRIORITY_THEME_KEYS.get(
+        priority_text, _theme_key = _PRIORITY_THEME_KEYS.get(
             project.priority, (project.priority, "accent_start")
         )
-        priority_color = theme_mgr.color(theme_key)
         self._priority_badge.setText(f"● {priority_text} Öncelik")
-        self._priority_badge.setStyleSheet(
-            f"font-size: 11px; font-weight: 600; color: {priority_color};"
-            f" background: {priority_color}22; padding: 4px 10px; border-radius: 10px;"
-        )
+        self._priority_badge.setProperty("badge-type", "proj-priority")
+        self._priority_badge.setProperty("badge-value", project.priority)
+        self._priority_badge.style().unpolish(self._priority_badge)
+        self._priority_badge.style().polish(self._priority_badge)
 
         has_desc = bool(project.short_description)
         self._desc_header.setVisible(has_desc)
@@ -366,14 +361,14 @@ class ProjectDetailPanel(QWidget):
         self._outputs_list.clear()
         if self._project_id is None:
             return
-        for item in self._di.attachment_repository.get_by_project(self._project_id):
+        for item in self._di.project_controller.get_attachments_sync(self._project_id):
             self._outputs_list.addItem(QListWidgetItem(f"{item.file_path}\n{item.caption or ''}"))
 
     def _refresh_activity(self) -> None:
         self._activity_list.clear()
         if self._project_id is None:
             return
-        for log in self._di.activity_log_repository.get_by_project(self._project_id):
+        for log in self._di.project_controller.get_activity_logs_sync(self._project_id):
             self._activity_list.addItem(QListWidgetItem(f"{log.created_at} · {log.summary}"))
 
     def _on_add_output(self) -> None:
@@ -383,7 +378,7 @@ class ProjectDetailPanel(QWidget):
         if not ok or not path.strip():
             return
         caption, _ = QInputDialog.getText(self, "Çıktı Açıklaması", "Kısa açıklama:")
-        self._di.attachment_repository.create(
+        self._di.project_controller.create_attachment_sync(
             Attachment(
                 project_id=self._project_id,
                 file_path=path.strip(),

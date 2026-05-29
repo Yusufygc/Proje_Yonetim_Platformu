@@ -1,0 +1,32 @@
+/* ================================================================
+   SEARCH DIALOG — Arama iletisim kutusu stilleri
+   ================================================================ */
+
+QWidget#search_container {
+    background-color: @surface;
+    border: 1px solid @border;
+    border-radius: 12px;
+}
+QLineEdit#search_input {
+    background-color: @background;
+    color: @text_primary;
+    border: 1px solid @accent_start;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
+}
+QListWidget#search_results {
+    background: transparent;
+    border: none;
+    outline: 0;
+}
+QListWidget#search_results::item {
+    padding: 12px;
+    border-radius: 6px;
+    color: @text_secondary;
+    border-bottom: 1px solid @border;
+}
+QListWidget#search_results::item:selected {
+    background-color: @surface_raised;
+    color: @text_primary;
+}

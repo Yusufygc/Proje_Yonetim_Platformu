@@ -12,6 +12,7 @@ class AnimatedButton(QPushButton):
     def __init__(self, text: str, parent: QWidget | None = None) -> None:
         super().__init__(text, parent)
         self.setProperty("primary", True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         
         # Geometri animasyonu (büyüme efekti simülasyonu)
         self._anim = QPropertyAnimation(self, b"geometry")

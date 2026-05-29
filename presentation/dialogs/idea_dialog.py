@@ -72,15 +72,14 @@ class IdeaDialog(QDialog):
 
         # Kaydırılabilir form alanı
         scroll = QScrollArea(parent=self)
-        scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
-        scroll.viewport().setStyleSheet("background: transparent;")
+        scroll.setObjectName("dialog_scroll")
         scroll.viewport().setAutoFillBackground(False)
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         form_widget = QWidget(parent=scroll)
-        form_widget.setStyleSheet("background: transparent;")
+        form_widget.setObjectName("form_container")
         form_widget.setAutoFillBackground(False)
         layout = QVBoxLayout(form_widget)
         layout.setContentsMargins(0, 4, 12, 4)
@@ -88,6 +87,10 @@ class IdeaDialog(QDialog):
 
         # Başlık
         layout.addWidget(self._make_label("Fikir Başlığı *"))
+        self._error_label = QLabel(parent=form_widget)
+        self._error_label.setProperty("cssClass", "text-danger")
+        self._error_label.hide()
+        layout.addWidget(self._error_label)
         self._title_edit = QLineEdit(parent=form_widget)
         self._title_edit.setPlaceholderText("Örn: Yeni mobil uygulama fikri...")
         self._title_edit.setMinimumHeight(36)
@@ -199,15 +202,14 @@ class IdeaDialog(QDialog):
         save_btn = QPushButton("Kaydet", parent=self)
         save_btn.setObjectName("accent_button")
         save_btn.setMinimumSize(90, 36)
-        save_btn.clicked.connect(self.accept)
+        save_btn.clicked.connect(self._on_save)
         btn_layout.addWidget(save_btn)
 
         outer_layout.addLayout(btn_layout)
 
     def _make_label(self, text: str) -> QLabel:
         lbl = QLabel(text, parent=self)
-        lbl.setProperty("cssClass", "text-secondary")
-        lbl.setStyleSheet("font-size: 12px; font-weight: 600; letter-spacing: 0.3px;")
+        lbl.setProperty("cssClass", "field-label")
         return lbl
 
     def _make_score_spin(self, label: str, row: QHBoxLayout, parent: QWidget | None = None) -> QSpinBox:
@@ -249,6 +251,24 @@ class IdeaDialog(QDialog):
             if self._priority_combo.itemData(i) == self._idea.priority:
                 self._priority_combo.setCurrentIndex(i)
                 break
+
+    def _on_save(self) -> None:
+        title = self._title_edit.text().strip()
+        if not title:
+            self._error_label.setText("Fikir başlığı boş olamaz.")
+            self._error_label.show()
+            self._set_field_error(self._title_edit, True)
+            self._title_edit.setFocus()
+            return
+
+        self._error_label.hide()
+        self._set_field_error(self._title_edit, False)
+        self.accept()
+
+    def _set_field_error(self, widget: QWidget, error: bool) -> None:
+        widget.setProperty("error", "true" if error else "false")
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
 
     def get_data(self) -> dict:
         return {

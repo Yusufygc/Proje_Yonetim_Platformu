@@ -14,10 +14,13 @@ from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
 from domain.models.project import Project
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
+from infrastructure.repositories.attachment_repository import AttachmentRepository
 from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.project_tag_repository import ProjectTagRepository
 from infrastructure.repositories.task_repository import TaskRepository
 from services.stage_service import StageService
+from domain.models.attachment import Attachment
+from domain.models.activity_log import ActivityLog
 
 logger = logging.getLogger(__name__)
 
@@ -56,12 +59,14 @@ class ProjectService:
         activity_log_repository: ActivityLogRepository | None = None,
         tag_repository: ProjectTagRepository | None = None,
         task_repository: TaskRepository | None = None,
+        attachment_repository: AttachmentRepository | None = None,
     ) -> None:
         self._repo = repository
         self._stage_service = stage_service
         self._activity_logs = activity_log_repository
         self._tag_repo = tag_repository
         self._task_repo = task_repository
+        self._attachment_repo = attachment_repository
 
     def get_all_projects(
         self,
@@ -76,6 +81,21 @@ class ProjectService:
         if project is None:
             raise ProjectNotFoundError(project_id)
         return project
+
+    def get_activity_logs(self, project_id: int) -> list[ActivityLog]:
+        if self._activity_logs is None:
+            return []
+        return self._activity_logs.get_by_project(project_id)
+
+    def get_attachments(self, project_id: int) -> list[Attachment]:
+        if self._attachment_repo is None:
+            return []
+        return self._attachment_repo.get_by_project(project_id)
+
+    def create_attachment(self, attachment: Attachment) -> Attachment:
+        if self._attachment_repo is None:
+            raise RuntimeError("Attachment repository not configured")
+        return self._attachment_repo.create(attachment)
 
     def create_project(self, title: str, **kwargs: Any) -> Project:
         self._validate_title(title)

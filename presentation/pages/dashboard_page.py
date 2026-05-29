@@ -136,13 +136,11 @@ class DashboardPage(QWidget):
         card_layout.setContentsMargins(20, 20, 20, 20)
 
         lbl_title = QLabel(title, parent=card)
-        lbl_title.setProperty("cssClass", "text-secondary")
-        lbl_title.setStyleSheet("font-weight: bold;")
+        lbl_title.setProperty("cssClass", "stat-card-title")
         card_layout.addWidget(lbl_title)
 
         lbl_val = QLabel(initial_val, parent=card)
-        lbl_val.setProperty("cssClass", "text-primary")
-        lbl_val.setStyleSheet("font-size: 32px; font-weight: 800;")
+        lbl_val.setProperty("cssClass", "stat-card-value")
         card_layout.addWidget(lbl_val)
 
         layout.addWidget(card)

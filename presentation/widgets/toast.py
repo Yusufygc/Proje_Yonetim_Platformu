@@ -38,21 +38,17 @@ class Toast(QWidget):
         layout.setContentsMargins(16, 8, 16, 8)
         
         self._label = QLabel(self)
-        self._label.setStyleSheet("color: white; font-weight: 500; font-size: 13px;")
+        self._label.setObjectName("toast_label")
         layout.addWidget(self._label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self._undo_btn = QPushButton(parent=self)
+        self._undo_btn.setObjectName("toast_undo_btn")
         self._undo_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._undo_btn.setStyleSheet(
-            "QPushButton { color: white; background: rgba(255,255,255,0.18); "
-            "border-radius: 6px; padding: 6px 10px; font-weight: 600; }"
-            "QPushButton:hover { background: rgba(255,255,255,0.28); }"
-        )
         self._undo_btn.clicked.connect(self._on_undo_clicked)
         self._undo_btn.hide()
         layout.addWidget(self._undo_btn)
-        
-        self.setStyleSheet("Toast { background-color: #22C55E; border-radius: 8px; }")
+
+        self.setProperty("type", "success")
         apply_shadow(self, blur_radius=20, y_offset=6, alpha=40)
 
     def _on_toast_requested(
@@ -79,11 +75,9 @@ class Toast(QWidget):
         else:
             self._undo_btn.hide()
         
-        from core.managers.theme_manager import ThemeManager
-        theme_mgr = ThemeManager.instance()
-        theme_key = "success" if type_ == "success" else ("accent_start" if type_ == "info" else "danger")
-        bg_color = theme_mgr.color(theme_key)
-        self.setStyleSheet(f"Toast {{ background-color: {bg_color}; border-radius: 8px; }}")
+        self.setProperty("type", type_)
+        self.style().unpolish(self)
+        self.style().polish(self)
         
         self.adjustSize()
         

@@ -16,5 +16,13 @@
   "sidebar_bg": "#E3E6F0",
   "sidebar_active": "#6366F1",
   "stage_active": "#0097A7",
-  "stage_done": "#00838F"
+  "stage_done": "#00838F",
+  "success_alpha": "#16A34A22",
+  "warning_alpha": "#D9770622",
+  "danger_alpha": "#DC262622",
+  "accent_alpha": "#6366F122",
+  "secondary_alpha": "#5A5E7822",
+  "muted_alpha": "#9CA3B822",
+  "stage_active_alpha": "#0097A722",
+  "stage_done_alpha": "#00838F22"
 }

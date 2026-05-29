@@ -1,0 +1,58 @@
+/* ================================================================
+   SIDEBAR — Sidebar bileşeni, nav buton, tema toggle switch
+   ================================================================ */
+
+/* ── ThemeToggleSwitch ── */
+ThemeToggleSwitch {
+    background-color: @border;
+    border-radius: 12px;
+}
+ThemeToggleSwitch[active="true"] {
+    background-color: @accent_start;
+}
+/* Thumb (iç QFrame) */
+ThemeToggleSwitch QFrame {
+    background-color: @text_secondary;
+    border-radius: 9px;
+}
+ThemeToggleSwitch[active="true"] QFrame {
+    background-color: #FFFFFF;
+}
+
+/* ── SidebarNavButton ── */
+SidebarNavButton {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    color: @text_secondary;
+    font-size: 13px;
+    text-align: left;
+    padding-left: 8px;
+}
+SidebarNavButton:hover {
+    background-color: @surface_raised;
+}
+SidebarNavButton:checked {
+    background-color: rgba(99, 102, 241, 0.18);
+    border-left: 3px solid @accent_start;
+    color: @accent_start;
+    font-weight: 700;
+}
+
+/* ── Arama butonu ── */
+QPushButton#sidebar_search_btn {
+    text-align: left;
+    padding-left: 12px;
+    margin-top: 8px;
+}
+
+/* ── Daraltılmış tema butonu ── */
+QPushButton[cssClass="theme-collapsed-btn"] {
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    border-radius: 18px;
+}
+QPushButton[cssClass="theme-collapsed-btn"]:hover {
+    background-color: @surface_raised;
+}
