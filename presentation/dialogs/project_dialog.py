@@ -87,21 +87,24 @@ class ProjectDialog(QDialog):
 
         # Kaydırılabilir form alanları
         scroll = QScrollArea(parent=self)
-        scroll.setStyleSheet("QScrollArea { background: transparent; border: none; }")
-        scroll.viewport().setStyleSheet("background: transparent;")
+        scroll.setObjectName("dialog_scroll")
         scroll.viewport().setAutoFillBackground(False)
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         form_widget = QWidget(parent=scroll)
-        form_widget.setStyleSheet("background: transparent;")
+        form_widget.setObjectName("form_container")
         form_widget.setAutoFillBackground(False)
         layout = QVBoxLayout(form_widget)
-        layout.setContentsMargins(0, 4, 12, 4)
+        layout.setContentsMargins(0, 4, 24, 4)
         layout.setSpacing(0)
 
         layout.addWidget(self._make_field_label("Proje Başlığı *"))
+        self._error_label = QLabel(parent=form_widget)
+        self._error_label.setProperty("cssClass", "text-danger")
+        self._error_label.hide()
+        layout.addWidget(self._error_label)
         layout.addSpacing(6)
         self._title_edit = QLineEdit(parent=form_widget)
         self._title_edit.setPlaceholderText("Projenin adını girin...")
@@ -197,8 +200,7 @@ class ProjectDialog(QDialog):
 
     def _make_field_label(self, text: str) -> QLabel:
         lbl = QLabel(text, parent=self)
-        lbl.setProperty("cssClass", "text-secondary")
-        lbl.setStyleSheet("font-size: 12px; font-weight: 600; letter-spacing: 0.5px;")
+        lbl.setProperty("cssClass", "field-label")
         return lbl
 
     def _build_status_priority_row(self, parent: QWidget | None = None) -> QWidget:
@@ -362,10 +364,21 @@ class ProjectDialog(QDialog):
     def _on_save(self) -> None:
         title = self._title_edit.text().strip()
         if not title:
-            QMessageBox.warning(self, "Geçersiz Giriş", "Proje başlığı boş olamaz.")
+            self._error_label.setText("Proje başlığı boş olamaz.")
+            self._error_label.show()
+            self._set_field_error(self._title_edit, True)
             self._title_edit.setFocus()
             return
+
+        self._error_label.hide()
+        self._set_field_error(self._title_edit, False)
         self.accept()
+
+    def _set_field_error(self, widget: QWidget, error: bool) -> None:
+        """QSS error[=true/false] property'sini ayarlar ve stili yeniler."""
+        widget.setProperty("error", "true" if error else "false")
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
 
     def get_data(self) -> dict[str, object]:
         """Dialog kabul edildikten sonra çağrılır; dolu alanları sözlük olarak döndürür."""
