@@ -27,33 +27,7 @@ from domain.enums.task_type import TaskType
 from domain.models.project_stage import ProjectStage
 from domain.models.task import Task
 
-_STATUS_LABELS: dict[str, str] = {
-    TaskStatus.TODO.value: "Yapılacak",
-    TaskStatus.IN_PROGRESS.value: "Devam Ediyor",
-    TaskStatus.WAITING.value: "Bekliyor",
-    TaskStatus.BLOCKED.value: "Engellendi",
-    TaskStatus.DONE.value: "Tamamlandı",
-    TaskStatus.CANCELLED.value: "İptal Edildi",
-}
 
-_PRIORITY_LABELS: dict[str, str] = {
-    Priority.LOW.value: "Düşük",
-    Priority.MEDIUM.value: "Orta",
-    Priority.HIGH.value: "Yüksek",
-    Priority.CRITICAL.value: "Kritik",
-}
-
-_TYPE_LABELS: dict[str, str] = {
-    TaskType.TASK.value: "Görev",
-    TaskType.GROUP.value: "Grup",
-    TaskType.BUG.value: "Hata",
-    TaskType.IMPROVEMENT.value: "İyileştirme",
-    TaskType.RESEARCH.value: "Araştırma",
-    TaskType.DOCUMENTATION.value: "Dokümantasyon",
-    TaskType.DESIGN.value: "Tasarım",
-    TaskType.TEST.value: "Test",
-    TaskType.REVIEW.value: "İnceleme",
-}
 
 
 class TaskDialog(QDialog):
@@ -88,14 +62,16 @@ class TaskDialog(QDialog):
         layout.setContentsMargins(28, 28, 28, 24)
         layout.setSpacing(0)
 
-        from core.managers.theme_manager import ThemeManager
-        _text_primary = ThemeManager.instance().color("text_primary")
         dialog_title = QLabel(title_text, parent=self)
-        dialog_title.setStyleSheet(f"font-size: 16px; font-weight: 700; color: {_text_primary};")
+        dialog_title.setProperty("cssClass", "title-small")
         layout.addWidget(dialog_title)
         layout.addSpacing(20)
 
         layout.addWidget(self._make_field_label("Görev Başlığı *"))
+        self._error_label = QLabel(parent=self)
+        self._error_label.setProperty("cssClass", "text-danger")
+        self._error_label.hide()
+        layout.addWidget(self._error_label)
         layout.addSpacing(6)
         self._title_edit = QLineEdit(parent=self)
         self._title_edit.setPlaceholderText("Görevin adını girin...")
@@ -121,12 +97,8 @@ class TaskDialog(QDialog):
         layout.addWidget(self._build_button_row())
 
     def _make_field_label(self, text: str) -> QLabel:
-        from core.managers.theme_manager import ThemeManager
-        color = ThemeManager.instance().color("text_primary")
         lbl = QLabel(text, parent=self)
-        lbl.setStyleSheet(
-            f"font-size: 12px; font-weight: 700; color: {color}; letter-spacing: 0.5px;"
-        )
+        lbl.setProperty("cssClass", "field-label")
         return lbl
 
     def _build_combos_row(self) -> QWidget:
@@ -143,8 +115,12 @@ class TaskDialog(QDialog):
         sc.addWidget(self._make_field_label("Durum"))
         self._status_combo = QComboBox(parent=status_col)
         self._status_combo.setMinimumHeight(36)
-        for s in TaskStatus:
-            self._status_combo.addItem(_STATUS_LABELS.get(s.value, s.value), s.value)
+        self._status_combo.addItem("Yapılacak", TaskStatus.TODO.value)
+        self._status_combo.addItem("Devam Ediyor", TaskStatus.IN_PROGRESS.value)
+        self._status_combo.addItem("Bekliyor", TaskStatus.WAITING.value)
+        self._status_combo.addItem("Engellendi", TaskStatus.BLOCKED.value)
+        self._status_combo.addItem("Tamamlandı", TaskStatus.DONE.value)
+        self._status_combo.addItem("İptal Edildi", TaskStatus.CANCELLED.value)
         sc.addWidget(self._status_combo)
         layout.addWidget(status_col)
 
@@ -156,8 +132,10 @@ class TaskDialog(QDialog):
         pc.addWidget(self._make_field_label("Öncelik"))
         self._priority_combo = QComboBox(parent=priority_col)
         self._priority_combo.setMinimumHeight(36)
-        for p in Priority:
-            self._priority_combo.addItem(_PRIORITY_LABELS.get(p.value, p.value), p.value)
+        self._priority_combo.addItem("Düşük", Priority.LOW.value)
+        self._priority_combo.addItem("Orta", Priority.MEDIUM.value)
+        self._priority_combo.addItem("Yüksek", Priority.HIGH.value)
+        self._priority_combo.addItem("Kritik", Priority.CRITICAL.value)
         pc.addWidget(self._priority_combo)
         layout.addWidget(priority_col)
 
@@ -169,8 +147,15 @@ class TaskDialog(QDialog):
         tc.addWidget(self._make_field_label("Tip"))
         self._type_combo = QComboBox(parent=type_col)
         self._type_combo.setMinimumHeight(36)
-        for t in TaskType:
-            self._type_combo.addItem(_TYPE_LABELS.get(t.value, t.value), t.value)
+        self._type_combo.addItem("Görev", TaskType.TASK.value)
+        self._type_combo.addItem("Grup", TaskType.GROUP.value)
+        self._type_combo.addItem("Hata", TaskType.BUG.value)
+        self._type_combo.addItem("İyileştirme", TaskType.IMPROVEMENT.value)
+        self._type_combo.addItem("Araştırma", TaskType.RESEARCH.value)
+        self._type_combo.addItem("Dokümantasyon", TaskType.DOCUMENTATION.value)
+        self._type_combo.addItem("Tasarım", TaskType.DESIGN.value)
+        self._type_combo.addItem("Test", TaskType.TEST.value)
+        self._type_combo.addItem("İnceleme", TaskType.REVIEW.value)
         tc.addWidget(self._type_combo)
         layout.addWidget(type_col)
 
@@ -197,11 +182,9 @@ class TaskDialog(QDialog):
         layout.setSpacing(10)
 
         if self._is_edit:
-            from core.managers.theme_manager import ThemeManager
-            danger = ThemeManager.instance().color("danger")
             delete_btn = QPushButton("Sil", parent=row)
             delete_btn.setMinimumSize(80, 38)
-            delete_btn.setStyleSheet(f"color: {danger};")
+            delete_btn.setProperty("cssClass", "btn-danger")
             delete_btn.clicked.connect(self._on_delete)
             layout.addWidget(delete_btn)
 
@@ -250,49 +233,38 @@ class TaskDialog(QDialog):
         self._render_checklist()
 
     def _render_checklist(self) -> None:
-        # Eski itemları temizle
         while self._chk_layout.count():
             item = self._chk_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-        
-        if not self._task or not hasattr(self._task, 'checklist_items'):
-            return
 
-        from core.managers.theme_manager import ThemeManager
-        _tm = ThemeManager.instance()
-        _success = _tm.color("success")
-        _text_muted = _tm.color("text_muted")
-        _text_secondary = _tm.color("text_secondary")
-        _danger = _tm.color("danger")
-        _surface_raised = _tm.color("surface_raised")
+        if not self._task or not hasattr(self._task, "checklist_items"):
+            return
 
         for item in self._task.checklist_items:
             row = QWidget(parent=self._chk_container)
+            row.setProperty("cssClass", "panel-raised")
             rl = QHBoxLayout(row)
             rl.setContentsMargins(4, 4, 4, 4)
             rl.setSpacing(8)
 
             status_char = "●" if item.is_done else "○"
-            status_color = _success if item.is_done else _text_muted
             chk_btn = QPushButton(status_char, parent=row)
             chk_btn.setFixedSize(20, 20)
-            chk_btn.setStyleSheet(f"color: {status_color}; font-size: 14px; border: none; background: transparent;")
+            chk_btn.setProperty("cssClass", "chk-done" if item.is_done else "chk-pending")
             chk_btn.clicked.connect(lambda checked=False, i_id=item.id: self._on_toggle_checklist_item(i_id))
             rl.addWidget(chk_btn)
 
             lbl = QLabel(item.text, parent=row)
-            text_color = _text_muted if item.is_done else _text_secondary
-            lbl.setStyleSheet(f"color: {text_color}; font-size: 13px;")
+            lbl.setProperty("cssClass", "text-muted" if item.is_done else "text-secondary")
             rl.addWidget(lbl, 1)
 
             del_btn = QPushButton("×", parent=row)
             del_btn.setFixedSize(20, 20)
-            del_btn.setStyleSheet(f"color: {_danger}; border: none; background: transparent; font-weight: bold; font-size: 16px;")
+            del_btn.setProperty("cssClass", "chk-delete")
             del_btn.clicked.connect(lambda checked=False, i_id=item.id: self._on_delete_checklist_item(i_id))
             rl.addWidget(del_btn)
 
-            row.setStyleSheet(f"QWidget {{ background: {_surface_raised}; border-radius: 4px; }}")
             self._chk_layout.addWidget(row)
 
     def _on_add_checklist_item(self) -> None:
@@ -342,10 +314,20 @@ class TaskDialog(QDialog):
     def _on_save(self) -> None:
         title = self._title_edit.text().strip()
         if not title:
-            QMessageBox.warning(self, "Geçersiz Giriş", "Görev başlığı boş olamaz.")
+            self._error_label.setText("Görev başlığı boş olamaz.")
+            self._error_label.show()
+            self._set_field_error(self._title_edit, True)
             self._title_edit.setFocus()
             return
+
+        self._error_label.hide()
+        self._set_field_error(self._title_edit, False)
         self.accept()
+
+    def _set_field_error(self, widget: QWidget, error: bool) -> None:
+        widget.setProperty("error", "true" if error else "false")
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
 
     def _on_delete(self) -> None:
         # Silme kararını çağırana bırak; özel result kodu ile sinyalleşir
