@@ -20,6 +20,8 @@ from PySide6.QtWidgets import (
 from controllers.project_controller import ProjectController
 from controllers.stage_controller import StageController
 from controllers.task_controller import TaskController
+from core.events.app_events import NEW_PROJECT_REQUESTED, PROJECT_DETAIL_REQUESTED
+from core.events.event_bus import EventBus
 from di_container import DIContainer
 from domain.models.project import Project
 from presentation.dialogs.project_dialog import ProjectDialog
@@ -48,12 +50,19 @@ class ProjectsPage(QWidget):
         self._stages = []
         self._setup_ui()
         self._connect_signals()
+        self._subscribe_events()
         self._controller.load_projects()
 
     def _setup_ui(self) -> None:
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+
+        main_divider = QFrame(parent=self)
+        main_divider.setFrameShape(QFrame.Shape.VLine)
+        main_divider.setFixedWidth(1)
+        main_divider.setProperty("cssClass", "divider")
+        layout.addWidget(main_divider)
 
         layout.addWidget(self._build_left_panel())
 
@@ -88,7 +97,7 @@ class ProjectsPage(QWidget):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self._list_container = QWidget(parent=scroll)
-        self._list_container.setStyleSheet("background: transparent;")
+        self._list_container.setProperty("cssClass", "transparent-bg")
         self._list_layout = QVBoxLayout(self._list_container)
         self._list_layout.setContentsMargins(8, 0, 8, 8)
         self._list_layout.setSpacing(4)
@@ -118,14 +127,28 @@ class ProjectsPage(QWidget):
         title.setProperty("cssClass", "title-small")
         layout.addWidget(title, 1)
 
-        new_btn = AnimatedButton("+", parent=header)
-        new_btn.setFixedSize(32, 32)
+        new_btn = AnimatedButton("+ Yeni Proje", parent=header)
+        new_btn.setFixedSize(130, 36)
         new_btn.setObjectName("accent_button")
         new_btn.setToolTip("Yeni Proje Oluştur")
         new_btn.clicked.connect(self._on_new_project)
         layout.addWidget(new_btn)
 
         return header
+
+    def _subscribe_events(self) -> None:
+        bus = EventBus.instance()
+        bus.subscribe(NEW_PROJECT_REQUESTED, self.open_new_project_dialog)
+        bus.subscribe(PROJECT_DETAIL_REQUESTED, self._on_project_detail_requested)
+        self.destroyed.connect(self._unsubscribe_events)
+
+    def _unsubscribe_events(self) -> None:
+        bus = EventBus.instance()
+        bus.unsubscribe(NEW_PROJECT_REQUESTED, self.open_new_project_dialog)
+        bus.unsubscribe(PROJECT_DETAIL_REQUESTED, self._on_project_detail_requested)
+
+    def _on_project_detail_requested(self, project_id: int) -> None:
+        self.open_project_detail(project_id)
 
     def _connect_signals(self) -> None:
         self._controller.projects_loaded.connect(self._on_projects_loaded)
