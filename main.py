@@ -44,6 +44,14 @@ def main() -> None:
     else:
         app.setFont(QFont("Segoe UI", 10))
 
+    # Global Scroll Event Filter'ı yükle
+    from presentation.utils.scroll_filter import WheelEventFilter
+    app.installEventFilter(WheelEventFilter(app))
+
+    # Modülleri registry'ye kaydet; MainWindow'dan önce çağrılmalıdır
+    from presentation.modules import setup_modules  # noqa: PLC0415
+    setup_modules(container)
+
     window = MainWindow()
     window.show()
 
