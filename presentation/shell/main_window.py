@@ -6,8 +6,7 @@ from __future__ import annotations
 
 import logging
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QMainWindow,
@@ -16,29 +15,18 @@ from PySide6.QtWidgets import (
 )
 
 import config
+from core.events.app_events import NEW_PROJECT_REQUESTED, PROJECT_DETAIL_REQUESTED
+from core.events.event_bus import EventBus
 from core.managers.preference_manager import PreferenceManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
+from core.module_registry import ModuleRegistry
 from di_container import DIContainer
 from presentation.dialogs.search_dialog import SearchDialog
-from presentation.pages.dashboard_page import DashboardPage
-from presentation.pages.ideas_page import IdeasPage
-from presentation.pages.projects_page import ProjectsPage
-from presentation.pages.settings_page import SettingsPage
-from presentation.pages.tasks_page import TasksPage
 from presentation.shell.sidebar import Sidebar
 from presentation.widgets.toast import Toast
 
 logger = logging.getLogger(__name__)
-
-# Sayfa adı → QStackedWidget index eşlemesi
-PAGE_INDEX: dict[str, int] = {
-    "dashboard": 0,
-    "projects": 1,
-    "ideas": 2,
-    "tasks": 3,
-    "settings": 4,
-}
 
 
 class MainWindow(QMainWindow):
@@ -52,6 +40,7 @@ class MainWindow(QMainWindow):
         self._prefs = PreferenceManager.instance()
         self._theme = ThemeManager.instance()
         self._di = DIContainer.instance()
+        self._page_index: dict[str, int] = {}
 
         self._setup_window()
         self._setup_ui()
@@ -89,41 +78,13 @@ class MainWindow(QMainWindow):
         self._sidebar.search_requested.connect(self._open_search_dialog)
         root_layout.addWidget(self._sidebar)
 
-        # Sağ panel: Sayfalar
+        # Sağ panel: Sayfalar — ModuleRegistry'den dinamik yükleme
         self._stack = QStackedWidget(parent=central)
-        _container = DIContainer.instance()
-        self._stack.addWidget(
-            DashboardPage(
-                parent=self._stack,
-                controller=_container.dashboard_controller,
-                idea_controller=_container.idea_controller,
-            )
-        )   # 0
-        self._projects_page = ProjectsPage(
-            parent=self._stack,
-            di_container=_container
-        )
-        self._stack.addWidget(self._projects_page)
-        self._stack.addWidget(                                     # 2
-            IdeasPage(
-                parent=self._stack,
-                idea_controller=_container.idea_controller,
-                project_controller=_container.project_controller,
-            )
-        )
-        self._stack.addWidget(                                     # 3
-            TasksPage(
-                parent=self._stack,
-                controller=_container.task_controller,
-                project_controller=_container.project_controller,
-            )
-        )
-        self._stack.addWidget(
-            SettingsPage(
-                parent=self._stack,
-                controller=_container.settings_controller
-            )
-        )   # 4
+        registry = ModuleRegistry.instance()
+        for i, plugin in enumerate(registry.plugins()):
+            page = plugin.factory(self._stack)
+            self._stack.addWidget(page)
+            self._page_index[plugin.page_key] = i
         root_layout.addWidget(self._stack)
         
         # Toast bildirimleri pencerenin üstünde yer alır
@@ -131,7 +92,7 @@ class MainWindow(QMainWindow):
 
     def _navigate_to(self, page_name: str) -> None:
         """Sidebar navigasyon sinyalini alarak ilgili sayfayı gösterir."""
-        index = PAGE_INDEX.get(page_name, 0)
+        index = self._page_index.get(page_name, 0)
         self._stack.setCurrentIndex(index)
         self._sidebar.set_active_page(page_name)
         logger.debug("Sayfa değiştirildi: %s (index=%d)", page_name, index)
@@ -148,7 +109,7 @@ class MainWindow(QMainWindow):
 
     def _create_new_project(self) -> None:
         self._navigate_to("projects")
-        self._projects_page.open_new_project_dialog()
+        EventBus.instance().publish(NEW_PROJECT_REQUESTED)
 
     def _open_search_dialog(self) -> None:
         dialog = SearchDialog(controller=self._di.search_controller, parent=self)
@@ -158,9 +119,7 @@ class MainWindow(QMainWindow):
     def _on_search_item_selected(self, type_str: str, item_id: int) -> None:
         if type_str == "Proje":
             self._navigate_to("projects")
-            # Proje detayını açmak için projeler sayfasına ID göndermeliyiz
-            # Fakat şu an projects_page'e direct erişimimiz self._projects_page üzerinden var:
-            self._projects_page.open_project_detail(item_id)
+            EventBus.instance().publish(PROJECT_DETAIL_REQUESTED, project_id=item_id)
         elif type_str == "Görev":
             self._navigate_to("tasks")
         elif type_str == "Fikir":

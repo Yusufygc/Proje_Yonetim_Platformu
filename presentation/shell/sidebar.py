@@ -11,16 +11,9 @@ from core.managers.icon_manager import IconManager
 from core.managers.preference_manager import PreferenceManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
+from core.module_registry import ModuleRegistry
 
 logger = logging.getLogger(__name__)
-
-NAV_ITEMS: list[tuple[str, str, str, str]] = [
-    ("dashboard", "nav_dashboard", "Dashboard", "house"),
-    ("projects", "nav_projects", "Projeler", "folder"),
-    ("ideas", "nav_ideas", "Fikirler", "lightbulb"),
-    ("tasks", "nav_tasks", "Görevler", "square-check"),
-    ("settings", "nav_settings", "Ayarlar", "settings"),
-]
 
 
 def _tr(key: str, default: str) -> str:
@@ -41,16 +34,15 @@ class ThemeToggleSwitch(QFrame):
         self._anim = QPropertyAnimation(self._thumb, b"pos", parent=self)
         self._anim.setDuration(200)
         self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
-        self._apply_style()
 
     def set_active(self, active: bool) -> None:
         self._active = active
-        self._apply_style()
+        self._refresh_qss()
         self._thumb.move(self._get_x(), 3)
 
     def animate_to_state(self, active: bool) -> None:
         self._active = active
-        self._apply_style()
+        self._refresh_qss()
         self._anim.stop()
         self._anim.setStartValue(self._thumb.pos())
         self._anim.setEndValue(QPoint(self._get_x(), 3))
@@ -59,13 +51,13 @@ class ThemeToggleSwitch(QFrame):
     def _get_x(self) -> int:
         return 23 if self._active else 3
 
-    def _apply_style(self) -> None:
-        if self._active:
-            self.setStyleSheet("ThemeToggleSwitch { background-color: #6366F1; border-radius: 12px; }")
-            self._thumb.setStyleSheet("background-color: #FFFFFF; border-radius: 9px;")
-        else:
-            self.setStyleSheet("ThemeToggleSwitch { background-color: #2A2D38; border-radius: 12px; }")
-            self._thumb.setStyleSheet("background-color: #8B8FA8; border-radius: 9px;")
+    def _refresh_qss(self) -> None:
+        """active property'sini günceller; QSS kuralı ThemeToggleSwitch[active="true"] ile çalışır."""
+        self.setProperty("active", "true" if self._active else "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self._thumb.style().unpolish(self._thumb)
+        self._thumb.style().polish(self._thumb)
 
     def mousePressEvent(self, event: object) -> None:
         self.clicked.emit()
@@ -83,34 +75,28 @@ class SidebarNavButton(QPushButton):
         self.setFixedHeight(44)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.set_expanded(True)
-        self._apply_style(active=False)
+        self._update_icon(active=False)
 
     def set_expanded(self, expanded: bool) -> None:
         self.setText(f"  {_tr(self._label_key, self._default_label)}" if expanded else "")
 
     def set_active(self, active: bool) -> None:
         self.setChecked(active)
-        self._apply_style(active)
+        self._update_icon(active)
 
     def refresh_theme(self) -> None:
-        self._apply_style(self.isChecked())
+        self._update_icon(self.isChecked())
 
-    def _apply_style(self, active: bool) -> None:
+    def _update_icon(self, active: bool) -> None:
+        """Tema/aktiflik durumuna göre ikon rengini günceller; CSS QSS tarafından yönetilir."""
         theme_mgr = ThemeManager.instance()
         is_dark = theme_mgr.current_theme == "dark"
         if active:
-            # Dark modda beyaz ikon (koyu arka planüzerinde), light modda accent rengi (açık arka plan üzerinde)
+            # Koyu temada aktif buton arka planı koyu olduğundan ikon beyaz,
+            # açık temada accent rengiyle kontrast sağlanır.
             icon_color = "#FFFFFF" if is_dark else theme_mgr.color("accent_start")
-            # Aktif buton arka planı — her iki temada da accent yarı saydam
-            accent = theme_mgr.color("accent_start")
-            self.setStyleSheet(
-                f"QPushButton {{ background-color: rgba(99,102,241,0.18); "
-                f"border-left: 3px solid {accent}; "
-                f"border-radius: 8px; color: {accent}; font-weight: 700; }}"
-            )
         else:
             icon_color = theme_mgr.color("text_secondary")
-            self.setStyleSheet("")
         self.setIcon(IconManager.instance().get_icon(self._icon_name, icon_color))
 
 
@@ -159,7 +145,7 @@ class Sidebar(QFrame):
         self._search_btn.setFixedHeight(36)
         self._search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._search_btn.setProperty("cssClass", "btn-secondary")
-        self._search_btn.setStyleSheet("text-align: left; padding-left: 12px; margin-top: 8px;")
+        self._search_btn.setObjectName("sidebar_search_btn")
         self._search_btn.clicked.connect(self.search_requested.emit)
         layout.addWidget(self._search_btn)
 
@@ -169,10 +155,14 @@ class Sidebar(QFrame):
         separator.setFixedHeight(1)
         layout.addWidget(separator)
 
-        for page_name, label_key, default_label, icon_name in NAV_ITEMS:
-            btn = SidebarNavButton(page_name, label_key, default_label, icon_name, parent=self)
-            btn.clicked.connect(lambda checked, p=page_name: self._on_nav_clicked(p))
-            self._nav_buttons[page_name] = btn
+        for plugin in ModuleRegistry.instance().plugins():
+            btn = SidebarNavButton(
+                plugin.page_key, plugin.nav_label_key,
+                plugin.nav_label_default, plugin.nav_icon,
+                parent=self,
+            )
+            btn.clicked.connect(lambda checked, p=plugin.page_key: self._on_nav_clicked(p))
+            self._nav_buttons[plugin.page_key] = btn
             layout.addWidget(btn)
 
         layout.addStretch(1)
@@ -183,8 +173,7 @@ class Sidebar(QFrame):
         theme_layout.setSpacing(8)
 
         self._theme_label = QLabel(parent=self._theme_container)
-        self._theme_label.setProperty("cssClass", "text-secondary")
-        self._theme_label.setStyleSheet("font-size: 13px; font-weight: 500;")
+        self._theme_label.setProperty("cssClass", "theme-label")
         self._theme_switch = ThemeToggleSwitch(parent=self._theme_container)
         self._theme_switch.clicked.connect(self._toggle_theme)
         theme_layout.addWidget(self._theme_label, 1)
