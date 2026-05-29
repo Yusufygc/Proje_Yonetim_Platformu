@@ -430,6 +430,23 @@ class TasksPage(QWidget):
         current = self._tree.currentItem()
         if current is not None:
             data["parent_task_id"] = current.data(0, Qt.ItemDataRole.UserRole)
+            
+        status = self._status_filter.currentData()
+        if status:
+            data["status"] = status
+            
+        priority = self._priority_filter.currentData()
+        if priority:
+            data["priority"] = priority
+            
+        task_type = self._type_filter.currentData()
+        if task_type:
+            data["task_type"] = task_type
+            
+        stage_id = self._stage_filter.currentData()
+        if stage_id:
+            data["stage_id"] = stage_id
+            
         self._task_controller.create_task(self._selected_project_id, title, **data)
         self._quick_add_edit.clear()
 
