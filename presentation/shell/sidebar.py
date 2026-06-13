@@ -7,17 +7,14 @@ from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
 import config
-from core.managers.icon_manager import IconManager
+from core.managers.icon_manager import IconManager, Icons
 from core.managers.preference_manager import PreferenceManager
-from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
 from core.module_registry import ModuleRegistry
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr as _tr
 
 logger = logging.getLogger(__name__)
-
-
-def _tr(key: str, default: str) -> str:
-    return StringManager.get(key, default)
 
 
 class ThemeToggleSwitch(QFrame):
@@ -26,11 +23,11 @@ class ThemeToggleSwitch(QFrame):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setFixedHeight(24)
-        self.setFixedWidth(44)
+        self.setFixedHeight(Size.THEME_SWITCH_H)
+        self.setFixedWidth(Size.THEME_SWITCH_W)
         self._active = False
         self._thumb = QFrame(parent=self)
-        self._thumb.setFixedSize(18, 18)
+        self._thumb.setFixedSize(Size.THEME_THUMB, Size.THEME_THUMB)
         self._anim = QPropertyAnimation(self._thumb, b"pos", parent=self)
         self._anim.setDuration(200)
         self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
@@ -49,7 +46,8 @@ class ThemeToggleSwitch(QFrame):
         self._anim.start()
 
     def _get_x(self) -> int:
-        return 23 if self._active else 3
+        # Thumb, switch içinde 3px boşlukla konumlanır; sağ taraf = switch_w - thumb - 3
+        return Size.THEME_SWITCH_W - Size.THEME_THUMB - 3 if self._active else 3
 
     def _refresh_qss(self) -> None:
         """active property'sini günceller; QSS kuralı ThemeToggleSwitch[active="true"] ile çalışır."""
@@ -65,14 +63,25 @@ class ThemeToggleSwitch(QFrame):
 
 
 class SidebarNavButton(QPushButton):
-    def __init__(self, page_name: str, label_key: str, default_label: str, icon_name: str, parent: QWidget) -> None:
+    def __init__(
+        self,
+        page_name: str,
+        label_key: str,
+        default_label: str,
+        icon_name: str,
+        parent: QWidget,
+        theme: ThemeManager,
+        icons: IconManager,
+    ) -> None:
         super().__init__(parent=parent)
         self.page_name = page_name
         self._label_key = label_key
         self._default_label = default_label
         self._icon_name = icon_name
+        self._theme = theme
+        self._icons = icons
         self.setCheckable(True)
-        self.setFixedHeight(44)
+        self.setFixedHeight(Size.SIDEBAR_NAV_BTN_H)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.set_expanded(True)
         self._update_icon(active=False)
@@ -88,26 +97,33 @@ class SidebarNavButton(QPushButton):
         self._update_icon(self.isChecked())
 
     def _update_icon(self, active: bool) -> None:
-        """Tema/aktiflik durumuna göre ikon rengini günceller; CSS QSS tarafından yönetilir."""
-        theme_mgr = ThemeManager.instance()
-        is_dark = theme_mgr.current_theme == "dark"
+        """Tema/aktiflik durumuna göre ikon rengini günceller; renk paletten alınır."""
         if active:
-            # Koyu temada aktif buton arka planı koyu olduğundan ikon beyaz,
-            # açık temada accent rengiyle kontrast sağlanır.
-            icon_color = "#FFFFFF" if is_dark else theme_mgr.color("accent_start")
+            # Aktif buton rengi tema paletindeki icon_on_accent token'ından gelir;
+            # koyu temada beyaz, açık temada tema tanımlı kontrast rengi.
+            icon_color = self._theme.color("icon_on_accent")
         else:
-            icon_color = theme_mgr.color("text_secondary")
-        self.setIcon(IconManager.instance().get_icon(self._icon_name, icon_color))
+            icon_color = self._theme.color("text_secondary")
+        self.setIcon(self._icons.get_icon(self._icon_name, icon_color))
 
 
 class Sidebar(QFrame):
     page_requested = Signal(str)
     search_requested = Signal()
 
-    def __init__(self, parent: QWidget) -> None:
+    def __init__(
+        self,
+        parent: QWidget,
+        theme: ThemeManager | None = None,
+        icons: IconManager | None = None,
+        prefs: PreferenceManager | None = None,
+    ) -> None:
         super().__init__(parent=parent)
-        self._prefs = PreferenceManager.instance()
-        self._theme = ThemeManager.instance()
+        # Constructor injection tercih edilir; None ise singleton'a düşülür
+        # (geriye dönük uyum ve basit test kurulumları için).
+        self._theme = theme or ThemeManager.instance()
+        self._icons = icons or IconManager.instance()
+        self._prefs = prefs or PreferenceManager.instance()
         self._collapsed = self._prefs.load_sidebar_collapsed()
         self._nav_buttons: dict[str, SidebarNavButton] = {}
         self._setup_ui()
@@ -121,8 +137,8 @@ class Sidebar(QFrame):
         self.setObjectName("sidebar")
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 16, 8, 16)
-        layout.setSpacing(4)
+        layout.setContentsMargins(Spacing.MD, Spacing.XL, Spacing.MD, Spacing.XL)
+        layout.setSpacing(Spacing.XS)
 
         header = QHBoxLayout()
         self._title_label = QLabel(_tr("app_short_name", "Proje Takip"), parent=self)
@@ -131,18 +147,18 @@ class Sidebar(QFrame):
         header.addStretch()
 
         self._toggle_btn = QPushButton("", parent=self)
-        self._toggle_btn.setFixedSize(28, 28)
+        self._toggle_btn.setFixedSize(Size.SIDEBAR_TOGGLE_W, Size.SIDEBAR_TOGGLE_H)
         self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._toggle_btn.setProperty("cssClass", "btn-secondary")
         self._toggle_btn.clicked.connect(self.toggle_collapse)
         self._toggle_btn.setIcon(
-            IconManager.instance().get_icon("menu", self._theme.color("text_secondary"))
+            self._icons.get_icon(Icons.MENU, self._theme.color("text_secondary"))
         )
         header.addWidget(self._toggle_btn)
         layout.addLayout(header)
 
         self._search_btn = QPushButton(_tr("sidebar_search", "🔍 Ara (Ctrl+F)"), parent=self)
-        self._search_btn.setFixedHeight(36)
+        self._search_btn.setFixedHeight(Size.SIDEBAR_SEARCH_H)
         self._search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._search_btn.setProperty("cssClass", "btn-secondary")
         self._search_btn.setObjectName("sidebar_search_btn")
@@ -152,7 +168,7 @@ class Sidebar(QFrame):
         separator = QFrame(parent=self)
         separator.setFrameShape(QFrame.Shape.HLine)
         separator.setProperty("cssClass", "divider")
-        separator.setFixedHeight(1)
+        separator.setFixedHeight(Size.SIDEBAR_DIVIDER_H)
         layout.addWidget(separator)
 
         for plugin in ModuleRegistry.instance().plugins():
@@ -160,6 +176,8 @@ class Sidebar(QFrame):
                 plugin.page_key, plugin.nav_label_key,
                 plugin.nav_label_default, plugin.nav_icon,
                 parent=self,
+                theme=self._theme,
+                icons=self._icons,
             )
             btn.clicked.connect(lambda checked, p=plugin.page_key: self._on_nav_clicked(p))
             self._nav_buttons[plugin.page_key] = btn
@@ -169,8 +187,8 @@ class Sidebar(QFrame):
 
         self._theme_container = QWidget(parent=self)
         theme_layout = QHBoxLayout(self._theme_container)
-        theme_layout.setContentsMargins(12, 8, 12, 8)
-        theme_layout.setSpacing(8)
+        theme_layout.setContentsMargins(Spacing.LG, Spacing.MD, Spacing.LG, Spacing.MD)
+        theme_layout.setSpacing(Spacing.MD)
 
         self._theme_label = QLabel(parent=self._theme_container)
         self._theme_label.setProperty("cssClass", "theme-label")
@@ -181,7 +199,7 @@ class Sidebar(QFrame):
         layout.addWidget(self._theme_container)
 
         self._theme_collapsed_btn = QPushButton(parent=self)
-        self._theme_collapsed_btn.setFixedSize(36, 36)
+        self._theme_collapsed_btn.setFixedSize(Size.THEME_COLLAPSED_BTN, Size.THEME_COLLAPSED_BTN)
         self._theme_collapsed_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._theme_collapsed_btn.setProperty("cssClass", "theme-collapsed-btn")
         self._theme_collapsed_btn.clicked.connect(self._toggle_theme)
@@ -204,7 +222,7 @@ class Sidebar(QFrame):
         for btn in self._nav_buttons.values():
             btn.refresh_theme()
         self._toggle_btn.setIcon(
-            IconManager.instance().get_icon("menu", self._theme.color("text_secondary"))
+            self._icons.get_icon(Icons.MENU, self._theme.color("text_secondary"))
         )
 
     def _apply_theme_labels(self, animate: bool) -> None:

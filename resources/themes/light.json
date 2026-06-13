@@ -24,5 +24,6 @@
   "secondary_alpha": "#5A5E7822",
   "muted_alpha": "#9CA3B822",
   "stage_active_alpha": "#0097A722",
-  "stage_done_alpha": "#00838F22"
+  "stage_done_alpha": "#00838F22",
+  "icon_on_accent": "#FFFFFF"
 }

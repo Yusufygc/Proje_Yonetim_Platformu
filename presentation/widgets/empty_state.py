@@ -8,6 +8,7 @@ from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
 import config
+from presentation.dimensions import Size, Spacing
 
 
 class EmptyState(QWidget):
@@ -27,12 +28,12 @@ class EmptyState(QWidget):
 
     def _setup_ui(self, title: str, message: str, action_label: str | None) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(10)
+        layout.setContentsMargins(Spacing.XXXL, Spacing.XXXL, Spacing.XXXL, Spacing.XXXL)
+        layout.setSpacing(Spacing.MD)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         illustration = QSvgWidget(str(config.RESOURCES_DIR / "illustrations" / "empty_state.svg"))
-        illustration.setFixedSize(160, 120)
+        illustration.setFixedSize(Size.EMPTY_ILLUSTRATION_W, Size.EMPTY_ILLUSTRATION_H)
         layout.addWidget(illustration, alignment=Qt.AlignmentFlag.AlignCenter)
 
         title_label = QLabel(title, parent=self)
@@ -49,6 +50,6 @@ class EmptyState(QWidget):
         if action_label and self._action:
             button = QPushButton(action_label, parent=self)
             button.setProperty("cssClass", "btn-primary")
-            button.setMinimumHeight(36)
+            button.setMinimumHeight(Size.ACTION_BTN_H)
             button.clicked.connect(self._action)
             layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignCenter)

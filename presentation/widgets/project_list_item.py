@@ -16,23 +16,30 @@ from PySide6.QtWidgets import (
 )
 
 from domain.models.project import Project
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 
-_STATUS_TR: dict[str, str] = {
-    "PLANNED": "Planlandı",
-    "ACTIVE": "Aktif",
-    "ON_HOLD": "Beklemede",
-    "BLOCKED": "Engellendi",
-    "COMPLETED": "Tamamlandı",
-    "ARCHIVED": "Arşivlendi",
-    "CANCELLED": "İptal",
-}
 
-_PRIORITY_TR: dict[str, str] = {
-    "LOW": "Düşük",
-    "MEDIUM": "Orta",
-    "HIGH": "Yüksek",
-    "CRITICAL": "Kritik",
-}
+def _status_labels() -> dict[str, str]:
+    """Durum etiketleri; dil değişimi kart her kurulduğunda yansısın diye fonksiyon."""
+    return {
+        "PLANNED": tr("status_planned", "Planlandı"),
+        "ACTIVE": tr("status_active", "Aktif"),
+        "ON_HOLD": tr("status_on_hold", "Beklemede"),
+        "BLOCKED": tr("status_blocked", "Engellendi"),
+        "COMPLETED": tr("status_completed", "Tamamlandı"),
+        "ARCHIVED": tr("status_archived", "Arşivlendi"),
+        "CANCELLED": tr("status_cancelled_short", "İptal"),
+    }
+
+
+def _priority_labels() -> dict[str, str]:
+    return {
+        "LOW": tr("priority_low", "Düşük"),
+        "MEDIUM": tr("priority_medium", "Orta"),
+        "HIGH": tr("priority_high", "Yüksek"),
+        "CRITICAL": tr("priority_critical", "Kritik"),
+    }
 
 
 class ProjectListItem(QFrame):
@@ -49,23 +56,23 @@ class ProjectListItem(QFrame):
 
     def _setup_ui(self, project: Project) -> None:
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setMinimumHeight(58)
+        self.setMinimumHeight(Size.LIST_ITEM_MIN_H)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 8, 12, 8)
-        layout.setSpacing(4)
+        layout.setContentsMargins(Spacing.LG, Spacing.MD, Spacing.LG, Spacing.MD)
+        layout.setSpacing(Spacing.XS)
 
         top_row = QWidget(parent=self)
         top_layout = QHBoxLayout(top_row)
         top_layout.setContentsMargins(0, 0, 0, 0)
-        top_layout.setSpacing(8)
+        top_layout.setSpacing(Spacing.MD)
 
         title_lbl = QLabel(project.title, parent=top_row)
         title_lbl.setProperty("cssClass", "project-list-title")
         title_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         top_layout.addWidget(title_lbl, 1)
 
-        status_lbl = QLabel(_STATUS_TR.get(project.status, project.status), parent=top_row)
+        status_lbl = QLabel(_status_labels().get(project.status, project.status), parent=top_row)
         status_lbl.setProperty("inline-status", project.status)
         status_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         top_layout.addWidget(status_lbl)
@@ -81,9 +88,9 @@ class ProjectListItem(QFrame):
         bottom_row = QWidget(parent=self)
         bottom_layout = QHBoxLayout(bottom_row)
         bottom_layout.setContentsMargins(0, 0, 0, 0)
-        bottom_layout.setSpacing(8)
+        bottom_layout.setSpacing(Spacing.MD)
 
-        priority_lbl = QLabel(f"● {_PRIORITY_TR.get(project.priority, project.priority)}", parent=bottom_row)
+        priority_lbl = QLabel(f"● {_priority_labels().get(project.priority, project.priority)}", parent=bottom_row)
         priority_lbl.setProperty("inline-priority", project.priority)
         priority_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         bottom_layout.addWidget(priority_lbl)
@@ -92,8 +99,8 @@ class ProjectListItem(QFrame):
         progress = QProgressBar(parent=bottom_row)
         progress.setRange(0, 100)
         progress.setValue(project.progress_percent)
-        progress.setMaximumWidth(80)
-        progress.setMaximumHeight(4)
+        progress.setMaximumWidth(Size.PROGRESS_W)
+        progress.setMaximumHeight(Size.PROGRESS_H)
         progress.setTextVisible(False)
         progress.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         bottom_layout.addWidget(progress)
@@ -103,19 +110,19 @@ class ProjectListItem(QFrame):
         try:
             active_stage = next((s.name for s in project.stages if s.status == "ACTIVE"), None)
             if active_stage:
-                meta_parts.append(f"Aşama: {active_stage}")
+                meta_parts.append(tr("card_meta_stage", "Aşama: {name}").format(name=active_stage))
         except Exception:
             pass
         try:
             open_tasks = len([t for t in project.tasks if t.status not in {"DONE", "CANCELLED"}])
-            meta_parts.append(f"Açık görev: {open_tasks}")
+            meta_parts.append(tr("card_meta_open_tasks", "Açık görev: {count}").format(count=open_tasks))
         except Exception:
             pass
-        meta_parts.append(f"Güncellendi: {project.updated_at.date()}")
+        meta_parts.append(tr("card_meta_updated", "Güncellendi: {date}").format(date=project.updated_at.date()))
         try:
             tags = [tag.tag_name for tag in project.tags[:3]]
             if tags:
-                meta_parts.append("Etiket: " + ", ".join(tags))
+                meta_parts.append(tr("card_meta_tags", "Etiket: {tags}").format(tags=", ".join(tags)))
         except Exception:
             pass
         meta_lbl = QLabel(" · ".join(meta_parts), parent=self)

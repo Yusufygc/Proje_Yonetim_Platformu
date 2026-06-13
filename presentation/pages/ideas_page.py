@@ -23,8 +23,10 @@ from controllers.idea_controller import IdeaController
 from controllers.project_controller import ProjectController
 from domain.enums.idea_status import IdeaStatus
 from domain.models.idea import Idea
-from presentation.dialogs.idea_dialog import IdeaDialog, _IDEA_STATUS_LABELS
+from presentation.dialogs.idea_dialog import IdeaDialog, _idea_status_labels
 from presentation.dialogs.project_dialog import ProjectDialog
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 
 _STATUS_THEME_KEYS = {
     IdeaStatus.RAW.value: "text_muted",
@@ -64,22 +66,22 @@ class IdeasPage(QWidget):
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 32, 32, 32)
-        layout.setSpacing(24)
+        layout.setContentsMargins(Spacing.PAGE, Spacing.PAGE, Spacing.PAGE, Spacing.PAGE)
+        layout.setSpacing(Spacing.XXXL)
 
         # Header
         header = QWidget(parent=self)
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(0, 0, 0, 0)
 
-        title = QLabel("Fikir Havuzu", parent=header)
+        title = QLabel(tr("ideas_title", "Fikir Havuzu"), parent=header)
         title.setProperty("cssClass", "title-medium")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
 
-        add_btn = QPushButton("+ Yeni Fikir", parent=header)
-        add_btn.setMinimumSize(140, 40)
+        add_btn = QPushButton(tr("ideas_add_btn", "+ Yeni Fikir"), parent=header)
+        add_btn.setMinimumSize(Size.BTN_IDEA_W, Size.BTN_IDEA_H)
         add_btn.setProperty("cssClass", "btn-primary")
         add_btn.clicked.connect(self._on_add_idea)
         header_layout.addWidget(add_btn)
@@ -100,7 +102,10 @@ class IdeasPage(QWidget):
         self._list_widget.itemSelectionChanged.connect(self._on_selection_changed)
         list_layout.addWidget(self._list_widget)
 
-        self._empty_label = QLabel("Henüz fikir yok.\nYeni oluşturmak için\n+ Yeni Fikir'e basın.", parent=list_container)
+        self._empty_label = QLabel(
+            tr("ideas_empty", "Henüz fikir yok.\nYeni oluşturmak için\n+ Yeni Fikir'e basın."),
+            parent=list_container,
+        )
         self._empty_label.setProperty("cssClass", "text-secondary")
         self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._empty_label.hide()
@@ -110,8 +115,8 @@ class IdeasPage(QWidget):
         self._detail_panel = QFrame(parent=splitter)
         self._detail_panel.setProperty("cssClass", "panel")
         self._detail_layout = QVBoxLayout(self._detail_panel)
-        self._detail_layout.setContentsMargins(32, 32, 32, 32)
-        self._detail_layout.setSpacing(16)
+        self._detail_layout.setContentsMargins(Spacing.PAGE, Spacing.PAGE, Spacing.PAGE, Spacing.PAGE)
+        self._detail_layout.setSpacing(Spacing.XL)
         
         self._build_detail_panel()
         
@@ -154,14 +159,14 @@ class IdeasPage(QWidget):
         btn_layout = QHBoxLayout(btn_row)
         btn_layout.setContentsMargins(0,0,0,0)
         
-        self._edit_btn = QPushButton("Düzenle", parent=btn_row)
-        self._edit_btn.setMinimumHeight(36)
+        self._edit_btn = QPushButton(tr("action_edit", "Düzenle"), parent=btn_row)
+        self._edit_btn.setMinimumHeight(Size.ACTION_BTN_H)
         self._edit_btn.setProperty("cssClass", "btn-secondary")
         self._edit_btn.clicked.connect(self._on_edit_idea)
         btn_layout.addWidget(self._edit_btn)
-        
-        self._convert_btn = QPushButton("Projeye Dönüştür", parent=btn_row)
-        self._convert_btn.setMinimumHeight(36)
+
+        self._convert_btn = QPushButton(tr("ideas_convert_btn", "Projeye Dönüştür"), parent=btn_row)
+        self._convert_btn.setMinimumHeight(Size.ACTION_BTN_H)
         self._convert_btn.setProperty("cssClass", "btn-primary")
         self._convert_btn.clicked.connect(self._on_convert_to_project)
         btn_layout.addWidget(self._convert_btn)
@@ -215,7 +220,7 @@ class IdeasPage(QWidget):
         
         self._idea_title.setText(idea.title)
         
-        status_label = _IDEA_STATUS_LABELS.get(idea.status, idea.status)
+        status_label = _idea_status_labels().get(idea.status, idea.status)
         self._idea_status.setText(status_label)
         self._idea_status.setProperty("badge-value", idea.status)
         self._idea_status.style().unpolish(self._idea_status)
@@ -223,11 +228,11 @@ class IdeasPage(QWidget):
         
         desc = ""
         if idea.problem:
-            desc += f"<b>Çözülen Problem:</b><br>{idea.problem}<br><br>"
+            desc += f"<b>{tr('idea_dialog_problem_label', 'Çözülen Problem')}:</b><br>{idea.problem}<br><br>"
         if idea.solution:
-            desc += f"<b>Önerilen Çözüm:</b><br>{idea.solution}<br><br>"
+            desc += f"<b>{tr('idea_dialog_solution_label', 'Önerilen Çözüm')}:</b><br>{idea.solution}<br><br>"
         if idea.expected_value:
-            desc += f"<b>Beklenen Değer:</b><br>{idea.expected_value}<br><br>"
+            desc += f"<b>{tr('ideas_expected_label', 'Beklenen Değer')}:</b><br>{idea.expected_value}<br><br>"
             
         self._desc_lbl.setText(desc)
         
@@ -262,8 +267,8 @@ class IdeasPage(QWidget):
             
         reply = QMessageBox.question(
             self,
-            "Projeye Dönüştür",
-            "Bu fikir için proje formu açılacak. Bilgileri kontrol edip onaylayın.",
+            tr("ideas_convert_btn", "Projeye Dönüştür"),
+            tr("ideas_convert_confirm", "Bu fikir için proje formu açılacak. Bilgileri kontrol edip onaylayın."),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
@@ -290,4 +295,4 @@ class IdeasPage(QWidget):
         self._controller.load_ideas()
 
     def _on_error(self, msg: str) -> None:
-        QMessageBox.critical(self, "Hata", msg)
+        QMessageBox.critical(self, tr("error_title", "Hata"), msg)

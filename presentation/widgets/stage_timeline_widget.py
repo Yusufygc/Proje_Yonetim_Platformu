@@ -14,15 +14,21 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from core.managers.theme_manager import ThemeManager
 from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 
-_STATUS_TR: dict[str, str] = {
-    StageStatus.NOT_STARTED.value: "Bekliyor",
-    StageStatus.ACTIVE.value: "Aktif",
-    StageStatus.DONE.value: "Tamamlandı",
-    StageStatus.SKIPPED.value: "Atlandı",
-}
+
+def _status_labels() -> dict[str, str]:
+    """Aşama durum etiketleri; dil değişimi her render'da yansısın diye fonksiyon."""
+    return {
+        StageStatus.NOT_STARTED.value: tr("stage_status_not_started", "Bekliyor"),
+        StageStatus.ACTIVE.value: tr("stage_status_active", "Aktif"),
+        StageStatus.DONE.value: tr("stage_status_done", "Tamamlandı"),
+        StageStatus.SKIPPED.value: tr("stage_status_skipped", "Atlandı"),
+    }
 
 
 class StageTimelineWidget(QWidget):
@@ -31,14 +37,15 @@ class StageTimelineWidget(QWidget):
     complete_requested = Signal(int)
     activate_requested = Signal(int)
 
-    def __init__(self, parent: QWidget) -> None:
+    def __init__(self, parent: QWidget, theme: ThemeManager | None = None) -> None:
         super().__init__(parent=parent)
         self._rows_layout = QVBoxLayout(self)
         self._rows_layout.setContentsMargins(0, 0, 0, 0)
-        self._rows_layout.setSpacing(4)
+        self._rows_layout.setSpacing(Spacing.XS)
         self._stages: list[ProjectStage] = []
-        from core.managers.theme_manager import ThemeManager
-        ThemeManager.instance().theme_changed.connect(self._on_theme_changed)
+        # Constructor injection tercih edilir; None ise singleton'a düşülür.
+        self._theme = theme or ThemeManager.instance()
+        self._theme.theme_changed.connect(self._on_theme_changed)
 
     def _on_theme_changed(self, _theme_name: str) -> None:
         if self._stages:
@@ -58,15 +65,15 @@ class StageTimelineWidget(QWidget):
     def _build_row(self, stage: ProjectStage, has_active: bool) -> QFrame:
         """Tek bir aşama satırı oluşturur; duruma göre buton ve QSS property uygular."""
         is_active = stage.status == StageStatus.ACTIVE.value
-        is_completed = stage.status == StageStatus.DONE.value
         is_pending = stage.status == StageStatus.NOT_STARTED.value
 
         card = QFrame(parent=self)
         card.setObjectName("stage_card")
         card.setProperty("stage-status", stage.status)
         layout = QHBoxLayout(card)
-        layout.setContentsMargins(14, 10, 14, 10)
-        layout.setSpacing(10)
+        # 14px yatay, 10px dikey — standart ızgara arası değer; Spacing.LG (12) ile yakın tasarım kararı
+        layout.setContentsMargins(14, Spacing.MD, 14, Spacing.MD)
+        layout.setSpacing(Spacing.MD)
 
         dot = QLabel("●", parent=card)
         dot.setObjectName("stage_dot")
@@ -78,7 +85,7 @@ class StageTimelineWidget(QWidget):
         name_lbl.setProperty("stage-status", stage.status)
         layout.addWidget(name_lbl, 1)
 
-        status_text = _STATUS_TR.get(stage.status, stage.status)
+        status_text = _status_labels().get(stage.status, stage.status)
         badge = QLabel(status_text, parent=card)
         badge.setObjectName("stage_badge")
         badge.setProperty("stage-status", stage.status)
@@ -87,7 +94,7 @@ class StageTimelineWidget(QWidget):
         if is_active:
             btn = QPushButton("Tamamla", parent=card)
             btn.setProperty("cssClass", "btn-primary")
-            btn.setMinimumSize(80, 28)
+            btn.setMinimumSize(Size.BTN_MD_W, Spacing.XXXL)
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.complete_requested.emit(sid)
             )
@@ -95,7 +102,7 @@ class StageTimelineWidget(QWidget):
         elif is_pending and not has_active:
             btn = QPushButton("Aktif Et", parent=card)
             btn.setProperty("cssClass", "btn-secondary")
-            btn.setMinimumSize(80, 28)
+            btn.setMinimumSize(Size.BTN_MD_W, Spacing.XXXL)
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.activate_requested.emit(sid)
             )

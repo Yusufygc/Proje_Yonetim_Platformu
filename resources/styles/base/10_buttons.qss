@@ -1,0 +1,44 @@
+/* ================================================================
+   BASE/BUTTONS — QPushButton varyantlari
+   ================================================================ */
+
+QPushButton {
+    background-color: @surface;
+    color: @text_primary;
+    border: 1px solid @border;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 13px;
+}
+QPushButton:hover {
+    background-color: @accent_start;
+    border-color: @accent_start;
+    color: #FFFFFF;
+}
+QPushButton:focus, QComboBox:focus, QTreeWidget:focus {
+    border: 1px solid @accent_start;
+}
+QPushButton[primary="true"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 @accent_start, stop:1 @accent_end);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 600;
+}
+QPushButton[primary="true"]:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 @accent_end, stop:1 @accent_start);
+}
+QPushButton#accent_button {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 @accent_start, stop:1 @accent_end);
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
+}
+QPushButton#accent_button:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 @accent_end, stop:1 @accent_start);
+}

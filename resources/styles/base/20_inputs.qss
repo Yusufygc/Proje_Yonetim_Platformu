@@ -1,0 +1,80 @@
+/* ================================================================
+   BASE/INPUTS — Metin girisleri, combobox ve spinbox'lar
+   ================================================================ */
+
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background-color: @surface;
+    color: @text_primary;
+    border: 1px solid @border;
+    border-radius: 8px;
+    padding: 6px 10px;
+    selection-background-color: @accent_start;
+}
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
+    border: 1px solid @accent_start;
+}
+QLineEdit[error="true"], QTextEdit[error="true"] {
+    border: 1px solid @danger;
+}
+QComboBox {
+    background-color: @surface;
+    color: @text_primary;
+    border: 1px solid @border;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+QComboBox:hover {
+    border: 1px solid @accent_start;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+    border-left: 1px solid @border;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+QComboBox::down-arrow {
+    image: url(@icon_chevron_down);
+    width: 11px;
+    height: 7px;
+}
+QComboBox QAbstractItemView {
+    background-color: @surface;
+    color: @text_primary;
+    border: 1px solid @border;
+    border-radius: 8px;
+    selection-background-color: @accent_start;
+}
+QSpinBox, QDoubleSpinBox {
+    background-color: @surface;
+    color: @text_primary;
+    border: 1px solid @border;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+QSpinBox:hover, QDoubleSpinBox:hover,
+QSpinBox:focus, QDoubleSpinBox:focus {
+    border: 1px solid @accent_start;
+}
+QSpinBox::up-button, QSpinBox::down-button,
+QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
+    background-color: @surface_raised;
+    border: none;
+    width: 20px;
+    border-radius: 4px;
+}
+QSpinBox::up-button:hover, QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover {
+    background-color: @accent_alpha;
+}
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
+    image: url(@icon_chevron_up);
+    width: 9px;
+    height: 6px;
+}
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+    image: url(@icon_chevron_down);
+    width: 9px;
+    height: 6px;
+}

@@ -17,10 +17,12 @@ from PySide6.QtWidgets import (
 )
 
 from controllers.search_controller import SearchController
+from presentation.dimensions import Spacing
+from presentation.utils.i18n import tr
 
 
 class SearchDialog(QDialog):
-    # (type, id) döner
+    # (type_code, id) döner — type_code dilden bağımsız sabit: "project" | "task" | "idea"
     item_selected = Signal(str, int)
 
     def __init__(self, controller: SearchController, parent: QWidget = None) -> None:
@@ -47,12 +49,14 @@ class SearchDialog(QDialog):
         main_widget.setFixedSize(self.size())
 
         layout = QVBoxLayout(main_widget)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(12)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
+        layout.setSpacing(Spacing.LG)
 
         self._search_input = QLineEdit(parent=self)
         self._search_input.setObjectName("search_input")
-        self._search_input.setPlaceholderText("Projelerde, fikirlerde ve görevlerde ara...")
+        self._search_input.setPlaceholderText(
+            tr("search_placeholder", "Projelerde, fikirlerde ve görevlerde ara...")
+        )
         layout.addWidget(self._search_input)
 
         self._list_widget = QListWidget(parent=self)
@@ -78,23 +82,22 @@ class SearchDialog(QDialog):
         self._list_widget.clear()
         
         for p in results.get("projects", []):
-            self._add_item("Proje", p["id"], p["title"], p["description"])
-            
+            self._add_item("project", tr("search_type_project", "Proje"), p["id"], p["title"], p["description"])
+
         for t in results.get("tasks", []):
-            self._add_item("Görev", t["id"], t["title"], t["description"])
-            
+            self._add_item("task", tr("search_type_task", "Görev"), t["id"], t["title"], t["description"])
+
         for i in results.get("ideas", []):
-            self._add_item("Fikir", i["id"], i["title"], i["description"])
+            self._add_item("idea", tr("search_type_idea", "Fikir"), i["id"], i["title"], i["description"])
 
         if self._list_widget.count() > 0:
             self._list_widget.setCurrentRow(0)
 
-    def _add_item(self, type_str: str, item_id: int, title: str, desc: str) -> None:
+    def _add_item(self, type_code: str, type_label: str, item_id: int, title: str, desc: str) -> None:
         item = QListWidgetItem()
-        # Görünüm
-        item.setText(f"[{type_str}] {title}\n{desc[:80] + '...' if len(desc) > 80 else desc}")
-        # Data
-        item.setData(Qt.ItemDataRole.UserRole, type_str)
+        # Görünümde çevrilmiş etiket; data'da dilden bağımsız tip kodu taşınır
+        item.setText(f"[{type_label}] {title}\n{desc[:80] + '...' if len(desc) > 80 else desc}")
+        item.setData(Qt.ItemDataRole.UserRole, type_code)
         item.setData(Qt.ItemDataRole.UserRole + 1, item_id)
         self._list_widget.addItem(item)
 

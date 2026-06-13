@@ -25,6 +25,8 @@ from core.events.event_bus import EventBus
 from di_container import DIContainer
 from domain.models.project import Project
 from presentation.dialogs.project_dialog import ProjectDialog
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 from presentation.widgets.animated_button import AnimatedButton
 from presentation.widgets.project_detail_panel import ProjectDetailPanel
 from presentation.widgets.project_list_item import ProjectListItem
@@ -44,6 +46,7 @@ class ProjectsPage(QWidget):
         self._controller = di_container.project_controller
         self._stage_controller = di_container.stage_controller
         self._task_controller = di_container.task_controller
+        self._event_bus = di_container.event_bus
         self._selected_project_id: int | None = None
         self._selected_item: ProjectListItem | None = None
         self._list_items: dict[int, ProjectListItem] = {}
@@ -76,7 +79,7 @@ class ProjectsPage(QWidget):
 
     def _build_left_panel(self) -> QWidget:
         panel = QWidget(parent=self)
-        panel.setFixedWidth(280)
+        panel.setFixedWidth(Size.LEFT_PANEL_W)
         panel.setProperty("cssClass", "surface-panel")
 
         layout = QVBoxLayout(panel)
@@ -99,16 +102,19 @@ class ProjectsPage(QWidget):
         self._list_container = QWidget(parent=scroll)
         self._list_container.setProperty("cssClass", "transparent-bg")
         self._list_layout = QVBoxLayout(self._list_container)
-        self._list_layout.setContentsMargins(8, 0, 8, 8)
-        self._list_layout.setSpacing(4)
+        self._list_layout.setContentsMargins(Spacing.MD, 0, Spacing.MD, Spacing.MD)
+        self._list_layout.setSpacing(Spacing.XS)
 
-        self._empty_label = QLabel("Henüz proje yok.\nYeni oluşturmak için\n+'ya basın.", parent=self._list_container)
+        self._empty_label = QLabel(
+            tr("projects_empty", "Henüz proje yok.\nYeni oluşturmak için\n+'ya basın."),
+            parent=self._list_container,
+        )
         self._empty_label.setProperty("cssClass", "text-secondary")
         self._empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._empty_label.hide()
         self._list_layout.addWidget(self._empty_label)
         
-        self._skeleton = SkeletonLoader(parent=self._list_container)
+        self._skeleton = SkeletonLoader(parent=self._list_container, theme=self._di.theme)
         self._list_layout.addWidget(self._skeleton)
 
         self._list_layout.addStretch()
@@ -121,31 +127,29 @@ class ProjectsPage(QWidget):
     def _build_panel_header(self, parent: QWidget) -> QWidget:
         header = QWidget(parent=parent)
         layout = QHBoxLayout(header)
-        layout.setContentsMargins(16, 16, 12, 12)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.LG, Spacing.LG)
 
-        title = QLabel("Projeler", parent=header)
+        title = QLabel(tr("nav_projects", "Projeler"), parent=header)
         title.setProperty("cssClass", "title-small")
         layout.addWidget(title, 1)
 
-        new_btn = AnimatedButton("+ Yeni Proje", parent=header)
-        new_btn.setFixedSize(130, 36)
+        new_btn = AnimatedButton(tr("projects_new_btn", "+ Yeni Proje"), parent=header)
+        new_btn.setFixedSize(Size.BTN_NEW_PROJECT_W, Size.BTN_NEW_PROJECT_H)
         new_btn.setObjectName("accent_button")
-        new_btn.setToolTip("Yeni Proje Oluştur")
+        new_btn.setToolTip(tr("projects_new_tooltip", "Yeni Proje Oluştur"))
         new_btn.clicked.connect(self._on_new_project)
         layout.addWidget(new_btn)
 
         return header
 
     def _subscribe_events(self) -> None:
-        bus = EventBus.instance()
-        bus.subscribe(NEW_PROJECT_REQUESTED, self.open_new_project_dialog)
-        bus.subscribe(PROJECT_DETAIL_REQUESTED, self._on_project_detail_requested)
+        self._event_bus.subscribe(NEW_PROJECT_REQUESTED, self.open_new_project_dialog)
+        self._event_bus.subscribe(PROJECT_DETAIL_REQUESTED, self._on_project_detail_requested)
         self.destroyed.connect(self._unsubscribe_events)
 
     def _unsubscribe_events(self) -> None:
-        bus = EventBus.instance()
-        bus.unsubscribe(NEW_PROJECT_REQUESTED, self.open_new_project_dialog)
-        bus.unsubscribe(PROJECT_DETAIL_REQUESTED, self._on_project_detail_requested)
+        self._event_bus.unsubscribe(NEW_PROJECT_REQUESTED, self.open_new_project_dialog)
+        self._event_bus.unsubscribe(PROJECT_DETAIL_REQUESTED, self._on_project_detail_requested)
 
     def _on_project_detail_requested(self, project_id: int) -> None:
         self.open_project_detail(project_id)
@@ -248,8 +252,8 @@ class ProjectsPage(QWidget):
     def _on_delete_project_confirm(self, project_id: int) -> None:
         reply = QMessageBox.question(
             self,
-            "Projeyi Sil",
-            "Bu projeyi kalıcı olarak silmek istediğinizden emin misiniz?",
+            tr("projects_delete_title", "Projeyi Sil"),
+            tr("projects_delete_confirm", "Bu projeyi kalıcı olarak silmek istediğinizden emin misiniz?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:

@@ -48,6 +48,12 @@ class PreferenceManager:
     def load_theme(self) -> str:
         return str(self._settings.value("ui/theme", "dark"))
 
+    def save_language(self, lang_code: str) -> None:
+        self._settings.setValue("ui/language", lang_code)
+
+    def load_language(self) -> str:
+        return str(self._settings.value("ui/language", "tr"))
+
     def save_sidebar_collapsed(self, collapsed: bool) -> None:
         self._settings.setValue("ui/sidebar_collapsed", collapsed)
 

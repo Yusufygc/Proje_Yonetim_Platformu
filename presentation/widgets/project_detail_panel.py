@@ -25,29 +25,36 @@ from di_container import DIContainer
 from domain.models.attachment import Attachment
 from domain.models.project import Project
 from domain.models.project_stage import ProjectStage
-from presentation.pages.tasks_page import TasksPage
+from presentation.dimensions import Size, Spacing
+from presentation.pages.tasks import TasksPage
 from presentation.widgets.decision_list_widget import DecisionListWidget
 from presentation.widgets.note_list_widget import NoteListWidget
 from presentation.widgets.resource_list_widget import ResourceListWidget
 from presentation.widgets.stage_timeline_widget import StageTimelineWidget
+from presentation.utils.i18n import tr
 from presentation.widgets.task_list_widget import TaskListWidget
 
-_STATUS_THEME_KEYS: dict[str, tuple[str, str]] = {
-    "PLANNED": ("Planlandı", "text_secondary"),
-    "ACTIVE": ("Aktif", "success"),
-    "ON_HOLD": ("Beklemede", "warning"),
-    "BLOCKED": ("Engellendi", "danger"),
-    "COMPLETED": ("Tamamlandı", "success"),
-    "ARCHIVED": ("Arşivlendi", "text_muted"),
-    "CANCELLED": ("İptal Edildi", "danger"),
-}
 
-_PRIORITY_THEME_KEYS: dict[str, tuple[str, str]] = {
-    "LOW": ("Düşük", "text_secondary"),
-    "MEDIUM": ("Orta", "accent_start"),
-    "HIGH": ("Yüksek", "warning"),
-    "CRITICAL": ("Kritik", "danger"),
-}
+def _status_theme_keys() -> dict[str, tuple[str, str]]:
+    """(etiket, tema rengi anahtarı) — dil değişimi yansısın diye fonksiyon."""
+    return {
+        "PLANNED": (tr("status_planned", "Planlandı"), "text_secondary"),
+        "ACTIVE": (tr("status_active", "Aktif"), "success"),
+        "ON_HOLD": (tr("status_on_hold", "Beklemede"), "warning"),
+        "BLOCKED": (tr("status_blocked", "Engellendi"), "danger"),
+        "COMPLETED": (tr("status_completed", "Tamamlandı"), "success"),
+        "ARCHIVED": (tr("status_archived", "Arşivlendi"), "text_muted"),
+        "CANCELLED": (tr("status_cancelled", "İptal Edildi"), "danger"),
+    }
+
+
+def _priority_theme_keys() -> dict[str, tuple[str, str]]:
+    return {
+        "LOW": (tr("priority_low", "Düşük"), "text_secondary"),
+        "MEDIUM": (tr("priority_medium", "Orta"), "accent_start"),
+        "HIGH": (tr("priority_high", "Yüksek"), "warning"),
+        "CRITICAL": (tr("priority_critical", "Kritik"), "danger"),
+    }
 
 
 class ProjectDetailPanel(QWidget):
@@ -79,6 +86,7 @@ class ProjectDetailPanel(QWidget):
     def _build_empty_page(self) -> QWidget:
         page = QWidget(parent=self._stack)
         layout = QVBoxLayout(page)
+        # Yatay 60px — sabit boşluk, tasarım kararı; Spacing skalalasından büyük
         layout.setContentsMargins(60, 0, 60, 0)
         layout.addStretch()
 
@@ -87,7 +95,7 @@ class ProjectDetailPanel(QWidget):
         icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(icon_lbl)
 
-        msg_lbl = QLabel("Bir proje seçin\nveya yeni proje oluşturun", parent=page)
+        msg_lbl = QLabel(tr("detail_empty_message", "Bir proje seçin\nveya yeni proje oluşturun"), parent=page)
         msg_lbl.setProperty("cssClass", "text-muted")
         msg_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(msg_lbl)
@@ -103,7 +111,7 @@ class ProjectDetailPanel(QWidget):
         scroll.setWidget(container)
 
         layout = QVBoxLayout(container)
-        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
         layout.setSpacing(0)
 
         layout.addWidget(self._build_header_row(container))
@@ -111,7 +119,7 @@ class ProjectDetailPanel(QWidget):
         layout.addWidget(self._build_badges_row(container))
         layout.addSpacing(16)
 
-        self._desc_header = QLabel("AÇIKLAMA", parent=container)
+        self._desc_header = QLabel(tr("section_description", "AÇIKLAMA"), parent=container)
         self._desc_header.setProperty("cssClass", "section-header")
         layout.addWidget(self._desc_header)
         layout.addSpacing(6)
@@ -126,12 +134,12 @@ class ProjectDetailPanel(QWidget):
         layout.addWidget(self._github_row)
         layout.addSpacing(16)
 
-        stages_header = QLabel("SÜREÇ AŞAMALARI", parent=container)
+        stages_header = QLabel(tr("section_stages", "SÜREÇ AŞAMALARI"), parent=container)
         stages_header.setProperty("cssClass", "section-header")
         layout.addWidget(stages_header)
         layout.addSpacing(6)
 
-        self._stage_timeline = StageTimelineWidget(parent=container)
+        self._stage_timeline = StageTimelineWidget(parent=container, theme=self._di.theme)
         self._stage_timeline.complete_requested.connect(self.complete_stage_requested)
         self._stage_timeline.activate_requested.connect(self.activate_stage_requested)
         layout.addWidget(self._stage_timeline)
@@ -141,43 +149,45 @@ class ProjectDetailPanel(QWidget):
         # QTabWidget stilleri global QSS içinde yönetiliyor
 
         self._summary_page = self._build_summary_tab()
-        self._tab_widget.addTab(self._summary_page, "Özet")
+        self._tab_widget.addTab(self._summary_page, tr("tab_summary", "Özet"))
 
         self._tasks_page = TasksPage(
             parent=self._tab_widget,
             controller=self._di.task_controller,
             project_controller=self._di.project_controller,
+            theme=self._di.theme,
         )
-        self._tab_widget.addTab(self._tasks_page, "Görevler")
+        self._tab_widget.addTab(self._tasks_page, tr("tab_tasks", "Görevler"))
 
         self._decisions_page = DecisionListWidget(
             controller=self._di.decision_controller,
             parent=self._tab_widget
         )
-        self._tab_widget.addTab(self._decisions_page, "Kararlar")
+        self._tab_widget.addTab(self._decisions_page, tr("tab_decisions", "Kararlar"))
 
         self._notes_page = NoteListWidget(
             controller=self._di.note_controller,
             parent=self._tab_widget
         )
-        self._tab_widget.addTab(self._notes_page, "Notlar")
+        self._tab_widget.addTab(self._notes_page, tr("tab_notes", "Notlar"))
 
         self._resources_page = ResourceListWidget(
             controller=self._di.resource_controller,
-            parent=self._tab_widget
+            parent=self._tab_widget,
+            theme=self._di.theme,
         )
-        self._tab_widget.addTab(self._resources_page, "Kaynaklar")
+        self._tab_widget.addTab(self._resources_page, tr("tab_resources", "Kaynaklar"))
 
         self._ideas_page = self._build_simple_text_tab(
-            "Projeye bağlı fikirler ProjectIdea ilişkisiyle saklanır."
+            tr("detail_ideas_info", "Projeye bağlı fikirler ProjectIdea ilişkisiyle saklanır.")
         )
-        self._tab_widget.addTab(self._ideas_page, "Fikirler")
+        self._tab_widget.addTab(self._ideas_page, tr("tab_ideas", "Fikirler"))
 
         self._outputs_page = self._build_outputs_tab()
-        self._tab_widget.addTab(self._outputs_page, "Çıktılar")
+        self._tab_widget.addTab(self._outputs_page, tr("tab_outputs", "Çıktılar"))
 
         self._activity_page = self._build_activity_tab()
-        self._tab_widget.addTab(self._activity_page, "Aktivite")
+        self._tab_widget.addTab(self._activity_page, tr("tab_activity", "Aktivite"))
 
         layout.addWidget(self._tab_widget, 1)
         layout.addStretch()
@@ -187,8 +197,8 @@ class ProjectDetailPanel(QWidget):
     def _build_summary_tab(self) -> QWidget:
         page = QWidget(parent=self._tab_widget)
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(10)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
+        layout.setSpacing(Spacing.MD)
         self._summary_problem = QLabel("", parent=page)
         self._summary_problem.setWordWrap(True)
         self._summary_target = QLabel("", parent=page)
@@ -203,7 +213,7 @@ class ProjectDetailPanel(QWidget):
     def _build_simple_text_tab(self, text: str) -> QWidget:
         page = QWidget(parent=self._tab_widget)
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
         label = QLabel(text, parent=page)
         label.setProperty("cssClass", "text-muted")
         label.setWordWrap(True)
@@ -214,8 +224,8 @@ class ProjectDetailPanel(QWidget):
     def _build_outputs_tab(self) -> QWidget:
         page = QWidget(parent=self._tab_widget)
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(16, 16, 16, 16)
-        add_btn = QPushButton("+ Çıktı / Dosya Yolu Ekle", parent=page)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
+        add_btn = QPushButton(tr("detail_add_output_btn", "+ Çıktı / Dosya Yolu Ekle"), parent=page)
         add_btn.setProperty("cssClass", "btn-primary")
         add_btn.clicked.connect(self._on_add_output)
         layout.addWidget(add_btn)
@@ -227,7 +237,7 @@ class ProjectDetailPanel(QWidget):
     def _build_activity_tab(self) -> QWidget:
         page = QWidget(parent=self._tab_widget)
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
         self._activity_list = QListWidget(parent=page)
         self._activity_list.setProperty("cssClass", "panel-raised")
         layout.addWidget(self._activity_list)
@@ -237,21 +247,21 @@ class ProjectDetailPanel(QWidget):
         row = QWidget(parent=parent)
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
+        layout.setSpacing(Spacing.MD)
 
         self._title_lbl = QLabel("", parent=row)
         self._title_lbl.setProperty("cssClass", "title-medium")
         self._title_lbl.setWordWrap(True)
         layout.addWidget(self._title_lbl, 1)
 
-        self._edit_btn = QPushButton("Düzenle", parent=row)
-        self._edit_btn.setMinimumSize(80, 32)
+        self._edit_btn = QPushButton(tr("action_edit", "Düzenle"), parent=row)
+        self._edit_btn.setMinimumSize(Size.BTN_MD_W, Size.BTN_SM_H)
         self._edit_btn.setProperty("cssClass", "btn-primary")
         self._edit_btn.clicked.connect(self._on_edit)
         layout.addWidget(self._edit_btn)
 
         self._more_btn = QPushButton("···", parent=row)
-        self._more_btn.setMinimumSize(36, 32)
+        self._more_btn.setMinimumSize(Size.THEME_COLLAPSED_BTN, Size.BTN_SM_H)
         self._more_btn.clicked.connect(self._on_more_menu)
         layout.addWidget(self._more_btn)
         return row
@@ -291,17 +301,19 @@ class ProjectDetailPanel(QWidget):
         self._project_id = project.id
         self._title_lbl.setText(project.title)
 
-        status_text, _theme_key = _STATUS_THEME_KEYS.get(project.status, (project.status, "text_secondary"))
+        status_text, _theme_key = _status_theme_keys().get(project.status, (project.status, "text_secondary"))
         self._status_badge.setText(status_text)
         self._status_badge.setProperty("badge-type", "proj-status")
         self._status_badge.setProperty("badge-value", project.status)
         self._status_badge.style().unpolish(self._status_badge)
         self._status_badge.style().polish(self._status_badge)
 
-        priority_text, _theme_key = _PRIORITY_THEME_KEYS.get(
+        priority_text, _theme_key = _priority_theme_keys().get(
             project.priority, (project.priority, "accent_start")
         )
-        self._priority_badge.setText(f"● {priority_text} Öncelik")
+        self._priority_badge.setText(
+            tr("detail_priority_badge", "● {priority} Öncelik").format(priority=priority_text)
+        )
         self._priority_badge.setProperty("badge-type", "proj-priority")
         self._priority_badge.setProperty("badge-value", project.priority)
         self._priority_badge.style().unpolish(self._priority_badge)
@@ -316,11 +328,17 @@ class ProjectDetailPanel(QWidget):
         self._decisions_page.set_project(project.id)
         self._notes_page.set_project(project.id)
         self._resources_page.set_project(project.id)
-        self._summary_problem.setText(f"Problem: {project.problem_statement or '-'}")
-        self._summary_target.setText(f"Hedef çıktı: {project.target_outcome or '-'}")
+        self._summary_problem.setText(
+            tr("detail_summary_problem", "Problem: {value}").format(value=project.problem_statement or "-")
+        )
+        self._summary_target.setText(
+            tr("detail_summary_target", "Hedef çıktı: {value}").format(value=project.target_outcome or "-")
+        )
         target_date = project.target_end_date.isoformat() if project.target_end_date else "-"
         self._summary_progress.setText(
-            f"İlerleme: %{project.progress_percent}  |  Hedef tarih: {target_date}"
+            tr("detail_summary_progress", "İlerleme: %{percent}  |  Hedef tarih: {date}").format(
+                percent=project.progress_percent, date=target_date
+            )
         )
         self._refresh_outputs()
         self._refresh_activity()
@@ -346,12 +364,12 @@ class ProjectDetailPanel(QWidget):
 
     def _on_more_menu(self) -> None:
         menu = QMenu(self)
-        archive_action = menu.addAction("Arşivle")
+        archive_action = menu.addAction(tr("action_archive", "Arşivle"))
         archive_action.triggered.connect(
             lambda: self.archive_requested.emit(self._project_id)
         )
         menu.addSeparator()
-        delete_action = menu.addAction("Sil")
+        delete_action = menu.addAction(tr("action_delete", "Sil"))
         delete_action.triggered.connect(
             lambda: self.delete_requested.emit(self._project_id)
         )
@@ -374,10 +392,18 @@ class ProjectDetailPanel(QWidget):
     def _on_add_output(self) -> None:
         if self._project_id is None:
             return
-        path, ok = QInputDialog.getText(self, "Çıktı Ekle", "Dosya yolu veya bağlantı:")
+        path, ok = QInputDialog.getText(
+            self,
+            tr("detail_output_add_title", "Çıktı Ekle"),
+            tr("detail_output_add_prompt", "Dosya yolu veya bağlantı:"),
+        )
         if not ok or not path.strip():
             return
-        caption, _ = QInputDialog.getText(self, "Çıktı Açıklaması", "Kısa açıklama:")
+        caption, _ = QInputDialog.getText(
+            self,
+            tr("detail_output_caption_title", "Çıktı Açıklaması"),
+            tr("detail_output_caption_prompt", "Kısa açıklama:"),
+        )
         self._di.project_controller.create_attachment_sync(
             Attachment(
                 project_id=self._project_id,

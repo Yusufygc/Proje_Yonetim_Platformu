@@ -19,7 +19,7 @@ def setup_modules(di: DIContainer) -> None:
     from presentation.pages.info_page import InfoPage
     from presentation.pages.projects_page import ProjectsPage
     from presentation.pages.settings_page import SettingsPage
-    from presentation.pages.tasks_page import TasksPage
+    from presentation.pages.tasks import TasksPage
 
     registry = ModuleRegistry.instance()
 
@@ -32,6 +32,7 @@ def setup_modules(di: DIContainer) -> None:
             parent=parent,
             controller=di.dashboard_controller,
             idea_controller=di.idea_controller,
+            theme=di.theme,
         ),
     ))
     registry.register(FeaturePlugin(
@@ -58,12 +59,13 @@ def setup_modules(di: DIContainer) -> None:
     registry.register(FeaturePlugin(
         page_key="tasks",
         nav_label_key="nav_tasks",
-        nav_label_default="Görevler",
+        nav_label_default="Görevler",  # l10n: data — nav_tasks anahtarının fallback'i
         nav_icon="square-check",
         factory=lambda parent: TasksPage(
             parent=parent,
             controller=di.task_controller,
             project_controller=di.project_controller,
+            theme=di.theme,
         ),
     ))
     registry.register(FeaturePlugin(
@@ -71,7 +73,7 @@ def setup_modules(di: DIContainer) -> None:
         nav_label_key="nav_info",
         nav_label_default="Bilgilendirme",
         nav_icon="circle-info",
-        factory=lambda parent: InfoPage(parent=parent),
+        factory=lambda parent: InfoPage(parent=parent, theme=di.theme),
     ))
     registry.register(FeaturePlugin(
         page_key="settings",
@@ -81,5 +83,7 @@ def setup_modules(di: DIContainer) -> None:
         factory=lambda parent: SettingsPage(
             parent=parent,
             controller=di.settings_controller,
+            strings=di.strings,
+            prefs=di.prefs,
         ),
     ))

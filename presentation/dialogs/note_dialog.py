@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
 
 from domain.enums.note_type import NoteType
 from domain.models.note import Note
+from presentation.dimensions import Spacing
+from presentation.utils.i18n import tr
 
 
 class NoteDialog(QDialog):
@@ -28,31 +30,35 @@ class NoteDialog(QDialog):
             self._populate_fields()
 
     def _setup_ui(self) -> None:
-        title = "Notu Düzenle" if self._is_edit else "Yeni Not Ekle"
+        title = (
+            tr("note_dialog_edit_title", "Notu Düzenle")
+            if self._is_edit
+            else tr("note_dialog_new_title", "Yeni Not Ekle")
+        )
         self.setWindowTitle(title)
         self.setMinimumWidth(500)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(16)
+        layout.setContentsMargins(Spacing.XXXL, Spacing.XXXL, Spacing.XXXL, Spacing.XXXL)
+        layout.setSpacing(Spacing.XL)
 
         # Başlık
-        layout.addWidget(QLabel("Not Başlığı *", parent=self))
+        layout.addWidget(QLabel(tr("note_dialog_title_label", "Not Başlığı *"), parent=self))
         self._title_edit = QLineEdit(parent=self)
-        self._title_edit.setPlaceholderText("Örn: Toplantı Notları...")
+        self._title_edit.setPlaceholderText(tr("note_dialog_title_placeholder", "Örn: Toplantı Notları..."))
         layout.addWidget(self._title_edit)
 
         # Tür
-        layout.addWidget(QLabel("Tür", parent=self))
+        layout.addWidget(QLabel(tr("label_kind", "Tür"), parent=self))
         self._type_combo = QComboBox(parent=self)
         for t in NoteType:
             self._type_combo.addItem(t.value, t.value)
         layout.addWidget(self._type_combo)
 
         # İçerik
-        layout.addWidget(QLabel("İçerik *", parent=self))
+        layout.addWidget(QLabel(tr("note_dialog_body_label", "İçerik *"), parent=self))
         self._body_edit = QTextEdit(parent=self)
-        self._body_edit.setPlaceholderText("Notunuz...")
+        self._body_edit.setPlaceholderText(tr("note_dialog_body_placeholder", "Notunuz..."))
         self._body_edit.setMinimumHeight(150)
         layout.addWidget(self._body_edit)
 
@@ -62,11 +68,11 @@ class NoteDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         
-        cancel_btn = QPushButton("İptal", parent=self)
+        cancel_btn = QPushButton(tr("action_cancel", "İptal"), parent=self)
         cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(cancel_btn)
-        
-        save_btn = QPushButton("Kaydet", parent=self)
+
+        save_btn = QPushButton(tr("action_save", "Kaydet"), parent=self)
         save_btn.setObjectName("accent_button")
         save_btn.clicked.connect(self.accept)
         btn_layout.addWidget(save_btn)

@@ -22,7 +22,7 @@ from core.managers.theme_manager import ThemeManager
 from domain.enums.task_type import TaskType
 from domain.models.project import Project
 from domain.models.task import Task
-from presentation.pages.tasks_page import TasksPage
+from presentation.pages.tasks import TasksPage
 from presentation.shell import main_window as main_window_module
 from presentation.shell.main_window import MainWindow
 
@@ -74,7 +74,7 @@ class FakeTaskController(QObject):
 
 def _init_managers() -> None:
     try:
-        ThemeManager.instance(config.THEMES_DIR)
+        ThemeManager.instance(config.THEMES_DIR, config.STYLES_DIR)
     except RuntimeError:
         pass
     try:

@@ -21,6 +21,8 @@ from PySide6.QtWidgets import (
 from controllers.dashboard_controller import DashboardController
 from controllers.idea_controller import IdeaController
 from core.managers.theme_manager import ThemeManager
+from presentation.dimensions import Shadow, Spacing
+from presentation.utils.i18n import tr
 from presentation.utils.ui_utils import apply_shadow
 
 
@@ -32,38 +34,41 @@ class DashboardPage(QWidget):
         parent: QWidget,
         controller: DashboardController,
         idea_controller: IdeaController | None = None,
+        theme: ThemeManager | None = None,
     ) -> None:
         super().__init__(parent=parent)
         self._controller = controller
         self._idea_controller = idea_controller
+        # Constructor injection tercih edilir; None ise singleton'a düşülür.
+        self._theme = theme or ThemeManager.instance()
         self._setup_ui()
         self._connect_signals()
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 32, 32, 32)
-        layout.setSpacing(24)
+        layout.setContentsMargins(Spacing.PAGE, Spacing.PAGE, Spacing.PAGE, Spacing.PAGE)
+        layout.setSpacing(Spacing.XXXL)
 
         # Header
-        title = QLabel("Ana Panel", parent=self)
+        title = QLabel(tr("dashboard_title", "Ana Panel"), parent=self)
         title.setProperty("cssClass", "title-large")
         layout.addWidget(title)
 
         # Stats Cards
         stats_layout = QHBoxLayout()
-        self._lbl_projects = self._create_stat_card(stats_layout, "Toplam Proje", "0")
-        self._lbl_active = self._create_stat_card(stats_layout, "Aktif", "0")
-        self._lbl_completed = self._create_stat_card(stats_layout, "Tamamlanan", "0")
-        self._lbl_ideas = self._create_stat_card(stats_layout, "Toplam Fikir", "0")
-        self._lbl_tasks = self._create_stat_card(stats_layout, "Toplam Görev", "0")
-        self._lbl_updated_week = self._create_stat_card(stats_layout, "Bu Hafta", "0")
+        self._lbl_projects = self._create_stat_card(stats_layout, tr("dashboard_stat_projects", "Toplam Proje"), "0")
+        self._lbl_active = self._create_stat_card(stats_layout, tr("dashboard_stat_active", "Aktif"), "0")
+        self._lbl_completed = self._create_stat_card(stats_layout, tr("dashboard_stat_completed", "Tamamlanan"), "0")
+        self._lbl_ideas = self._create_stat_card(stats_layout, tr("dashboard_stat_ideas", "Toplam Fikir"), "0")
+        self._lbl_tasks = self._create_stat_card(stats_layout, tr("dashboard_stat_tasks", "Toplam Görev"), "0")
+        self._lbl_updated_week = self._create_stat_card(stats_layout, tr("dashboard_stat_week", "Bu Hafta"), "0")
         layout.addLayout(stats_layout)
 
         quick_layout = QHBoxLayout()
         self._quick_idea_edit = QLineEdit(parent=self)
-        self._quick_idea_edit.setPlaceholderText("Hızlı fikir kaydet...")
+        self._quick_idea_edit.setPlaceholderText(tr("dashboard_quick_idea_placeholder", "Hızlı fikir kaydet..."))
         quick_layout.addWidget(self._quick_idea_edit, 1)
-        quick_btn = QPushButton("+ Fikir", parent=self)
+        quick_btn = QPushButton(tr("dashboard_quick_idea_btn", "+ Fikir"), parent=self)
         quick_btn.setProperty("cssClass", "btn-primary")
         quick_btn.clicked.connect(self._on_quick_idea)
         quick_layout.addWidget(quick_btn)
@@ -71,20 +76,20 @@ class DashboardPage(QWidget):
 
         # Lists Layout
         lists_layout = QHBoxLayout()
-        lists_layout.setSpacing(24)
+        lists_layout.setSpacing(Spacing.XXXL)
 
         # Blocked Projects
         blocked_container = QWidget(parent=self)
         blocked_layout = QVBoxLayout(blocked_container)
         blocked_layout.setContentsMargins(0, 0, 0, 0)
         
-        lbl_blocked = QLabel("Tıkanan / Riskli Projeler")
+        lbl_blocked = QLabel(tr("dashboard_blocked_title", "Tıkanan / Riskli Projeler"))
         lbl_blocked.setProperty("cssClass", "title-small")
         blocked_layout.addWidget(lbl_blocked)
 
         self._blocked_list = QListWidget(parent=blocked_container)
         self._blocked_list.setProperty("cssClass", "panel")
-        apply_shadow(self._blocked_list, blur_radius=15, y_offset=3, alpha=15)
+        apply_shadow(self._blocked_list, blur_radius=Shadow.LIST_BLUR, y_offset=Shadow.LIST_Y, alpha=Shadow.LIST_ALPHA)
         blocked_layout.addWidget(self._blocked_list)
         lists_layout.addWidget(blocked_container)
 
@@ -93,20 +98,20 @@ class DashboardPage(QWidget):
         recent_layout = QVBoxLayout(recent_container)
         recent_layout.setContentsMargins(0, 0, 0, 0)
 
-        lbl_recent = QLabel("Son Aktiviteler (Görevler)")
+        lbl_recent = QLabel(tr("dashboard_recent_title", "Son Aktiviteler (Görevler)"))
         lbl_recent.setProperty("cssClass", "title-small")
         recent_layout.addWidget(lbl_recent)
 
         self._recent_list = QListWidget(parent=recent_container)
         self._recent_list.setProperty("cssClass", "panel")
-        apply_shadow(self._recent_list, blur_radius=15, y_offset=3, alpha=15)
+        apply_shadow(self._recent_list, blur_radius=Shadow.LIST_BLUR, y_offset=Shadow.LIST_Y, alpha=Shadow.LIST_ALPHA)
         recent_layout.addWidget(self._recent_list)
         lists_layout.addWidget(recent_container)
 
         high_container = QWidget(parent=self)
         high_layout = QVBoxLayout(high_container)
         high_layout.setContentsMargins(0, 0, 0, 0)
-        lbl_high = QLabel("Yüksek Öncelikli Açık Görevler")
+        lbl_high = QLabel(tr("dashboard_high_priority_title", "Yüksek Öncelikli Açık Görevler"))
         lbl_high.setProperty("cssClass", "title-small")
         high_layout.addWidget(lbl_high)
         self._high_priority_list = QListWidget(parent=high_container)
@@ -130,10 +135,10 @@ class DashboardPage(QWidget):
     def _create_stat_card(self, layout: QHBoxLayout, title: str, initial_val: str) -> QLabel:
         card = QFrame(parent=self)
         card.setProperty("cssClass", "panel")
-        apply_shadow(card, blur_radius=15, y_offset=3, alpha=20)
-        
+        apply_shadow(card, blur_radius=Shadow.CARD_BLUR, y_offset=Shadow.CARD_Y, alpha=Shadow.CARD_ALPHA)
+
         card_layout = QVBoxLayout(card)
-        card_layout.setContentsMargins(20, 20, 20, 20)
+        card_layout.setContentsMargins(Spacing.XXL, Spacing.XXL, Spacing.XXL, Spacing.XXL)
 
         lbl_title = QLabel(title, parent=card)
         lbl_title.setProperty("cssClass", "stat-card-title")
@@ -148,6 +153,13 @@ class DashboardPage(QWidget):
 
     def _connect_signals(self) -> None:
         self._controller.stats_loaded.connect(self._on_stats_loaded)
+        # Liste item renkleri setForeground ile programatik atanır; tema
+        # değişince görünür durumdaki listeler yeni paletle tazelenmelidir.
+        self._theme.theme_changed.connect(self._on_theme_changed)
+
+    def _on_theme_changed(self, _theme_name: str) -> None:
+        if self.isVisible():
+            self._controller.load_stats()
 
     def _on_stats_loaded(self, stats: dict) -> None:
         self._lbl_projects.setText(str(stats.get("total_projects", 0)))
@@ -158,8 +170,7 @@ class DashboardPage(QWidget):
         self._lbl_updated_week.setText(str(stats.get("updated_this_week", 0)))
 
         self._blocked_list.clear()
-        theme_mgr = ThemeManager.instance()
-        danger_color = theme_mgr.color("danger")
+        danger_color = self._theme.color("danger")
         for p in stats.get("blocked_projects", []):
             item = QListWidgetItem()
             item.setText(f"{p['name']} ({p['status']})")
@@ -167,7 +178,7 @@ class DashboardPage(QWidget):
             self._blocked_list.addItem(item)
 
         self._recent_list.clear()
-        text_sec_color = theme_mgr.color("text_secondary")
+        text_sec_color = self._theme.color("text_secondary")
         for t in stats.get("recent_tasks", []):
             item = QListWidgetItem()
             item.setText(f"[{t['project_name']}] {t['title']} ({t['status']})")

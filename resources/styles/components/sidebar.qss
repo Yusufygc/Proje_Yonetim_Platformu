@@ -2,6 +2,9 @@
    SIDEBAR — Sidebar bileşeni, nav buton, tema toggle switch
    ================================================================ */
 
+/* Sidebar arka planı — base/00_reset.qss'teki QFrame transparent kuralını override eder */
+QFrame#sidebar { background-color: @sidebar_bg; }
+
 /* ── ThemeToggleSwitch ── */
 ThemeToggleSwitch {
     background-color: @border;
@@ -33,7 +36,7 @@ SidebarNavButton:hover {
     background-color: @surface_raised;
 }
 SidebarNavButton:checked {
-    background-color: rgba(99, 102, 241, 0.18);
+    background-color: @accent_alpha;
     border-left: 3px solid @accent_start;
     color: @accent_start;
     font-weight: 700;

@@ -2,7 +2,8 @@
 Uygulama genelinde scroll davranışlarını düzenleyen Event Filter sınıfı.
 """
 from PySide6.QtCore import QEvent, QObject
-from PySide6.QtWidgets import QApplication, QComboBox, QAbstractSpinBox, QTabBar
+from PySide6.QtWidgets import QAbstractSpinBox, QApplication, QComboBox, QTabBar
+
 
 class WheelEventFilter(QObject):
     """

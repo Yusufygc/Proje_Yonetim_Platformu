@@ -1,0 +1,86 @@
+/*
+ * InfoPage QTextBrowser için belge stili.
+ * @token_name yer tutucular ThemeManager.resolve_tokens() ile çözümlenir.
+ * Bu dosya global QSS pipeline'ına (*.qss rglob) dahil edilmez — kasıtlı ayrım.
+ */
+
+body {
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: @text_primary;
+}
+
+h1 {
+    color: @accent_start;
+    font-size: 32px;
+    margin-bottom: 12px;
+    margin-top: 10px;
+}
+
+h2 {
+    color: @accent_start;
+    margin-top: 40px;
+    font-size: 22px;
+}
+
+h2.first {
+    margin-top: 24px;
+}
+
+p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: @text_primary;
+}
+
+p.intro {
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+p.muted {
+    color: @text_secondary;
+}
+
+p.footer {
+    margin-top: 40px;
+    font-size: 13px;
+    color: @text_secondary;
+    text-align: center;
+}
+
+ul {
+    font-size: 15px;
+    color: @text_primary;
+    line-height: 1.8;
+}
+
+ul.shortcut-list {
+    font-size: 16px;
+    line-height: 2.2;
+    margin: 0;
+    padding-left: 20px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid @border;
+    margin: 32px 0;
+}
+
+hr.wide {
+    margin: 40px 0;
+}
+
+div.shortcut-box {
+    background-color: @surface_raised;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+b.accent {
+    color: @accent_start;
+}

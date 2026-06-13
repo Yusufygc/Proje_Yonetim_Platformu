@@ -16,34 +16,46 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from PySide6.QtGui import QColor
+
 from controllers.resource_controller import ResourceController
+from core.managers.theme_manager import ThemeManager
 from domain.models.resource import Resource
 from presentation.dialogs.resource_dialog import ResourceDialog
+from presentation.dimensions import Spacing
+from presentation.utils.i18n import tr
 
 
 class ResourceListWidget(QWidget):
     """Proje kaynaklarını listeleyen sekme widget'ı."""
 
-    def __init__(self, controller: ResourceController, parent: QWidget = None) -> None:
+    def __init__(
+        self,
+        controller: ResourceController,
+        parent: QWidget = None,
+        theme: ThemeManager | None = None,
+    ) -> None:
         super().__init__(parent=parent)
         self._controller = controller
+        # Constructor injection tercih edilir; None ise singleton'a düşülür.
+        self._theme = theme or ThemeManager.instance()
         self._project_id: int | None = None
         self._setup_ui()
         self._connect_signals()
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(16)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
+        layout.setSpacing(Spacing.XL)
 
         header = QHBoxLayout()
-        title = QLabel("Proje Kaynakları", parent=self)
+        title = QLabel(tr("resources_title", "Proje Kaynakları"), parent=self)
         title.setProperty("cssClass", "title-small")
         header.addWidget(title)
-        
+
         header.addStretch()
-        
-        self._add_btn = QPushButton("+ Kaynak Ekle", parent=self)
+
+        self._add_btn = QPushButton(tr("resources_add_btn", "+ Kaynak Ekle"), parent=self)
         self._add_btn.setProperty("cssClass", "btn-primary")
         self._add_btn.clicked.connect(self._on_add_resource)
         header.addWidget(self._add_btn)
@@ -62,6 +74,12 @@ class ResourceListWidget(QWidget):
         self._controller.resource_created.connect(self._refresh)
         self._controller.resource_updated.connect(self._refresh)
         self._controller.resource_deleted.connect(self._refresh)
+        # Link rengi setForeground ile programatik atanır; tema değişince
+        # liste yeni paletle yeniden çizilmelidir.
+        self._theme.theme_changed.connect(self._on_theme_changed)
+
+    def _on_theme_changed(self, _theme_name: str) -> None:
+        self._refresh()
 
     def set_project(self, project_id: int) -> None:
         self._project_id = project_id
@@ -73,11 +91,7 @@ class ResourceListWidget(QWidget):
 
     def _on_resources_loaded(self, resources: list[Resource]) -> None:
         self._list_widget.clear()
-        from PySide6.QtGui import QColor
-
-        from core.managers.theme_manager import ThemeManager
-        theme_mgr = ThemeManager.instance()
-        link_color = theme_mgr.color("accent_start")
+        link_color = self._theme.color("accent_start")
 
         for r in resources:
             item = QListWidgetItem()
@@ -117,9 +131,9 @@ class ResourceListWidget(QWidget):
         
         menu = QMenu(self)
                            
-        open_action = menu.addAction("Tarayıcıda Aç")
-        edit_action = menu.addAction("Düzenle")
-        delete_action = menu.addAction("Sil")
+        open_action = menu.addAction(tr("resources_open_browser", "Tarayıcıda Aç"))
+        edit_action = menu.addAction(tr("action_edit", "Düzenle"))
+        delete_action = menu.addAction(tr("action_delete", "Sil"))
         
         action = menu.exec(self._list_widget.mapToGlobal(pos))
         if action == open_action:
@@ -131,7 +145,11 @@ class ResourceListWidget(QWidget):
                 if dialog.exec() == QDialog.DialogCode.Accepted:
                     self._controller.update_resource(resource_id, **dialog.get_data())
         elif action == delete_action:
-            reply = QMessageBox.question(self, "Sil", "Bu kaynağı silmek istediğinize emin misiniz?",
-                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            reply = QMessageBox.question(
+                self,
+                tr("action_delete", "Sil"),
+                tr("resources_delete_confirm", "Bu kaynağı silmek istediğinize emin misiniz?"),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
             if reply == QMessageBox.StandardButton.Yes:
                 self._controller.delete_resource(resource_id)

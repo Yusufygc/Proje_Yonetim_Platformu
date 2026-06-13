@@ -3,7 +3,6 @@ from typing import Optional
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
-    QComboBox,
     QDialog,
     QFrame,
     QHBoxLayout,
@@ -20,22 +19,35 @@ from PySide6.QtWidgets import (
 from domain.enums.idea_priority import IdeaPriority
 from domain.enums.idea_status import IdeaStatus
 from domain.models.idea import Idea
+from presentation.dialogs.form_utils import (
+    make_combo_column,
+    make_two_column_row,
+    select_combo_data,
+    set_field_error,
+)
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 
-_IDEA_STATUS_LABELS: dict[str, str] = {
-    IdeaStatus.RAW.value: "Ham Fikir",
-    IdeaStatus.REVIEWING.value: "İnceleniyor",
-    IdeaStatus.VALIDATING.value: "Doğrulanıyor",
-    IdeaStatus.CONVERTED.value: "Projeye Dönüştürüldü",
-    IdeaStatus.DEFERRED.value: "Ertelendi",
-    IdeaStatus.REJECTED.value: "Reddedildi",
-}
 
-_IDEA_PRIORITY_LABELS: dict[str, str] = {
-    IdeaPriority.LOW.value: "Düşük",
-    IdeaPriority.MEDIUM.value: "Orta",
-    IdeaPriority.HIGH.value: "Yüksek",
-    IdeaPriority.CRITICAL.value: "Kritik",
-}
+def _idea_status_labels() -> dict[str, str]:
+    """Durum etiketleri; dil değişimi dialog her açılışta yansısın diye fonksiyon."""
+    return {
+        IdeaStatus.RAW.value: tr("idea_status_raw", "Ham Fikir"),
+        IdeaStatus.REVIEWING.value: tr("idea_status_reviewing", "İnceleniyor"),
+        IdeaStatus.VALIDATING.value: tr("idea_status_validating", "Doğrulanıyor"),
+        IdeaStatus.CONVERTED.value: tr("idea_status_converted", "Projeye Dönüştürüldü"),
+        IdeaStatus.DEFERRED.value: tr("idea_status_deferred", "Ertelendi"),
+        IdeaStatus.REJECTED.value: tr("idea_status_rejected", "Reddedildi"),
+    }
+
+
+def _idea_priority_labels() -> dict[str, str]:
+    return {
+        IdeaPriority.LOW.value: tr("priority_low", "Düşük"),
+        IdeaPriority.MEDIUM.value: tr("priority_medium", "Orta"),
+        IdeaPriority.HIGH.value: tr("priority_high", "Yüksek"),
+        IdeaPriority.CRITICAL.value: tr("priority_critical", "Kritik"),
+    }
 
 
 class IdeaDialog(QDialog):
@@ -50,9 +62,13 @@ class IdeaDialog(QDialog):
             self._populate_fields()
 
     def _setup_ui(self) -> None:
-        title = "Fikri Düzenle" if self._is_edit else "Yeni Fikir Ekle"
+        title = (
+            tr("idea_dialog_edit_title", "Fikri Düzenle")
+            if self._is_edit
+            else tr("idea_dialog_new_title", "Yeni Fikir Ekle")
+        )
         self.setWindowTitle(title)
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(Size.DIALOG_IDEA_MIN_W)
 
         # Ekran yüksekliğine göre maksimum yükseklik sınırı
         screen = QApplication.primaryScreen()
@@ -62,7 +78,7 @@ class IdeaDialog(QDialog):
 
         # Ana layout: başlık + scroll + butonlar
         outer_layout = QVBoxLayout(self)
-        outer_layout.setContentsMargins(24, 20, 24, 16)
+        outer_layout.setContentsMargins(Spacing.XXXL, Spacing.XXL, Spacing.XXXL, Spacing.XL)
         outer_layout.setSpacing(0)
 
         dialog_title = QLabel(title, parent=self)
@@ -86,73 +102,56 @@ class IdeaDialog(QDialog):
         layout.setSpacing(14)
 
         # Başlık
-        layout.addWidget(self._make_label("Fikir Başlığı *"))
+        layout.addWidget(self._make_label(tr("idea_dialog_title_label", "Fikir Başlığı *")))
         self._error_label = QLabel(parent=form_widget)
         self._error_label.setProperty("cssClass", "text-danger")
         self._error_label.hide()
         layout.addWidget(self._error_label)
         self._title_edit = QLineEdit(parent=form_widget)
-        self._title_edit.setPlaceholderText("Örn: Yeni mobil uygulama fikri...")
-        self._title_edit.setMinimumHeight(36)
+        self._title_edit.setPlaceholderText(tr("idea_dialog_title_placeholder", "Örn: Yeni mobil uygulama fikri..."))
+        self._title_edit.setMinimumHeight(Size.INPUT_H_MD)
         layout.addWidget(self._title_edit)
 
-        # Durum ve Öncelik Yan Yana
-        combo_row = QWidget(parent=form_widget)
-        combo_row_layout = QHBoxLayout(combo_row)
-        combo_row_layout.setContentsMargins(0, 0, 0, 0)
-        combo_row_layout.setSpacing(16)
-
-        status_col = QWidget(parent=combo_row)
-        sc_layout = QVBoxLayout(status_col)
-        sc_layout.setContentsMargins(0, 0, 0, 0)
-        sc_layout.setSpacing(6)
-        sc_layout.addWidget(self._make_label("Durum"))
-        self._status_combo = QComboBox(parent=status_col)
-        self._status_combo.setMinimumHeight(36)
-        for s in IdeaStatus:
-            self._status_combo.addItem(_IDEA_STATUS_LABELS.get(s.value, s.value), s.value)
-        sc_layout.addWidget(self._status_combo)
-        combo_row_layout.addWidget(status_col)
-
-        priority_col = QWidget(parent=combo_row)
-        pc_layout = QVBoxLayout(priority_col)
-        pc_layout.setContentsMargins(0, 0, 0, 0)
-        pc_layout.setSpacing(6)
-        pc_layout.addWidget(self._make_label("Öncelik"))
-        self._priority_combo = QComboBox(parent=priority_col)
-        self._priority_combo.setMinimumHeight(36)
-        for p in IdeaPriority:
-            self._priority_combo.addItem(_IDEA_PRIORITY_LABELS.get(p.value, p.value), p.value)
-        pc_layout.addWidget(self._priority_combo)
-        combo_row_layout.addWidget(priority_col)
-
-        layout.addWidget(combo_row)
+        # Durum ve Öncelik yan yana
+        status_labels = _idea_status_labels()
+        status_col, self._status_combo = make_combo_column(
+            form_widget,
+            tr("label_status", "Durum"),
+            [(status_labels.get(s.value, s.value), s.value) for s in IdeaStatus],
+        )
+        priority_labels = _idea_priority_labels()
+        priority_col, self._priority_combo = make_combo_column(
+            form_widget,
+            tr("label_priority", "Öncelik"),
+            [(priority_labels.get(p.value, p.value), p.value) for p in IdeaPriority],
+        )
+        layout.addWidget(make_two_column_row(form_widget, status_col, priority_col))
 
         # Hedef Kullanıcı
-        layout.addWidget(self._make_label("Hedef Kullanıcı"))
+        layout.addWidget(self._make_label(tr("label_target_user", "Hedef Kullanıcı")))
         self._target_user_edit = QLineEdit(parent=form_widget)
-        self._target_user_edit.setPlaceholderText("Kim için?")
-        self._target_user_edit.setMinimumHeight(36)
+        self._target_user_edit.setPlaceholderText(tr("idea_dialog_target_user_placeholder", "Kim için?"))
+        self._target_user_edit.setMinimumHeight(Size.INPUT_H_MD)
         layout.addWidget(self._target_user_edit)
 
-        layout.addWidget(self._make_label("Çözülen Problem"))
+        layout.addWidget(self._make_label(tr("idea_dialog_problem_label", "Çözülen Problem")))
         self._problem_edit = QTextEdit(parent=form_widget)
-        self._problem_edit.setPlaceholderText("Bu fikir hangi problemi çözüyor?")
-        self._problem_edit.setMaximumHeight(80)
+        self._problem_edit.setPlaceholderText(tr("idea_dialog_problem_placeholder", "Bu fikir hangi problemi çözüyor?"))
+        self._problem_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
         layout.addWidget(self._problem_edit)
 
         # Çözüm
-        layout.addWidget(self._make_label("Önerilen Çözüm"))
+        layout.addWidget(self._make_label(tr("idea_dialog_solution_label", "Önerilen Çözüm")))
         self._solution_edit = QTextEdit(parent=form_widget)
-        self._solution_edit.setPlaceholderText("Önerdiğiniz çözüm detayları...")
-        self._solution_edit.setMaximumHeight(80)
+        self._solution_edit.setPlaceholderText(tr("idea_dialog_solution_placeholder", "Önerdiğiniz çözüm detayları..."))
+        self._solution_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
         layout.addWidget(self._solution_edit)
 
         # Beklenen Değer
-        layout.addWidget(self._make_label("Beklenen Değer / Çıktı"))
+        layout.addWidget(self._make_label(tr("idea_dialog_expected_label", "Beklenen Değer / Çıktı")))
         self._expected_edit = QLineEdit(parent=form_widget)
-        self._expected_edit.setPlaceholderText("Örn: Aylık %10 ciro artışı")
-        self._expected_edit.setMinimumHeight(36)
+        self._expected_edit.setPlaceholderText(tr("idea_dialog_expected_placeholder", "Örn: Aylık %10 ciro artışı"))
+        self._expected_edit.setMinimumHeight(Size.INPUT_H_MD)
         layout.addWidget(self._expected_edit)
 
         # Skor satırı
@@ -160,20 +159,20 @@ class IdeaDialog(QDialog):
         score_row_layout = QHBoxLayout(score_row)
         score_row_layout.setContentsMargins(0, 0, 0, 0)
         score_row_layout.setSpacing(16)
-        self._difficulty_spin = self._make_score_spin("Zorluk", score_row_layout, score_row)
-        self._effort_spin = self._make_score_spin("Efor", score_row_layout, score_row)
-        self._confidence_spin = self._make_score_spin("Güven", score_row_layout, score_row)
+        self._difficulty_spin = self._make_score_spin(tr("label_difficulty", "Zorluk"), score_row_layout, score_row)
+        self._effort_spin = self._make_score_spin(tr("label_effort", "Efor"), score_row_layout, score_row)
+        self._confidence_spin = self._make_score_spin(tr("label_confidence", "Güven"), score_row_layout, score_row)
         layout.addWidget(score_row)
 
-        layout.addWidget(self._make_label("Notlar"))
+        layout.addWidget(self._make_label(tr("label_notes", "Notlar")))
         self._notes_edit = QTextEdit(parent=form_widget)
-        self._notes_edit.setMaximumHeight(70)
+        self._notes_edit.setMaximumHeight(Size.TEXTAREA_H_SM)
         layout.addWidget(self._notes_edit)
 
-        layout.addWidget(self._make_label("Kaynak URL"))
+        layout.addWidget(self._make_label(tr("label_source_url", "Kaynak URL")))
         self._source_edit = QLineEdit(parent=form_widget)
-        self._source_edit.setPlaceholderText("Örn: https://github.com/ornek")
-        self._source_edit.setMinimumHeight(36)
+        self._source_edit.setPlaceholderText("https://github.com/ornek")
+        self._source_edit.setMinimumHeight(Size.INPUT_H_MD)
         layout.addWidget(self._source_edit)
 
         layout.addStretch()
@@ -194,14 +193,14 @@ class IdeaDialog(QDialog):
         btn_layout.setSpacing(10)
         btn_layout.addStretch()
 
-        cancel_btn = QPushButton("İptal", parent=self)
-        cancel_btn.setMinimumSize(90, 36)
+        cancel_btn = QPushButton(tr("action_cancel", "İptal"), parent=self)
+        cancel_btn.setMinimumSize(Size.BTN_LG_W, Size.INPUT_H_MD)
         cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(cancel_btn)
 
-        save_btn = QPushButton("Kaydet", parent=self)
+        save_btn = QPushButton(tr("action_save", "Kaydet"), parent=self)
         save_btn.setObjectName("accent_button")
-        save_btn.setMinimumSize(90, 36)
+        save_btn.setMinimumSize(Size.BTN_LG_W, Size.INPUT_H_MD)
         save_btn.clicked.connect(self._on_save)
         btn_layout.addWidget(save_btn)
 
@@ -218,7 +217,7 @@ class IdeaDialog(QDialog):
         spin = QSpinBox(parent=parent or self)
         spin.setRange(0, 10)
         spin.setSpecialValueText("-")
-        spin.setMinimumHeight(36)
+        spin.setMinimumHeight(Size.INPUT_H_MD)
         col.addWidget(spin)
         row.addLayout(col)
         return spin
@@ -242,33 +241,22 @@ class IdeaDialog(QDialog):
         self._difficulty_spin.setValue(self._idea.difficulty or 0)
         self._effort_spin.setValue(self._idea.effort or 0)
         self._confidence_spin.setValue(self._idea.confidence or 0)
-        
-        for i in range(self._status_combo.count()):
-            if self._status_combo.itemData(i) == self._idea.status:
-                self._status_combo.setCurrentIndex(i)
-                break
-        for i in range(self._priority_combo.count()):
-            if self._priority_combo.itemData(i) == self._idea.priority:
-                self._priority_combo.setCurrentIndex(i)
-                break
+
+        select_combo_data(self._status_combo, self._idea.status)
+        select_combo_data(self._priority_combo, self._idea.priority)
 
     def _on_save(self) -> None:
         title = self._title_edit.text().strip()
         if not title:
-            self._error_label.setText("Fikir başlığı boş olamaz.")
+            self._error_label.setText(tr("idea_dialog_title_required", "Fikir başlığı boş olamaz."))
             self._error_label.show()
-            self._set_field_error(self._title_edit, True)
+            set_field_error(self._title_edit, True)
             self._title_edit.setFocus()
             return
 
         self._error_label.hide()
-        self._set_field_error(self._title_edit, False)
+        set_field_error(self._title_edit, False)
         self.accept()
-
-    def _set_field_error(self, widget: QWidget, error: bool) -> None:
-        widget.setProperty("error", "true" if error else "false")
-        widget.style().unpolish(widget)
-        widget.style().polish(widget)
 
     def get_data(self) -> dict:
         return {

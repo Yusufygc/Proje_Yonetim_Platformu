@@ -12,11 +12,7 @@ Bu dosya, **Proje Yönetim ve Takip Platformu** deposunda (repository) çalışa
 - **Veritabanı:** Doğrudan SQLite sorguları YASAKTIR. Veri katmanında `SQLAlchemy` ve `Alembic` kullanılacaktır. Tüm şema değişiklikleri migration scriptleri ile yapılacaktır.
 - **Bellek Yönetimi:** PySide6 widget'ları oluşturulurken memory leak (bellek sızıntısı) olmaması için daima `parent` parametresi atanacaktır.
 
-## 3. Graphify ve Mimari Şema Zorunluluğu
-- Sisteme yeni bir katman, yeni bir modül (örneğin yeni bir Service veya Controller) eklendiğinde veya mevcut modüllerin bağımlılık (Dependency) yapısı değiştiğinde, projenin **Graphify** bağımlılık ve mimari haritaları DERHAL güncellenecektir.
-- Mimari dokümantasyon ile güncel kod tabanı asla birbiriyle çelişmemelidir.
-
-## 4. İletişim ve Commit Kuralları
+## 3. İletişim ve Commit Kuralları
 - Commit mesajları yazarken asla AI referansı verme (Örn: "Yapay zeka tarafından düzeltildi", "Prompt uygulandı" YASAKTIR).
 - Commit mesajları tamamen Türkçe, imla kurallarına uygun ve o dosyadaki değişikliği spesifik olarak açıklayan nitelikte olacaktır.
 - Kod yazarken neyin yapıldığını değil, **neden** yapıldığını anlatan açıklayıcı Türkçe yorum satırları eklenecektir.

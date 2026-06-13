@@ -1,0 +1,35 @@
+/* ================================================================
+   BASE/RESET — Uygulama geneli temel widget stilleri
+   Token'lar ThemeManager tarafindan hex degere donusturulur.
+   Yukleme sirasi dosya adindaki sayisal onek ile belirlenir
+   (ThemeManager rglob sonucunu alfabetik sıralar).
+   ================================================================ */
+
+QWidget {
+    color: @text_primary;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 13px;
+    border: none;
+    outline: none;
+}
+QMainWindow, QDialog, QStackedWidget, QTabWidget, QScrollArea {
+    background-color: @background;
+}
+QFrame {
+    background-color: transparent;
+}
+QLabel {
+    background-color: transparent;
+    color: @text_primary;
+    border: none;
+}
+QLabel[secondary="true"] {
+    color: @text_secondary;
+}
+QToolTip {
+    background-color: @surface;
+    color: @text_primary;
+    border: 1px solid @border;
+    border-radius: 6px;
+    padding: 4px 8px;
+}

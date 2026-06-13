@@ -1,0 +1,81 @@
+<!--
+  InfoPage içerik şablonu — saf semantik HTML, inline stil yok.
+  Stiller info_browser.css üzerinden QTextBrowser.document().setDefaultStyleSheet() ile uygulanır.
+-->
+<body>
+<div>
+    <h1>Proje Takip Platformu</h1>
+    <p class="intro">
+        Bu platform, yazılım projelerinizi, yaratıcı fikirlerinizi ve günlük görevlerinizi tek bir merkezden,
+        modern ve hızlı bir arayüzle yönetebilmeniz için geliştirildi. Aşağıda platformun tüm özelliklerini nasıl
+        tam kapasiteyle kullanabileceğinize dair detaylı bilgileri bulabilirsiniz.
+    </p>
+
+    <hr>
+
+    <h2 class="first">🏠 Ana Panel (Dashboard)</h2>
+    <p>
+        Uygulamaya ilk girdiğinizde sizi karşılayan kontrol merkezidir. Platformdaki genel durumunuzu özetler ve sizi yönlendirir.
+    </p>
+    <ul>
+        <li><b>Durum Özeti:</b> Toplam proje sayınızı, bekleyen ve tamamlanan görevlerinizi anlık olarak, istatistiksel kartlar halinde görebilirsiniz.</li>
+        <li><b>Aktif Projeler:</b> Üzerinde çalıştığınız (aktif durumdaki) projelere tek tıkla ulaşmanızı sağlayan hızlı erişim listesi.</li>
+        <li><b>Yaklaşan Görevler:</b> Yapılacaklar listenizdeki en acil veya üzerinde çalışılan görevlerinizi gösterir.</li>
+    </ul>
+
+    <h2>📁 Projeler Modülü</h2>
+    <p>
+        Tüm çalışmalarınızı yapılandırıp takip edebileceğiniz, platformun kalbi niteliğindeki ana modüldür.
+    </p>
+    <ul>
+        <li><b>Kapsamlı Proje Oluşturma:</b> Yan menüden "Projeler"e tıklayıp <b>+ Yeni Proje</b> butonuyla detaylı form doldurabilirsiniz. Projeye başlık, açıklama, GitHub linki, demo URL, etiketler ve son teslim tarihi (hedef tarih) verebilirsiniz.</li>
+        <li><b>Süreç Aşamaları (Timeline):</b> Her projenin "Planlandı", "Geliştirme", "Test", "Tamamlandı" gibi aşamaları vardır. Ekrandaki aşama kartları (Kanban vari) ile projenin tam olarak hangi adımda olduğunu görsel olarak görebilirsiniz.</li>
+        <li><b>Kararlar ve Notlar:</b> Proje detay sayfasındaki ilgili butonlara tıklayarak proje toplantılarında aldığınız <i>Kararları</i> ve tuttuğunuz <i>Notları</i> kaydedebilirsiniz.</li>
+        <li><b>Kaynaklar (Linkler):</b> Projeye ait GitHub repo, Figma tasarım dosyası, Trello veya dokümantasyon (Notion vb.) linklerini "Kaynaklar" diyaloğu aracılığıyla ekleyerek tek tıkla harici sitelere ulaşabilirsiniz.</li>
+    </ul>
+
+    <h2>💡 Fikirler Modülü</h2>
+    <p>
+        Aklınıza aniden gelen ama henüz büyük bir projeye dönüşmeye hazır olmayan düşüncelerinizi, unutmadan kaydedeceğiniz kuluçka merkezidir.
+    </p>
+    <ul>
+        <li><b>Fikir Havuzu:</b> Fikirlerinizi başlık, içerik, etiket ve önem derecesiyle sisteme ekleyin. İsterseniz fikirlerinizi filtreleyip arayabilirsiniz.</li>
+        <li><b>Projeye Dönüştürme:</b> Zamanı gelen ve olgunlaşan bir fikri detay sayfasındaki "Projeye Dönüştür" butonuna tıklayarak saniyeler içinde tüm verileriyle (başlık, açıklama vb.) "Proje Formuna" aktarabilirsiniz. Böylece fikirden icraata geçiş pürüzsüz olur.</li>
+    </ul>
+
+    <h2>☑️ Görevler (TODO) Modülü</h2>
+    <p>
+        Büyük projeleri küçük, eyleme dökülebilir parçalara bölmek için tasarlanmış görev yönetim aracıdır.
+    </p>
+    <ul>
+        <li><b>Kanban Yapısı:</b> "Yapılacak" (To Do), "Devam Eden" (In Progress) ve "Tamamlanan" (Done) listeleri arasında görevlerinizi yönetebilirsiniz.</li>
+        <li><b>Proje Bağlantısı:</b> Her bir görevi sistemdeki belirli bir projenin altına bağlayabilirsiniz. Böylece hangi görevin hangi projeye ait olduğu hiçbir zaman karışmaz.</li>
+    </ul>
+
+    <h2>⚙️ Ayarlar ve Kişiselleştirme</h2>
+    <p>
+        Uygulama deneyimini zevkinize göre özelleştirin.
+    </p>
+    <ul>
+        <li><b>Karanlık ve Aydınlık Tema (Dark Mode):</b> Sol menünün alt tarafındaki ☀️ / 🌙 ikonuna tıklayarak (veya Ayarlar sayfasından) gözünüzü yormayan premium karanlık (dark) temaya veya ferah aydınlık (light) temaya anında geçiş yapabilirsiniz.</li>
+        <li><b>Profil Bilgileri:</b> Adınızı, unvanınızı ve uygulamanın veri dosyalarını (veritabanı) nereye kaydedeceğini (Çalışma Dizini) Ayarlar modülünden güncelleyebilirsiniz.</li>
+    </ul>
+
+    <hr class="wide">
+
+    <h2 class="first">🚀 Hayat Kurtaran Kısayollar</h2>
+    <p class="muted">
+        Farenizi (mouse) olabildiğince az kullanarak uygulamada hızla gezinmek için aşağıdaki klavye kısayollarını kullanabilirsiniz:
+    </p>
+    <div class="shortcut-box">
+        <ul class="shortcut-list">
+            <li><b class="accent">Ctrl + F</b> veya <b class="accent">Ctrl + K</b> : Tüm uygulama verilerinde arama yapabileceğiniz <b>Hızlı Arama</b> (Search) kutusunu açar.</li>
+            <li><b class="accent">Ctrl + N</b> : Nerede olursanız olun anında <b>Yeni Proje</b> oluşturma formunu ekrana getirir.</li>
+        </ul>
+    </div>
+
+    <p class="footer">
+        Proje Takip Platformu v0.1.0 &bull; Verimli çalışmalar dileriz!
+    </p>
+</div>
+</body>

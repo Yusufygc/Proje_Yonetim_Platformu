@@ -17,6 +17,8 @@ from PySide6.QtWidgets import (
 from controllers.note_controller import NoteController
 from domain.models.note import Note
 from presentation.dialogs.note_dialog import NoteDialog
+from presentation.dimensions import Spacing
+from presentation.utils.i18n import tr
 
 
 class NoteListWidget(QWidget):
@@ -31,17 +33,17 @@ class NoteListWidget(QWidget):
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(16)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
+        layout.setSpacing(Spacing.XL)
 
         header = QHBoxLayout()
-        title = QLabel("Proje Notları", parent=self)
+        title = QLabel(tr("notes_title", "Proje Notları"), parent=self)
         title.setProperty("cssClass", "title-small")
         header.addWidget(title)
-        
+
         header.addStretch()
-        
-        self._add_btn = QPushButton("+ Not Ekle", parent=self)
+
+        self._add_btn = QPushButton(tr("notes_add_btn", "+ Not Ekle"), parent=self)
         self._add_btn.setProperty("cssClass", "btn-primary")
         self._add_btn.clicked.connect(self._on_add_note)
         header.addWidget(self._add_btn)
@@ -98,8 +100,8 @@ class NoteListWidget(QWidget):
         
         menu = QMenu(self)
                            
-        edit_action = menu.addAction("Düzenle")
-        delete_action = menu.addAction("Sil")
+        edit_action = menu.addAction(tr("action_edit", "Düzenle"))
+        delete_action = menu.addAction(tr("action_delete", "Sil"))
         
         action = menu.exec(self._list_widget.mapToGlobal(pos))
         if action == edit_action:
@@ -109,7 +111,11 @@ class NoteListWidget(QWidget):
                 if dialog.exec() == QDialog.DialogCode.Accepted:
                     self._controller.update_note(note_id, **dialog.get_data())
         elif action == delete_action:
-            reply = QMessageBox.question(self, "Sil", "Bu notu silmek istediğinize emin misiniz?",
-                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            reply = QMessageBox.question(
+                self,
+                tr("action_delete", "Sil"),
+                tr("notes_delete_confirm", "Bu notu silmek istediğinize emin misiniz?"),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
             if reply == QMessageBox.StandardButton.Yes:
                 self._controller.delete_note(note_id)

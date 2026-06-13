@@ -115,23 +115,33 @@ class ThemeManager(QObject):
         QSS ok ikonlarını tema rengiyle oluşturur, cache'e yazar ve palette'e ekler.
         IconManager bootstrap'ten sonra hazır olduğunda çalışır; önceyse atlanır.
         """
-        from core.managers.icon_manager import IconManager  # geç import — döngüsel bağımlılık önlemi
-        if IconManager._instance is None:
+        from core.managers.icon_manager import IconManager, Icons  # noqa: I001 — döngüsel bağımlılık önlemi için geç import
+
+        icon_mgr = IconManager.try_instance()
+        if icon_mgr is None:
             return
 
-        icon_mgr = IconManager._instance
         arrow_color = self.color("text_secondary")
 
         for token, icon_name in (
-            ("icon_chevron_down", "chevron-down"),
-            ("icon_chevron_up", "chevron-up"),
+            ("icon_chevron_down", Icons.CHEVRON_DOWN),
+            ("icon_chevron_up", Icons.CHEVRON_UP),
         ):
-            svg = icon_mgr.get_svg_content(icon_name, arrow_color)
-            if not svg:
-                continue
             cache_file = self._icons_cache_dir / f"{icon_name}_{arrow_color.lstrip('#')}.svg"
-            cache_file.write_text(svg, encoding="utf-8")
+            # Aynı renk için dosya zaten üretildiyse disk I/O tekrarlanmaz.
+            if not cache_file.exists():
+                svg = icon_mgr.get_svg_content(icon_name, arrow_color)
+                if not svg:
+                    continue
+                cache_file.write_text(svg, encoding="utf-8")
             self._palette[token] = str(cache_file).replace("\\", "/")
+
+    def resolve_tokens(self, text: str) -> str:
+        """@token_name yer tutucularını aktif palet değerleriyle değiştirir.
+
+        QSS dışındaki dosyalar (CSS, HTML şablonları vb.) için public API.
+        """
+        return self._interpolate_tokens(text)
 
     def build_global_qss(self) -> str:
         """Tüm uygulama için merkezi QSS stil dizgesini üretir."""
@@ -160,4 +170,5 @@ class ThemeManager(QObject):
             "scrollbar_handle": "#3A3D4A",
             "sidebar_bg": "#0F1117",
             "sidebar_active": "#6366F1",
+            "icon_on_accent": "#FFFFFF",
         }

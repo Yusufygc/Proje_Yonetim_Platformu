@@ -1,0 +1,44 @@
+/* ================================================================
+   BASE/CSS-CLASSES — cssClass dinamik secicileri (utility sinifi)
+   Python tarafinda widget.setProperty("cssClass", "...") ile kullanilir.
+   ================================================================ */
+
+*[cssClass="text-primary"]   { color: @text_primary; }
+*[cssClass="text-secondary"] { color: @text_secondary; }
+*[cssClass="text-muted"]     { color: @text_muted; }
+*[cssClass="text-accent"]    { color: @accent_start; }
+*[cssClass="text-danger"]    { color: @danger; font-size: 12px; font-weight: 500; }
+
+*[cssClass="title-large"]    { font-size: 26px; font-weight: 800; color: @text_primary; }
+*[cssClass="title-medium"]   { font-size: 22px; font-weight: 700; color: @text_primary; }
+*[cssClass="title-small"]    { font-size: 18px; font-weight: bold; color: @text_primary; }
+*[cssClass="section-header"] { font-size: 11px; font-weight: 600; color: @text_muted; letter-spacing: 1px; }
+*[cssClass="field-label"]    { font-size: 12px; font-weight: 600; color: @text_secondary; letter-spacing: 0.5px; }
+*[cssClass="theme-label"]    { font-size: 13px; font-weight: 500; color: @text_secondary; }
+
+*[cssClass="surface-panel"]  { background-color: @sidebar_bg; }
+*[cssClass="panel"]          { background-color: @surface; border-radius: 12px; border: 1px solid @border; }
+*[cssClass="panel-raised"]   { background-color: @surface_raised; border-radius: 8px; }
+*[cssClass="divider"]        { background-color: @border; max-width: 1px; border: none; }
+
+*[cssClass="btn-primary"]          { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 @accent_start, stop:1 @accent_end); color: #FFFFFF; font-weight: bold; border-radius: 6px; padding: 6px 12px; }
+*[cssClass="btn-primary"]:hover    { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 @accent_end, stop:1 @accent_start); }
+*[cssClass="btn-secondary"]        { background-color: @surface_raised; color: @text_primary; border-radius: 6px; padding: 6px 12px; border: none; }
+*[cssClass="btn-secondary"]:hover  { background-color: @border; }
+*[cssClass="btn-danger"]           { color: @danger; background: transparent; border: 1px solid @danger; border-radius: 6px; padding: 6px 12px; }
+*[cssClass="btn-danger"]:hover     { background-color: @danger; color: #FFFFFF; }
+
+/* Checklist butonları */
+*[cssClass="chk-done"]    { color: @success; font-size: 14px; border: none; background: transparent; }
+*[cssClass="chk-pending"] { color: @text_muted; font-size: 14px; border: none; background: transparent; }
+*[cssClass="chk-delete"]  { color: @danger; border: none; background: transparent; font-weight: bold; font-size: 16px; }
+
+/* QListWidget panel varyantı */
+QListWidget[cssClass="panel"] {
+    background-color: @surface;
+    border: 1px solid @border;
+    border-radius: 12px;
+}
+
+/* Seffaf arka plan ihtiyaci olan widget'lar */
+*[cssClass="transparent-bg"] { background: transparent; background-color: transparent; }

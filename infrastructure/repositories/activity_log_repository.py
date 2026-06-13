@@ -6,14 +6,13 @@ import json
 from sqlalchemy import select
 
 from domain.models.activity_log import ActivityLog
-from infrastructure.database.db_manager import DatabaseManager
+from infrastructure.repositories.base_repository import BaseRepository
 
 
-class ActivityLogRepository:
-    def __init__(self, db: DatabaseManager) -> None:
-        self._db = db
+class ActivityLogRepository(BaseRepository[ActivityLog]):
+    model = ActivityLog
 
-    def create(
+    def create(  # type: ignore[override] — log kaydı alanlardan kurulur, entity dışarıdan gelmez
         self,
         project_id: int,
         action: str,
@@ -30,12 +29,7 @@ class ActivityLogRepository:
             summary=summary,
             metadata_json=json.dumps(metadata, ensure_ascii=False) if metadata else None,
         )
-        with self._db.session() as sess:
-            sess.add(log)
-            sess.flush()
-            sess.refresh(log)
-            sess.expunge(log)
-            return log
+        return super().create(log)
 
     def get_by_project(self, project_id: int, limit: int = 50) -> list[ActivityLog]:
         with self._db.session() as sess:

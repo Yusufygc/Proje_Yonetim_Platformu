@@ -16,13 +16,18 @@ from PySide6.QtWidgets import (
 )
 
 from domain.models.task import Task
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 
-_PRIORITY_TR: dict[str, str] = {
-    "LOW": "Düşük",
-    "MEDIUM": "Orta",
-    "HIGH": "Yüksek",
-    "CRITICAL": "Kritik",
-}
+
+def _priority_labels() -> dict[str, str]:
+    """Öncelik etiketleri; dil değişimi satır her kurulduğunda yansısın diye fonksiyon."""
+    return {
+        "LOW": tr("priority_low", "Düşük"),
+        "MEDIUM": tr("priority_medium", "Orta"),
+        "HIGH": tr("priority_high", "Yüksek"),
+        "CRITICAL": tr("priority_critical", "Kritik"),
+    }
 
 
 class _TaskRow(QWidget):
@@ -39,8 +44,8 @@ class _TaskRow(QWidget):
 
     def _setup_ui(self) -> None:
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(4, 6, 8, 6)
-        layout.setSpacing(8)
+        layout.setContentsMargins(Spacing.XS, Spacing.SM, Spacing.MD, Spacing.SM)
+        layout.setSpacing(Spacing.MD)
 
         is_done = self._task.status == "DONE"
         status_char = "●" if is_done else "○"
@@ -48,8 +53,8 @@ class _TaskRow(QWidget):
         self._status_btn = QPushButton(status_char, parent=self)
         self._status_btn.setObjectName("task_status_btn")
         self._status_btn.setProperty("task-status", self._task.status)
-        self._status_btn.setFixedSize(20, 20)
-        self._status_btn.setToolTip("Durumu değiştir")
+        self._status_btn.setFixedSize(Size.BTN_ICON_SM, Size.BTN_ICON_SM)
+        self._status_btn.setToolTip(tr("task_row_toggle_tooltip", "Durumu değiştir"))
         self._status_btn.clicked.connect(lambda: self.status_toggle_requested.emit(self._task.id))
         layout.addWidget(self._status_btn)
 
@@ -59,7 +64,7 @@ class _TaskRow(QWidget):
         self._title_btn.clicked.connect(lambda: self.edit_requested.emit(self._task.id))
         layout.addWidget(self._title_btn, 1)
 
-        priority_text = _PRIORITY_TR.get(self._task.priority, self._task.priority)
+        priority_text = _priority_labels().get(self._task.priority, self._task.priority)
         priority_lbl = QLabel(priority_text, parent=self)
         priority_lbl.setProperty("badge-type", "task-priority")
         priority_lbl.setProperty("badge-value", self._task.priority)
@@ -87,7 +92,7 @@ class TaskListWidget(QWidget):
         scroll = QScrollArea(parent=self)
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setMaximumHeight(220)
+        scroll.setMaximumHeight(Size.TASK_LIST_MAX_H)
 
         self._list_container = QWidget(parent=scroll)
         self._list_layout = QVBoxLayout(self._list_container)
@@ -102,10 +107,10 @@ class TaskListWidget(QWidget):
     def _build_header(self) -> QWidget:
         header = QWidget(parent=self)
         layout = QHBoxLayout(header)
-        layout.setContentsMargins(0, 0, 0, 8)
-        layout.setSpacing(8)
+        layout.setContentsMargins(0, 0, 0, Spacing.MD)
+        layout.setSpacing(Spacing.MD)
 
-        title_lbl = QLabel("GÖREVLER", parent=header)
+        title_lbl = QLabel(tr("section_tasks", "GÖREVLER"), parent=header)
         title_lbl.setProperty("cssClass", "section-header")
         layout.addWidget(title_lbl)
 
@@ -115,9 +120,9 @@ class TaskListWidget(QWidget):
         layout.addStretch()
 
         add_btn = QPushButton("+", parent=header)
-        add_btn.setFixedSize(24, 24)
+        add_btn.setFixedSize(Size.BTN_ICON_MD, Size.BTN_ICON_MD)
         add_btn.setProperty("cssClass", "btn-primary")
-        add_btn.setToolTip("Görev Ekle")
+        add_btn.setToolTip(tr("task_add_tooltip", "Görev Ekle"))
         add_btn.clicked.connect(self.add_task_requested)
         layout.addWidget(add_btn)
 
@@ -134,7 +139,7 @@ class TaskListWidget(QWidget):
         self._rendered_tasks = tasks
 
         if not tasks:
-            empty = QLabel("Henüz görev yok.", parent=self._list_container)
+            empty = QLabel(tr("tasks_empty_short", "Henüz görev yok."), parent=self._list_container)
             empty.setObjectName("task_empty_msg")
             empty.setProperty("cssClass", "text-muted")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)

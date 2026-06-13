@@ -8,14 +8,12 @@ from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
-    QComboBox,
     QDateEdit,
     QDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QPushButton,
     QScrollArea,
     QTextEdit,
@@ -27,29 +25,64 @@ from domain.enums.priority import Priority
 from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
 from domain.models.project import Project
+from presentation.dialogs.form_utils import (
+    add_field,
+    make_combo_column,
+    make_field_label,
+    make_two_column_row,
+    select_combo_data,
+    set_field_error,
+)
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 
-_STATUS_LABELS: dict[str, str] = {
-    ProjectStatus.PLANNED.value: "Planlandı",
-    ProjectStatus.ACTIVE.value: "Aktif",
-    ProjectStatus.ON_HOLD.value: "Beklemede",
-    ProjectStatus.BLOCKED.value: "Engellendi",
-    ProjectStatus.COMPLETED.value: "Tamamlandı",
-    ProjectStatus.CANCELLED.value: "İptal Edildi",
-}
 
-_PRIORITY_LABELS: dict[str, str] = {
-    Priority.LOW.value: "Düşük",
-    Priority.MEDIUM.value: "Orta",
-    Priority.HIGH.value: "Yüksek",
-    Priority.CRITICAL.value: "Kritik",
-}
+def _status_labels() -> dict[str, str]:
+    """Durum etiketleri; dil değişimi dialog her açılışta yansısın diye fonksiyon."""
+    return {
+        ProjectStatus.PLANNED.value: tr("status_planned", "Planlandı"),
+        ProjectStatus.ACTIVE.value: tr("status_active", "Aktif"),
+        ProjectStatus.ON_HOLD.value: tr("status_on_hold", "Beklemede"),
+        ProjectStatus.BLOCKED.value: tr("status_blocked", "Engellendi"),
+        ProjectStatus.COMPLETED.value: tr("status_completed", "Tamamlandı"),
+        ProjectStatus.CANCELLED.value: tr("status_cancelled", "İptal Edildi"),
+    }
 
-_HEALTH_LABELS: dict[str, str] = {
-    ProjectHealth.GOOD.value: "Yolunda",
-    ProjectHealth.AT_RISK.value: "Riskli",
-    ProjectHealth.BLOCKED.value: "Tıkandı",
-    ProjectHealth.UNKNOWN.value: "Belirsiz",
-}
+
+def _priority_labels() -> dict[str, str]:
+    return {
+        Priority.LOW.value: tr("priority_low", "Düşük"),
+        Priority.MEDIUM.value: tr("priority_medium", "Orta"),
+        Priority.HIGH.value: tr("priority_high", "Yüksek"),
+        Priority.CRITICAL.value: tr("priority_critical", "Kritik"),
+    }
+
+
+def _health_labels() -> dict[str, str]:
+    return {
+        ProjectHealth.GOOD.value: tr("health_good", "Yolunda"),
+        ProjectHealth.AT_RISK.value: tr("health_at_risk", "Riskli"),
+        ProjectHealth.BLOCKED.value: tr("health_blocked", "Tıkandı"),
+        ProjectHealth.UNKNOWN.value: tr("health_unknown", "Belirsiz"),
+    }
+
+
+def _project_type_items() -> list[tuple[str, str]]:
+    """(görünen etiket, saklanan değer) çiftleri.
+
+    Saklanan değer DB'de geçmiş kayıtlarla uyum için sabit tutulur;
+    yalnızca görünen etiket çevrilir.
+    """
+    return [
+        (tr("project_type_software", "Yazılım"), "Yazılım"),  # l10n: data
+        (tr("project_type_education", "Eğitim"), "Eğitim"),  # l10n: data
+        (tr("project_type_research", "Araştırma"), "Araştırma"),  # l10n: data
+        (tr("project_type_design", "Tasarım"), "Tasarım"),  # l10n: data
+        (tr("project_type_internal", "İç araç"), "İç araç"),  # l10n: data
+        (tr("project_type_client", "Müşteri işi"), "Müşteri işi"),  # l10n: data
+        (tr("project_type_experimental", "Deneysel"), "Deneysel"),  # l10n: data
+        (tr("project_type_other", "Diğer"), "Diğer"),  # l10n: data
+    ]
 
 
 class ProjectDialog(QDialog):
@@ -63,10 +96,16 @@ class ProjectDialog(QDialog):
         if self._is_edit:
             self._populate_fields()
 
+    # ── UI kurulumu ──────────────────────────────────────────────────────────
+
     def _setup_ui(self) -> None:
-        title_text = "Projeyi Düzenle" if self._is_edit else "Yeni Proje Oluştur"
+        title_text = (
+            tr("project_dialog_edit_title", "Projeyi Düzenle")
+            if self._is_edit
+            else tr("project_dialog_new_title", "Yeni Proje Oluştur")
+        )
         self.setWindowTitle(title_text)
-        self.setMinimumWidth(620)
+        self.setMinimumWidth(Size.DIALOG_PROJECT_MIN_W)
         self.setModal(True)
 
         # Ekran yüksekliğine göre maksimum yükseklik sınırı
@@ -77,15 +116,28 @@ class ProjectDialog(QDialog):
 
         # Ana layout: başlık + scroll + butonlar
         outer_layout = QVBoxLayout(self)
-        outer_layout.setContentsMargins(28, 24, 28, 20)
+        outer_layout.setContentsMargins(Spacing.XXXL, Spacing.XXL, Spacing.XXXL, Spacing.XXL)
         outer_layout.setSpacing(0)
 
         dialog_title = QLabel(title_text, parent=self)
         dialog_title.setProperty("cssClass", "title-small")
         outer_layout.addWidget(dialog_title)
-        outer_layout.addSpacing(16)
+        outer_layout.addSpacing(Spacing.XL)
 
-        # Kaydırılabilir form alanları
+        outer_layout.addWidget(self._build_scroll_form(), 1)
+        outer_layout.addSpacing(Spacing.LG)
+
+        # Ayraç çizgisi
+        sep = QFrame(parent=self)
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setProperty("cssClass", "divider")
+        outer_layout.addWidget(sep)
+        outer_layout.addSpacing(Spacing.LG)
+
+        # Butonlar scroll dışında, her zaman görünür
+        outer_layout.addWidget(self._build_button_row())
+
+    def _build_scroll_form(self) -> QScrollArea:
         scroll = QScrollArea(parent=self)
         scroll.setObjectName("dialog_scroll")
         scroll.viewport().setAutoFillBackground(False)
@@ -97,189 +149,122 @@ class ProjectDialog(QDialog):
         form_widget.setObjectName("form_container")
         form_widget.setAutoFillBackground(False)
         layout = QVBoxLayout(form_widget)
-        layout.setContentsMargins(0, 4, 24, 4)
+        layout.setContentsMargins(0, Spacing.XS, Spacing.XXXL, Spacing.XS)
         layout.setSpacing(0)
 
-        layout.addWidget(self._make_field_label("Proje Başlığı *"))
+        self._build_form_fields(form_widget, layout)
+
+        scroll.setWidget(form_widget)
+        return scroll
+
+    def _build_form_fields(self, form_widget: QWidget, layout: QVBoxLayout) -> None:
+        # Başlık alanı: validasyon hata etiketi araya girdiği için add_field kullanılmaz
+        layout.addWidget(make_field_label(tr("project_dialog_title_label", "Proje Başlığı *"), form_widget))
         self._error_label = QLabel(parent=form_widget)
         self._error_label.setProperty("cssClass", "text-danger")
         self._error_label.hide()
         layout.addWidget(self._error_label)
-        layout.addSpacing(6)
+        layout.addSpacing(Spacing.SM)
         self._title_edit = QLineEdit(parent=form_widget)
-        self._title_edit.setPlaceholderText("Projenin adını girin...")
-        self._title_edit.setMinimumHeight(38)
+        self._title_edit.setPlaceholderText(tr("project_dialog_title_placeholder", "Projenin adını girin..."))
+        self._title_edit.setMinimumHeight(Size.INPUT_H_LG)
         layout.addWidget(self._title_edit)
-        layout.addSpacing(16)
+        layout.addSpacing(Spacing.XL)
 
-        layout.addWidget(self._make_field_label("Kısa Açıklama"))
-        layout.addSpacing(6)
-        self._desc_edit = QTextEdit(parent=form_widget)
-        self._desc_edit.setPlaceholderText("Projeyi kısaca açıklayın (isteğe bağlı)...")
-        self._desc_edit.setMaximumHeight(80)
-        layout.addWidget(self._desc_edit)
-        layout.addSpacing(16)
+        self._desc_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_LG)
+        self._desc_edit.setPlaceholderText(
+            tr("project_dialog_short_desc_placeholder", "Projeyi kısaca açıklayın (isteğe bağlı)...")
+        )
+        add_field(layout, tr("project_dialog_short_desc", "Kısa Açıklama"), self._desc_edit)
 
         layout.addWidget(self._build_status_priority_row(form_widget))
-        layout.addSpacing(16)
+        layout.addSpacing(Spacing.XL)
 
-        layout.addWidget(self._make_field_label("Detaylı Açıklama"))
-        layout.addSpacing(6)
-        self._full_desc_edit = QTextEdit(parent=form_widget)
-        self._full_desc_edit.setMaximumHeight(72)
-        layout.addWidget(self._full_desc_edit)
-        layout.addSpacing(16)
+        self._full_desc_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_MD)
+        add_field(layout, tr("project_dialog_full_desc", "Detaylı Açıklama"), self._full_desc_edit)
 
-        layout.addWidget(self._make_field_label("Problem Tanımı"))
-        layout.addSpacing(6)
-        self._problem_edit = QTextEdit(parent=form_widget)
-        self._problem_edit.setMaximumHeight(72)
-        layout.addWidget(self._problem_edit)
-        layout.addSpacing(16)
+        self._problem_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_MD)
+        add_field(layout, tr("project_dialog_problem", "Problem Tanımı"), self._problem_edit)
 
-        layout.addWidget(self._make_field_label("Hedef Çıktı"))
-        layout.addSpacing(6)
-        self._target_edit = QTextEdit(parent=form_widget)
-        self._target_edit.setMaximumHeight(72)
-        layout.addWidget(self._target_edit)
-        layout.addSpacing(16)
+        self._target_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_MD)
+        add_field(layout, tr("project_dialog_target", "Hedef Çıktı"), self._target_edit)
 
         layout.addWidget(self._build_type_health_row(form_widget))
-        layout.addSpacing(16)
+        layout.addSpacing(Spacing.XL)
 
-        layout.addWidget(self._make_field_label("Demo URL"))
-        layout.addSpacing(6)
-        self._demo_edit = QLineEdit(parent=form_widget)
-        self._demo_edit.setMinimumHeight(38)
-        layout.addWidget(self._demo_edit)
-        layout.addSpacing(16)
+        self._demo_edit = self._make_line_edit(form_widget)
+        add_field(layout, tr("label_demo_url", "Demo URL"), self._demo_edit)
 
-        layout.addWidget(self._make_field_label("Doküman URL"))
-        layout.addSpacing(6)
-        self._docs_edit = QLineEdit(parent=form_widget)
-        self._docs_edit.setMinimumHeight(38)
-        layout.addWidget(self._docs_edit)
-        layout.addSpacing(16)
+        self._docs_edit = self._make_line_edit(form_widget)
+        add_field(layout, tr("label_docs_url", "Doküman URL"), self._docs_edit)
 
         layout.addWidget(self._build_target_date_row(form_widget))
-        layout.addSpacing(16)
+        layout.addSpacing(Spacing.XL)
 
-        layout.addWidget(self._make_field_label("Etiketler"))
-        layout.addSpacing(6)
-        self._tags_edit = QLineEdit(parent=form_widget)
-        self._tags_edit.setPlaceholderText("virgülle ayırın: mvp, ui, araştırma")
-        self._tags_edit.setMinimumHeight(38)
-        layout.addWidget(self._tags_edit)
-        layout.addSpacing(16)
+        self._tags_edit = self._make_line_edit(form_widget)
+        self._tags_edit.setPlaceholderText(
+            tr("project_dialog_tags_placeholder", "virgülle ayırın: mvp, ui, araştırma")
+        )
+        add_field(layout, tr("label_tags", "Etiketler"), self._tags_edit)
 
-        self._featured_check = QCheckBox("Portfolyoya eklensin", parent=form_widget)
+        self._featured_check = QCheckBox(tr("project_dialog_featured", "Portfolyoya eklensin"), parent=form_widget)
         layout.addWidget(self._featured_check)
-        layout.addSpacing(16)
+        layout.addSpacing(Spacing.XL)
 
-        layout.addWidget(self._make_field_label("GitHub URL"))
-        layout.addSpacing(6)
-        self._github_edit = QLineEdit(parent=form_widget)
+        self._github_edit = self._make_line_edit(form_widget)
         self._github_edit.setPlaceholderText("https://github.com/kullanici/repo")
-        self._github_edit.setMinimumHeight(38)
-        layout.addWidget(self._github_edit)
-        layout.addSpacing(8)
+        add_field(layout, tr("label_github_url", "GitHub URL"), self._github_edit, gap_after=Spacing.MD)
 
-        scroll.setWidget(form_widget)
-        outer_layout.addWidget(scroll, 1)
-        outer_layout.addSpacing(12)
+    @staticmethod
+    def _make_line_edit(parent: QWidget) -> QLineEdit:
+        edit = QLineEdit(parent=parent)
+        edit.setMinimumHeight(Size.INPUT_H_LG)
+        return edit
 
-        # Ayraç çizgisi
-        sep = QFrame(parent=self)
-        sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setProperty("cssClass", "divider")
-        outer_layout.addWidget(sep)
-        outer_layout.addSpacing(12)
+    @staticmethod
+    def _make_text_area(parent: QWidget, max_height: int) -> QTextEdit:
+        edit = QTextEdit(parent=parent)
+        edit.setMaximumHeight(max_height)
+        return edit
 
-        # Butonlar scroll dışında, her zaman görünür
-        outer_layout.addWidget(self._build_button_row())
+    def _build_status_priority_row(self, parent: QWidget) -> QWidget:
+        status_labels = _status_labels()
+        status_items = [
+            (status_labels.get(s.value, s.value), s.value)
+            for s in ProjectStatus
+            if s != ProjectStatus.ARCHIVED
+        ]
+        status_col, self._status_combo = make_combo_column(
+            parent, tr("label_status", "Durum"), status_items
+        )
+        priority_labels = _priority_labels()
+        priority_items = [(priority_labels.get(p.value, p.value), p.value) for p in Priority]
+        priority_col, self._priority_combo = make_combo_column(
+            parent, tr("label_priority", "Öncelik"), priority_items
+        )
+        return make_two_column_row(parent, status_col, priority_col)
 
-    def _make_field_label(self, text: str) -> QLabel:
-        lbl = QLabel(text, parent=self)
-        lbl.setProperty("cssClass", "field-label")
-        return lbl
+    def _build_type_health_row(self, parent: QWidget) -> QWidget:
+        type_col, self._type_combo = make_combo_column(
+            parent, tr("label_project_type", "Proje Türü"), _project_type_items()
+        )
+        health_labels = _health_labels()
+        health_col, self._health_combo = make_combo_column(
+            parent,
+            tr("label_health", "Sağlık"),
+            [(health_labels.get(h.value, h.value), h.value) for h in ProjectHealth],
+        )
+        return make_two_column_row(parent, type_col, health_col)
 
-    def _build_status_priority_row(self, parent: QWidget | None = None) -> QWidget:
-        row = QWidget(parent=parent or self)
+    def _build_target_date_row(self, parent: QWidget) -> QWidget:
+        row = QWidget(parent=parent)
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(16)
-
-        status_col = QWidget(parent=row)
-        sc_layout = QVBoxLayout(status_col)
-        sc_layout.setContentsMargins(0, 0, 0, 0)
-        sc_layout.setSpacing(6)
-        sc_layout.addWidget(self._make_field_label("Durum"))
-        self._status_combo = QComboBox(parent=status_col)
-        self._status_combo.setMinimumHeight(38)
-        for status in ProjectStatus:
-            if status == ProjectStatus.ARCHIVED:
-                continue
-            label = _STATUS_LABELS.get(status.value, status.value)
-            self._status_combo.addItem(label, status.value)
-        sc_layout.addWidget(self._status_combo)
-        layout.addWidget(status_col)
-
-        priority_col = QWidget(parent=row)
-        pc_layout = QVBoxLayout(priority_col)
-        pc_layout.setContentsMargins(0, 0, 0, 0)
-        pc_layout.setSpacing(6)
-        pc_layout.addWidget(self._make_field_label("Öncelik"))
-        self._priority_combo = QComboBox(parent=priority_col)
-        self._priority_combo.setMinimumHeight(38)
-        for priority in Priority:
-            label = _PRIORITY_LABELS.get(priority.value, priority.value)
-            self._priority_combo.addItem(label, priority.value)
-        pc_layout.addWidget(self._priority_combo)
-        layout.addWidget(priority_col)
-
-        return row
-
-    def _build_type_health_row(self, parent: QWidget | None = None) -> QWidget:
-        row = QWidget(parent=parent or self)
-        layout = QHBoxLayout(row)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(16)
-
-        type_col = QWidget(parent=row)
-        tc_layout = QVBoxLayout(type_col)
-        tc_layout.setContentsMargins(0, 0, 0, 0)
-        tc_layout.setSpacing(6)
-        tc_layout.addWidget(self._make_field_label("Proje Türü"))
-        self._type_combo = QComboBox(parent=type_col)
-        self._type_combo.setMinimumHeight(38)
-        for label in ["Yazılım", "Eğitim", "Araştırma", "Tasarım", "İç araç", "Müşteri işi", "Deneysel", "Diğer"]:
-            self._type_combo.addItem(label, label)
-        tc_layout.addWidget(self._type_combo)
-        layout.addWidget(type_col)
-
-        health_col = QWidget(parent=row)
-        hc_layout = QVBoxLayout(health_col)
-        hc_layout.setContentsMargins(0, 0, 0, 0)
-        hc_layout.setSpacing(6)
-        hc_layout.addWidget(self._make_field_label("Sağlık"))
-        self._health_combo = QComboBox(parent=health_col)
-        self._health_combo.setMinimumHeight(38)
-        for health in ProjectHealth:
-            self._health_combo.addItem(_HEALTH_LABELS.get(health.value, health.value), health.value)
-        hc_layout.addWidget(self._health_combo)
-        layout.addWidget(health_col)
-
-        return row
-
-    def _build_target_date_row(self, parent: QWidget | None = None) -> QWidget:
-        row = QWidget(parent=parent or self)
-        layout = QHBoxLayout(row)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self._target_date_enabled = QCheckBox("Hedef tarih", parent=row)
+        self._target_date_enabled = QCheckBox(tr("label_target_date", "Hedef tarih"), parent=row)
         layout.addWidget(self._target_date_enabled)
         self._target_date_edit = QDateEdit(parent=row)
         self._target_date_edit.setCalendarPopup(True)
-        self._target_date_edit.setMinimumHeight(38)
+        self._target_date_edit.setMinimumHeight(Size.INPUT_H_LG)
         self._target_date_edit.setEnabled(False)
         self._target_date_enabled.toggled.connect(self._target_date_edit.setEnabled)
         layout.addWidget(self._target_date_edit, 1)
@@ -289,22 +274,24 @@ class ProjectDialog(QDialog):
         row = QWidget(parent=self)
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
+        layout.setSpacing(Spacing.MD + 2)
         layout.addStretch()
 
-        cancel_btn = QPushButton("İptal", parent=row)
-        cancel_btn.setMinimumSize(90, 38)
+        cancel_btn = QPushButton(tr("action_cancel", "İptal"), parent=row)
+        cancel_btn.setMinimumSize(Size.BTN_LG_W, Size.BTN_LG_H)
         cancel_btn.clicked.connect(self.reject)
         layout.addWidget(cancel_btn)
 
-        save_label = "Kaydet" if self._is_edit else "Oluştur"
+        save_label = tr("action_save", "Kaydet") if self._is_edit else tr("action_create", "Oluştur")
         self._save_btn = QPushButton(save_label, parent=row)
-        self._save_btn.setMinimumSize(90, 38)
+        self._save_btn.setMinimumSize(Size.BTN_LG_W, Size.BTN_LG_H)
         self._save_btn.setObjectName("accent_button")
         self._save_btn.clicked.connect(self._on_save)
         layout.addWidget(self._save_btn)
 
         return row
+
+    # ── Veri doldurma ────────────────────────────────────────────────────────
 
     def _populate_fields(self) -> None:
         p = self._project
@@ -319,14 +306,9 @@ class ProjectDialog(QDialog):
             self._problem_edit.setPlainText(p.problem_statement)
         if p.target_outcome:
             self._target_edit.setPlainText(p.target_outcome)
-        for i in range(self._status_combo.count()):
-            if self._status_combo.itemData(i) == p.status:
-                self._status_combo.setCurrentIndex(i)
-                break
-        for i in range(self._priority_combo.count()):
-            if self._priority_combo.itemData(i) == p.priority:
-                self._priority_combo.setCurrentIndex(i)
-                break
+        select_combo_data(self._status_combo, p.status)
+        select_combo_data(self._priority_combo, p.priority)
+        select_combo_data(self._health_combo, p.health)
         if p.github_url:
             self._github_edit.setText(p.github_url)
         if p.demo_url:
@@ -334,11 +316,7 @@ class ProjectDialog(QDialog):
         if p.docs_url:
             self._docs_edit.setText(p.docs_url)
         if p.project_type:
-            self._type_combo.setCurrentText(p.project_type)
-        for i in range(self._health_combo.count()):
-            if self._health_combo.itemData(i) == p.health:
-                self._health_combo.setCurrentIndex(i)
-                break
+            select_combo_data(self._type_combo, p.project_type)
         if p.target_end_date:
             self._target_date_enabled.setChecked(True)
             self._target_date_edit.setDate(
@@ -361,24 +339,20 @@ class ProjectDialog(QDialog):
         if docs_url := data.get("docs_url"):
             self._docs_edit.setText(str(docs_url))
 
+    # ── Doğrulama ve sonuç ───────────────────────────────────────────────────
+
     def _on_save(self) -> None:
         title = self._title_edit.text().strip()
         if not title:
-            self._error_label.setText("Proje başlığı boş olamaz.")
+            self._error_label.setText(tr("project_dialog_title_required", "Proje başlığı boş olamaz."))
             self._error_label.show()
-            self._set_field_error(self._title_edit, True)
+            set_field_error(self._title_edit, True)
             self._title_edit.setFocus()
             return
 
         self._error_label.hide()
-        self._set_field_error(self._title_edit, False)
+        set_field_error(self._title_edit, False)
         self.accept()
-
-    def _set_field_error(self, widget: QWidget, error: bool) -> None:
-        """QSS error[=true/false] property'sini ayarlar ve stili yeniler."""
-        widget.setProperty("error", "true" if error else "false")
-        widget.style().unpolish(widget)
-        widget.style().polish(widget)
 
     def get_data(self) -> dict[str, object]:
         """Dialog kabul edildikten sonra çağrılır; dolu alanları sözlük olarak döndürür."""

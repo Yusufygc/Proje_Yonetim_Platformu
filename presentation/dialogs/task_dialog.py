@@ -4,17 +4,12 @@ Yeni görev için boş, var olan görev için alanlar dolu gelir.
 """
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QComboBox,
     QDialog,
-    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QPushButton,
-    QScrollArea,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -26,8 +21,48 @@ from domain.enums.task_status import TaskStatus
 from domain.enums.task_type import TaskType
 from domain.models.project_stage import ProjectStage
 from domain.models.task import Task
+from presentation.dialogs.form_utils import (
+    make_combo_column,
+    select_combo_data,
+    set_field_error,
+)
+from presentation.dimensions import Size, Spacing
+from presentation.utils.i18n import tr
 
 
+def _task_status_items() -> list[tuple[str, str]]:
+    """(etiket, enum değeri) — dil değişimi dialog her açılışta yansısın diye fonksiyon."""
+    return [
+        (tr("task_status_todo", "Yapılacak"), TaskStatus.TODO.value),
+        (tr("task_status_in_progress", "Devam Ediyor"), TaskStatus.IN_PROGRESS.value),
+        (tr("task_status_waiting", "Bekliyor"), TaskStatus.WAITING.value),
+        (tr("task_status_blocked", "Engellendi"), TaskStatus.BLOCKED.value),
+        (tr("task_status_done", "Tamamlandı"), TaskStatus.DONE.value),
+        (tr("task_status_cancelled", "İptal Edildi"), TaskStatus.CANCELLED.value),
+    ]
+
+
+def _task_priority_items() -> list[tuple[str, str]]:
+    return [
+        (tr("priority_low", "Düşük"), Priority.LOW.value),
+        (tr("priority_medium", "Orta"), Priority.MEDIUM.value),
+        (tr("priority_high", "Yüksek"), Priority.HIGH.value),
+        (tr("priority_critical", "Kritik"), Priority.CRITICAL.value),
+    ]
+
+
+def _task_type_items() -> list[tuple[str, str]]:
+    return [
+        (tr("task_type_task", "Görev"), TaskType.TASK.value),
+        (tr("task_type_group", "Grup"), TaskType.GROUP.value),
+        (tr("task_type_bug", "Hata"), TaskType.BUG.value),
+        (tr("task_type_improvement", "İyileştirme"), TaskType.IMPROVEMENT.value),
+        (tr("task_type_research", "Araştırma"), TaskType.RESEARCH.value),
+        (tr("task_type_documentation", "Dokümantasyon"), TaskType.DOCUMENTATION.value),
+        (tr("task_type_design", "Tasarım"), TaskType.DESIGN.value),
+        (tr("task_type_test", "Test"), TaskType.TEST.value),
+        (tr("task_type_review", "İnceleme"), TaskType.REVIEW.value),
+    ]
 
 
 class TaskDialog(QDialog):
@@ -53,13 +88,17 @@ class TaskDialog(QDialog):
             self._task_controller.task_updated.connect(self._on_task_updated_event)
 
     def _setup_ui(self) -> None:
-        title_text = "Görevi Düzenle" if self._is_edit else "Yeni Görev Ekle"
+        title_text = (
+            tr("task_dialog_edit_title", "Görevi Düzenle")
+            if self._is_edit
+            else tr("task_dialog_new_title", "Yeni Görev Ekle")
+        )
         self.setWindowTitle(title_text)
-        self.setMinimumWidth(480)
+        self.setMinimumWidth(Size.DIALOG_TASK_MIN_W)
         self.setModal(True)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(28, 28, 28, 24)
+        layout.setContentsMargins(Spacing.XXXL, Spacing.XXXL, Spacing.XXXL, Spacing.XXL)
         layout.setSpacing(0)
 
         dialog_title = QLabel(title_text, parent=self)
@@ -67,23 +106,23 @@ class TaskDialog(QDialog):
         layout.addWidget(dialog_title)
         layout.addSpacing(20)
 
-        layout.addWidget(self._make_field_label("Görev Başlığı *"))
+        layout.addWidget(self._make_field_label(tr("task_dialog_title_label", "Görev Başlığı *")))
         self._error_label = QLabel(parent=self)
         self._error_label.setProperty("cssClass", "text-danger")
         self._error_label.hide()
         layout.addWidget(self._error_label)
         layout.addSpacing(6)
         self._title_edit = QLineEdit(parent=self)
-        self._title_edit.setPlaceholderText("Görevin adını girin...")
-        self._title_edit.setMinimumHeight(38)
+        self._title_edit.setPlaceholderText(tr("task_dialog_title_placeholder", "Görevin adını girin..."))
+        self._title_edit.setMinimumHeight(Size.INPUT_H_LG)
         layout.addWidget(self._title_edit)
         layout.addSpacing(16)
 
-        layout.addWidget(self._make_field_label("Açıklama"))
+        layout.addWidget(self._make_field_label(tr("label_description", "Açıklama")))
         layout.addSpacing(6)
         self._desc_edit = QTextEdit(parent=self)
-        self._desc_edit.setPlaceholderText("Görevi açıklayın (isteğe bağlı)...")
-        self._desc_edit.setMaximumHeight(72)
+        self._desc_edit.setPlaceholderText(tr("task_dialog_desc_placeholder", "Görevi açıklayın (isteğe bağlı)..."))
+        self._desc_edit.setMaximumHeight(Size.TEXTAREA_H_MD)
         layout.addWidget(self._desc_edit)
         layout.addSpacing(16)
 
@@ -105,72 +144,29 @@ class TaskDialog(QDialog):
         row = QWidget(parent=self)
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
+        layout.setSpacing(Spacing.LG)
 
-        # Durum
-        status_col = QWidget(parent=row)
-        sc = QVBoxLayout(status_col)
-        sc.setContentsMargins(0, 0, 0, 0)
-        sc.setSpacing(6)
-        sc.addWidget(self._make_field_label("Durum"))
-        self._status_combo = QComboBox(parent=status_col)
-        self._status_combo.setMinimumHeight(36)
-        self._status_combo.addItem("Yapılacak", TaskStatus.TODO.value)
-        self._status_combo.addItem("Devam Ediyor", TaskStatus.IN_PROGRESS.value)
-        self._status_combo.addItem("Bekliyor", TaskStatus.WAITING.value)
-        self._status_combo.addItem("Engellendi", TaskStatus.BLOCKED.value)
-        self._status_combo.addItem("Tamamlandı", TaskStatus.DONE.value)
-        self._status_combo.addItem("İptal Edildi", TaskStatus.CANCELLED.value)
-        sc.addWidget(self._status_combo)
+        status_col, self._status_combo = make_combo_column(
+            row, tr("label_status", "Durum"), _task_status_items()
+        )
         layout.addWidget(status_col)
 
-        # Öncelik
-        priority_col = QWidget(parent=row)
-        pc = QVBoxLayout(priority_col)
-        pc.setContentsMargins(0, 0, 0, 0)
-        pc.setSpacing(6)
-        pc.addWidget(self._make_field_label("Öncelik"))
-        self._priority_combo = QComboBox(parent=priority_col)
-        self._priority_combo.setMinimumHeight(36)
-        self._priority_combo.addItem("Düşük", Priority.LOW.value)
-        self._priority_combo.addItem("Orta", Priority.MEDIUM.value)
-        self._priority_combo.addItem("Yüksek", Priority.HIGH.value)
-        self._priority_combo.addItem("Kritik", Priority.CRITICAL.value)
-        pc.addWidget(self._priority_combo)
+        priority_col, self._priority_combo = make_combo_column(
+            row, tr("label_priority", "Öncelik"), _task_priority_items()
+        )
         layout.addWidget(priority_col)
 
-        # Tip
-        type_col = QWidget(parent=row)
-        tc = QVBoxLayout(type_col)
-        tc.setContentsMargins(0, 0, 0, 0)
-        tc.setSpacing(6)
-        tc.addWidget(self._make_field_label("Tip"))
-        self._type_combo = QComboBox(parent=type_col)
-        self._type_combo.setMinimumHeight(36)
-        self._type_combo.addItem("Görev", TaskType.TASK.value)
-        self._type_combo.addItem("Grup", TaskType.GROUP.value)
-        self._type_combo.addItem("Hata", TaskType.BUG.value)
-        self._type_combo.addItem("İyileştirme", TaskType.IMPROVEMENT.value)
-        self._type_combo.addItem("Araştırma", TaskType.RESEARCH.value)
-        self._type_combo.addItem("Dokümantasyon", TaskType.DOCUMENTATION.value)
-        self._type_combo.addItem("Tasarım", TaskType.DESIGN.value)
-        self._type_combo.addItem("Test", TaskType.TEST.value)
-        self._type_combo.addItem("İnceleme", TaskType.REVIEW.value)
-        tc.addWidget(self._type_combo)
+        type_col, self._type_combo = make_combo_column(
+            row, tr("label_type", "Tip"), _task_type_items()
+        )
         layout.addWidget(type_col)
 
-        # Aşama (Stage)
-        stage_col = QWidget(parent=row)
-        stc = QVBoxLayout(stage_col)
-        stc.setContentsMargins(0, 0, 0, 0)
-        stc.setSpacing(6)
-        stc.addWidget(self._make_field_label("Aşama"))
-        self._stage_combo = QComboBox(parent=stage_col)
-        self._stage_combo.setMinimumHeight(36)
-        self._stage_combo.addItem("Yok", None)
-        for s in self._stages:
-            self._stage_combo.addItem(s.name, s.id)
-        stc.addWidget(self._stage_combo)
+        # Aşama: ilk seçenek "Yok" (None), ardından projenin aşamaları
+        stage_items: list[tuple[str, object]] = [(tr("label_stage_none", "Yok"), None)]
+        stage_items += [(s.name, s.id) for s in self._stages]
+        stage_col, self._stage_combo = make_combo_column(
+            row, tr("filter_stage", "Aşama"), stage_items
+        )
         layout.addWidget(stage_col)
 
         return row
@@ -179,25 +175,25 @@ class TaskDialog(QDialog):
         row = QWidget(parent=self)
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
+        layout.setSpacing(Spacing.MD)
 
         if self._is_edit:
-            delete_btn = QPushButton("Sil", parent=row)
-            delete_btn.setMinimumSize(80, 38)
+            delete_btn = QPushButton(tr("action_delete", "Sil"), parent=row)
+            delete_btn.setMinimumSize(Size.BTN_MD_W, Size.BTN_MD_H38)
             delete_btn.setProperty("cssClass", "btn-danger")
             delete_btn.clicked.connect(self._on_delete)
             layout.addWidget(delete_btn)
 
         layout.addStretch()
 
-        cancel_btn = QPushButton("İptal", parent=row)
-        cancel_btn.setMinimumSize(80, 38)
+        cancel_btn = QPushButton(tr("action_cancel", "İptal"), parent=row)
+        cancel_btn.setMinimumSize(Size.BTN_MD_W, Size.BTN_MD_H38)
         cancel_btn.clicked.connect(self.reject)
         layout.addWidget(cancel_btn)
 
-        save_label = "Kaydet" if self._is_edit else "Ekle"
+        save_label = tr("action_save", "Kaydet") if self._is_edit else tr("action_add", "Ekle")
         self._save_btn = QPushButton(save_label, parent=row)
-        self._save_btn.setMinimumSize(80, 38)
+        self._save_btn.setMinimumSize(Size.BTN_MD_W, Size.BTN_MD_H38)
         self._save_btn.setObjectName("accent_button")
         self._save_btn.clicked.connect(self._on_save)
         layout.addWidget(self._save_btn)
@@ -205,19 +201,19 @@ class TaskDialog(QDialog):
         return row
 
     def _build_checklist_section(self, main_layout: QVBoxLayout) -> None:
-        main_layout.addWidget(self._make_field_label("Checklist"))
+        main_layout.addWidget(self._make_field_label(tr("label_checklist", "Checklist")))
         main_layout.addSpacing(8)
 
         add_layout = QHBoxLayout()
         add_layout.setContentsMargins(0, 0, 0, 0)
         
         self._chk_edit = QLineEdit(parent=self)
-        self._chk_edit.setPlaceholderText("Yeni madde...")
-        self._chk_edit.setMinimumHeight(32)
+        self._chk_edit.setPlaceholderText(tr("task_dialog_checklist_placeholder", "Yeni madde..."))
+        self._chk_edit.setMinimumHeight(Size.INPUT_H_SM)
         add_layout.addWidget(self._chk_edit, 1)
 
-        add_btn = QPushButton("Ekle", parent=self)
-        add_btn.setMinimumSize(60, 32)
+        add_btn = QPushButton(tr("action_add", "Ekle"), parent=self)
+        add_btn.setMinimumSize(Size.BTN_SM_W, Size.INPUT_H_SM)
         add_btn.clicked.connect(self._on_add_checklist_item)
         add_layout.addWidget(add_btn)
 
@@ -245,12 +241,12 @@ class TaskDialog(QDialog):
             row = QWidget(parent=self._chk_container)
             row.setProperty("cssClass", "panel-raised")
             rl = QHBoxLayout(row)
-            rl.setContentsMargins(4, 4, 4, 4)
-            rl.setSpacing(8)
+            rl.setContentsMargins(Spacing.XS, Spacing.XS, Spacing.XS, Spacing.XS)
+            rl.setSpacing(Spacing.MD)
 
             status_char = "●" if item.is_done else "○"
             chk_btn = QPushButton(status_char, parent=row)
-            chk_btn.setFixedSize(20, 20)
+            chk_btn.setFixedSize(Size.BTN_ICON_SM, Size.BTN_ICON_SM)
             chk_btn.setProperty("cssClass", "chk-done" if item.is_done else "chk-pending")
             chk_btn.clicked.connect(lambda checked=False, i_id=item.id: self._on_toggle_checklist_item(i_id))
             rl.addWidget(chk_btn)
@@ -260,7 +256,7 @@ class TaskDialog(QDialog):
             rl.addWidget(lbl, 1)
 
             del_btn = QPushButton("×", parent=row)
-            del_btn.setFixedSize(20, 20)
+            del_btn.setFixedSize(Size.BTN_ICON_SM, Size.BTN_ICON_SM)
             del_btn.setProperty("cssClass", "chk-delete")
             del_btn.clicked.connect(lambda checked=False, i_id=item.id: self._on_delete_checklist_item(i_id))
             rl.addWidget(del_btn)
@@ -293,41 +289,23 @@ class TaskDialog(QDialog):
         self._title_edit.setText(t.title)
         if t.description:
             self._desc_edit.setPlainText(t.description)
-        for i in range(self._status_combo.count()):
-            if self._status_combo.itemData(i) == t.status:
-                self._status_combo.setCurrentIndex(i)
-                break
-        for i in range(self._priority_combo.count()):
-            if self._priority_combo.itemData(i) == t.priority:
-                self._priority_combo.setCurrentIndex(i)
-                break
-        for i in range(self._type_combo.count()):
-            if self._type_combo.itemData(i) == t.task_type:
-                self._type_combo.setCurrentIndex(i)
-                break
-        
-        for i in range(self._stage_combo.count()):
-            if self._stage_combo.itemData(i) == t.stage_id:
-                self._stage_combo.setCurrentIndex(i)
-                break
+        select_combo_data(self._status_combo, t.status)
+        select_combo_data(self._priority_combo, t.priority)
+        select_combo_data(self._type_combo, t.task_type)
+        select_combo_data(self._stage_combo, t.stage_id)
 
     def _on_save(self) -> None:
         title = self._title_edit.text().strip()
         if not title:
-            self._error_label.setText("Görev başlığı boş olamaz.")
+            self._error_label.setText(tr("task_dialog_title_required", "Görev başlığı boş olamaz."))
             self._error_label.show()
-            self._set_field_error(self._title_edit, True)
+            set_field_error(self._title_edit, True)
             self._title_edit.setFocus()
             return
 
         self._error_label.hide()
-        self._set_field_error(self._title_edit, False)
+        set_field_error(self._title_edit, False)
         self.accept()
-
-    def _set_field_error(self, widget: QWidget, error: bool) -> None:
-        widget.setProperty("error", "true" if error else "false")
-        widget.style().unpolish(widget)
-        widget.style().polish(widget)
 
     def _on_delete(self) -> None:
         # Silme kararını çağırana bırak; özel result kodu ile sinyalleşir

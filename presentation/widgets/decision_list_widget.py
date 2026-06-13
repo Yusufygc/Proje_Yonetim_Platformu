@@ -18,6 +18,8 @@ from controllers.decision_controller import DecisionController
 from domain.enums.decision_status import DecisionStatus
 from domain.models.decision_record import DecisionRecord
 from presentation.dialogs.decision_dialog import DecisionDialog
+from presentation.dimensions import Spacing
+from presentation.utils.i18n import tr
 
 
 class DecisionListWidget(QWidget):
@@ -32,17 +34,17 @@ class DecisionListWidget(QWidget):
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(16)
+        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
+        layout.setSpacing(Spacing.XL)
 
         header = QHBoxLayout()
-        title = QLabel("Karar Kayıtları", parent=self)
+        title = QLabel(tr("decisions_title", "Karar Kayıtları"), parent=self)
         title.setProperty("cssClass", "title-small")
         header.addWidget(title)
-        
+
         header.addStretch()
-        
-        self._add_btn = QPushButton("+ Karar Ekle", parent=self)
+
+        self._add_btn = QPushButton(tr("decisions_add_btn", "+ Karar Ekle"), parent=self)
         self._add_btn.setProperty("cssClass", "btn-primary")
         self._add_btn.clicked.connect(self._on_add_decision)
         header.addWidget(self._add_btn)
@@ -75,14 +77,15 @@ class DecisionListWidget(QWidget):
             item = QListWidgetItem()
             item.setData(Qt.ItemDataRole.UserRole, d.id)
             
-            # Simple text representation for now
             status_text = d.status
             if d.status == DecisionStatus.ACCEPTED.value:
-                status_text = "✅ KABUL"
+                status_text = tr("decision_status_accepted", "✅ KABUL")
             elif d.status == DecisionStatus.CANCELLED.value:
-                status_text = "❌ İPTAL"
-                
-            text = f"{d.title}\nDurum: {status_text}\nKarar: {d.decision}"
+                status_text = tr("decision_status_cancelled", "❌ İPTAL")
+
+            text = tr("decisions_item_format", "{title}\nDurum: {status}\nKarar: {decision}").format(
+                title=d.title, status=status_text, decision=d.decision
+            )
             item.setText(text)
             self._list_widget.addItem(item)
 
@@ -106,8 +109,8 @@ class DecisionListWidget(QWidget):
         
         menu = QMenu(self)
                            
-        edit_action = menu.addAction("Düzenle")
-        delete_action = menu.addAction("İptal Et")
+        edit_action = menu.addAction(tr("action_edit", "Düzenle"))
+        delete_action = menu.addAction(tr("action_cancel_record", "İptal Et"))
         
         action = menu.exec(self._list_widget.mapToGlobal(pos))
         if action == edit_action:
@@ -117,7 +120,11 @@ class DecisionListWidget(QWidget):
                 if dialog.exec() == QDialog.DialogCode.Accepted:
                     self._controller.update_decision(decision_id, **dialog.get_data())
         elif action == delete_action:
-            reply = QMessageBox.question(self, "İptal Et", "Bu kararı iptal etmek istediğinize emin misiniz?",
-                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            reply = QMessageBox.question(
+                self,
+                tr("action_cancel_record", "İptal Et"),
+                tr("decisions_cancel_confirm", "Bu kararı iptal etmek istediğinize emin misiniz?"),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
             if reply == QMessageBox.StandardButton.Yes:
                 self._controller.delete_decision(decision_id)

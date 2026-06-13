@@ -37,9 +37,12 @@ class MainWindow(QMainWindow):
 
     def __init__(self) -> None:
         super().__init__()
-        self._prefs = PreferenceManager.instance()
-        self._theme = ThemeManager.instance()
         self._di = DIContainer.instance()
+        # Tüm bağımlılıklar kompozisyon kökünden (DI) alınır; test ortamında
+        # bootstrap yapılmamışsa singleton'a düşülür.
+        self._prefs = getattr(self._di, "prefs", None) or PreferenceManager.instance()
+        self._theme = getattr(self._di, "theme", None) or ThemeManager.instance()
+        self._event_bus = getattr(self._di, "event_bus", None) or EventBus.instance()
         self._page_index: dict[str, int] = {}
 
         self._setup_window()
@@ -73,7 +76,12 @@ class MainWindow(QMainWindow):
         root_layout.setSpacing(0)
 
         # Sol panel: Sidebar
-        self._sidebar = Sidebar(parent=central)
+        self._sidebar = Sidebar(
+            parent=central,
+            theme=self._theme,
+            icons=getattr(self._di, "icons", None),
+            prefs=self._prefs,
+        )
         self._sidebar.page_requested.connect(self._navigate_to)
         self._sidebar.search_requested.connect(self._open_search_dialog)
         root_layout.addWidget(self._sidebar)
@@ -88,14 +96,14 @@ class MainWindow(QMainWindow):
         root_layout.addWidget(self._stack)
         
         # Toast bildirimleri pencerenin üstünde yer alır
-        self._toast = Toast(parent=central)
+        self._toast = Toast(parent=central, event_bus=self._event_bus)
 
     def _navigate_to(self, page_name: str) -> None:
         """Sidebar navigasyon sinyalini alarak ilgili sayfayı gösterir."""
         index = self._page_index.get(page_name, 0)
         self._stack.setCurrentIndex(index)
         self._sidebar.set_active_page(page_name)
-        logger.debug("Sayfa değiştirildi: %s (index=%d)", page_name, index)
+        logger.debug("Sayfa değiştirildi: %s (index=%d)", page_name, index)  # l10n: log
 
     def _setup_shortcuts(self) -> None:
         shortcut_f = QShortcut(QKeySequence("Ctrl+F"), self)
@@ -109,20 +117,21 @@ class MainWindow(QMainWindow):
 
     def _create_new_project(self) -> None:
         self._navigate_to("projects")
-        EventBus.instance().publish(NEW_PROJECT_REQUESTED)
+        self._event_bus.publish(NEW_PROJECT_REQUESTED)
 
     def _open_search_dialog(self) -> None:
         dialog = SearchDialog(controller=self._di.search_controller, parent=self)
         dialog.item_selected.connect(self._on_search_item_selected)
         dialog.exec()
 
-    def _on_search_item_selected(self, type_str: str, item_id: int) -> None:
-        if type_str == "Proje":
+    def _on_search_item_selected(self, type_code: str, item_id: int) -> None:
+        # type_code SearchDialog'dan dilden bağımsız sabit gelir ("project"|"task"|"idea")
+        if type_code == "project":
             self._navigate_to("projects")
-            EventBus.instance().publish(PROJECT_DETAIL_REQUESTED, project_id=item_id)
-        elif type_str == "Görev":
+            self._event_bus.publish(PROJECT_DETAIL_REQUESTED, project_id=item_id)
+        elif type_code == "task":
             self._navigate_to("tasks")
-        elif type_str == "Fikir":
+        elif type_code == "idea":
             self._navigate_to("ideas")
 
     def _restore_geometry(self) -> None:
@@ -132,5 +141,5 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: object) -> None:  # type: ignore[override]
         self._prefs.save_window_geometry(self.saveGeometry())
-        logger.info("Uygulama kapatılıyor, geometri kaydedildi.")
+        logger.info("Uygulama kapatılıyor, geometri kaydedildi.")  # l10n: log
         super().closeEvent(event)  # type: ignore[arg-type]

@@ -8,34 +8,37 @@ from PySide6.QtCore import QPropertyAnimation, QRect, Qt, QTimer
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 from core.events.event_bus import EventBus
+from presentation.dimensions import Shadow, Size, Spacing
 from presentation.utils.ui_utils import apply_shadow
 
 
 class Toast(QWidget):
     """Ekranda geçici olarak beliren şık bildirim mesajı."""
-    def __init__(self, parent: QWidget) -> None:
+    def __init__(self, parent: QWidget, event_bus: EventBus | None = None) -> None:
         super().__init__(parent)
         self.hide()
         self._undo_callback: Callable[[], None] | None = None
-        
+
         self._setup_ui()
         self._anim = QPropertyAnimation(self, b"geometry")
         self._anim.setDuration(300)
-        
+
         self._timer = QTimer(self)
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self.hide_toast)
-        
-        # Olay dinleyicisi
-        EventBus.instance().subscribe("toast.show", self._on_toast_requested)
+
+        # Constructor injection tercih edilir; None ise singleton'a düşülür.
+        # WeakMethod aboneliği sayesinde widget yok olunca otomatik düşer.
+        bus = event_bus or EventBus.instance()
+        bus.subscribe("toast.show", self._on_toast_requested)
         
     def _setup_ui(self) -> None:
-        self.setFixedHeight(48)
-        self.setMinimumWidth(300)
-        self.setMaximumWidth(500)
-        
+        self.setFixedHeight(Size.TOAST_H)
+        self.setMinimumWidth(Size.TOAST_MIN_W)
+        self.setMaximumWidth(Size.TOAST_MAX_W)
+
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 8, 16, 8)
+        layout.setContentsMargins(Spacing.XL, Spacing.MD, Spacing.XL, Spacing.MD)
         
         self._label = QLabel(self)
         self._label.setObjectName("toast_label")
@@ -49,7 +52,7 @@ class Toast(QWidget):
         layout.addWidget(self._undo_btn)
 
         self.setProperty("type", "success")
-        apply_shadow(self, blur_radius=20, y_offset=6, alpha=40)
+        apply_shadow(self, blur_radius=Shadow.TOAST_BLUR, y_offset=Shadow.TOAST_Y, alpha=Shadow.TOAST_ALPHA)
 
     def _on_toast_requested(
         self,
