@@ -65,6 +65,10 @@ dmypy.json
 .pytype/
 .pylint.d/
 
+# Tema/ikon renk varyantı üretildikçe oluşan QSS ok ikonu önbelleği —
+# çalışma zamanı çıktısı, palet değişiminde yeniden üretilir.
+resources/styles/_cache/
+
 # --- POETRY VE UV SANAL ORTAM ÇIKTILARI ---
 # RULES.md: pyproject.toml ve poetry.lock/uv.lock Git'e EKLENMELİDİR.
 # Ancak yerel .venv klasörleri kesinlikle yoksayılmalıdır.
