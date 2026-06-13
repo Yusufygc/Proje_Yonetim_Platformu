@@ -1,5 +1,8 @@
 # Wiki Kayıt Defteri
 
+## [2026-06-13] UX | Palet geçişi sonrası kontrast ve hiyerarşi onarımı
+Sidebar yeni token seti (`sidebar_text`, `sidebar_text_active`, `sidebar_hover_bg`, `sidebar_active_bg`); aktif öğe 3px sol kenar + opak metin desenine geçti (alpha blend kaldırıldı). Koyu temada `text_secondary` lavanta, `border` ayrı ton, `stage_done` success yeşili. Stat kart KPI değeri primary + büyük punto. Stage row 36px sabit (`Size.STAGE_ROW_H`). Tab stili browser-tab desenine geçti. Stage butonları StringManager'a taşındı. Detay: [[tema-sistemi]], `Project_docs/UX_TEMA_GERI_BILDIRIMI_2026-06-13.md`.
+
 ## [2026-06-13] REFACTOR | Constructor injection UI'da tamamlandı
 9 widget/sayfa + `Sidebar` + `Toast` + `SettingsPage` artık `theme/icons/strings/prefs/event_bus`'ı constructor parametresinden alıyor; modules.py factory'leri DI'den besler. `DIContainer`'a `strings` ve `icons` public property'leri eklendi. Sadece `MainWindow` (kompozisyon kökü) `getattr(di) or instance()` fallback'i tutuyor. Detay: [[di-container]], [[yol-haritasi]].
 

@@ -124,17 +124,18 @@ Etkilenen: "Projeler", "Fikirler", "Görevler", "Bilgilendirme", "Ayarlar" — b
 
 ## Eylem Önerisi (Öncelik Sırası)
 
-| # | Aksiyon | Tahmini efor | Etki |
-|---|---|---|---|
-| P0-1 | `sidebar_text` + `sidebar_text_active` token ekle, QSS bağla, iki temaya değer | 30 dk | Açık tema kullanılabilir |
-| P0-2 | "Tamamlandı"/"DONE" badge'lerini `success`'a bağla | 15 dk | Semantik onarım |
-| P0-3 | Sidebar `:checked` kuralında sabit hex taraması, token'a çevir | 15 dk | Görsel tutarlılık |
-| P1-4 | `text_secondary` koyu temada Goldenrod'dan nötr lavanta'ya | 5 dk + 2 ekran kontrol | Hiyerarşi geri gelir |
-| P1-5 | `border` token'ı surface_raised'tan ayrıştır | 5 dk | Kart sınırları görünür |
-| P1-6 | Stage satır yüksekliği 36px | dimensions.py | Yer kazanımı |
-| P2-7 | Stat kart hiyerarşi swap | 10 dk | KPI vurgu |
-| P2-8 | Scrollbar handle nötralleştir | 5 dk | Görsel parazit azalır |
-| P2-9 | WBS sütun başlığı `section-header` sınıfı | 10 dk | Tablo okunaklı |
-| P3-11/13 | Tab stili + text-ellipsis | 30 dk | Cila |
+| # | Aksiyon | Durum (commit 015923c) |
+|---|---|---|
+| P0-1 | `sidebar_text*` token ekle, QSS bağla | ✅ Yapıldı — açık tema okunabilir |
+| P0-2 | `stage_done` → success yeşili | ✅ Yapıldı — Tamamlandı badge yeşil |
+| P0-3 | Sidebar aktif → 3px sol kenar + opak metin (alpha blend kaldırıldı) | ✅ Yapıldı — kırmızımsı blend gitti |
+| P1-4 | `text_secondary` lavanta (#9CA0C8) | ✅ Yapıldı — hiyerarşi geri geldi |
+| P1-5 | `border` ayrıştır (#2A3590) | ✅ Yapıldı — kart sınırları görünür |
+| P1-6 | Stage row 36px sabit (`Size.STAGE_ROW_H`) | ✅ Yapıldı + buton `STAGE_BTN_H` |
+| P2-7 | Stat kart hiyerarşi swap (badges.qss) | ✅ Yapıldı — KPI değeri primary |
+| P2-8 | Scrollbar handle | Skip — dark `scrollbar_handle=#2A3590` zaten nötr |
+| P2-9 | WBS sütun başlığı `section-header` | Otomatik düzeldi (text_secondary lavanta) |
+| P3-11 | Tab alt çizgi (browser-tab) | ✅ Yapıldı (30_views.qss) |
+| P3-13 | Liste ellipsis | Bekliyor (düşük öncelik) |
 
-**Toplam P0+P1 efor:** ~80 dakika, kullanılabilirliği WCAG AA seviyesine çeker.
+**Sonuç:** P0/P1/P2 tamamen kapandı; uygulama WCAG AA kontrast eşiğine çekildi. Sidebar aktif vurgu deseni "alpha bg" yerine "border + opak metin" — Qt'nin alpha mix tuhaflığından da kurtuldu.

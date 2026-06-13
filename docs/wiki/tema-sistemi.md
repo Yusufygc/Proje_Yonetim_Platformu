@@ -19,6 +19,18 @@ resources/styles/
 ```
 Kural: yeni stil ilgili modül dosyasına yazılır; Python içinde `setStyleSheet` YASAK (tek istisna: main_window global uygulaması). Renk daima `@token`.
 
+## Sidebar token ailesi (2026-06-13)
+Sidebar arka planı genel paletten **bağımsız** olduğu için ayrı token seti vardır:
+- `sidebar_bg` — sidebar zemini (koyu tonda her temada).
+- `sidebar_text` — pasif nav metni (zemin üstünde WCAG AA geçer).
+- `sidebar_text_active` — aktif/hover nav metni.
+- `sidebar_active` — aktif öğenin 3px sol kenar rengi.
+- `sidebar_hover_bg`, `sidebar_active_bg` — alpha tonları (gerekirse).
+
+Aktif vurgu deseni: **transparent bg + 3px sol border + opak metin rengi**. Alpha karışım Qt'de koyu zemin altında kırmızımsı tonlar üretiyordu; bu desen sorunu tamamen kaldırır.
+
+Genel kural: sidebar dışında `text_secondary` kullan, sidebar **içinde** `sidebar_text` kullan. QSS'te `QFrame#sidebar QLabel` seçicisi sidebar etiketlerini otomatik bu token'a bağlar.
+
 ## Tema Sözleşmesi (programatik renk)
 QSS ile verilemeyen renkler (`setForeground` vb.) `ThemeManager.color(key)` ile çözülür ve **o widget `theme_changed`'e abone olmak zorundadır**. Uygulayanlar: `pages/tasks` (ağaç), `dashboard_page`, `resource_list_widget`, `sidebar`, `stage_timeline_widget`, `info_page`. `skeleton_loader` her `showEvent`'te çözdüğü için muaf.
 
