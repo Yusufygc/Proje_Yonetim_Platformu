@@ -35,14 +35,18 @@ def main() -> None:
     app.setApplicationName(config.APP_NAME)
     app.setOrganizationName(config.APP_ORGANIZATION)
 
+    # Premium fontlar eksikse arka planda indir (hata olursa fallback devreye girer)
+    try:
+        from scripts.download_fonts import ensure_fonts  # noqa: PLC0415
+        ensure_fonts()
+    except Exception:  # noqa: BLE001
+        pass
+
     # Fontları yükle ve uygula
     from PySide6.QtGui import QFont
     font_mgr = container.fonts
     font_mgr.load_all()
-    if font_mgr.loaded_families:
-        app.setFont(QFont(font_mgr.loaded_families[0], 10))
-    else:
-        app.setFont(QFont("Segoe UI", 10))
+    app.setFont(QFont(font_mgr.ui_font, 10))
 
     # Global Scroll Event Filter'ı yükle
     from presentation.utils.scroll_filter import WheelEventFilter

@@ -117,3 +117,12 @@ class Shadow:
     COLOR_R = 0
     COLOR_G = 0
     COLOR_B = 0
+
+
+class FontFamily:
+    """Font ailesi sabitleri — QFont ve QSS için tek doğruluk kaynağı."""
+
+    UI = "Plus Jakarta Sans"
+    MONO = "JetBrains Mono"
+    FALLBACK_UI = "Segoe UI"
+    FALLBACK_MONO = "Consolas"
