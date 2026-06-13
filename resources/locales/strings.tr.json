@@ -233,6 +233,8 @@
   "stage_status_active": "Aktif",
   "stage_status_done": "Tamamlandı",
   "stage_status_skipped": "Atlandı",
+  "stage_complete_btn": "Tamamla",
+  "stage_activate_btn": "Aktif Et",
   "projects_empty": "Henüz proje yok.\nYeni oluşturmak için\n+'ya basın.",
   "projects_new_btn": "+ Yeni Proje",
   "projects_new_tooltip": "Yeni Proje Oluştur",

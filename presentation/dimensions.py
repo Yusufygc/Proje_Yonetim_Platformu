@@ -42,6 +42,8 @@ class Size:
     BTN_MD_W = 80                   # Orta buton min genişliği
     BTN_MD_H = 36                   # Orta buton min yüksekliği
     BTN_MD_H38 = 38                 # Dialog ana butonları (Cancel, Save)
+    STAGE_BTN_H = 24                # Aşama satırı içi "Tamamla/Aktif Et" butonu — kompakt
+    STAGE_ROW_H = 36                # Aşama satırı sabit yüksekliği (8 aşamayı yarım ekran yutmadan göstermek için)
     BTN_LG_W = 90                   # Büyük dialog butonu min genişliği
     BTN_LG_H = 38                   # Büyük dialog butonu min yüksekliği
     BTN_NEW_PROJECT_W = 130         # "Yeni Proje" AnimatedButton genişliği

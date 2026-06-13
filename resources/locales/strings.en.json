@@ -233,6 +233,8 @@
   "stage_status_active": "Active",
   "stage_status_done": "Done",
   "stage_status_skipped": "Skipped",
+  "stage_complete_btn": "Complete",
+  "stage_activate_btn": "Activate",
   "projects_empty": "No projects yet.\nPress + to\ncreate one.",
   "projects_new_btn": "+ New Project",
   "projects_new_tooltip": "Create New Project",

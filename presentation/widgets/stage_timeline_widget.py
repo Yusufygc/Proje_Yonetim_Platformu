@@ -70,9 +70,10 @@ class StageTimelineWidget(QWidget):
         card = QFrame(parent=self)
         card.setObjectName("stage_card")
         card.setProperty("stage-status", stage.status)
+        # Sabit yükseklik: 8 aşamalık liste detay panelin yarısını yutmasın.
+        card.setFixedHeight(Size.STAGE_ROW_H)
         layout = QHBoxLayout(card)
-        # 14px yatay, 10px dikey — standart ızgara arası değer; Spacing.LG (12) ile yakın tasarım kararı
-        layout.setContentsMargins(14, Spacing.MD, 14, Spacing.MD)
+        layout.setContentsMargins(14, Spacing.XS, 14, Spacing.XS)
         layout.setSpacing(Spacing.MD)
 
         dot = QLabel("●", parent=card)
@@ -92,17 +93,17 @@ class StageTimelineWidget(QWidget):
         layout.addWidget(badge)
 
         if is_active:
-            btn = QPushButton("Tamamla", parent=card)
+            btn = QPushButton(tr("stage_complete_btn", "Tamamla"), parent=card)
             btn.setProperty("cssClass", "btn-primary")
-            btn.setMinimumSize(Size.BTN_MD_W, Spacing.XXXL)
+            btn.setMinimumSize(Size.BTN_MD_W, Size.STAGE_BTN_H)
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.complete_requested.emit(sid)
             )
             layout.addWidget(btn)
         elif is_pending and not has_active:
-            btn = QPushButton("Aktif Et", parent=card)
+            btn = QPushButton(tr("stage_activate_btn", "Aktif Et"), parent=card)
             btn.setProperty("cssClass", "btn-secondary")
-            btn.setMinimumSize(Size.BTN_MD_W, Spacing.XXXL)
+            btn.setMinimumSize(Size.BTN_MD_W, Size.STAGE_BTN_H)
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.activate_requested.emit(sid)
             )

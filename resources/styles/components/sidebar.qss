@@ -7,38 +7,47 @@ QFrame#sidebar { background-color: @sidebar_bg; }
 
 /* ── ThemeToggleSwitch ── */
 ThemeToggleSwitch {
-    background-color: @border;
+    background-color: @sidebar_active_bg;
     border-radius: 12px;
 }
 ThemeToggleSwitch[active="true"] {
-    background-color: @accent_start;
+    background-color: @sidebar_active;
 }
 /* Thumb (iç QFrame) */
 ThemeToggleSwitch QFrame {
-    background-color: @text_secondary;
+    background-color: @sidebar_text;
     border-radius: 9px;
 }
 ThemeToggleSwitch[active="true"] QFrame {
-    background-color: #FFFFFF;
+    background-color: @sidebar_text_active;
 }
 
-/* ── SidebarNavButton ── */
+/* ── Sidebar metin etiketleri (tema toggle altyazısı vb.) ── */
+QFrame#sidebar QLabel { color: @sidebar_text; }
+
+/* ── SidebarNavButton ──
+   Nav item metni sidebar zeminine özel token ile çözülür; genel
+   text_secondary kullanılırsa açık tema Royal Blue zemininde
+   kontrast oranı WCAG AA eşiğinin altına düşer. */
 SidebarNavButton {
     background-color: transparent;
     border: none;
     border-radius: 8px;
-    color: @text_secondary;
+    color: @sidebar_text;
     font-size: 13px;
     text-align: left;
     padding-left: 8px;
 }
 SidebarNavButton:hover {
-    background-color: @surface_raised;
+    /* Alpha katmanı kullanılmaz: koyu zeminle çakışan alpha karışımı Qt'de
+       beklenmedik tonlar üretiyordu. Sadece metin rengini vurguluyoruz. */
+    color: @sidebar_text_active;
 }
 SidebarNavButton:checked {
-    background-color: @accent_alpha;
-    border-left: 3px solid @accent_start;
-    color: @accent_start;
+    background-color: transparent;
+    border-left: 3px solid @sidebar_active;
+    padding-left: 5px;
+    color: @sidebar_text_active;
     font-weight: 700;
 }
 
