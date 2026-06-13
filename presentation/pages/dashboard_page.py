@@ -8,6 +8,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QFrame,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -20,10 +21,54 @@ from PySide6.QtWidgets import (
 
 from controllers.dashboard_controller import DashboardController
 from controllers.idea_controller import IdeaController
+from core.events.event_bus import EventBus
 from core.managers.theme_manager import ThemeManager
 from presentation.dimensions import Shadow, Spacing
 from presentation.utils.i18n import tr
 from presentation.utils.ui_utils import apply_shadow
+
+
+def _tr_project_status(value: str) -> str:
+    return {
+        "PLANNED":   tr("status_planned",   "Planlandı"),
+        "ACTIVE":    tr("status_active",    "Aktif"),
+        "ON_HOLD":   tr("status_on_hold",   "Beklemede"),
+        "BLOCKED":   tr("status_blocked",   "Engellendi"),
+        "COMPLETED": tr("status_completed", "Tamamlandı"),
+        "ARCHIVED":  tr("status_archived",  "Arşivlendi"),
+        "CANCELLED": tr("status_cancelled", "İptal Edildi"),
+    }.get(value, value)
+
+
+def _tr_task_status(value: str) -> str:
+    return {
+        "TODO":        tr("task_status_todo",        "Yapılacak"),
+        "IN_PROGRESS": tr("task_status_in_progress", "Devam Ediyor"),
+        "WAITING":     tr("task_status_waiting",     "Bekliyor"),
+        "BLOCKED":     tr("task_status_blocked",     "Engellendi"),
+        "DONE":        tr("task_status_done",        "Tamamlandı"),
+        "CANCELLED":   tr("task_status_cancelled",   "İptal Edildi"),
+    }.get(value, value)
+
+
+def _tr_priority(value: str) -> str:
+    return {
+        "LOW":      tr("priority_low",      "Düşük"),
+        "MEDIUM":   tr("priority_medium",   "Orta"),
+        "HIGH":     tr("priority_high",     "Yüksek"),
+        "CRITICAL": tr("priority_critical", "Kritik"),
+    }.get(value, value)
+
+
+def _tr_idea_status(value: str) -> str:
+    return {
+        "RAW":        tr("idea_status_raw",       "Ham Fikir"),
+        "REVIEWING":  tr("idea_status_reviewing", "İnceleniyor"),
+        "VALIDATING": tr("idea_status_validating","Doğrulanıyor"),
+        "CONVERTED":  tr("idea_status_converted", "Projeye Dönüştürüldü"),
+        "DEFERRED":   tr("idea_status_deferred",  "Ertelendi"),
+        "REJECTED":   tr("idea_status_rejected",  "Reddedildi"),
+    }.get(value, value)
 
 
 class DashboardPage(QWidget):
@@ -74,40 +119,41 @@ class DashboardPage(QWidget):
         quick_layout.addWidget(quick_btn)
         layout.addLayout(quick_layout)
 
-        # Lists Layout
-        lists_layout = QHBoxLayout()
+        # Lists Layout — 2×2 grid, yatay taşmayı önler
+        lists_layout = QGridLayout()
         lists_layout.setSpacing(Spacing.XXXL)
+        lists_layout.setColumnStretch(0, 1)
+        lists_layout.setColumnStretch(1, 1)
+        lists_layout.setRowStretch(0, 1)
+        lists_layout.setRowStretch(1, 1)
 
-        # Blocked Projects
+        # Blocked Projects (0,0)
         blocked_container = QWidget(parent=self)
         blocked_layout = QVBoxLayout(blocked_container)
         blocked_layout.setContentsMargins(0, 0, 0, 0)
-        
         lbl_blocked = QLabel(tr("dashboard_blocked_title", "Tıkanan / Riskli Projeler"))
         lbl_blocked.setProperty("cssClass", "title-small")
         blocked_layout.addWidget(lbl_blocked)
-
         self._blocked_list = QListWidget(parent=blocked_container)
         self._blocked_list.setProperty("cssClass", "panel")
         apply_shadow(self._blocked_list, blur_radius=Shadow.LIST_BLUR, y_offset=Shadow.LIST_Y, alpha=Shadow.LIST_ALPHA)
         blocked_layout.addWidget(self._blocked_list)
-        lists_layout.addWidget(blocked_container)
+        lists_layout.addWidget(blocked_container, 0, 0)
 
-        # Recent Tasks
+        # Recent Tasks (0,1)
         recent_container = QWidget(parent=self)
         recent_layout = QVBoxLayout(recent_container)
         recent_layout.setContentsMargins(0, 0, 0, 0)
-
         lbl_recent = QLabel(tr("dashboard_recent_title", "Son Aktiviteler (Görevler)"))
         lbl_recent.setProperty("cssClass", "title-small")
         recent_layout.addWidget(lbl_recent)
-
         self._recent_list = QListWidget(parent=recent_container)
         self._recent_list.setProperty("cssClass", "panel")
         apply_shadow(self._recent_list, blur_radius=Shadow.LIST_BLUR, y_offset=Shadow.LIST_Y, alpha=Shadow.LIST_ALPHA)
         recent_layout.addWidget(self._recent_list)
-        lists_layout.addWidget(recent_container)
+        lists_layout.addWidget(recent_container, 0, 1)
 
+        # High Priority Tasks (1,0)
         high_container = QWidget(parent=self)
         high_layout = QVBoxLayout(high_container)
         high_layout.setContentsMargins(0, 0, 0, 0)
@@ -117,18 +163,19 @@ class DashboardPage(QWidget):
         self._high_priority_list = QListWidget(parent=high_container)
         self._high_priority_list.setProperty("cssClass", "panel")
         high_layout.addWidget(self._high_priority_list)
-        lists_layout.addWidget(high_container)
+        lists_layout.addWidget(high_container, 1, 0)
 
+        # Recent Ideas (1,1)
         ideas_container = QWidget(parent=self)
         ideas_layout = QVBoxLayout(ideas_container)
         ideas_layout.setContentsMargins(0, 0, 0, 0)
-        lbl_ideas = QLabel("Son Fikirler")
+        lbl_ideas = QLabel(tr("dashboard_ideas_title", "Son Fikirler"))
         lbl_ideas.setProperty("cssClass", "title-small")
         ideas_layout.addWidget(lbl_ideas)
         self._recent_ideas_list = QListWidget(parent=ideas_container)
         self._recent_ideas_list.setProperty("cssClass", "panel")
         ideas_layout.addWidget(self._recent_ideas_list)
-        lists_layout.addWidget(ideas_container)
+        lists_layout.addWidget(ideas_container, 1, 1)
 
         layout.addLayout(lists_layout, 1)
 
@@ -173,7 +220,7 @@ class DashboardPage(QWidget):
         danger_color = self._theme.color("danger")
         for p in stats.get("blocked_projects", []):
             item = QListWidgetItem()
-            item.setText(f"{p['name']} ({p['status']})")
+            item.setText(f"{p['name']} ({_tr_project_status(p['status'])})")
             item.setForeground(QColor(danger_color))
             self._blocked_list.addItem(item)
 
@@ -181,27 +228,39 @@ class DashboardPage(QWidget):
         text_sec_color = self._theme.color("text_secondary")
         for t in stats.get("recent_tasks", []):
             item = QListWidgetItem()
-            item.setText(f"[{t['project_name']}] {t['title']} ({t['status']})")
+            item.setText(f"[{t['project_name']}] {t['title']} ({_tr_task_status(t['status'])})")
             item.setForeground(QColor(text_sec_color))
             self._recent_list.addItem(item)
 
         self._high_priority_list.clear()
         for t in stats.get("high_priority_tasks", []):
             self._high_priority_list.addItem(
-                QListWidgetItem(f"[{t['project_name']}] {t['title']} ({t['priority']})")
+                QListWidgetItem(f"[{t['project_name']}] {t['title']} ({_tr_priority(t['priority'])})")
             )
 
         self._recent_ideas_list.clear()
         for idea in stats.get("recent_ideas", []):
-            self._recent_ideas_list.addItem(QListWidgetItem(f"{idea['title']} ({idea['status']})"))
+            self._recent_ideas_list.addItem(QListWidgetItem(f"{idea['title']} ({_tr_idea_status(idea['status'])})"))
 
     def _on_quick_idea(self) -> None:
         title = self._quick_idea_edit.text().strip()
-        if not title or self._idea_controller is None:
+        if not title:
+            EventBus.instance().publish(
+                "toast.show",
+                message=tr("toast_idea_empty", "Fikir başlığı boş olamaz."),
+                type_="warning",
+            )
+            return
+        if self._idea_controller is None:
             return
         self._idea_controller.create_idea(title)
         self._quick_idea_edit.clear()
         self._controller.load_stats()
+        EventBus.instance().publish(
+            "toast.show",
+            message=tr("toast_idea_saved", "Fikir kaydedildi."),
+            type_="success",
+        )
 
     def showEvent(self, event):
         super().showEvent(event)

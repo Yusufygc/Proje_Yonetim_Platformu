@@ -48,6 +48,7 @@
   "status_on_hold": "On Hold",
   "status_blocked": "Blocked",
   "status_completed": "Completed",
+  "status_archived": "Archived",
   "status_cancelled": "Cancelled",
   "priority_low": "Low",
   "priority_medium": "Medium",

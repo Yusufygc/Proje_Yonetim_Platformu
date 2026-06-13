@@ -17,6 +17,41 @@ from domain.enums.task_status import TaskStatus
 from domain.models.task import Task
 from presentation.utils.i18n import tr
 
+
+def _label_status(value: str) -> str:
+    return {
+        "TODO":        tr("task_status_todo",        "Yapılacak"),
+        "IN_PROGRESS": tr("task_status_in_progress", "Devam Ediyor"),
+        "WAITING":     tr("task_status_waiting",     "Bekliyor"),
+        "BLOCKED":     tr("task_status_blocked",     "Engellendi"),
+        "DONE":        tr("task_status_done",        "Tamamlandı"),
+        "CANCELLED":   tr("task_status_cancelled",   "İptal Edildi"),
+    }.get(value, value)
+
+
+def _label_priority(value: str) -> str:
+    return {
+        "LOW":      tr("priority_low",      "Düşük"),
+        "MEDIUM":   tr("priority_medium",   "Orta"),
+        "HIGH":     tr("priority_high",     "Yüksek"),
+        "CRITICAL": tr("priority_critical", "Kritik"),
+    }.get(value, value)
+
+
+def _label_task_type(value: str) -> str:
+    return {
+        "TASK":          tr("task_type_task",          "Görev"),
+        "GROUP":         tr("task_type_group",         "Grup"),
+        "BUG":           tr("task_type_bug",           "Hata"),
+        "IMPROVEMENT":   tr("task_type_improvement",   "İyileştirme"),
+        "RESEARCH":      tr("task_type_research",      "Araştırma"),
+        "DOCUMENTATION": tr("task_type_documentation", "Dokümantasyon"),
+        "DESIGN":        tr("task_type_design",        "Tasarım"),
+        "TEST":          tr("task_type_test",          "Test"),
+        "REVIEW":        tr("task_type_review",        "İnceleme"),
+    }.get(value, value)
+
+
 # Durum sütunu rengi QSS ile verilemez (satır bazlı dinamik veri);
 # bu yüzden palet anahtarından programatik çözülür.
 _STATUS_THEME_KEYS: dict[str, str] = {
@@ -88,7 +123,12 @@ class WBSTreeWidget(QTreeWidget):
         try:
             self.clear()
             for task in tasks:
-                item = QTreeWidgetItem([task.title, task.status, task.priority, task.task_type])
+                item = QTreeWidgetItem([
+                    task.title,
+                    _label_status(task.status),
+                    _label_priority(task.priority),
+                    _label_task_type(task.task_type),
+                ])
                 item.setData(0, Qt.ItemDataRole.UserRole, task.id)
                 item.setToolTip(0, task.title)
                 if task.description:

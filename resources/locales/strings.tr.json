@@ -48,6 +48,7 @@
   "status_on_hold": "Beklemede",
   "status_blocked": "Engellendi",
   "status_completed": "Tamamlandı",
+  "status_archived": "Arşivlendi",
   "status_cancelled": "İptal Edildi",
   "priority_low": "Düşük",
   "priority_medium": "Orta",

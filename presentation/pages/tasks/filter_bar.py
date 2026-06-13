@@ -13,6 +13,40 @@ from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
 
 
+def _status_items() -> list[tuple[str, str]]:
+    return [
+        (tr("task_status_todo", "Yapılacak"), TaskStatus.TODO.value),
+        (tr("task_status_in_progress", "Devam Ediyor"), TaskStatus.IN_PROGRESS.value),
+        (tr("task_status_waiting", "Bekliyor"), TaskStatus.WAITING.value),
+        (tr("task_status_blocked", "Engellendi"), TaskStatus.BLOCKED.value),
+        (tr("task_status_done", "Tamamlandı"), TaskStatus.DONE.value),
+        (tr("task_status_cancelled", "İptal Edildi"), TaskStatus.CANCELLED.value),
+    ]
+
+
+def _priority_items() -> list[tuple[str, str]]:
+    return [
+        (tr("priority_low", "Düşük"), Priority.LOW.value),
+        (tr("priority_medium", "Orta"), Priority.MEDIUM.value),
+        (tr("priority_high", "Yüksek"), Priority.HIGH.value),
+        (tr("priority_critical", "Kritik"), Priority.CRITICAL.value),
+    ]
+
+
+def _type_items() -> list[tuple[str, str]]:
+    return [
+        (tr("task_type_task", "Görev"), TaskType.TASK.value),
+        (tr("task_type_group", "Grup"), TaskType.GROUP.value),
+        (tr("task_type_bug", "Hata"), TaskType.BUG.value),
+        (tr("task_type_improvement", "İyileştirme"), TaskType.IMPROVEMENT.value),
+        (tr("task_type_research", "Araştırma"), TaskType.RESEARCH.value),
+        (tr("task_type_documentation", "Dokümantasyon"), TaskType.DOCUMENTATION.value),
+        (tr("task_type_design", "Tasarım"), TaskType.DESIGN.value),
+        (tr("task_type_test", "Test"), TaskType.TEST.value),
+        (tr("task_type_review", "İnceleme"), TaskType.REVIEW.value),
+    ]
+
+
 class TaskFilterBar(QWidget):
     """
     Başlık satırı + filtre satırından oluşan üst çubuk.
@@ -60,17 +94,11 @@ class TaskFilterBar(QWidget):
         self._project_combo.setMinimumHeight(Size.BTN_SM_H)
         self._project_combo.currentIndexChanged.connect(self._on_project_index_changed)
         r2.addWidget(self._project_combo, 1)
-        self._status_filter = self._make_filter_combo(
-            tr("filter_status", "Durum"), [(s.value, s.value) for s in TaskStatus]
-        )
+        self._status_filter = self._make_filter_combo(tr("filter_status", "Durum"), _status_items())
         r2.addWidget(self._status_filter)
-        self._priority_filter = self._make_filter_combo(
-            tr("filter_priority", "Öncelik"), [(p.value, p.value) for p in Priority]
-        )
+        self._priority_filter = self._make_filter_combo(tr("filter_priority", "Öncelik"), _priority_items())
         r2.addWidget(self._priority_filter)
-        self._type_filter = self._make_filter_combo(
-            tr("filter_type", "Tür"), [(t.value, t.value) for t in TaskType]
-        )
+        self._type_filter = self._make_filter_combo(tr("filter_type", "Tür"), _type_items())
         r2.addWidget(self._type_filter)
         self._stage_filter = self._make_filter_combo(tr("filter_stage", "Aşama"), [])
         r2.addWidget(self._stage_filter)
