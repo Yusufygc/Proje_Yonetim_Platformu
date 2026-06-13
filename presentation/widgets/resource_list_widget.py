@@ -20,6 +20,7 @@ from PySide6.QtGui import QColor
 
 from controllers.resource_controller import ResourceController
 from core.managers.theme_manager import ThemeManager
+from domain.enums.resource_type import ResourceType
 from domain.models.resource import Resource
 from presentation.dialogs.resource_dialog import ResourceDialog
 from presentation.dimensions import Spacing
@@ -98,7 +99,18 @@ class ResourceListWidget(QWidget):
             item.setData(Qt.ItemDataRole.UserRole, r.id)
             item.setData(Qt.ItemDataRole.UserRole + 1, r.url)
             
-            text = f"[{r.resource_type}] {r.title}\n{r.url}"
+            _type_labels = {
+                ResourceType.DOCUMENT.value: tr("resource_type_document", "Doküman"),
+                ResourceType.ARTICLE.value:  tr("resource_type_article",  "Makale"),
+                ResourceType.VIDEO.value:    tr("resource_type_video",    "Video"),
+                ResourceType.GITHUB.value:   tr("resource_type_github",   "GitHub / Repo"),
+                ResourceType.DESIGN.value:   tr("resource_type_design",   "Tasarım"),
+                ResourceType.API.value:      tr("resource_type_api",      "API Referansı"),
+                ResourceType.TOOL.value:     tr("resource_type_tool",     "Araç"),
+                ResourceType.OTHER.value:    tr("resource_type_other",    "Diğer"),
+            }
+            resource_type_label = _type_labels.get(r.resource_type, r.resource_type)
+            text = f"[{resource_type_label}] {r.title}\n{r.url}"
             if r.description:
                 text += f"\n{r.description}"
                 

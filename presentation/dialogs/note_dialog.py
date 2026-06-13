@@ -51,8 +51,16 @@ class NoteDialog(QDialog):
         # Tür
         layout.addWidget(QLabel(tr("label_kind", "Tür"), parent=self))
         self._type_combo = QComboBox(parent=self)
+        _note_type_labels = {
+            NoteType.GENERAL.value:        tr("note_type_general",        "Genel"),
+            NoteType.MEETING.value:        tr("note_type_meeting",        "Toplantı"),
+            NoteType.RESEARCH.value:       tr("note_type_research",       "Araştırma"),
+            NoteType.DEBUG.value:          tr("note_type_debug",          "Hata Ayıklama"),
+            NoteType.LESSON_LEARNED.value: tr("note_type_lesson_learned", "Öğrenilen Ders"),
+            NoteType.RELEASE.value:        tr("note_type_release",        "Yayın"),
+        }
         for t in NoteType:
-            self._type_combo.addItem(t.value, t.value)
+            self._type_combo.addItem(_note_type_labels[t.value], t.value)
         layout.addWidget(self._type_combo)
 
         # İçerik
@@ -84,11 +92,13 @@ class NoteDialog(QDialog):
             return
         self._title_edit.setText(self._note.title)
         self._body_edit.setText(self._note.body)
-        self._type_combo.setCurrentText(self._note.note_type)
+        idx = self._type_combo.findData(self._note.note_type)
+        if idx >= 0:
+            self._type_combo.setCurrentIndex(idx)
 
     def get_data(self) -> dict:
         return {
             "title": self._title_edit.text(),
             "body": self._body_edit.toPlainText(),
-            "note_type": self._type_combo.currentText(),
+            "note_type": self._type_combo.currentData(),
         }

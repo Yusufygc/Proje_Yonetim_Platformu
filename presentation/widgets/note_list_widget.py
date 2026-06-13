@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from controllers.note_controller import NoteController
+from domain.enums.note_type import NoteType
 from domain.models.note import Note
 from presentation.dialogs.note_dialog import NoteDialog
 from presentation.dimensions import Spacing
@@ -76,7 +77,16 @@ class NoteListWidget(QWidget):
             item = QListWidgetItem()
             item.setData(Qt.ItemDataRole.UserRole, n.id)
             
-            text = f"[{n.note_type}] {n.title}\n{n.body}"
+            _type_labels = {
+                NoteType.GENERAL.value:        tr("note_type_general",        "Genel"),
+                NoteType.MEETING.value:        tr("note_type_meeting",        "Toplantı"),
+                NoteType.RESEARCH.value:       tr("note_type_research",       "Araştırma"),
+                NoteType.DEBUG.value:          tr("note_type_debug",          "Hata Ayıklama"),
+                NoteType.LESSON_LEARNED.value: tr("note_type_lesson_learned", "Öğrenilen Ders"),
+                NoteType.RELEASE.value:        tr("note_type_release",        "Yayın"),
+            }
+            note_type_label = _type_labels.get(n.note_type, n.note_type)
+            text = f"[{note_type_label}] {n.title}\n{n.body}"
             item.setText(text)
             self._list_widget.addItem(item)
 

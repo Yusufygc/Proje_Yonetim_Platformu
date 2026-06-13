@@ -77,11 +77,13 @@ class DecisionListWidget(QWidget):
             item = QListWidgetItem()
             item.setData(Qt.ItemDataRole.UserRole, d.id)
             
-            status_text = d.status
-            if d.status == DecisionStatus.ACCEPTED.value:
-                status_text = tr("decision_status_accepted", "✅ KABUL")
-            elif d.status == DecisionStatus.CANCELLED.value:
-                status_text = tr("decision_status_cancelled", "❌ İPTAL")
+            _status_labels = {
+                DecisionStatus.DRAFT.value:      tr("decision_status_draft",     "Taslak"),
+                DecisionStatus.ACCEPTED.value:   tr("decision_status_accepted",  "✅ Kabul Edildi"),
+                DecisionStatus.SUPERSEDED.value: tr("decision_status_superseded","Güncellendi"),
+                DecisionStatus.CANCELLED.value:  tr("decision_status_cancelled", "❌ İptal Edildi"),
+            }
+            status_text = _status_labels.get(d.status, d.status)
 
             text = tr("decisions_item_format", "{title}\nDurum: {status}\nKarar: {decision}").format(
                 title=d.title, status=status_text, decision=d.decision
