@@ -39,8 +39,11 @@ SidebarNavButton {
     padding-left: 8px;
 }
 SidebarNavButton:hover {
-    /* Alpha katmanı kullanılmaz: koyu zeminle çakışan alpha karışımı Qt'de
-       beklenmedik tonlar üretiyordu. Sadece metin rengini vurguluyoruz. */
+    /* Arka plan açıkça tanımlanmazsa global QPushButton:hover kuralı
+       açık tema gibi aydınlık bir zemin uygulayabilir; bu durumda
+       sidebar'a özel koyu zemin üzerindeki metin ve ikon okunamaz hale
+       gelir. sidebar_active_bg ile her iki temada da koyu zemin korunur. */
+    background-color: @sidebar_active_bg;
     color: @sidebar_text_active;
 }
 SidebarNavButton:checked {

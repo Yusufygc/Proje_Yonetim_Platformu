@@ -96,6 +96,20 @@ class SidebarNavButton(QPushButton):
     def refresh_theme(self) -> None:
         self._update_icon(self.isChecked())
 
+    def enterEvent(self, event: object) -> None:
+        super().enterEvent(event)
+        if not self.isChecked():
+            self.setIcon(self._icons.get_icon(
+                self._icon_name, self._theme.color("sidebar_text_active")
+            ))
+
+    def leaveEvent(self, event: object) -> None:
+        super().leaveEvent(event)
+        if not self.isChecked():
+            self.setIcon(self._icons.get_icon(
+                self._icon_name, self._theme.color("text_secondary")
+            ))
+
     def _update_icon(self, active: bool) -> None:
         """Tema/aktiflik durumuna göre ikon rengini günceller; renk paletten alınır."""
         if active:
@@ -140,11 +154,13 @@ class Sidebar(QFrame):
         layout.setContentsMargins(Spacing.MD, Spacing.XL, Spacing.MD, Spacing.XL)
         layout.setSpacing(Spacing.XS)
 
-        header = QHBoxLayout()
+        # Layout: [title(0)] [stretch(1)] [btn(2)]
+        # Collapse'da stretch kaldırılıp iki taraflı stretch eklenerek buton ortalanır.
+        self._header_layout = QHBoxLayout()
         self._title_label = QLabel(_tr("app_short_name", "Proje Takip"), parent=self)
         self._title_label.setProperty("cssClass", "title-small")
-        header.addWidget(self._title_label)
-        header.addStretch()
+        self._header_layout.addWidget(self._title_label)
+        self._header_layout.addStretch()
 
         self._toggle_btn = QPushButton("", parent=self)
         self._toggle_btn.setFixedSize(Size.SIDEBAR_TOGGLE_W, Size.SIDEBAR_TOGGLE_H)
@@ -154,8 +170,8 @@ class Sidebar(QFrame):
         self._toggle_btn.setIcon(
             self._icons.get_icon(Icons.MENU, self._theme.color("text_secondary"))
         )
-        header.addWidget(self._toggle_btn)
-        layout.addLayout(header)
+        self._header_layout.addWidget(self._toggle_btn)
+        layout.addLayout(self._header_layout)
 
         self._search_btn = QPushButton(_tr("sidebar_search", "🔍 Ara (Ctrl+F)"), parent=self)
         self._search_btn.setFixedHeight(Size.SIDEBAR_SEARCH_H)
@@ -266,6 +282,12 @@ class Sidebar(QFrame):
             btn.set_expanded(False)
         self._theme_container.hide()
         self._theme_collapsed_btn.show()
+        # Hamburger butonu ortalamak için: mevcut orta stretch'i kaldır,
+        # başa ve sona eşit stretch ekle → [stretch][title(gizli)][btn][stretch]
+        middle = self._header_layout.takeAt(1)
+        del middle
+        self._header_layout.insertStretch(0, 1)
+        self._header_layout.addStretch(1)
         if animate:
             self._animate_width(config.SIDEBAR_COLLAPSED_WIDTH)
         else:
@@ -281,6 +303,14 @@ class Sidebar(QFrame):
             btn.set_expanded(True)
         self._theme_collapsed_btn.hide()
         self._theme_container.show()
+        # Collapse'da eklenen iki taraflı stretch'leri kaldır,
+        # orijinal orta stretch'i geri ekle → [title(0)][stretch(1)][btn(2)]
+        last = self._header_layout.count() - 1
+        trail = self._header_layout.takeAt(last)
+        del trail
+        lead = self._header_layout.takeAt(0)
+        del lead
+        self._header_layout.insertStretch(1, 1)
         if animate:
             self._animate_width(config.SIDEBAR_EXPANDED_WIDTH)
         else:
