@@ -12,6 +12,8 @@ from core.exceptions.project_exceptions import ProjectNotFoundError, ProjectVali
 from domain.enums.priority import Priority
 from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
+from domain.models.activity_log import ActivityLog
+from domain.models.attachment import Attachment
 from domain.models.project import Project
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.attachment_repository import AttachmentRepository
@@ -19,8 +21,6 @@ from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.project_tag_repository import ProjectTagRepository
 from infrastructure.repositories.task_repository import TaskRepository
 from services.stage_service import StageService
-from domain.models.attachment import Attachment
-from domain.models.activity_log import ActivityLog
 
 logger = logging.getLogger(__name__)
 

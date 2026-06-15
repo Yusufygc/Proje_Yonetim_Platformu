@@ -3,79 +3,103 @@
   Stiller info_browser.css üzerinden QTextBrowser.document().setDefaultStyleSheet() ile uygulanır.
 -->
 <body>
-<div>
-    <h1>Proje Takip Platformu</h1>
+<div class="container">
+    <h1>Proje Yönetim Platformu</h1>
     <p class="intro">
-        Bu platform, yazılım projelerinizi, yaratıcı fikirlerinizi ve günlük görevlerinizi tek bir merkezden,
-        modern ve hızlı bir arayüzle yönetebilmeniz için geliştirildi. Aşağıda platformun tüm özelliklerini nasıl
-        tam kapasiteyle kullanabileceğinize dair detaylı bilgileri bulabilirsiniz.
+        Bu platform; yazılım projelerinizi, yaratıcı fikirlerinizi ve günlük görevlerinizi tek bir merkezden,
+        modern ve hızlı bir arayüzle yönetebilmeniz için geliştirilmiştir.
     </p>
+
+    <!-- --- SÜREÇ AKIŞ ŞEMASI (FLOWCHART) --- -->
+    <div class="flowchart-title">⚙️ UYGULAMA ÇALIŞMA AKIŞI</div>
+    <table class="flowchart-table" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td class="node" width="28%">
+                <div class="node-title">💡 FİKİR HAVUZU</div>
+                <div class="node-desc">Ham fikirlerinizi toplayın, puanlayın ve filtreleyin.</div>
+            </td>
+            <td class="arrow" width="8%">➔</td>
+            <td class="node" width="28%">
+                <div class="node-title">📁 PROJELER</div>
+                <div class="node-desc">Fikirleri projelere dönüştürün ve aşamaları (WBS) izleyin.</div>
+            </td>
+            <td class="arrow" width="8%">➔</td>
+            <td class="node" width="28%">
+                <div class="node-title">☑️ GÖREVLER (WBS)</div>
+                <div class="node-desc">İşleri küçük parçalara bölün, hiyerarşik yönetin.</div>
+            </td>
+        </tr>
+    </table>
 
     <hr>
 
-    <h2 class="first">🏠 Ana Panel (Dashboard)</h2>
-    <p>
-        Uygulamaya ilk girdiğinizde sizi karşılayan kontrol merkezidir. Platformdaki genel durumunuzu özetler ve sizi yönlendirir.
-    </p>
-    <ul>
-        <li><b>Durum Özeti:</b> Toplam proje sayınızı, bekleyen ve tamamlanan görevlerinizi anlık olarak, istatistiksel kartlar halinde görebilirsiniz.</li>
-        <li><b>Aktif Projeler:</b> Üzerinde çalıştığınız (aktif durumdaki) projelere tek tıkla ulaşmanızı sağlayan hızlı erişim listesi.</li>
-        <li><b>Yaklaşan Görevler:</b> Yapılacaklar listenizdeki en acil veya üzerinde çalışılan görevlerinizi gösterir.</li>
-    </ul>
+    <!-- --- MODÜL GRİD YAPISI --- -->
+    <div class="grid-title">🛡️ SİSTEM BİLEŞENLERİ VE ÖZELLİKLERİ</div>
+    <table width="100%" cellpadding="0" cellspacing="10">
+        <tr>
+            <td class="grid-card" width="50%">
+                <div class="card-icon-title">🏠 Kontrol Paneli (Dashboard)</div>
+                <div class="card-desc">
+                    Toplam proje sayısı, bekleyen/tamamlanan görev sayıları gibi kritik istatistikleri sunar. 
+                    Tıkanan (geciken) projelerinizi ve acil yapılacak işlerinizi tek bir bakışta listeler.
+                </div>
+            </td>
+            <td class="grid-card" width="50%">
+                <div class="card-icon-title">📁 Projeler & Süreç Takibi</div>
+                <div class="card-desc">
+                    Projelerinizi aşama aşama (Planlandı, Geliştirme, Test, Tamamlandı) takip edin. 
+                    Toplantı kararlarını, kaynak bağlantılarını (Figma, GitHub vb.) ve notları proje kartlarına bağlayın.
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="grid-card" width="50%">
+                <div class="card-icon-title">💡 Fikir Kuluçka Merkezi</div>
+                <div class="card-desc">
+                    Olgunlaşmamış fikirleri kaydetme alanı. Zamanı geldiğinde fikir detay panelinden 
+                    <b>"Projeye Dönüştür"</b> seçeneğini kullanarak verileri kaybetmeden doğrudan projeye aktarabilirsiniz.
+                </div>
+            </td>
+            <td class="grid-card" width="50%">
+                <div class="card-icon-title">☑️ Hiyerarşik Görev Yönetimi</div>
+                <div class="card-desc">
+                    Görevlerinizi sürükle-bırak desteğiyle hiyerarşik iş kırılım yapısına (WBS) göre yapılandırın. 
+                    Durum, öncelik ve tür filtreleriyle görev yoğunluğunuzu kontrol edin.
+                </div>
+            </td>
+        </tr>
+    </table>
 
-    <h2>📁 Projeler Modülü</h2>
-    <p>
-        Tüm çalışmalarınızı yapılandırıp takip edebileceğiniz, platformun kalbi niteliğindeki ana modüldür.
-    </p>
-    <ul>
-        <li><b>Kapsamlı Proje Oluşturma:</b> Yan menüden "Projeler"e tıklayıp <b>+ Yeni Proje</b> butonuyla detaylı form doldurabilirsiniz. Projeye başlık, açıklama, GitHub linki, demo URL, etiketler ve son teslim tarihi (hedef tarih) verebilirsiniz.</li>
-        <li><b>Süreç Aşamaları (Timeline):</b> Her projenin "Planlandı", "Geliştirme", "Test", "Tamamlandı" gibi aşamaları vardır. Ekrandaki aşama kartları (Kanban vari) ile projenin tam olarak hangi adımda olduğunu görsel olarak görebilirsiniz.</li>
-        <li><b>Kararlar ve Notlar:</b> Proje detay sayfasındaki ilgili butonlara tıklayarak proje toplantılarında aldığınız <i>Kararları</i> ve tuttuğunuz <i>Notları</i> kaydedebilirsiniz.</li>
-        <li><b>Kaynaklar (Linkler):</b> Projeye ait GitHub repo, Figma tasarım dosyası, Trello veya dokümantasyon (Notion vb.) linklerini "Kaynaklar" diyaloğu aracılığıyla ekleyerek tek tıkla harici sitelere ulaşabilirsiniz.</li>
-    </ul>
+    <hr>
 
-    <h2>💡 Fikirler Modülü</h2>
-    <p>
-        Aklınıza aniden gelen ama henüz büyük bir projeye dönüşmeye hazır olmayan düşüncelerinizi, unutmadan kaydedeceğiniz kuluçka merkezidir.
-    </p>
-    <ul>
-        <li><b>Fikir Havuzu:</b> Fikirlerinizi başlık, içerik, etiket ve önem derecesiyle sisteme ekleyin. İsterseniz fikirlerinizi filtreleyip arayabilirsiniz.</li>
-        <li><b>Projeye Dönüştürme:</b> Zamanı gelen ve olgunlaşan bir fikri detay sayfasındaki "Projeye Dönüştür" butonuna tıklayarak saniyeler içinde tüm verileriyle (başlık, açıklama vb.) "Proje Formuna" aktarabilirsiniz. Böylece fikirden icraata geçiş pürüzsüz olur.</li>
-    </ul>
-
-    <h2>☑️ Görevler (TODO) Modülü</h2>
-    <p>
-        Büyük projeleri küçük, eyleme dökülebilir parçalara bölmek için tasarlanmış görev yönetim aracıdır.
-    </p>
-    <ul>
-        <li><b>Kanban Yapısı:</b> "Yapılacak" (To Do), "Devam Eden" (In Progress) ve "Tamamlanan" (Done) listeleri arasında görevlerinizi yönetebilirsiniz.</li>
-        <li><b>Proje Bağlantısı:</b> Her bir görevi sistemdeki belirli bir projenin altına bağlayabilirsiniz. Böylece hangi görevin hangi projeye ait olduğu hiçbir zaman karışmaz.</li>
-    </ul>
-
-    <h2>⚙️ Ayarlar ve Kişiselleştirme</h2>
-    <p>
-        Uygulama deneyimini zevkinize göre özelleştirin.
-    </p>
-    <ul>
-        <li><b>Karanlık ve Aydınlık Tema (Dark Mode):</b> Sol menünün alt tarafındaki ☀️ / 🌙 ikonuna tıklayarak (veya Ayarlar sayfasından) gözünüzü yormayan premium karanlık (dark) temaya veya ferah aydınlık (light) temaya anında geçiş yapabilirsiniz.</li>
-        <li><b>Profil Bilgileri:</b> Adınızı, unvanınızı ve uygulamanın veri dosyalarını (veritabanı) nereye kaydedeceğini (Çalışma Dizini) Ayarlar modülünden güncelleyebilirsiniz.</li>
-    </ul>
-
-    <hr class="wide">
-
-    <h2 class="first">🚀 Hayat Kurtaran Kısayollar</h2>
-    <p class="muted">
-        Farenizi (mouse) olabildiğince az kullanarak uygulamada hızla gezinmek için aşağıdaki klavye kısayollarını kullanabilirsiniz:
-    </p>
-    <div class="shortcut-box">
-        <ul class="shortcut-list">
-            <li><b class="accent">Ctrl + F</b> veya <b class="accent">Ctrl + K</b> : Tüm uygulama verilerinde arama yapabileceğiniz <b>Hızlı Arama</b> (Search) kutusunu açar.</li>
-            <li><b class="accent">Ctrl + N</b> : Nerede olursanız olun anında <b>Yeni Proje</b> oluşturma formunu ekrana getirir.</li>
-        </ul>
+    <!-- --- İPUCU VE UYARI ALANI --- -->
+    <div class="info-section-title">💡 ÖNEMLİ İPUÇLARI</div>
+    <div class="alert-box">
+        <div class="alert-title">🎨 Dinamik Tema Desteği</div>
+        <div class="alert-desc">
+            Sol menünün en altındaki toggle butonunu kullanarak anlık olarak Karanlık (Dark) veya Aydınlık (Light) modlar arasında geçiş yapabilirsiniz. Tüm renkler kontrast uyumluluğu gözetilerek dinamik olarak değişir.
+        </div>
+    </div>
+    <div class="alert-box" style="border-left-color: #16A34A;">
+        <div class="alert-title">📂 Yerel Veri Depolama</div>
+        <div class="alert-desc">
+            Tüm verileriniz SQLite veritabanı olarak yerel sisteminizde tutulur. Çalışma dizini değişikliğini Ayarlar sayfasından güvenle yönetebilirsiniz.
+        </div>
     </div>
 
-    <p class="footer">
-        Proje Takip Platformu v0.1.0 &bull; Verimli çalışmalar dileriz!
-    </p>
+    <!-- --- KISAYOLLAR --- -->
+    <div class="info-section-title">⌨️ HAYAT KURTARAN KLAVYE KISAYOLLARI</div>
+    <div class="shortcut-box">
+        <div class="shortcut-item">
+            <span class="kbd">Ctrl</span> + <span class="kbd">F</span> veya <span class="kbd">Ctrl</span> + <span class="kbd">K</span> : Tüm projelerde ve görevlerde <b>Hızlı Arama</b> kutusunu açar.
+        </div>
+        <div class="shortcut-item" style="margin-top: 8px;">
+            <span class="kbd">Ctrl</span> + <span class="kbd">N</span> : Nerede olursanız olun anında <b>Yeni Proje</b> oluşturma formunu başlatır.
+        </div>
+    </div>
+
+    <div class="footer">
+        Proje Yönetim Platformu v0.2.0 &bull; Verimli çalışmalar dileriz!
+    </div>
 </div>
 </body>

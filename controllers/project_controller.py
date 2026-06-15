@@ -13,9 +13,9 @@ from core.events.event_bus import EventBus
 from core.exceptions.base_exception import AppBaseException
 from core.workers.worker import Worker
 from domain.dtos.forms import ProjectCreateDTO, ProjectUpdateDTO
-from domain.models.project import Project
-from domain.models.attachment import Attachment
 from domain.models.activity_log import ActivityLog
+from domain.models.attachment import Attachment
+from domain.models.project import Project
 from services.project_service import ProjectService
 
 logger = logging.getLogger(__name__)

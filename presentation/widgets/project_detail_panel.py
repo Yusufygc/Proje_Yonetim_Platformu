@@ -27,11 +27,11 @@ from domain.models.project import Project
 from domain.models.project_stage import ProjectStage
 from presentation.dimensions import Size, Spacing
 from presentation.pages.tasks import TasksPage
+from presentation.utils.i18n import tr
 from presentation.widgets.decision_list_widget import DecisionListWidget
 from presentation.widgets.note_list_widget import NoteListWidget
 from presentation.widgets.resource_list_widget import ResourceListWidget
 from presentation.widgets.stage_timeline_widget import StageTimelineWidget
-from presentation.utils.i18n import tr
 from presentation.widgets.task_list_widget import TaskListWidget
 
 

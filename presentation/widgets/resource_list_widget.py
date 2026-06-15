@@ -3,6 +3,7 @@ from __future__ import annotations
 import webbrowser
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -15,8 +16,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-from PySide6.QtGui import QColor
 
 from controllers.resource_controller import ResourceController
 from core.managers.theme_manager import ThemeManager
