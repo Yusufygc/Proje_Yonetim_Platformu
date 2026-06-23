@@ -141,7 +141,6 @@ def test_export_uses_existing_idea_fields(service_stack, tmp_path):
         "Export fikri",
         problem="Sorun",
         solution="Çözüm",
-        expected_value="Değer",
         notes="Not",
     )
     target = tmp_path / "export.json"
@@ -152,7 +151,6 @@ def test_export_uses_existing_idea_fields(service_stack, tmp_path):
     idea = payload["ideas"][0]
     assert idea["problem"] == "Sorun"
     assert idea["solution"] == "Çözüm"
-    assert idea["expected_value"] == "Değer"
     assert idea["notes"] == "Not"
     assert "description" not in idea
 
