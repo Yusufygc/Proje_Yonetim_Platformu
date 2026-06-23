@@ -107,7 +107,7 @@ class SidebarNavButton(QPushButton):
         super().leaveEvent(event)
         if not self.isChecked():
             self.setIcon(self._icons.get_icon(
-                self._icon_name, self._theme.color("text_secondary")
+                self._icon_name, self._theme.color("sidebar_text")
             ))
 
     def _update_icon(self, active: bool) -> None:
@@ -117,7 +117,7 @@ class SidebarNavButton(QPushButton):
             # koyu temada beyaz, açık temada tema tanımlı kontrast rengi.
             icon_color = self._theme.color("icon_on_accent")
         else:
-            icon_color = self._theme.color("text_secondary")
+            icon_color = self._theme.color("sidebar_text")
         self.setIcon(self._icons.get_icon(self._icon_name, icon_color))
 
 
@@ -168,7 +168,7 @@ class Sidebar(QFrame):
         self._toggle_btn.setProperty("cssClass", "btn-secondary")
         self._toggle_btn.clicked.connect(self.toggle_collapse)
         self._toggle_btn.setIcon(
-            self._icons.get_icon(Icons.MENU, self._theme.color("text_secondary"))
+            self._icons.get_icon(Icons.MENU, self._theme.color("sidebar_text"))
         )
         self._header_layout.addWidget(self._toggle_btn)
         layout.addLayout(self._header_layout)
@@ -238,7 +238,7 @@ class Sidebar(QFrame):
         for btn in self._nav_buttons.values():
             btn.refresh_theme()
         self._toggle_btn.setIcon(
-            self._icons.get_icon(Icons.MENU, self._theme.color("text_secondary"))
+            self._icons.get_icon(Icons.MENU, self._theme.color("sidebar_text"))
         )
 
     def _apply_theme_labels(self, animate: bool) -> None:

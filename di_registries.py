@@ -129,6 +129,7 @@ class ServiceRegistry:
             repository=self._repos.stage,
             workflow_repository=self._repos.workflow_stage,
             activity_log_repository=self._repos.activity_log,
+            project_repository=self._repos.project,
         )
 
     @cached_property

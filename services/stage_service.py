@@ -10,7 +10,9 @@ from datetime import datetime, timezone
 from core.exceptions.stage_exceptions import StageNotFoundError, StageValidationError
 from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
+from domain.enums.project_status import ProjectStatus
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
+from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.stage_repository import StageRepository
 from infrastructure.repositories.workflow_stage_repository import WorkflowStageRepository
 
@@ -37,10 +39,12 @@ class StageService:
         repository: StageRepository,
         workflow_repository: WorkflowStageRepository | None = None,
         activity_log_repository: ActivityLogRepository | None = None,
+        project_repository: ProjectRepository | None = None,
     ) -> None:
         self._repo = repository
         self._workflow_repo = workflow_repository
         self._activity_logs = activity_log_repository
+        self._project_repo = project_repository
 
     def get_stages(self, project_id: int) -> list[ProjectStage]:
         return self._repo.get_by_project(project_id)
@@ -105,6 +109,7 @@ class StageService:
         stage.completed_at = datetime.now(timezone.utc)
         updated = self._repo.update(stage)
         self._activate_next_stage(updated)
+        self._check_and_complete_project(updated.project_id)
         if self._activity_logs is not None:
             self._activity_logs.create(
                 project_id=updated.project_id,
@@ -154,3 +159,29 @@ class StageService:
                         entity_id=stage.id,
                     )
                 break
+
+    def _check_and_complete_project(self, project_id: int) -> None:
+        """Eğer projenin tüm aşamaları DONE veya SKIPPED ise projeyi otomatik olarak COMPLETED yapar."""
+        if self._project_repo is None:
+            return
+        stages = self._repo.get_by_project(project_id)
+        if not stages:
+            return
+        all_completed = all(
+            s.status in {StageStatus.DONE.value, StageStatus.SKIPPED.value}
+            for s in stages
+        )
+        if all_completed:
+            project = self._project_repo.get_by_id(project_id)
+            if project is not None and project.status != ProjectStatus.COMPLETED.value:
+                project.status = ProjectStatus.COMPLETED.value
+                self._project_repo.update(project)
+                if self._activity_logs is not None:
+                    self._activity_logs.create(
+                        project_id=project_id,
+                        action="PROJECT_COMPLETED",
+                        summary="Tüm süreç aşamaları tamamlandığı için proje otomatik olarak tamamlandı durumuna getirildi.",
+                        entity_type="project",
+                        entity_id=project_id,
+                    )
+                logger.info("Tüm aşamaları tamamlanan proje otomatik tamamlandı olarak işaretlendi: id=%d", project_id)

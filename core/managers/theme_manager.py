@@ -121,16 +121,16 @@ class ThemeManager(QObject):
         if icon_mgr is None:
             return
 
-        arrow_color = self.color("text_secondary")
-
-        for token, icon_name in (
-            ("icon_chevron_down", Icons.CHEVRON_DOWN),
-            ("icon_chevron_up", Icons.CHEVRON_UP),
+        for token, icon_name, color_name in (
+            ("icon_chevron_down", Icons.CHEVRON_DOWN, "text_secondary"),
+            ("icon_chevron_up", Icons.CHEVRON_UP, "text_secondary"),
+            ("icon_check", Icons.SQUARE_CHECK, "accent_start"),
         ):
-            cache_file = self._icons_cache_dir / f"{icon_name}_{arrow_color.lstrip('#')}.svg"
+            color_val = self.color(color_name)
+            cache_file = self._icons_cache_dir / f"{icon_name}_{color_val.lstrip('#')}.svg"
             # Aynı renk için dosya zaten üretildiyse disk I/O tekrarlanmaz.
             if not cache_file.exists():
-                svg = icon_mgr.get_svg_content(icon_name, arrow_color)
+                svg = icon_mgr.get_svg_content(icon_name, color_val)
                 if not svg:
                     continue
                 cache_file.write_text(svg, encoding="utf-8")

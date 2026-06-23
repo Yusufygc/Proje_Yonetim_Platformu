@@ -2,7 +2,7 @@
    BASE/INPUTS — Metin girisleri, combobox ve spinbox'lar
    ================================================================ */
 
-QLineEdit, QTextEdit, QPlainTextEdit {
+QLineEdit, QTextEdit, QPlainTextEdit, QDateEdit, QDateTimeEdit {
     background-color: @surface;
     color: @text_primary;
     border: 1px solid @border;
@@ -10,11 +10,16 @@ QLineEdit, QTextEdit, QPlainTextEdit {
     padding: 6px 10px;
     selection-background-color: @accent_start;
 }
-QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QDateEdit:focus, QDateTimeEdit:focus {
     border: 1px solid @accent_start;
 }
-QLineEdit[error="true"], QTextEdit[error="true"] {
+QLineEdit[error="true"], QTextEdit[error="true"], QDateEdit[error="true"], QDateTimeEdit[error="true"] {
     border: 1px solid @danger;
+}
+QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QDateEdit:disabled, QDateTimeEdit:disabled {
+    background-color: @scrollbar_bg;
+    color: @text_muted;
+    border-color: @border;
 }
 QComboBox {
     background-color: @surface;
@@ -77,4 +82,46 @@ QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
     image: url(@icon_chevron_down);
     width: 9px;
     height: 6px;
+}
+
+/* ── QDateEdit / QDateTimeEdit Drop Down Arrow ── */
+QDateEdit::drop-down, QDateTimeEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+    border-left: 1px solid @border;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+QDateEdit::down-arrow, QDateTimeEdit::down-arrow {
+    image: url(@icon_chevron_down);
+    width: 11px;
+    height: 7px;
+}
+
+/* ── QCheckBox ── */
+QCheckBox {
+    spacing: 8px;
+    color: @text_primary;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid @border;
+    border-radius: 4px;
+    background-color: @surface;
+}
+QCheckBox::indicator:hover {
+    border-color: @accent_start;
+}
+QCheckBox::indicator:checked {
+    border: none;
+    background-color: transparent;
+    image: url(@icon_check);
+    width: 18px;
+    height: 18px;
+}
+QCheckBox::indicator:disabled {
+    background-color: @scrollbar_bg;
+    border-color: @border;
 }

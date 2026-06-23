@@ -27,14 +27,24 @@ QLabel#stage_badge {
     font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 8px;
 }
 QLabel#stage_badge[stage-status="ACTIVE"] {
-    color: @stage_active; background: @stage_active_alpha; border: 1px solid @stage_active;
+    color: @stage_active; background: @stage_active_alpha;
+    border: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 @accent_start, stop:1 @accent_end);
 }
 QLabel#stage_badge[stage-status="DONE"] {
-    color: @stage_done; background: @stage_done_alpha; border: 1px solid @stage_done;
+    color: @stage_done; background: @stage_done_alpha;
+    border: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 @accent_start, stop:1 @accent_end);
 }
 QLabel#stage_badge[stage-status="NOT_STARTED"] {
-    color: @text_secondary; background: @secondary_alpha; border: 1px solid @text_secondary;
+    color: @text_secondary; background: @secondary_alpha;
+    border: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 @accent_start, stop:1 @accent_end);
 }
 QLabel#stage_badge[stage-status="SKIPPED"] {
-    color: @text_muted; background: @muted_alpha; border: 1px solid @text_muted;
+    color: @text_muted; background: @muted_alpha;
+    border: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 @accent_start, stop:1 @accent_end);
+}
+
+/* Tamamla ve Aktif Et butonları için gradyan çerçeve */
+QFrame#stage_card QPushButton {
+    border: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 @accent_start, stop:1 @accent_end);
+    border-radius: 6px;
 }

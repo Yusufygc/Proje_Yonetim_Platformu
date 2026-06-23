@@ -94,7 +94,9 @@ class WBSTreeWidget(QTreeWidget):
             tr("task_tree_priority", "Öncelik"),
             tr("task_tree_type", "Tip"),
         ])
-        self.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header = self.header()
+        for i in range(4):
+            header.setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
@@ -103,10 +105,19 @@ class WBSTreeWidget(QTreeWidget):
         self.setDefaultDropAction(Qt.DropAction.MoveAction)
         self.setAlternatingRowColors(True)
 
+    def resizeEvent(self, event: object) -> None:
+        super().resizeEvent(event)
+        total_width = self.viewport().width()
+        self.setColumnWidth(0, int(total_width * 0.55))
+        self.setColumnWidth(1, int(total_width * 0.15))
+        self.setColumnWidth(2, int(total_width * 0.15))
+        self.setColumnWidth(3, int(total_width * 0.15))
+
     # ── Render ───────────────────────────────────────────────────────────────
 
     def render_tasks(self, tasks: list[Task]) -> None:
         """Görev listesini hiyerarşik olarak çizer ve fade-in oynatır."""
+        self.blockSignals(True)
         items_dict: dict[int, QTreeWidgetItem] = {}
 
         # Renkler döngü dışında bir kez çözülür; her görev için palet sorgusu
@@ -130,13 +141,23 @@ class WBSTreeWidget(QTreeWidget):
                     _label_task_type(task.task_type),
                 ])
                 item.setData(0, Qt.ItemDataRole.UserRole, task.id)
+                item.setData(0, Qt.ItemDataRole.UserRole + 1, "task")
                 item.setToolTip(0, task.title)
                 if task.description:
                     item.setToolTip(1, task.description)
-                item.setForeground(1, status_colors.get(task.status, default_color))
+                
+                # Checkbox durumunu ayarla
+                item.setCheckState(0, Qt.CheckState.Checked if task.status == TaskStatus.DONE.value else Qt.CheckState.Unchecked)
+
                 if task.status == TaskStatus.DONE.value:
-                    item.setForeground(0, muted_color)
-                    item.setForeground(1, muted_color)
+                    for col in range(4):
+                        font = item.font(col)
+                        font.setStrikeOut(True)
+                        item.setFont(col, font)
+                        item.setForeground(col, muted_color)
+                else:
+                    item.setForeground(1, status_colors.get(task.status, default_color))
+                
                 items_dict[task.id] = item
 
             root_items: list[QTreeWidgetItem] = []
@@ -147,10 +168,38 @@ class WBSTreeWidget(QTreeWidget):
                 else:
                     root_items.append(item)
 
+            # Checklist maddelerini hiyerarşik olarak ekle
+            for task in tasks:
+                item = items_dict[task.id]
+                if task.checklist_items:
+                    for cl_item in task.checklist_items:
+                        cl_widget_item = QTreeWidgetItem([
+                            cl_item.text,
+                            tr("task_status_done", "Tamamlandı") if cl_item.is_done else tr("task_status_todo", "Yapılacak"),
+                            "-",
+                            tr("checklist", "Checklist"),
+                        ])
+                        cl_widget_item.setData(0, Qt.ItemDataRole.UserRole, cl_item.id)
+                        cl_widget_item.setData(0, Qt.ItemDataRole.UserRole + 1, "checklist")
+                        cl_widget_item.setData(0, Qt.ItemDataRole.UserRole + 2, task.id)
+                        cl_widget_item.setCheckState(0, Qt.CheckState.Checked if cl_item.is_done else Qt.CheckState.Unchecked)
+
+                        if cl_item.is_done:
+                            for col in range(4):
+                                font = cl_widget_item.font(col)
+                                font.setStrikeOut(True)
+                                cl_widget_item.setFont(col, font)
+                                cl_widget_item.setForeground(col, muted_color)
+                        else:
+                            cl_widget_item.setForeground(1, status_colors.get("TODO", default_color))
+
+                        item.addChild(cl_widget_item)
+
             self.addTopLevelItems(root_items)
             self.expandAll()
         finally:
             self.setUpdatesEnabled(True)
+            self.blockSignals(False)
 
         self._opacity.setOpacity(0.0)
         self._fade.stop()
@@ -162,6 +211,10 @@ class WBSTreeWidget(QTreeWidget):
 
     def startDrag(self, supported_actions: object) -> None:  # type: ignore[override]
         item = self.currentItem()
+        if item:
+            item_type = item.data(0, Qt.ItemDataRole.UserRole + 1)
+            if item_type == "checklist":
+                return
         self._drag_task_id = item.data(0, Qt.ItemDataRole.UserRole) if item else None
         super().startDrag(supported_actions)  # type: ignore[arg-type]
 
@@ -175,6 +228,8 @@ class WBSTreeWidget(QTreeWidget):
         if moved_item is None:
             return
         parent_item = moved_item.parent()
+        if parent_item and parent_item.data(0, Qt.ItemDataRole.UserRole + 1) == "checklist":
+            parent_item = parent_item.parent()
         new_parent_id = parent_item.data(0, Qt.ItemDataRole.UserRole) if parent_item else None
         new_order = parent_item.indexOfChild(moved_item) if parent_item else self.indexOfTopLevelItem(moved_item)
         self.task_moved.emit(dragged_id, new_parent_id, new_order)
@@ -185,7 +240,7 @@ class WBSTreeWidget(QTreeWidget):
             item = stack.pop()
             if item is None:
                 continue
-            if item.data(0, Qt.ItemDataRole.UserRole) == task_id:
+            if item.data(0, Qt.ItemDataRole.UserRole) == task_id and item.data(0, Qt.ItemDataRole.UserRole + 1) == "task":
                 return item
             stack.extend(item.child(i) for i in range(item.childCount()))
         return None

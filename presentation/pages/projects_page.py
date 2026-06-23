@@ -88,11 +88,18 @@ class ProjectsPage(QWidget):
 
         layout.addWidget(self._build_panel_header(panel))
 
-        self._search_edit = QLineEdit(parent=panel)
+        # Arama kutusu boyutunu küçültüp kenar boşlukları (margin) ekliyoruz
+        search_container = QWidget(parent=panel)
+        search_layout = QHBoxLayout(search_container)
+        search_layout.setContentsMargins(Spacing.XL, Spacing.XS, Spacing.XL, Spacing.MD)
+        search_layout.setSpacing(0)
+
+        self._search_edit = QLineEdit(parent=search_container)
         self._search_edit.setPlaceholderText("Proje ara...")
-        # Arama kutusu stili zaten global QLineEdit QSS içinde var
+        self._search_edit.setFixedHeight(30)
         self._search_edit.textChanged.connect(self._on_search)
-        layout.addWidget(self._search_edit)
+        search_layout.addWidget(self._search_edit)
+        layout.addWidget(search_container)
 
         scroll = QScrollArea(parent=panel)
         scroll.setWidgetResizable(True)
@@ -103,7 +110,7 @@ class ProjectsPage(QWidget):
         self._list_container.setProperty("cssClass", "transparent-bg")
         self._list_layout = QVBoxLayout(self._list_container)
         self._list_layout.setContentsMargins(Spacing.MD, 0, Spacing.MD, Spacing.MD)
-        self._list_layout.setSpacing(Spacing.XS)
+        self._list_layout.setSpacing(Spacing.LG)
 
         self._empty_label = QLabel(
             tr("projects_empty", "Henüz proje yok.\nYeni oluşturmak için\n+'ya basın."),
@@ -279,6 +286,7 @@ class ProjectsPage(QWidget):
     def _on_stage_updated(self, _stage: object) -> None:
         if self._selected_project_id is not None:
             self._stage_controller.load_stages(self._selected_project_id)
+            self._controller.load_projects()
 
     def _on_stages_loaded(self, stages: list) -> None:
         self._stages = stages

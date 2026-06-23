@@ -16,11 +16,23 @@ QTreeWidget::item:hover {
 }
 QTreeWidget::item:selected {
     background-color: @surface_raised;
-    color: @accent_start;
+    color: @text_primary;
 }
 QTreeWidget::indicator {
     width: 16px;
     height: 16px;
+    border: 1.5px solid @border;
+    border-radius: 4px;
+    background-color: @surface;
+}
+QTreeWidget::indicator:hover {
+    border-color: @accent_start;
+    background-color: @surface_raised;
+}
+QTreeWidget::indicator:checked {
+    image: url(@icon_check);
+    background-color: @surface_raised;
+    border: 1.5px solid @accent_start;
 }
 QAbstractItemView {
     outline: 0;

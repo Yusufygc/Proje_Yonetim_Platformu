@@ -121,6 +121,7 @@ class TasksPage(QWidget):
         self._filter_bar.filters_changed.connect(self._render_tree)
         self._filter_bar.add_root_requested.connect(self._on_add_root_task)
         self._tree.task_moved.connect(self._on_task_moved)
+        self._tree.itemChanged.connect(self._on_tree_item_changed)
         # Ağaç item renkleri QSS değil setForeground ile atanır; tema değişince
         # mevcut ağaç yeni paletle yeniden çizilmek zorundadır.
         self._theme.theme_changed.connect(self._on_theme_changed)
@@ -193,7 +194,12 @@ class TasksPage(QWidget):
         menu = QMenu(self)
 
         if item:
-            task_id = item.data(0, Qt.ItemDataRole.UserRole)
+            item_type = item.data(0, Qt.ItemDataRole.UserRole + 1)
+            if item_type == "checklist":
+                task_id = item.data(0, Qt.ItemDataRole.UserRole + 2)
+            else:
+                task_id = item.data(0, Qt.ItemDataRole.UserRole)
+                
             add_sub_action = menu.addAction(tr("task_add_child", "Alt Görev Ekle"))
             add_sub_action.triggered.connect(lambda: self._on_add_subtask(task_id))
             edit_action = menu.addAction(tr("action_edit", "Düzenle"))
@@ -251,7 +257,11 @@ class TasksPage(QWidget):
         data: dict[str, object] = {}
         current = self._tree.currentItem()
         if current is not None:
-            data["parent_task_id"] = current.data(0, Qt.ItemDataRole.UserRole)
+            item_type = current.data(0, Qt.ItemDataRole.UserRole + 1)
+            if item_type == "checklist":
+                data["parent_task_id"] = current.data(0, Qt.ItemDataRole.UserRole + 2)
+            else:
+                data["parent_task_id"] = current.data(0, Qt.ItemDataRole.UserRole)
         data.update(self._filter_bar.filter_values())
 
         self._task_controller.create_task(self._selected_project_id, title, **data)
@@ -301,5 +311,20 @@ class TasksPage(QWidget):
             self._task_controller.load_tasks(self._selected_project_id)
 
     def _on_item_double_clicked(self, item: QTreeWidgetItem, column: int) -> None:
-        task_id = item.data(0, Qt.ItemDataRole.UserRole)
+        item_type = item.data(0, Qt.ItemDataRole.UserRole + 1)
+        if item_type == "checklist":
+            task_id = item.data(0, Qt.ItemDataRole.UserRole + 2)
+        else:
+            task_id = item.data(0, Qt.ItemDataRole.UserRole)
         self._on_edit_task(task_id)
+
+    def _on_tree_item_changed(self, item: QTreeWidgetItem, column: int) -> None:
+        if column != 0:
+            return
+        item_type = item.data(0, Qt.ItemDataRole.UserRole + 1)
+        item_id = item.data(0, Qt.ItemDataRole.UserRole)
+        if item_type == "checklist":
+            parent_task_id = item.data(0, Qt.ItemDataRole.UserRole + 2)
+            self._task_controller.toggle_checklist_item(item_id, parent_task_id)
+        elif item_type == "task":
+            self._task_controller.toggle_status(item_id)
