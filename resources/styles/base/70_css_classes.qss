@@ -42,3 +42,6 @@ QListWidget[cssClass="panel"] {
 
 /* Seffaf arka plan ihtiyaci olan widget'lar */
 *[cssClass="transparent-bg"] { background: transparent; background-color: transparent; }
+
+/* Açılır/kapanır bölüm başlığı */
+QFrame[cssClass="section-collapse-header"]:hover { background-color: rgba(255, 255, 255, 0.05); border-radius: 4px; }

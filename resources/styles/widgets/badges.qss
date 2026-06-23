@@ -68,3 +68,4 @@ QLabel[badge-type="task-priority"][badge-value="CRITICAL"] { color: @danger;    
    KPI vurgu sayidadir: baslik secondary, deger primary + buyuk font. */
 QLabel[cssClass="stat-card-title"] { font-size: 12px; font-weight: 600; color: @text_secondary; letter-spacing: 0.4px; }
 QLabel[cssClass="stat-card-value"] { font-size: 36px; font-weight: 800; color: @text_primary; }
+QLabel[cssClass="stat-card-value-danger"] { font-size: 36px; font-weight: 800; color: @danger; }

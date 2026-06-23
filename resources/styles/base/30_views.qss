@@ -83,6 +83,16 @@ QListWidget::item:focus {
     border: none;
     border-bottom: 1px solid @border;
 }
+/* Fikir listesi: satır içi widget (başlık + silme ikonu) kendi boşluğunu
+   yönettiği için item padding'i sıfırlanır; aksi halde hover zemini kesilir. */
+QListWidget#ideas_list::item {
+    padding: 0px;
+    border-bottom: 1px solid @border;
+}
+QListWidget#ideas_list::item:selected {
+    background-color: @surface_raised;
+    border-radius: 6px;
+}
 QTabWidget::pane {
     border: none;
     background: transparent;
