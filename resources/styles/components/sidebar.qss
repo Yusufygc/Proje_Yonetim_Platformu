@@ -47,10 +47,17 @@ SidebarNavButton:hover {
     color: @sidebar_text_active;
 }
 SidebarNavButton:checked {
-    background-color: transparent;
-    border-left: 3px solid @sidebar_active;
-    padding-left: 5px;
-    color: @sidebar_text_active;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0.00 @sidebar_active,
+        stop:0.05 @sidebar_active,
+        stop:0.20 @sidebar_hover_bg,
+        stop:0.60 @sidebar_active_bg,
+        stop:1.00 @sidebar_bg
+    );
+    border: none;
+    border-radius: 8px;
+    padding-left: 8px;
+    color: @sidebar_active;
     font-weight: 700;
 }
 
