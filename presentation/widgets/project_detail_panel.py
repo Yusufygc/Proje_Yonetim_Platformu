@@ -70,6 +70,7 @@ class ProjectDetailPanel(QWidget):
         super().__init__(parent=parent)
         self._di = di
         self._project_id: int | None = None
+        self._stages_expanded: bool = True
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -134,10 +135,20 @@ class ProjectDetailPanel(QWidget):
         layout.addWidget(self._github_row)
         layout.addSpacing(16)
 
-        stages_header = QLabel(tr("section_stages", "SÜREÇ AŞAMALARI"), parent=container)
-        stages_header.setProperty("cssClass", "section-header")
-        layout.addWidget(stages_header)
-        layout.addSpacing(6)
+        stages_toggle = QFrame(parent=container)
+        stages_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        stages_toggle.setProperty("cssClass", "section-collapse-header")
+        sh_layout = QHBoxLayout(stages_toggle)
+        sh_layout.setContentsMargins(0, Spacing.SM, 0, Spacing.SM)
+        sh_layout.setSpacing(Spacing.SM)
+        sh_lbl = QLabel(tr("section_stages", "SÜREÇ AŞAMALARI"), parent=stages_toggle)
+        sh_lbl.setProperty("cssClass", "section-header")
+        sh_layout.addWidget(sh_lbl, 1)
+        self._stages_chevron = QLabel("▼", parent=stages_toggle)
+        self._stages_chevron.setProperty("cssClass", "text-muted")
+        sh_layout.addWidget(self._stages_chevron)
+        layout.addWidget(stages_toggle)
+        stages_toggle.mousePressEvent = lambda _e: self._toggle_stages()
 
         self._stage_timeline = StageTimelineWidget(parent=container, theme=self._di.theme)
         self._stage_timeline.complete_requested.connect(self.complete_stage_requested)
@@ -178,16 +189,8 @@ class ProjectDetailPanel(QWidget):
         )
         self._tab_widget.addTab(self._resources_page, tr("tab_resources", "Kaynaklar"))
 
-        self._ideas_page = self._build_simple_text_tab(
-            tr("detail_ideas_info", "Projeye bağlı fikirler ProjectIdea ilişkisiyle saklanır.")
-        )
-        self._tab_widget.addTab(self._ideas_page, tr("tab_ideas", "Fikirler"))
-
         self._outputs_page = self._build_outputs_tab()
         self._tab_widget.addTab(self._outputs_page, tr("tab_outputs", "Çıktılar"))
-
-        self._activity_page = self._build_activity_tab()
-        self._tab_widget.addTab(self._activity_page, tr("tab_activity", "Aktivite"))
 
         layout.addWidget(self._tab_widget, 1)
         layout.addStretch()
@@ -210,17 +213,6 @@ class ProjectDetailPanel(QWidget):
         layout.addStretch()
         return page
 
-    def _build_simple_text_tab(self, text: str) -> QWidget:
-        page = QWidget(parent=self._tab_widget)
-        layout = QVBoxLayout(page)
-        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
-        label = QLabel(text, parent=page)
-        label.setProperty("cssClass", "text-muted")
-        label.setWordWrap(True)
-        layout.addWidget(label)
-        layout.addStretch()
-        return page
-
     def _build_outputs_tab(self) -> QWidget:
         page = QWidget(parent=self._tab_widget)
         layout = QVBoxLayout(page)
@@ -232,15 +224,6 @@ class ProjectDetailPanel(QWidget):
         self._outputs_list = QListWidget(parent=page)
         self._outputs_list.setProperty("cssClass", "panel-raised")
         layout.addWidget(self._outputs_list)
-        return page
-
-    def _build_activity_tab(self) -> QWidget:
-        page = QWidget(parent=self._tab_widget)
-        layout = QVBoxLayout(page)
-        layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
-        self._activity_list = QListWidget(parent=page)
-        self._activity_list.setProperty("cssClass", "panel-raised")
-        layout.addWidget(self._activity_list)
         return page
 
     def _build_header_row(self, parent: QWidget) -> QWidget:
@@ -334,21 +317,27 @@ class ProjectDetailPanel(QWidget):
         self._summary_target.setText(
             tr("detail_summary_target", "Hedef çıktı: {value}").format(value=project.target_outcome or "-")
         )
-        target_date = project.target_end_date.isoformat() if project.target_end_date else "-"
         self._summary_progress.setText(
-            tr("detail_summary_progress", "İlerleme: %{percent}  |  Hedef tarih: {date}").format(
-                percent=project.progress_percent, date=target_date
+            tr("detail_summary_progress", "İlerleme: %{percent}").format(
+                percent=project.progress_percent
             )
         )
         self._refresh_outputs()
-        self._refresh_activity()
 
         has_github = bool(project.github_url)
         self._github_row.setVisible(has_github)
         if has_github:
             self._github_lbl.setText(project.github_url)
 
+        self._stages_chevron.setText("▼")
+        self._stage_timeline.setVisible(True)
+        self._stages_expanded = True
         self._stack.setCurrentIndex(1)
+
+    def _toggle_stages(self) -> None:
+        self._stages_expanded = not self._stages_expanded
+        self._stage_timeline.setVisible(self._stages_expanded)
+        self._stages_chevron.setText("▼" if self._stages_expanded else "▶")
 
     def update_stages(self, stages: list[ProjectStage]) -> None:
         """Aşama zaman çizelgesini verilen liste ile yeniler."""
@@ -381,13 +370,6 @@ class ProjectDetailPanel(QWidget):
             return
         for item in self._di.project_controller.get_attachments_sync(self._project_id):
             self._outputs_list.addItem(QListWidgetItem(f"{item.file_path}\n{item.caption or ''}"))
-
-    def _refresh_activity(self) -> None:
-        self._activity_list.clear()
-        if self._project_id is None:
-            return
-        for log in self._di.project_controller.get_activity_logs_sync(self._project_id):
-            self._activity_list.addItem(QListWidgetItem(f"{log.created_at} · {log.summary}"))
 
     def _on_add_output(self) -> None:
         if self._project_id is None:
