@@ -102,15 +102,13 @@ class IdeaService:
         return project.id
 
     def build_project_prefill_data(self, idea: Idea) -> dict[str, Any]:
-        short_desc = idea.expected_value if idea.expected_value else idea.problem
-        if short_desc and len(short_desc) > 500:
+        short_desc = idea.problem or ""
+        if len(short_desc) > 500:
             short_desc = short_desc[:497] + "..."
 
         project_data: dict[str, Any] = {
             "short_description": short_desc,
             "problem_statement": idea.problem,
-            "full_description": idea.solution,
-            "target_outcome": idea.expected_value,
         }
         if idea.source_link:
             project_data["docs_url"] = idea.source_link

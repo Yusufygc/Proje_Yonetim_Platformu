@@ -28,7 +28,6 @@ _MAX_TITLE_LEN = 255
 _MAX_SHORT_DESC_LEN = 500
 _OPTIONAL_FIELDS = (
     "short_description",
-    "full_description",
     "problem_statement",
     "target_outcome",
     "project_type",
@@ -38,12 +37,9 @@ _OPTIONAL_FIELDS = (
     "progress_percent",
     "manual_progress_percent",
     "github_url",
-    "demo_url",
     "docs_url",
     "start_date",
-    "target_end_date",
     "completed_at",
-    "is_featured",
     "is_archived",
     "display_order",
 )
