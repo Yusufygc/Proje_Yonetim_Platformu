@@ -4,11 +4,9 @@ Yeni proje için boş, var olan proje için alanlar dolu gelir.
 """
 from __future__ import annotations
 
-from PySide6.QtCore import QDate, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
-    QCheckBox,
-    QDateEdit,
     QDialog,
     QFrame,
     QHBoxLayout,
@@ -173,15 +171,12 @@ class ProjectDialog(QDialog):
 
         self._desc_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_LG)
         self._desc_edit.setPlaceholderText(
-            tr("project_dialog_short_desc_placeholder", "Projeyi kısaca açıklayın (isteğe bağlı)...")
+            tr("project_dialog_desc_placeholder", "Projeyi açıklayın (isteğe bağlı)...")
         )
-        add_field(layout, tr("project_dialog_short_desc", "Kısa Açıklama"), self._desc_edit)
+        add_field(layout, tr("project_dialog_desc", "Açıklama"), self._desc_edit)
 
         layout.addWidget(self._build_status_priority_row(form_widget))
         layout.addSpacing(Spacing.XL)
-
-        self._full_desc_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_MD)
-        add_field(layout, tr("project_dialog_full_desc", "Detaylı Açıklama"), self._full_desc_edit)
 
         self._problem_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_MD)
         add_field(layout, tr("project_dialog_problem", "Problem Tanımı"), self._problem_edit)
@@ -192,24 +187,14 @@ class ProjectDialog(QDialog):
         layout.addWidget(self._build_type_health_row(form_widget))
         layout.addSpacing(Spacing.XL)
 
-        self._demo_edit = self._make_line_edit(form_widget)
-        add_field(layout, tr("label_demo_url", "Demo URL"), self._demo_edit)
-
         self._docs_edit = self._make_line_edit(form_widget)
         add_field(layout, tr("label_docs_url", "Doküman URL"), self._docs_edit)
-
-        layout.addWidget(self._build_target_date_row(form_widget))
-        layout.addSpacing(Spacing.XL)
 
         self._tags_edit = self._make_line_edit(form_widget)
         self._tags_edit.setPlaceholderText(
             tr("project_dialog_tags_placeholder", "virgülle ayırın: mvp, ui, araştırma")
         )
         add_field(layout, tr("label_tags", "Etiketler"), self._tags_edit)
-
-        self._featured_check = QCheckBox(tr("project_dialog_featured", "Portfolyoya eklensin"), parent=form_widget)
-        layout.addWidget(self._featured_check)
-        layout.addSpacing(Spacing.XL)
 
         self._github_edit = self._make_line_edit(form_widget)
         self._github_edit.setPlaceholderText("https://github.com/kullanici/repo")
@@ -256,20 +241,6 @@ class ProjectDialog(QDialog):
         )
         return make_two_column_row(parent, type_col, health_col)
 
-    def _build_target_date_row(self, parent: QWidget) -> QWidget:
-        row = QWidget(parent=parent)
-        layout = QHBoxLayout(row)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self._target_date_enabled = QCheckBox(tr("label_target_date", "Hedef tarih"), parent=row)
-        layout.addWidget(self._target_date_enabled)
-        self._target_date_edit = QDateEdit(parent=row)
-        self._target_date_edit.setCalendarPopup(True)
-        self._target_date_edit.setMinimumHeight(Size.INPUT_H_LG)
-        self._target_date_edit.setEnabled(False)
-        self._target_date_enabled.toggled.connect(self._target_date_edit.setEnabled)
-        layout.addWidget(self._target_date_edit, 1)
-        return row
-
     def _build_button_row(self) -> QWidget:
         row = QWidget(parent=self)
         layout = QHBoxLayout(row)
@@ -298,10 +269,9 @@ class ProjectDialog(QDialog):
         if p is None:
             return
         self._title_edit.setText(p.title)
-        if p.short_description:
-            self._desc_edit.setPlainText(p.short_description)
-        if p.full_description:
-            self._full_desc_edit.setPlainText(p.full_description)
+        desc = p.short_description or ""
+        if desc:
+            self._desc_edit.setPlainText(desc)
         if p.problem_statement:
             self._problem_edit.setPlainText(p.problem_statement)
         if p.target_outcome:
@@ -311,27 +281,18 @@ class ProjectDialog(QDialog):
         select_combo_data(self._health_combo, p.health)
         if p.github_url:
             self._github_edit.setText(p.github_url)
-        if p.demo_url:
-            self._demo_edit.setText(p.demo_url)
         if p.docs_url:
             self._docs_edit.setText(p.docs_url)
         if p.project_type:
             select_combo_data(self._type_combo, p.project_type)
-        if p.target_end_date:
-            self._target_date_enabled.setChecked(True)
-            self._target_date_edit.setDate(
-                QDate(p.target_end_date.year, p.target_end_date.month, p.target_end_date.day)
-            )
-        self._featured_check.setChecked(p.is_featured)
 
     def set_prefill(self, data: dict) -> None:
         """Fikirden projeye dönüş gibi akışlarda formu önceden doldurur."""
         if title := data.get("title"):
             self._title_edit.setText(str(title))
-        if short_desc := data.get("short_description"):
-            self._desc_edit.setPlainText(str(short_desc))
-        if full_desc := data.get("full_description"):
-            self._full_desc_edit.setPlainText(str(full_desc))
+        desc = data.get("short_description")
+        if desc:
+            self._desc_edit.setPlainText(str(desc))
         if problem := data.get("problem_statement"):
             self._problem_edit.setPlainText(str(problem))
         if target := data.get("target_outcome"):
@@ -359,7 +320,6 @@ class ProjectDialog(QDialog):
         return {
             "title": self._title_edit.text().strip(),
             "short_description": self._desc_edit.toPlainText().strip() or None,
-            "full_description": self._full_desc_edit.toPlainText().strip() or None,
             "problem_statement": self._problem_edit.toPlainText().strip() or None,
             "target_outcome": self._target_edit.toPlainText().strip() or None,
             "project_type": self._type_combo.currentData(),
@@ -367,9 +327,6 @@ class ProjectDialog(QDialog):
             "priority": self._priority_combo.currentData(),
             "health": self._health_combo.currentData(),
             "github_url": self._github_edit.text().strip() or None,
-            "demo_url": self._demo_edit.text().strip() or None,
             "docs_url": self._docs_edit.text().strip() or None,
-            "target_end_date": self._target_date_edit.date().toPython() if self._target_date_enabled.isChecked() else None,
-            "is_featured": self._featured_check.isChecked(),
             "tags": [tag.strip() for tag in self._tags_edit.text().split(",") if tag.strip()],
         }
