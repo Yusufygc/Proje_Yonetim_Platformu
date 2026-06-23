@@ -100,8 +100,6 @@ class TaskFilterBar(QWidget):
         r2.addWidget(self._priority_filter)
         self._type_filter = self._make_filter_combo(tr("filter_type", "Tür"), _type_items())
         r2.addWidget(self._type_filter)
-        self._stage_filter = self._make_filter_combo(tr("filter_stage", "Aşama"), [])
-        r2.addWidget(self._stage_filter)
         outer.addWidget(row2)
 
     def _make_filter_combo(self, label: str, values: list[tuple[str, str]]) -> QComboBox:
@@ -146,7 +144,6 @@ class TaskFilterBar(QWidget):
         status = self._status_filter.currentData()
         priority = self._priority_filter.currentData()
         task_type = self._type_filter.currentData()
-        stage_id = self._stage_filter.currentData()
         result = []
         for task in tasks:
             if status and task.status != status:
@@ -154,8 +151,6 @@ class TaskFilterBar(QWidget):
             if priority and task.priority != priority:
                 continue
             if task_type and task.task_type != task_type:
-                continue
-            if stage_id is not None and task.stage_id != stage_id:
                 continue
             result.append(task)
         return result
@@ -169,23 +164,4 @@ class TaskFilterBar(QWidget):
             values["priority"] = self._priority_filter.currentData()
         if self._type_filter.currentData():
             values["task_type"] = self._type_filter.currentData()
-        if self._stage_filter.currentData():
-            values["stage_id"] = self._stage_filter.currentData()
         return values
-
-    def reload_stage_filter(self, tasks: list[Task]) -> None:
-        """Aşama filtresini görevlerde geçen stage_id'lerle tazeler, seçimi korur."""
-        current = self._stage_filter.currentData()
-        self._stage_filter.blockSignals(True)
-        self._stage_filter.clear()
-        self._stage_filter.addItem(tr("filter_stage", "Aşama"), None)
-        stage_ids = sorted({task.stage_id for task in tasks if task.stage_id is not None})
-        for stage_id in stage_ids:
-            self._stage_filter.addItem(
-                tr("filter_stage_item", "Aşama #{id}").format(id=stage_id), stage_id
-            )
-        if current is not None:
-            idx = self._stage_filter.findData(current)
-            if idx >= 0:
-                self._stage_filter.setCurrentIndex(idx)
-        self._stage_filter.blockSignals(False)
