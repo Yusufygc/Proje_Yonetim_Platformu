@@ -59,3 +59,42 @@ class PreferenceManager:
 
     def load_sidebar_collapsed(self) -> bool:
         return bool(self._settings.value("ui/sidebar_collapsed", False))
+
+    # ── Tema Slot Sistemi ────────────────────────────────────────────────────
+
+    def save_dark_slot(self, theme_name: str) -> None:
+        self._settings.setValue("ui/dark_slot", theme_name)
+
+    def load_dark_slot(self) -> str:
+        return str(self._settings.value("ui/dark_slot", "dark"))
+
+    def save_light_slot(self, theme_name: str) -> None:
+        self._settings.setValue("ui/light_slot", theme_name)
+
+    def load_light_slot(self) -> str:
+        return str(self._settings.value("ui/light_slot", "light"))
+
+    def save_active_mode(self, mode: str) -> None:
+        self._settings.setValue("ui/active_mode", mode)
+
+    def load_active_mode(self) -> str:
+        value = self._settings.value("ui/active_mode")
+        if value is not None:
+            return str(value)
+        # Eski kurulumlardan göç: tema adından mod çıkar
+        return "light" if self.load_theme() == "light" else "dark"
+
+    # ── Font Tercihleri ──────────────────────────────────────────────────────
+
+    def save_font_family(self, family: str) -> None:
+        self._settings.setValue("ui/font_family", family)
+
+    def load_font_family(self) -> str:
+        return str(self._settings.value("ui/font_family", ""))
+
+    def save_font_size(self, size: int) -> None:
+        self._settings.setValue("ui/font_size", size)
+
+    def load_font_size(self) -> int:
+        value = self._settings.value("ui/font_size")
+        return int(value) if value is not None else 10
