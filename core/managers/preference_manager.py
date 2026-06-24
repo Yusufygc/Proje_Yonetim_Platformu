@@ -97,4 +97,9 @@ class PreferenceManager:
 
     def load_font_size(self) -> int:
         value = self._settings.value("ui/font_size")
-        return int(value) if value is not None else 10
+        try:
+            size = int(value) if value is not None else 10
+            # Qt, 0 veya negatif point size aldığında -1 döner; geçerli aralığı zorla
+            return max(7, size)
+        except (TypeError, ValueError):
+            return 10
