@@ -96,5 +96,6 @@ def setup_modules(di: DIContainer) -> None:
             controller=di.settings_controller,
             strings=di.strings,
             prefs=di.prefs,
+            theme=di.theme,
         ),
     ))

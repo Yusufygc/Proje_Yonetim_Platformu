@@ -42,11 +42,14 @@ def main() -> None:
     except Exception:  # noqa: BLE001
         pass
 
-    # Fontları yükle ve uygula
+    # Fontları yükle ve uygula (kullanıcı tercihi varsa önceliği alır)
     from PySide6.QtGui import QFont
     font_mgr = container.fonts
     font_mgr.load_all()
-    app.setFont(QFont(font_mgr.ui_font, 10))
+    saved_family = container.prefs.load_font_family()
+    saved_size = container.prefs.load_font_size()
+    effective_family = saved_family if saved_family else font_mgr.ui_font
+    app.setFont(QFont(effective_family, saved_size))
 
     # Global Scroll Event Filter'ı yükle
     from presentation.utils.scroll_filter import WheelEventFilter

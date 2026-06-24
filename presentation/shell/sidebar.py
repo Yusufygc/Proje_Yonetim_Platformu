@@ -229,9 +229,16 @@ class Sidebar(QFrame):
         self._apply_theme_labels(animate=False)
 
     def _toggle_theme(self) -> None:
-        new_theme = "light" if self._theme.current_theme == "dark" else "dark"
-        self._prefs.save_theme(new_theme)
-        self._theme.switch_theme(new_theme)
+        current_mode = self._prefs.load_active_mode()
+        if current_mode == "dark":
+            next_mode = "light"
+            next_theme = self._prefs.load_light_slot()
+        else:
+            next_mode = "dark"
+            next_theme = self._prefs.load_dark_slot()
+        self._prefs.save_active_mode(next_mode)
+        self._prefs.save_theme(next_theme)
+        self._theme.switch_theme(next_theme)
 
     def _on_theme_changed(self, _theme_name: str) -> None:
         self._apply_theme_labels(animate=True)
@@ -242,7 +249,7 @@ class Sidebar(QFrame):
         )
 
     def _apply_theme_labels(self, animate: bool) -> None:
-        is_light = self._theme.current_theme == "light"
+        is_light = self._prefs.load_active_mode() == "light"
         if animate:
             self._theme_switch.animate_to_state(is_light)
         else:
