@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -63,9 +64,14 @@ class ThemeManager(QObject):
     def _load_theme(self, theme_name: str) -> None:
         """Belirtilen tema dosyasını yükler; bulunamazsa gömülü varsayılanı kullanır."""
         theme_file = self._themes_dir / f"{theme_name}.json"
+        if not theme_file.exists():
+            # Kullanıcı temaları user/ alt klasöründe saklanır
+            theme_file = self._themes_dir / "user" / f"{theme_name}.json"
         if theme_file.exists():
             with open(theme_file, encoding="utf-8") as f:
                 self._palette = json.load(f)
+            # Alpha token'ları kaynak JSON'a bağlı olmaksızın garantile
+            self._palette = self.derive_alpha_tokens(self._palette)
             logger.info("Tema yüklendi: %s", theme_file)
         else:
             logger.warning(
@@ -92,10 +98,11 @@ class ThemeManager(QObject):
     def _interpolate_tokens(self, qss: str) -> str:
         """@token_name yer tutucularını aktif palet hex değerleriyle değiştirir.
 
-        Uzun anahtarlar önce işlenir; @surface_raised, @surface'den önce eşleşir.
+        Regex kullanımı: @warning, @warning_alpha içinde kısmen eşleşip
+        '#F59E0B_alpha' gibi geçersiz renk isimleri oluşmasını engeller.
         """
         for key, value in sorted(self._palette.items(), key=lambda kv: len(kv[0]), reverse=True):
-            qss = qss.replace(f"@{key}", str(value))
+            qss = re.sub(r"@" + re.escape(key) + r"(?![A-Za-z0-9_])", str(value), qss)
         return qss
 
     def _load_styles(self) -> str:
@@ -289,8 +296,12 @@ class ThemeManager(QObject):
 
     @staticmethod
     def _default_dark_palette() -> dict[str, str]:
-        """Tema dosyası yokken kullanılacak gömülü koyu tema paleti."""
-        return {
+        """Tema dosyası yokken kullanılacak gömülü koyu tema paleti.
+
+        QSS dosyalarının kullandığı tüm token'ları içermeli; eksik token
+        kısmî eşleşme hatalarına yol açar (ör. #6366F1_bg).
+        """
+        return ThemeManager.derive_alpha_tokens({
             "background": "#12141A",
             "surface": "#1C1F26",
             "surface_raised": "#22263A",
@@ -299,6 +310,7 @@ class ThemeManager(QObject):
             "text_muted": "#4A4D5C",
             "accent_start": "#6366F1",
             "accent_end": "#8B5CF6",
+            "icon_on_accent": "#FFFFFF",
             "success": "#22C55E",
             "warning": "#F59E0B",
             "danger": "#EF4444",
@@ -307,5 +319,11 @@ class ThemeManager(QObject):
             "scrollbar_handle": "#3A3D4A",
             "sidebar_bg": "#0F1117",
             "sidebar_active": "#6366F1",
-            "icon_on_accent": "#FFFFFF",
-        }
+            "sidebar_text": "#8B8FA8",
+            "sidebar_text_active": "#FFFFFF",
+            "sidebar_hover_bg": "#1A1D25",
+            "sidebar_active_bg": "#1E2136",
+            "h-sidebar_bg": "#0A0C10",
+            "stage_active": "#6366F1",
+            "stage_done": "#22C55E",
+        })
