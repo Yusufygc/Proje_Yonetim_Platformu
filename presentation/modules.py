@@ -84,7 +84,7 @@ def setup_modules(di: DIContainer) -> None:
         nav_label_key="nav_info",
         nav_label_default="Bilgilendirme",
         nav_icon="circle-info",
-        factory=lambda parent: InfoPage(parent=parent, theme=di.theme),
+        factory=lambda parent: InfoPage(parent=parent, theme=di.theme, icons=di.icons),
     ))
     registry.register(FeaturePlugin(
         page_key="settings",

@@ -293,5 +293,25 @@
   "settings_font_section": "Yazı Tipi",
   "settings_font_family": "Yazı Ailesi:",
   "settings_font_size": "Boyut:",
-  "settings_font_preview": "Önizleme:"
+  "settings_font_preview": "Önizleme:",
+  "settings_font_apply": "Uygula",
+
+  "info_tagline": "Yazılım projelerinizi, fikirlerinizi ve görevlerinizi tek merkezden yönetin.",
+  "info_workflow_title": "Çalışma Akışı",
+  "info_flow_ideas": "Fikir Havuzu",
+  "info_flow_projects": "Projeler",
+  "info_flow_tasks": "Görevler (WBS)",
+  "info_features_title": "Sistem Bileşenleri",
+  "info_feat_dashboard_desc": "Proje sayısı, bekleyen ve tamamlanan görevler. Tıkanan projeler ile acil işler tek bakışta.",
+  "info_feat_projects_desc": "Aşama aşama takip: Planlandı → Geliştirme → Test → Tamamlandı. Kararlar, notlar, kaynak bağlantıları.",
+  "info_feat_ideas_desc": "Ham fikirleri kaydedin, puanlayın. Projeye Dönüştür ile veri kaybetmeden doğrudan projeye aktarın.",
+  "info_feat_tasks_desc": "Hiyerarşik iş kırılımı (WBS). Durum, öncelik ve tür filtreleriyle görev yoğunluğunu kontrol edin.",
+  "info_tips_title": "Önemli İpuçları",
+  "info_tip_theme_title": "Dinamik Tema Desteği",
+  "info_tip_theme_desc": "Sol menünün en altındaki toggle ile Koyu/Açık modlar arasında anlık geçiş yapın. Ayarlar → Tema bölümünden özel renk temaları oluşturabilirsiniz.",
+  "info_tip_data_title": "Yerel Veri Depolama",
+  "info_tip_data_desc": "Tüm veriler SQLite veritabanı olarak yerel sisteminizde tutulur. Ayarlar → Veri Yönetimi'nden JSON formatında dışa aktarabilirsiniz.",
+  "info_shortcuts_title": "Klavye Kısayolları",
+  "info_shortcut_search": "Hızlı Arama kutusunu açar",
+  "info_shortcut_new": "Yeni Proje oluşturur"
 }

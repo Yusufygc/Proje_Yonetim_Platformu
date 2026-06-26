@@ -293,5 +293,25 @@
   "settings_font_section": "Font",
   "settings_font_family": "Font Family:",
   "settings_font_size": "Size:",
-  "settings_font_preview": "Preview:"
+  "settings_font_preview": "Preview:",
+  "settings_font_apply": "Apply",
+
+  "info_tagline": "Manage your software projects, ideas, and tasks from a single hub.",
+  "info_workflow_title": "Workflow",
+  "info_flow_ideas": "Idea Pool",
+  "info_flow_projects": "Projects",
+  "info_flow_tasks": "Tasks (WBS)",
+  "info_features_title": "System Components",
+  "info_feat_dashboard_desc": "Project count, pending and completed tasks. Blocked projects and urgent work at a glance.",
+  "info_feat_projects_desc": "Stage-by-stage tracking: Planned → Development → Test → Done. Decisions, notes, resource links.",
+  "info_feat_ideas_desc": "Capture raw ideas and score them. Use Convert to Project to move data into a project without loss.",
+  "info_feat_tasks_desc": "Hierarchical work breakdown (WBS). Status, priority and type filters to manage task load.",
+  "info_tips_title": "Important Tips",
+  "info_tip_theme_title": "Dynamic Theme Support",
+  "info_tip_theme_desc": "Use the toggle at the bottom of the left menu to instantly switch between Dark and Light modes. Create custom color themes in Settings → Theme.",
+  "info_tip_data_title": "Local Data Storage",
+  "info_tip_data_desc": "All data is stored locally as a SQLite database. Export to JSON format from Settings → Data Management.",
+  "info_shortcuts_title": "Keyboard Shortcuts",
+  "info_shortcut_search": "Opens the Quick Search box",
+  "info_shortcut_new": "Creates a New Project"
 }
