@@ -19,7 +19,6 @@ from controllers.task_controller import TaskController
 from domain.enums.priority import Priority
 from domain.enums.task_status import TaskStatus
 from domain.enums.task_type import TaskType
-from domain.models.project_stage import ProjectStage
 from domain.models.task import Task
 from presentation.dialogs.form_utils import (
     make_combo_column,
@@ -72,18 +71,18 @@ class TaskDialog(QDialog):
         self,
         parent: QWidget,
         task: Task | None = None,
-        stages: list[ProjectStage] | None = None,
         task_controller: TaskController | None = None,
     ) -> None:
         super().__init__(parent=parent)
         self._task = task
         self._is_edit = task is not None
-        self._stages = stages or []
         self._task_controller = task_controller
+        # Yeni görev modunda checklist maddeleri geçici olarak burada tutulur
+        self._chk_pending: list[str] = []
         self._setup_ui()
         if self._is_edit:
             self._populate_fields()
-            
+
         if self._task_controller:
             self._task_controller.task_updated.connect(self._on_task_updated_event)
 
@@ -129,9 +128,8 @@ class TaskDialog(QDialog):
         layout.addWidget(self._build_combos_row())
         layout.addSpacing(28)
 
-        if self._is_edit:
-            self._build_checklist_section(layout)
-            layout.addSpacing(28)
+        self._build_checklist_section(layout)
+        layout.addSpacing(28)
 
         layout.addWidget(self._build_button_row())
 
@@ -160,14 +158,6 @@ class TaskDialog(QDialog):
             row, tr("label_type", "Tip"), _task_type_items()
         )
         layout.addWidget(type_col)
-
-        # Aşama: ilk seçenek "Yok" (None), ardından projenin aşamaları
-        stage_items: list[tuple[str, object]] = [(tr("label_stage_none", "Yok"), None)]
-        stage_items += [(s.name, s.id) for s in self._stages]
-        stage_col, self._stage_combo = make_combo_column(
-            row, tr("filter_stage", "Aşama"), stage_items
-        )
-        layout.addWidget(stage_col)
 
         return row
 
@@ -206,10 +196,11 @@ class TaskDialog(QDialog):
 
         add_layout = QHBoxLayout()
         add_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         self._chk_edit = QLineEdit(parent=self)
         self._chk_edit.setPlaceholderText(tr("task_dialog_checklist_placeholder", "Yeni madde..."))
         self._chk_edit.setMinimumHeight(Size.INPUT_H_SM)
+        self._chk_edit.returnPressed.connect(self._on_add_checklist_item)
         add_layout.addWidget(self._chk_edit, 1)
 
         add_btn = QPushButton(tr("action_add", "Ekle"), parent=self)
@@ -225,10 +216,12 @@ class TaskDialog(QDialog):
         self._chk_layout.setContentsMargins(0, 0, 0, 0)
         self._chk_layout.setSpacing(4)
         main_layout.addWidget(self._chk_container)
-        
-        self._render_checklist()
+
+        if self._is_edit:
+            self._render_checklist()
 
     def _render_checklist(self) -> None:
+        """Edit modunda DB'deki checklist item'larını render eder (toggle + sil destekler)."""
         while self._chk_layout.count():
             item = self._chk_layout.takeAt(0)
             if item.widget():
@@ -263,11 +256,48 @@ class TaskDialog(QDialog):
 
             self._chk_layout.addWidget(row)
 
+    def _render_pending_checklist(self) -> None:
+        """Yeni görev modunda geçici listeyi render eder (sadece sil destekler)."""
+        while self._chk_layout.count():
+            item = self._chk_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        for idx, text in enumerate(self._chk_pending):
+            row = QWidget(parent=self._chk_container)
+            row.setProperty("cssClass", "panel-raised")
+            rl = QHBoxLayout(row)
+            rl.setContentsMargins(Spacing.XS, Spacing.XS, Spacing.XS, Spacing.XS)
+            rl.setSpacing(Spacing.MD)
+
+            lbl = QLabel(f"○  {text}", parent=row)
+            lbl.setProperty("cssClass", "text-secondary")
+            rl.addWidget(lbl, 1)
+
+            del_btn = QPushButton("×", parent=row)
+            del_btn.setFixedSize(Size.BTN_ICON_SM, Size.BTN_ICON_SM)
+            del_btn.setProperty("cssClass", "chk-delete")
+            del_btn.clicked.connect(lambda checked=False, i=idx: self._on_remove_pending_item(i))
+            rl.addWidget(del_btn)
+
+            self._chk_layout.addWidget(row)
+
     def _on_add_checklist_item(self) -> None:
         text = self._chk_edit.text().strip()
-        if text and self._task and self._task_controller:
-            self._task_controller.add_checklist_item(self._task.id, text)
-            self._chk_edit.clear()
+        if not text:
+            return
+        self._chk_edit.clear()
+        if self._is_edit:
+            if self._task and self._task_controller:
+                self._task_controller.add_checklist_item(self._task.id, text)
+        else:
+            self._chk_pending.append(text)
+            self._render_pending_checklist()
+
+    def _on_remove_pending_item(self, index: int) -> None:
+        if 0 <= index < len(self._chk_pending):
+            self._chk_pending.pop(index)
+            self._render_pending_checklist()
 
     def _on_toggle_checklist_item(self, item_id: int) -> None:
         if self._task and self._task_controller:
@@ -278,7 +308,7 @@ class TaskDialog(QDialog):
             self._task_controller.delete_checklist_item(item_id, self._task.id)
 
     def _on_task_updated_event(self, task: object) -> None:
-        if self._task and hasattr(task, 'id') and getattr(task, 'id') == self._task.id:
+        if self._task and hasattr(task, "id") and getattr(task, "id") == self._task.id:
             self._task = task
             self._render_checklist()
 
@@ -292,7 +322,6 @@ class TaskDialog(QDialog):
         select_combo_data(self._status_combo, t.status)
         select_combo_data(self._priority_combo, t.priority)
         select_combo_data(self._type_combo, t.task_type)
-        select_combo_data(self._stage_combo, t.stage_id)
 
     def _on_save(self) -> None:
         title = self._title_edit.text().strip()
@@ -313,12 +342,13 @@ class TaskDialog(QDialog):
 
     def get_data(self) -> dict[str, object]:
         """Dialog kabul edildikten sonra çağrılır; dolu alanları döndürür."""
-        stage_id = self._stage_combo.currentData()
-        return {
+        data: dict[str, object] = {
             "title": self._title_edit.text().strip(),
             "description": self._desc_edit.toPlainText().strip() or None,
             "status": self._status_combo.currentData(),
             "priority": self._priority_combo.currentData(),
             "task_type": self._type_combo.currentData(),
-            "stage_id": stage_id,
         }
+        if not self._is_edit and self._chk_pending:
+            data["checklist_items"] = list(self._chk_pending)
+        return data

@@ -47,7 +47,6 @@ class ExportService:
                     "title": idea.title,
                     "problem": idea.problem,
                     "solution": idea.solution,
-                    "expected_value": idea.expected_value,
                     "notes": idea.notes,
                     "created_at": idea.created_at.isoformat() if idea.created_at else None
                 })

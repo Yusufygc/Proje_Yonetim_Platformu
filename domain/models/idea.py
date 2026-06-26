@@ -20,19 +20,12 @@ class Idea(Base, TimestampMixin):
     problem: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     solution: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     target_user: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    expected_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
     status: Mapped[str] = mapped_column(
         String(30), nullable=False, default=IdeaStatus.RAW.value
     )
     priority: Mapped[str] = mapped_column(
         String(20), nullable=False, default=IdeaPriority.MEDIUM.value
     )
-    
-    # Zorluk seviyesi, efor tahmini ve güven seviyesi (Örn: 1-10 arası, ICE/RICE skoru için)
-    difficulty: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    effort: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    confidence: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     source_link: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)

@@ -78,13 +78,6 @@ class ProjectListItem(QFrame):
         top_layout.addWidget(status_lbl)
         layout.addWidget(top_row)
 
-        if project.short_description:
-            desc_lbl = QLabel(project.short_description, parent=self)
-            desc_lbl.setProperty("cssClass", "project-list-desc")
-            desc_lbl.setWordWrap(True)
-            desc_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-            layout.addWidget(desc_lbl)
-
         bottom_row = QWidget(parent=self)
         bottom_layout = QHBoxLayout(bottom_row)
         bottom_layout.setContentsMargins(0, 0, 0, 0)
@@ -108,12 +101,6 @@ class ProjectListItem(QFrame):
 
         meta_parts = []
         try:
-            active_stage = next((s.name for s in project.stages if s.status == "ACTIVE"), None)
-            if active_stage:
-                meta_parts.append(tr("card_meta_stage", "Aşama: {name}").format(name=active_stage))
-        except Exception:
-            pass
-        try:
             open_tasks = len([t for t in project.tasks if t.status not in {"DONE", "CANCELLED"}])
             meta_parts.append(tr("card_meta_open_tasks", "Açık görev: {count}").format(count=open_tasks))
         except Exception:
@@ -125,7 +112,7 @@ class ProjectListItem(QFrame):
                 meta_parts.append(tr("card_meta_tags", "Etiket: {tags}").format(tags=", ".join(tags)))
         except Exception:
             pass
-        meta_lbl = QLabel(" · ".join(meta_parts), parent=self)
+        meta_lbl = QLabel("   ·   ".join(meta_parts), parent=self)
         meta_lbl.setProperty("cssClass", "project-list-meta")
         meta_lbl.setWordWrap(True)
         meta_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)

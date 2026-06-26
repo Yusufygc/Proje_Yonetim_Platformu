@@ -37,13 +37,15 @@ def service_stack():
     db.run_migrations()
     activity_repo = ActivityLogRepository(db)
     task_repo = TaskRepository(db)
+    project_repo = ProjectRepository(db)
     stage_service = StageService(
         StageRepository(db),
         WorkflowStageRepository(db),
         activity_repo,
+        project_repository=project_repo,
     )
     project_service = ProjectService(
-        ProjectRepository(db),
+        project_repo,
         stage_service,
         activity_repo,
         ProjectTagRepository(db),
@@ -139,7 +141,6 @@ def test_export_uses_existing_idea_fields(service_stack, tmp_path):
         "Export fikri",
         problem="Sorun",
         solution="Çözüm",
-        expected_value="Değer",
         notes="Not",
     )
     target = tmp_path / "export.json"
@@ -150,7 +151,6 @@ def test_export_uses_existing_idea_fields(service_stack, tmp_path):
     idea = payload["ideas"][0]
     assert idea["problem"] == "Sorun"
     assert idea["solution"] == "Çözüm"
-    assert idea["expected_value"] == "Değer"
     assert idea["notes"] == "Not"
     assert "description" not in idea
 
@@ -244,3 +244,23 @@ def test_performance_index_migration_is_idempotent(service_stack):
     assert "idx_projects_status" in index_names
     assert "idx_projects_is_archived" in index_names
     assert "idx_ideas_status" in index_names
+
+
+def test_project_auto_completed_when_all_stages_completed(service_stack):
+    project = service_stack["project_service"].create_project("Otomatik Tamamlama Testi")
+    stages = service_stack["stage_service"].get_stages(project.id)
+    assert len(stages) > 0
+
+    # Tüm aşamaları sırasıyla tamamla
+    for _ in range(len(stages)):
+        current_stages = service_stack["stage_service"].get_stages(project.id)
+        active_stage = next(s for s in current_stages if s.status == "ACTIVE")
+        service_stack["stage_service"].complete_stage(active_stage.id)
+
+    # Tüm aşamaların DONE olduğunu doğrula
+    updated_stages = service_stack["stage_service"].get_stages(project.id)
+    assert all(s.status == "DONE" for s in updated_stages)
+
+    # Projenin otomatik olarak COMPLETED olduğunu doğrula
+    updated_project = service_stack["project_service"].get_project(project.id)
+    assert updated_project.status == "COMPLETED"

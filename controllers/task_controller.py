@@ -63,15 +63,17 @@ class TaskController(QObject):
         worker.signals.error.connect(_on_error)
         worker.start()
 
-    def create_task(self, project_id: int, title: str, **kwargs: object) -> None:
+    def create_task(self, project_id: int, title: str, **kwargs: object) -> "Task | None":
         try:
             dto = TaskCreateDTO(project_id=project_id, title=title, values=dict(kwargs))
             task = self._service.create_task(dto.project_id, dto.title, **dto.values)
             self.task_created.emit(task)
             EventBus.instance().publish("task.created", task_id=task.id, project_id=task.project_id, task=task)
+            return task
         except (AppBaseException, ValueError) as exc:
             logger.error("Görev oluşturulamadı: %s", exc)
             self.error_occurred.emit(str(exc))
+            return None
 
     def update_task(self, task_id: int, **kwargs: object) -> None:
         try:

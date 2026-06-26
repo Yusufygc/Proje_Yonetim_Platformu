@@ -7,38 +7,57 @@ QFrame#sidebar { background-color: @sidebar_bg; }
 
 /* ── ThemeToggleSwitch ── */
 ThemeToggleSwitch {
-    background-color: @border;
+    background-color: @sidebar_active_bg;
     border-radius: 12px;
 }
 ThemeToggleSwitch[active="true"] {
-    background-color: @accent_start;
+    background-color: @sidebar_active;
 }
 /* Thumb (iç QFrame) */
 ThemeToggleSwitch QFrame {
-    background-color: @text_secondary;
+    background-color: @sidebar_text;
     border-radius: 9px;
 }
 ThemeToggleSwitch[active="true"] QFrame {
-    background-color: #FFFFFF;
+    background-color: @sidebar_text_active;
 }
 
-/* ── SidebarNavButton ── */
+/* ── Sidebar metin etiketleri (tema toggle altyazısı vb.) ── */
+QFrame#sidebar QLabel { color: @sidebar_text; }
+
+/* ── SidebarNavButton ──
+   Nav item metni sidebar zeminine özel token ile çözülür; genel
+   text_secondary kullanılırsa açık tema Royal Blue zemininde
+   kontrast oranı WCAG AA eşiğinin altına düşer. */
 SidebarNavButton {
     background-color: transparent;
     border: none;
     border-radius: 8px;
-    color: @text_secondary;
+    color: @sidebar_text;
     font-size: 13px;
     text-align: left;
     padding-left: 8px;
 }
 SidebarNavButton:hover {
-    background-color: @surface_raised;
+    /* Arka plan açıkça tanımlanmazsa global QPushButton:hover kuralı
+       açık tema gibi aydınlık bir zemin uygulayabilir; bu durumda
+       sidebar'a özel koyu zemin üzerindeki metin ve ikon okunamaz hale
+       gelir. sidebar_active_bg ile her iki temada da koyu zemin korunur. */
+    background-color: @sidebar_active_bg;
+    color: @sidebar_text_active;
 }
 SidebarNavButton:checked {
-    background-color: @accent_alpha;
-    border-left: 3px solid @accent_start;
-    color: @accent_start;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0.00 @sidebar_active,
+        stop:0.05 @sidebar_active,
+        stop:0.20 @sidebar_hover_bg,
+        stop:0.60 @sidebar_active_bg,
+        stop:1.00 @sidebar_bg
+    );
+    border: none;
+    border-radius: 8px;
+    padding-left: 8px;
+    color: @sidebar_active;
     font-weight: 700;
 }
 
@@ -47,6 +66,16 @@ QPushButton#sidebar_search_btn {
     text-align: left;
     padding-left: 12px;
     margin-top: 8px;
+}
+
+/* ── Hamburger / collapse toggle butonu ── */
+QPushButton#sidebar_toggle_btn {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+}
+QPushButton#sidebar_toggle_btn:hover {
+    background-color: @sidebar_active_bg;
 }
 
 /* ── Daraltılmış tema butonu ── */

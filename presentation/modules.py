@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 def setup_modules(di: DIContainer) -> None:
     """Tüm Feature Plugin'leri ModuleRegistry'ye kayıt eder. QApplication'dan sonra çağrılmalıdır."""
+    from presentation.pages.archive_page import ArchivePage
     from presentation.pages.dashboard_page import DashboardPage
     from presentation.pages.ideas_page import IdeasPage
     from presentation.pages.info_page import InfoPage
@@ -69,11 +70,21 @@ def setup_modules(di: DIContainer) -> None:
         ),
     ))
     registry.register(FeaturePlugin(
+        page_key="archive",
+        nav_label_key="nav_archive",
+        nav_label_default="Arşiv",
+        nav_icon="archive",
+        factory=lambda parent: ArchivePage(
+            parent=parent,
+            controller=di.project_controller,
+        ),
+    ))
+    registry.register(FeaturePlugin(
         page_key="info",
         nav_label_key="nav_info",
         nav_label_default="Bilgilendirme",
         nav_icon="circle-info",
-        factory=lambda parent: InfoPage(parent=parent, theme=di.theme),
+        factory=lambda parent: InfoPage(parent=parent, theme=di.theme, icons=di.icons),
     ))
     registry.register(FeaturePlugin(
         page_key="settings",
@@ -85,5 +96,6 @@ def setup_modules(di: DIContainer) -> None:
             controller=di.settings_controller,
             strings=di.strings,
             prefs=di.prefs,
+            theme=di.theme,
         ),
     ))

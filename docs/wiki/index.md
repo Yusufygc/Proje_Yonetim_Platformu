@@ -13,8 +13,8 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[veritabani-katmani]] — DatabaseManager, scoped_session, WAL modu ve `BaseRepository[T]` / `ProjectScopedRepository[T]` desenleri.
 
 ## Sunum Katmanı
-- [[tema-sistemi]] — JSON palet + token'lı modüler QSS yapısı ve programatik renk için "tema sözleşmesi".
-- [[l10n-string-yonetimi]] — StringManager, `tr()` yardımcısı, ratchet regresyon testi ve migrasyon kuyruğu.
+- [[tema-sistemi]] — JSON palet + token'lı modüler QSS yapısı; font boyutu `QApplication.setFont()` üzerinden yönetilir (QSS override yok).
+- [[l10n-string-yonetimi]] — StringManager, `tr()` yardımcısı, `language_changed` → MainWindow UI yeniden kurulum, ratchet testi.
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve planlanan iyileştirmeler.
 - [[gorevler-modulu]] — WBS görev sayfası paketi (`pages/tasks/`): filter bar + ağaç + sayfa kompozisyonu.
 

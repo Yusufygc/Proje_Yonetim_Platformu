@@ -11,6 +11,11 @@ from PySide6.QtGui import QFontDatabase
 
 logger = logging.getLogger(__name__)
 
+_UI_FAMILY = "Plus Jakarta Sans"
+_MONO_FAMILY = "JetBrains Mono"
+_FALLBACK_UI = "Segoe UI"
+_FALLBACK_MONO = "Consolas"
+
 
 class FontManager:
     """
@@ -54,3 +59,22 @@ class FontManager:
     @property
     def loaded_families(self) -> list[str]:
         return list(self._loaded_families)
+
+    @property
+    def ui_font(self) -> str:
+        """Birincil UI font ailesi; yüklü değilse Inter ardından sistem fontuna döner."""
+        for fam in self._loaded_families:
+            if _UI_FAMILY in fam:
+                return _UI_FAMILY
+        for fam in self._loaded_families:
+            if "Inter" in fam:
+                return "Inter"
+        return _FALLBACK_UI
+
+    @property
+    def mono_font(self) -> str:
+        """Monospace font ailesi; yüklü değilse sistem monospace fontuna döner."""
+        for fam in self._loaded_families:
+            if _MONO_FAMILY in fam:
+                return _MONO_FAMILY
+        return _FALLBACK_MONO

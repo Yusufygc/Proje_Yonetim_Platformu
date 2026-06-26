@@ -57,9 +57,16 @@ class MainWindow(QMainWindow):
         self.resize(1280, 800)
         self.setStyleSheet(self._theme.build_global_qss())
         self._theme.theme_changed.connect(self._on_theme_changed)
+        StringManager.instance().language_changed.connect(self._on_language_changed)
 
     def _on_theme_changed(self, theme_name: str) -> None:
         self.setStyleSheet(self._theme.build_global_qss())
+
+    def _on_language_changed(self, _lang: str) -> None:
+        self.setWindowTitle(StringManager.get("app_name", config.APP_NAME))
+        self._page_index = {}
+        self._setup_ui()
+        self._navigate_to("dashboard")
 
     def resizeEvent(self, event: object) -> None:  # type: ignore[override]
         super().resizeEvent(event)  # type: ignore[arg-type]

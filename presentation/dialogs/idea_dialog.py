@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QScrollArea,
-    QSpinBox,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -147,23 +146,6 @@ class IdeaDialog(QDialog):
         self._solution_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
         layout.addWidget(self._solution_edit)
 
-        # Beklenen Değer
-        layout.addWidget(self._make_label(tr("idea_dialog_expected_label", "Beklenen Değer / Çıktı")))
-        self._expected_edit = QLineEdit(parent=form_widget)
-        self._expected_edit.setPlaceholderText(tr("idea_dialog_expected_placeholder", "Örn: Aylık %10 ciro artışı"))
-        self._expected_edit.setMinimumHeight(Size.INPUT_H_MD)
-        layout.addWidget(self._expected_edit)
-
-        # Skor satırı
-        score_row = QWidget(parent=form_widget)
-        score_row_layout = QHBoxLayout(score_row)
-        score_row_layout.setContentsMargins(0, 0, 0, 0)
-        score_row_layout.setSpacing(16)
-        self._difficulty_spin = self._make_score_spin(tr("label_difficulty", "Zorluk"), score_row_layout, score_row)
-        self._effort_spin = self._make_score_spin(tr("label_effort", "Efor"), score_row_layout, score_row)
-        self._confidence_spin = self._make_score_spin(tr("label_confidence", "Güven"), score_row_layout, score_row)
-        layout.addWidget(score_row)
-
         layout.addWidget(self._make_label(tr("label_notes", "Notlar")))
         self._notes_edit = QTextEdit(parent=form_widget)
         self._notes_edit.setMaximumHeight(Size.TEXTAREA_H_SM)
@@ -211,17 +193,6 @@ class IdeaDialog(QDialog):
         lbl.setProperty("cssClass", "field-label")
         return lbl
 
-    def _make_score_spin(self, label: str, row: QHBoxLayout, parent: QWidget | None = None) -> QSpinBox:
-        col = QVBoxLayout()
-        col.addWidget(self._make_label(label))
-        spin = QSpinBox(parent=parent or self)
-        spin.setRange(0, 10)
-        spin.setSpecialValueText("-")
-        spin.setMinimumHeight(Size.INPUT_H_MD)
-        col.addWidget(spin)
-        row.addLayout(col)
-        return spin
-
     def _populate_fields(self) -> None:
         if not self._idea:
             return
@@ -232,16 +203,10 @@ class IdeaDialog(QDialog):
             self._target_user_edit.setText(self._idea.target_user)
         if self._idea.solution:
             self._solution_edit.setText(self._idea.solution)
-        if self._idea.expected_value:
-            self._expected_edit.setText(self._idea.expected_value)
         if self._idea.source_link:
             self._source_edit.setText(self._idea.source_link)
         if self._idea.notes:
             self._notes_edit.setText(self._idea.notes)
-        self._difficulty_spin.setValue(self._idea.difficulty or 0)
-        self._effort_spin.setValue(self._idea.effort or 0)
-        self._confidence_spin.setValue(self._idea.confidence or 0)
-
         select_combo_data(self._status_combo, self._idea.status)
         select_combo_data(self._priority_combo, self._idea.priority)
 
@@ -264,11 +229,7 @@ class IdeaDialog(QDialog):
             "problem": self._problem_edit.toPlainText(),
             "solution": self._solution_edit.toPlainText(),
             "target_user": self._target_user_edit.text(),
-            "expected_value": self._expected_edit.text(),
             "source_link": self._source_edit.text(),
-            "difficulty": self._difficulty_spin.value() or None,
-            "effort": self._effort_spin.value() or None,
-            "confidence": self._confidence_spin.value() or None,
             "notes": self._notes_edit.toPlainText(),
             "status": self._status_combo.currentData(),
             "priority": self._priority_combo.currentData(),

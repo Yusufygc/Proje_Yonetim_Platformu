@@ -7,8 +7,6 @@
 
 QWidget {
     color: @text_primary;
-    font-family: "Inter", "Segoe UI", sans-serif;
-    font-size: 13px;
     border: none;
     outline: none;
 }

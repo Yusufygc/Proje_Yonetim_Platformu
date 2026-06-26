@@ -13,9 +13,9 @@ from core.events.event_bus import EventBus
 from core.exceptions.base_exception import AppBaseException
 from core.workers.worker import Worker
 from domain.dtos.forms import ProjectCreateDTO, ProjectUpdateDTO
-from domain.models.project import Project
-from domain.models.attachment import Attachment
 from domain.models.activity_log import ActivityLog
+from domain.models.attachment import Attachment
+from domain.models.project import Project
 from services.project_service import ProjectService
 
 logger = logging.getLogger(__name__)
@@ -25,10 +25,12 @@ class ProjectController(QObject):
     """Proje CRUD işlemlerini sinyal tabanlı olarak yönetir."""
 
     projects_loaded = Signal(list)
+    archived_projects_loaded = Signal(list)
     project_created = Signal(object)
     project_updated = Signal(object)
     project_deleted = Signal(int)
     project_archived = Signal(int)
+    project_restored = Signal(int)
     error_occurred = Signal(str)
 
     def __init__(
@@ -60,6 +62,19 @@ class ProjectController(QObject):
             
         worker = Worker(_fetch)
         worker.signals.result.connect(self.projects_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        worker.start()
+
+    def load_archived_projects(self) -> None:
+        def _fetch() -> list[Project]:
+            return [p for p in self._service.get_all_projects(include_archived=True) if p.is_archived]
+
+        def _on_error(err: str) -> None:
+            logger.error("Arşivlenen projeler yüklenemedi: %s", err)
+            self.error_occurred.emit(str(err))
+
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.archived_projects_loaded.emit)
         worker.signals.error.connect(_on_error)
         worker.start()
 
@@ -118,6 +133,7 @@ class ProjectController(QObject):
     def restore_archived_project(self, project_id: int) -> None:
         try:
             self._service.restore_archived_project(project_id)
+            self.project_restored.emit(project_id)
             self._event_bus.publish("project.restored", project_id=project_id)
             self.load_projects()
         except AppBaseException as exc:

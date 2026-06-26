@@ -40,7 +40,7 @@ class ProjectRepository(BaseRepository[Project]):
             stmt = select(Project).options(*self._query_options())
             if not include_archived:
                 stmt = stmt.where(Project.is_archived.is_(False))
-            stmt = stmt.order_by(Project.display_order, Project.created_at.desc())
+            stmt = stmt.order_by(Project.display_order, Project.created_at.asc())
             if offset:
                 stmt = stmt.offset(max(0, offset))
             if limit is not None:

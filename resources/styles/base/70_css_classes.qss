@@ -16,7 +16,7 @@
 *[cssClass="field-label"]    { font-size: 12px; font-weight: 600; color: @text_secondary; letter-spacing: 0.5px; }
 *[cssClass="theme-label"]    { font-size: 13px; font-weight: 500; color: @text_secondary; }
 
-*[cssClass="surface-panel"]  { background-color: @sidebar_bg; }
+*[cssClass="surface-panel"]  { background-color: @h-sidebar_bg; }
 *[cssClass="panel"]          { background-color: @surface; border-radius: 12px; border: 1px solid @border; }
 *[cssClass="panel-raised"]   { background-color: @surface_raised; border-radius: 8px; }
 *[cssClass="divider"]        { background-color: @border; max-width: 1px; border: none; }
@@ -42,3 +42,6 @@ QListWidget[cssClass="panel"] {
 
 /* Seffaf arka plan ihtiyaci olan widget'lar */
 *[cssClass="transparent-bg"] { background: transparent; background-color: transparent; }
+
+/* Açılır/kapanır bölüm başlığı */
+QFrame[cssClass="section-collapse-header"]:hover { background-color: rgba(255, 255, 255, 0.05); border-radius: 4px; }

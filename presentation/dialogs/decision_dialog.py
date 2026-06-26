@@ -51,8 +51,14 @@ class DecisionDialog(QDialog):
         # Durum
         layout.addWidget(QLabel(tr("label_status", "Durum"), parent=self))
         self._status_combo = QComboBox(parent=self)
+        _decision_status_labels = {
+            DecisionStatus.DRAFT.value:      tr("decision_status_draft",     "Taslak"),
+            DecisionStatus.ACCEPTED.value:   tr("decision_status_accepted",  "✅ Kabul Edildi"),
+            DecisionStatus.SUPERSEDED.value: tr("decision_status_superseded","Güncellendi"),
+            DecisionStatus.CANCELLED.value:  tr("decision_status_cancelled", "❌ İptal Edildi"),
+        }
         for s in DecisionStatus:
-            self._status_combo.addItem(s.value, s.value)
+            self._status_combo.addItem(_decision_status_labels[s.value], s.value)
         layout.addWidget(self._status_combo)
 
         # Karar
@@ -93,12 +99,14 @@ class DecisionDialog(QDialog):
         self._decision_edit.setText(self._decision.decision)
         if self._decision.rationale:
             self._rationale_edit.setText(self._decision.rationale)
-        self._status_combo.setCurrentText(self._decision.status)
+        idx = self._status_combo.findData(self._decision.status)
+        if idx >= 0:
+            self._status_combo.setCurrentIndex(idx)
 
     def get_data(self) -> dict:
         return {
             "title": self._title_edit.text(),
             "decision": self._decision_edit.toPlainText(),
             "rationale": self._rationale_edit.toPlainText(),
-            "status": self._status_combo.currentText(),
+            "status": self._status_combo.currentData(),
         }

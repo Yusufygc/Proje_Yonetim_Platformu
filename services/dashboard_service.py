@@ -7,6 +7,7 @@ from typing import Any
 
 from sqlalchemy import func, select
 
+from domain.enums.idea_status import IdeaStatus
 from domain.enums.priority import Priority
 from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
@@ -29,9 +30,12 @@ class DashboardService:
             "total_projects": 0,
             "total_ideas": 0,
             "total_tasks": 0,
+            "open_tasks": 0,
             "active_projects": 0,
             "completed_projects": 0,
             "updated_this_week": 0,
+            "blocked_count": 0,
+            "raw_ideas": 0,
             "blocked_projects": [],
             "recent_tasks": [],
             "high_priority_tasks": [],
@@ -53,6 +57,25 @@ class DashboardService:
             stats["updated_this_week"] = sess.scalar(
                 select(func.count()).select_from(Project).where(Project.updated_at >= week_start)
             ) or 0
+            stats["open_tasks"] = sess.scalar(
+                select(func.count()).select_from(Task).where(
+                    Task.status.not_in([TaskStatus.DONE.value, TaskStatus.CANCELLED.value])
+                )
+            ) or 0
+            stats["raw_ideas"] = sess.scalar(
+                select(func.count()).select_from(Idea).where(
+                    Idea.status == IdeaStatus.RAW.value
+                )
+            ) or 0
+
+            _blocked_where = (
+                (Project.status == ProjectStatus.BLOCKED.value)
+                | (Project.health == ProjectHealth.AT_RISK.value)
+                | (Project.health == ProjectHealth.BLOCKED.value)
+            )
+            stats["blocked_count"] = sess.scalar(
+                select(func.count()).select_from(Project).where(_blocked_where)
+            ) or 0
 
             # Blocked / At Risk Projects
             stmt_p = select(Project).where(
@@ -64,7 +87,8 @@ class DashboardService:
                 stats["blocked_projects"].append({
                     "id": p.id,
                     "name": p.title,
-                    "status": p.status
+                    "status": p.status,
+                    "health": p.health,
                 })
 
             # Recent Tasks (Son güncellenen görevler)

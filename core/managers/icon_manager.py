@@ -19,18 +19,22 @@ _RENDER_SIZE = 64
 class Icons:
     """resources/icons/ altındaki ikon adları — çıplak string typo'larını önler."""
 
+    ARCHIVE = "archive"
     CHECK_SQUARE = "check_square"
     CHEVRON_DOWN = "chevron-down"
     CHEVRON_UP = "chevron-up"
     CIRCLE_INFO = "circle-info"
+    EXTERNAL_LINK = "external-link"
     FOLDER = "folder"
     HOME = "home"
     HOUSE = "house"
     LIGHTBULB = "lightbulb"
     MENU = "menu"
+    PENCIL = "pencil"
     SEARCH = "search"
     SETTINGS = "settings"
     SQUARE_CHECK = "square-check"
+    TRASH = "trash"
 
 
 class IconManager:

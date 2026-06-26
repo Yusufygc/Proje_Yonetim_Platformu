@@ -134,32 +134,39 @@ def test_main_window_ctrl_n_opens_project_dialog(monkeypatch, qtbot):
         def instance():
             return FakeDI()
 
+    from core.events.app_events import NEW_PROJECT_REQUESTED
+    from core.events.event_bus import EventBus
+
     class FakeProjectsPage(QDialog):
         def __init__(self, parent, di_container):
             super().__init__(parent)
+            EventBus.instance().subscribe(NEW_PROJECT_REQUESTED, self.open_new_project_dialog)
 
-        def open_new_project_dialog(self):
+        def open_new_project_dialog(self, *args, **kwargs):
             opened.append(True)
 
+    from core.module_registry import FeaturePlugin, ModuleRegistry
+
+    fake_plugins = [
+        FeaturePlugin(
+            page_key="dashboard",
+            nav_label_key="nav_dashboard",
+            nav_label_default="Dashboard",
+            nav_icon="house",
+            factory=lambda parent: QDialog(parent),
+        ),
+        FeaturePlugin(
+            page_key="projects",
+            nav_label_key="nav_projects",
+            nav_label_default="Projeler",
+            nav_icon="folder",
+            factory=lambda parent: FakeProjectsPage(parent, None),
+        )
+    ]
+
     monkeypatch.setattr(main_window_module, "DIContainer", FakeDIContainer)
-    monkeypatch.setattr(
-        main_window_module,
-        "DashboardPage",
-        lambda parent, controller, idea_controller: QDialog(parent),
-    )
-    monkeypatch.setattr(main_window_module, "ProjectsPage", FakeProjectsPage)
-    monkeypatch.setattr(
-        main_window_module,
-        "IdeasPage",
-        lambda parent, idea_controller, project_controller: QDialog(parent),
-    )
-    monkeypatch.setattr(
-        main_window_module,
-        "TasksPage",
-        lambda parent, controller, project_controller: QDialog(parent),
-    )
-    monkeypatch.setattr(main_window_module, "SettingsPage", lambda parent, controller: QDialog(parent))
-    monkeypatch.setattr(main_window_module, "Toast", lambda parent: QDialog(parent))
+    monkeypatch.setattr(ModuleRegistry.instance(), "plugins", lambda: fake_plugins)
+    monkeypatch.setattr(main_window_module, "Toast", lambda parent, event_bus: QDialog(parent))
 
     window = MainWindow()
     qtbot.addWidget(window)

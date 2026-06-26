@@ -16,11 +16,23 @@ QTreeWidget::item:hover {
 }
 QTreeWidget::item:selected {
     background-color: @surface_raised;
-    color: @accent_start;
+    color: @text_primary;
 }
 QTreeWidget::indicator {
     width: 16px;
     height: 16px;
+    border: 1.5px solid @border;
+    border-radius: 4px;
+    background-color: @surface;
+}
+QTreeWidget::indicator:hover {
+    border-color: @accent_start;
+    background-color: @surface_raised;
+}
+QTreeWidget::indicator:checked {
+    image: url(@icon_check);
+    background-color: @surface_raised;
+    border: 1.5px solid @accent_start;
 }
 QAbstractItemView {
     outline: 0;
@@ -30,10 +42,13 @@ QAbstractItemView:focus {
 }
 QHeaderView::section {
     background-color: @surface_raised;
-    color: @text_secondary;
+    color: @text_primary;
     border: none;
     padding: 8px;
-    font-weight: bold;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
 }
 QProgressBar {
     background-color: @border;
@@ -68,22 +83,35 @@ QListWidget::item:focus {
     border: none;
     border-bottom: 1px solid @border;
 }
+/* Fikir listesi: satır içi widget (başlık + silme ikonu) kendi boşluğunu
+   yönettiği için item padding'i sıfırlanır; aksi halde hover zemini kesilir. */
+QListWidget#ideas_list::item {
+    padding: 0px;
+    border-bottom: 1px solid @border;
+}
+QListWidget#ideas_list::item:selected {
+    background-color: @surface_raised;
+    border-radius: 6px;
+}
 QTabWidget::pane {
     border: none;
     background: transparent;
 }
+/* Sekme stili: aktif sekme alt çizgiyle vurgulanır (browser tab deseni),
+   blok dolgu kullanmaz ki sekme grubu bütünlüğü bozulmasın. */
 QTabBar::tab {
-    background: @surface_raised;
+    background: transparent;
     color: @text_secondary;
     padding: 10px 20px;
-    border-radius: 6px;
-    margin-right: 4px;
-    font-weight: bold;
+    margin-right: 2px;
+    border-bottom: 2px solid transparent;
+    font-weight: 600;
 }
 QTabBar::tab:selected {
-    background: @accent_start;
-    color: #FFFFFF;
+    color: @accent_start;
+    border-bottom: 2px solid @accent_start;
 }
 QTabBar::tab:hover:!selected {
-    background: @border;
+    color: @text_primary;
+    border-bottom: 2px solid @border;
 }

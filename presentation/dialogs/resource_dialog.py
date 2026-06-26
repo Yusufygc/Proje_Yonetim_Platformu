@@ -51,8 +51,18 @@ class ResourceDialog(QDialog):
         # Tür
         layout.addWidget(QLabel(tr("label_kind", "Tür"), parent=self))
         self._type_combo = QComboBox(parent=self)
+        _resource_type_labels = {
+            ResourceType.DOCUMENT.value: tr("resource_type_document", "Doküman"),
+            ResourceType.ARTICLE.value:  tr("resource_type_article",  "Makale"),
+            ResourceType.VIDEO.value:    tr("resource_type_video",    "Video"),
+            ResourceType.GITHUB.value:   tr("resource_type_github",   "GitHub / Repo"),
+            ResourceType.DESIGN.value:   tr("resource_type_design",   "Tasarım"),
+            ResourceType.API.value:      tr("resource_type_api",      "API Referansı"),
+            ResourceType.TOOL.value:     tr("resource_type_tool",     "Araç"),
+            ResourceType.OTHER.value:    tr("resource_type_other",    "Diğer"),
+        }
         for t in ResourceType:
-            self._type_combo.addItem(t.value, t.value)
+            self._type_combo.addItem(_resource_type_labels[t.value], t.value)
         layout.addWidget(self._type_combo)
 
         # URL
@@ -92,12 +102,14 @@ class ResourceDialog(QDialog):
         self._url_edit.setText(self._resource.url)
         if self._resource.description:
             self._desc_edit.setText(self._resource.description)
-        self._type_combo.setCurrentText(self._resource.resource_type)
+        idx = self._type_combo.findData(self._resource.resource_type)
+        if idx >= 0:
+            self._type_combo.setCurrentIndex(idx)
 
     def get_data(self) -> dict:
         return {
             "title": self._title_edit.text(),
             "url": self._url_edit.text(),
             "description": self._desc_edit.toPlainText(),
-            "resource_type": self._type_combo.currentText(),
+            "resource_type": self._type_combo.currentData(),
         }

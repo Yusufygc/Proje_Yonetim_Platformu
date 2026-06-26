@@ -12,9 +12,18 @@ Kaynak analiz: `Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu 
 2. ✅ **IconManager**: `QSvgRenderer`, `Icons` sabitleri, DRY, `try_instance()` ([[ikon-yonetimi]]).
 3. ✅ **Script taşıma**: `commit_all.py`, `download_assets.py` → `scripts/`.
 
+## P4 — Tamamlandı (2026-06-26 / 2026-06-27)
+
+### UX İyileştirmeleri
+- ✅ **Kart görünümü**: `_DecisionRow` ve `_NoteRow` `QWidget → QFrame + cssClass="panel"` dönüşümü; Kaynaklar sekmesiyle tutarlı görünüm.
+- ✅ **Font sistemi fix**: `00_reset.qss`'ten `font-size: 13px` ve `font-family` hardcode kaldırıldı; `QApplication.setFont()` artık QSS tarafından override edilmiyor. Font önizleme + "Uygula" butonu akışı eklendi.
+- ✅ **Anlık dil değişimi**: `MainWindow._on_language_changed` → `_setup_ui()` yeniden çağrısı; tüm sayfalar yeni dille anında yeniden oluşturuluyor. Restart mesaj kutusu kaldırıldı.
+- ✅ **Backup butonu kaldırıldı**: Veri Yönetimi bölümünden DB yedekleme UI'ı çıkarıldı — backend operasyonu kullanıcıya yaptırılmamalı.
+- ✅ **Sidebar hamburger düzeltmesi**: `_toggle_btn` `btn-secondary` yerine `#sidebar_toggle_btn` objectName ile özel şeffaf QSS kuralı aldı; light modda çizgiler artık görünüyor.
+- ✅ **InfoPage yeniden tasarımı**: `QTextBrowser + HTML` → native PySide6 widget'ları; `IconManager` ile tema uyumlu SVG ikonlar; hero bölümü, iş akışı, özellik kartları, ipuçları, kısayollar bölümleri.
+
 ## Sürekli kuyruk
 - L10N migrasyonu: 21 dosya allowlist'te ([[l10n-string-yonetimi]]).
-- Dil seçici UI + `language_changed` dinleyicileri (L10N tamamlanınca).
 - ✅ Tamamlandı (2026-06-13): UI'daki Service Locator çağrıları (Theme/Icon/String/Pref/EventBus) constructor injection'a çevrildi; factory'ler `di.<manager>` ile besler ([[di-container]]).
 
 İlgili: [[kurallar-ve-sozlesmeler]], [[log]]

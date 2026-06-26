@@ -64,12 +64,11 @@ class SearchService:
                     Idea.title.ilike(term),
                     Idea.problem.ilike(term),
                     Idea.solution.ilike(term),
-                    Idea.expected_value.ilike(term),
                     Idea.notes.ilike(term),
                 )
             ).limit(20)
             for i in sess.scalars(stmt_i):
-                description = i.problem or i.solution or i.expected_value or i.notes or ""
+                description = i.problem or i.solution or i.notes or ""
                 results["ideas"].append({
                     "id": i.id,
                     "title": i.title,
