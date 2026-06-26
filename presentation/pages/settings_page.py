@@ -337,6 +337,17 @@ class SettingsPage(QWidget):
         self._font_preview.setWordWrap(True)
         layout.addWidget(self._font_preview)
 
+        apply_row = QHBoxLayout()
+        apply_row.addStretch()
+        self._font_apply_btn = QPushButton(
+            tr("settings_font_apply", "Uygula"), parent=section
+        )
+        self._font_apply_btn.setProperty("cssClass", "btn-primary")
+        self._font_apply_btn.setFixedHeight(Size.BTN_SM_H)
+        self._font_apply_btn.clicked.connect(self._on_apply_font)
+        apply_row.addWidget(self._font_apply_btn)
+        layout.addLayout(apply_row)
+
         self._update_font_preview()
 
         self._font_combo.currentIndexChanged.connect(self._on_font_changed)
@@ -392,13 +403,6 @@ class SettingsPage(QWidget):
 
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(Spacing.XL)
-
-        self._btn_backup = QPushButton(
-            tr("settings_backup_btn", "💾 Veritabanını Yedekle (.db)"), parent=section
-        )
-        self._btn_backup.setProperty("cssClass", "btn-secondary")
-        self._btn_backup.clicked.connect(self._on_backup_clicked)
-        btn_layout.addWidget(self._btn_backup)
 
         self._btn_export = QPushButton(
             tr("settings_export_btn", "📤 Tüm Veriyi Dışa Aktar (.json)"), parent=section
@@ -473,14 +477,6 @@ class SettingsPage(QWidget):
             self._populate_theme_combo(self._dark_combo, "dark")
         if hasattr(self, "_light_combo"):
             self._populate_theme_combo(self._light_combo, "light")
-
-    # ── Sinyal Bağlantıları ──────────────────────────────────────────────────
-
-    def _connect_signals(self) -> None:
-        self._controller.backup_completed.connect(self._on_backup_completed)
-        self._controller.export_completed.connect(self._on_export_completed)
-        self._controller.error_occurred.connect(self._on_error)
-        self._theme.theme_changed.connect(self._on_theme_changed)
 
     # ── Tema İşleyicileri ────────────────────────────────────────────────────
 
@@ -675,17 +671,17 @@ class SettingsPage(QWidget):
     # ── Font İşleyicileri ────────────────────────────────────────────────────
 
     def _on_font_changed(self, _idx: int) -> None:
+        self._update_font_preview()
+
+    def _on_font_size_changed(self, _size: int) -> None:
+        self._update_font_preview()
+
+    def _on_apply_font(self) -> None:
         family = self._font_combo.currentText()
         size = self._font_size_spin.value()
         self._prefs.save_font_family(family)
-        QApplication.instance().setFont(QFont(family, size))  # type: ignore[union-attr]
-        self._update_font_preview()
-
-    def _on_font_size_changed(self, size: int) -> None:
-        family = self._font_combo.currentText()
         self._prefs.save_font_size(size)
         QApplication.instance().setFont(QFont(family, size))  # type: ignore[union-attr]
-        self._update_font_preview()
 
     # ── Dil İşleyicisi ───────────────────────────────────────────────────────
 
@@ -695,33 +691,13 @@ class SettingsPage(QWidget):
             return
         self._prefs.save_language(lang_code)
         self._strings.set_language(lang_code)
-        QMessageBox.information(
-            self,
-            tr("settings_language_section", "Dil"),
-            tr(
-                "settings_language_restart",
-                "Dil tercihi kaydedildi. Değişikliğin tüm ekranlara uygulanması için"
-                " uygulamayı yeniden başlatın.",
-            ),
-        )
 
     # ── Veri İşleyicileri ────────────────────────────────────────────────────
 
     def _connect_signals(self) -> None:
-        self._controller.backup_completed.connect(self._on_backup_completed)
         self._controller.export_completed.connect(self._on_export_completed)
         self._controller.error_occurred.connect(self._on_error)
         self._theme.theme_changed.connect(self._on_theme_changed)
-
-    def _on_backup_clicked(self) -> None:
-        path, _ = QFileDialog.getSaveFileName(
-            self,
-            tr("settings_backup_dialog_title", "Veritabanını Yedekle"),
-            "proje_takip_yedek.db",
-            tr("settings_backup_filter", "SQLite Veritabanı (*.db)"),
-        )
-        if path:
-            self._controller.backup_database(path)
 
     def _on_export_clicked(self) -> None:
         path, _ = QFileDialog.getSaveFileName(
@@ -732,15 +708,6 @@ class SettingsPage(QWidget):
         )
         if path:
             self._controller.export_to_json(path)
-
-    def _on_backup_completed(self, path: str) -> None:
-        QMessageBox.information(
-            self,
-            tr("success_title", "Başarılı"),
-            tr("settings_backup_done", "Veritabanı başarıyla yedeklendi:\n{path}").format(
-                path=path
-            ),
-        )
 
     def _on_export_completed(self, path: str) -> None:
         QMessageBox.information(
