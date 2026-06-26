@@ -165,7 +165,7 @@ class Sidebar(QFrame):
         self._toggle_btn = QPushButton("", parent=self)
         self._toggle_btn.setFixedSize(Size.SIDEBAR_TOGGLE_W, Size.SIDEBAR_TOGGLE_H)
         self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._toggle_btn.setProperty("cssClass", "btn-secondary")
+        self._toggle_btn.setObjectName("sidebar_toggle_btn")
         self._toggle_btn.clicked.connect(self.toggle_collapse)
         self._toggle_btn.setIcon(
             self._icons.get_icon(Icons.MENU, self._theme.color("sidebar_text"))

@@ -68,6 +68,16 @@ QPushButton#sidebar_search_btn {
     margin-top: 8px;
 }
 
+/* ── Hamburger / collapse toggle butonu ── */
+QPushButton#sidebar_toggle_btn {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+}
+QPushButton#sidebar_toggle_btn:hover {
+    background-color: @sidebar_active_bg;
+}
+
 /* ── Daraltılmış tema butonu ── */
 QPushButton[cssClass="theme-collapsed-btn"] {
     background: transparent;
