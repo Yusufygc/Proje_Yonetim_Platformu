@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-proje-takip-quality = "quality:main"
+proje-takip-quality = "scripts.quality:main"
 
 [tool.ruff]
 line-length = 100

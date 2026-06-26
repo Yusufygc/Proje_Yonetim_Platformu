@@ -14,14 +14,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import config
+from app import config
 from core.events.app_events import NEW_PROJECT_REQUESTED, PROJECT_DETAIL_REQUESTED
 from core.events.event_bus import EventBus
 from core.managers.preference_manager import PreferenceManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
 from core.module_registry import ModuleRegistry
-from di_container import DIContainer
+from app.di_container import DIContainer
 from presentation.dialogs.search_dialog import SearchDialog
 from presentation.shell.sidebar import Sidebar
 from presentation.widgets.toast import Toast

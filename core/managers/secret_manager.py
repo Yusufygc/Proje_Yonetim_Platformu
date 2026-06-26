@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any, cast
 
-import config
+from app import config
 
 logger = logging.getLogger(__name__)
 

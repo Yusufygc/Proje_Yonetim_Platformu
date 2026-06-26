@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from core.module_registry import FeaturePlugin, ModuleRegistry
 
 if TYPE_CHECKING:
-    from di_container import DIContainer
+    from app.di_container import DIContainer
 
 
 def setup_modules(di: DIContainer) -> None:

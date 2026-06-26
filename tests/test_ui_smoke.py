@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QDialog
 
-import config
+from app import config
 from core.managers.font_manager import FontManager
 from core.managers.icon_manager import IconManager
 from core.managers.string_manager import StringManager

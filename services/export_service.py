@@ -9,7 +9,7 @@ from typing import Any
 
 from sqlalchemy import select
 
-import config
+from app import config
 from domain.models.decision_record import DecisionRecord
 from domain.models.idea import Idea
 from domain.models.note import Note

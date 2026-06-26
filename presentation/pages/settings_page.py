@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import config
+from app import config
 from controllers.settings_controller import SettingsController
 from core.managers.preference_manager import PreferenceManager
 from core.managers.string_manager import StringManager

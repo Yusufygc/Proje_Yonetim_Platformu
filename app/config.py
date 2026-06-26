@@ -4,7 +4,8 @@ Uygulama genelinde kullanılan sabitler, yol tanımları ve çevre değişkenler
 from pathlib import Path
 
 # --- Uygulama Kök Dizini ---
-APP_DIR = Path(__file__).parent
+# Bu dosya app/ altında; kök dizin bir üst seviyededir.
+APP_DIR = Path(__file__).parent.parent
 PROJECT_ROOT = APP_DIR.parent
 
 # --- Veri ve Yedek Dizinleri ---

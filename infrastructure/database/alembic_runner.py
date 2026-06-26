@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Engine
 
-import config
+from app import config
 from infrastructure.database.migration_runner import run_migrations as run_legacy_migrations
 
 logger = logging.getLogger(__name__)

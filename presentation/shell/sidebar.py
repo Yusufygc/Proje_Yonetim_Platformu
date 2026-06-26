@@ -6,7 +6,7 @@ import logging
 from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
-import config
+from app import config
 from core.managers.icon_manager import IconManager, Icons
 from core.managers.preference_manager import PreferenceManager
 from core.managers.theme_manager import ThemeManager
