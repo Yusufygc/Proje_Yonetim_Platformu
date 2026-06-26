@@ -8,7 +8,7 @@ import logging
 
 from PySide6.QtCore import QByteArray, QSettings
 
-import config
+from app import config
 
 logger = logging.getLogger(__name__)
 

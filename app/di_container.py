@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from functools import cached_property
 
-import config
+from app import config
 from core.events.event_bus import EventBus
 from core.managers.backup_manager import BackupManager
 from core.managers.font_manager import FontManager
@@ -22,7 +22,7 @@ from core.managers.preference_manager import PreferenceManager
 from core.managers.secret_manager import SecretManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
-from di_registries import ControllerRegistry, RepositoryRegistry, ServiceRegistry
+from app.di_registries import ControllerRegistry, RepositoryRegistry, ServiceRegistry
 from infrastructure.database.db_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)

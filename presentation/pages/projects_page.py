@@ -22,7 +22,7 @@ from controllers.stage_controller import StageController
 from controllers.task_controller import TaskController
 from core.events.app_events import NEW_PROJECT_REQUESTED, PROJECT_DETAIL_REQUESTED
 from core.events.event_bus import EventBus
-from di_container import DIContainer
+from app.di_container import DIContainer
 from domain.models.project import Project
 from presentation.dialogs.project_dialog import ProjectDialog
 from presentation.dimensions import Size, Spacing

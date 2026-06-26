@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
-import config
+from app import config
 from presentation.dimensions import Size, Spacing
 
 

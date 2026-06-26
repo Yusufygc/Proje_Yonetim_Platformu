@@ -8,9 +8,9 @@ from pathlib import Path
 # Proje kökünü import path'e ekle
 sys.path.insert(0, str(Path(__file__).parent))
 
-import config  # noqa: E402 — sys.path ayarından sonra import edilmeli
+from app import config  # noqa: E402
 from core.logger import setup_global_exception_handler, setup_logging
-from di_container import DIContainer, OnboardingService  # noqa: E402
+from app.di_container import DIContainer, OnboardingService  # noqa: E402
 
 
 def main() -> None:

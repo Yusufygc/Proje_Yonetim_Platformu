@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import config
+from app import config
 from core.managers.icon_manager import IconManager, Icons
 from core.managers.theme_manager import ThemeManager
 from presentation.dimensions import FontFamily, Size, Spacing
