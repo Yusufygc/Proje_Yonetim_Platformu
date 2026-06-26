@@ -31,14 +31,14 @@ _STATUS_META: dict[str, tuple[str, str]] = {
 }
 
 
-class _DecisionRow(QWidget):
+class _DecisionRow(QFrame):
     edit_requested = Signal(int)
     delete_requested = Signal(int)
 
     def __init__(self, decision: DecisionRecord, parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.decision_id = decision.id
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setProperty("cssClass", "panel")
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         layout = QVBoxLayout(self)
@@ -124,7 +124,7 @@ class DecisionListWidget(QWidget):
         self._container.setProperty("cssClass", "transparent-bg")
         self._list_layout = QVBoxLayout(self._container)
         self._list_layout.setContentsMargins(0, 0, 0, 0)
-        self._list_layout.setSpacing(0)
+        self._list_layout.setSpacing(Spacing.SM)
         self._list_layout.addStretch()
 
         scroll.setWidget(self._container)
@@ -155,7 +155,7 @@ class DecisionListWidget(QWidget):
             self._list_layout.insertWidget(0, empty)
             return
 
-        for i, d in enumerate(decisions):
+        for d in decisions:
             row = _DecisionRow(d, parent=self._container)
             row.edit_requested.connect(self._on_edit)
             row.delete_requested.connect(self._on_delete_confirm)
@@ -163,11 +163,7 @@ class DecisionListWidget(QWidget):
             self._list_layout.insertWidget(pos, row)
             self._rows[d.id] = row
 
-            if i < len(decisions) - 1:
-                sep = QFrame(parent=self._container)
-                sep.setFixedHeight(1)
-                sep.setStyleSheet("background-color: rgba(128,128,128,0.15);")
-                self._list_layout.insertWidget(self._list_layout.count() - 1, sep)
+
 
     def _clear(self) -> None:
         while self._list_layout.count() > 1:

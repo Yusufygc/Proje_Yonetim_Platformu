@@ -33,14 +33,14 @@ _NOTE_TYPE_META: dict[str, tuple[str, str]] = {
 }
 
 
-class _NoteRow(QWidget):
+class _NoteRow(QFrame):
     edit_requested = Signal(int)
     delete_requested = Signal(int)
 
     def __init__(self, note: Note, parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.note_id = note.id
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setProperty("cssClass", "panel")
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         layout = QVBoxLayout(self)
@@ -126,7 +126,7 @@ class NoteListWidget(QWidget):
         self._container.setProperty("cssClass", "transparent-bg")
         self._list_layout = QVBoxLayout(self._container)
         self._list_layout.setContentsMargins(0, 0, 0, 0)
-        self._list_layout.setSpacing(0)
+        self._list_layout.setSpacing(Spacing.SM)
         self._list_layout.addStretch()
 
         scroll.setWidget(self._container)
@@ -157,7 +157,7 @@ class NoteListWidget(QWidget):
             self._list_layout.insertWidget(0, empty)
             return
 
-        for i, n in enumerate(notes):
+        for n in notes:
             row = _NoteRow(n, parent=self._container)
             row.edit_requested.connect(self._on_edit)
             row.delete_requested.connect(self._on_delete_confirm)
@@ -165,11 +165,7 @@ class NoteListWidget(QWidget):
             self._list_layout.insertWidget(pos, row)
             self._rows[n.id] = row
 
-            if i < len(notes) - 1:
-                sep = QFrame(parent=self._container)
-                sep.setFixedHeight(1)
-                sep.setStyleSheet("background-color: rgba(128,128,128,0.15);")
-                self._list_layout.insertWidget(self._list_layout.count() - 1, sep)
+
 
     def _clear(self) -> None:
         while self._list_layout.count() > 1:
