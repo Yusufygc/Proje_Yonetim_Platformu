@@ -25,3 +25,10 @@ QPushButton#toast_undo_btn {
     border-radius: 6px; padding: 6px 10px; font-weight: 600; border: none;
 }
 QPushButton#toast_undo_btn:hover { background: rgba(255, 255, 255, 0.28); }
+
+/* warning arka planı (#D97706) açık — koyu metin kullan (contrast ~6:1) */
+Toast[type="warning"] QLabel#toast_label { color: #292524; }
+Toast[type="warning"] QPushButton#toast_undo_btn {
+    color: #292524; background: rgba(0, 0, 0, 0.12);
+}
+Toast[type="warning"] QPushButton#toast_undo_btn:hover { background: rgba(0, 0, 0, 0.20); }

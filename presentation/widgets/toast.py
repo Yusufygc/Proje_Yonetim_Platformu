@@ -20,8 +20,13 @@ class Toast(QWidget):
         self._undo_callback: Callable[[], None] | None = None
 
         self._setup_ui()
-        self._anim = QPropertyAnimation(self, b"geometry")
-        self._anim.setDuration(300)
+        self._show_anim = QPropertyAnimation(self, b"geometry")
+        self._show_anim.setDuration(300)
+        self._show_anim.finished.connect(self._on_show_finished)
+
+        self._hide_anim = QPropertyAnimation(self, b"geometry")
+        self._hide_anim.setDuration(300)
+        self._hide_anim.finished.connect(self.hide)
 
         self._timer = QTimer(self)
         self._timer.setSingleShot(True)
@@ -52,6 +57,7 @@ class Toast(QWidget):
         layout.addWidget(self._undo_btn)
 
         self.setProperty("type", "success")
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         apply_shadow(self, blur_radius=Shadow.TOAST_BLUR, y_offset=Shadow.TOAST_Y, alpha=Shadow.TOAST_ALPHA)
 
     def _on_toast_requested(
@@ -84,35 +90,46 @@ class Toast(QWidget):
         
         self.adjustSize()
         
+        self._timer.stop()
+        self._hide_anim.stop()
+
         if self.parent():
             parent_rect = self.parent().rect()
             x = (parent_rect.width() - self.width()) // 2
             start_y = -self.height() - 20
             end_y = 20
-            
-            self._anim.setStartValue(QRect(x, start_y, self.width(), self.height()))
-            self._anim.setEndValue(QRect(x, end_y, self.width(), self.height()))
-            
+
+            self._show_anim.setStartValue(QRect(x, start_y, self.width(), self.height()))
+            self._show_anim.setEndValue(QRect(x, end_y, self.width(), self.height()))
+
         self.show()
         self.raise_()
-        self._anim.start()
+        self._show_anim.start()
+
+    def _on_show_finished(self) -> None:
         self._timer.start(3000)
 
     def _on_undo_clicked(self) -> None:
         callback = self._undo_callback
         self._undo_callback = None
-        self.hide()
+        self._timer.stop()
+        self._hide_toast_immediate()
         if callback is not None:
             callback()
 
+    def _hide_toast_immediate(self) -> None:
+        self._show_anim.stop()
+        self._timer.stop()
+        self.hide()
+
     def hide_toast(self) -> None:
+        self._show_anim.stop()
         if self.parent():
             parent_rect = self.parent().rect()
             x = (parent_rect.width() - self.width()) // 2
             start_y = self.geometry().y()
             end_y = -self.height() - 20
-            
-            self._anim.setStartValue(QRect(x, start_y, self.width(), self.height()))
-            self._anim.setEndValue(QRect(x, end_y, self.width(), self.height()))
-            self._anim.finished.connect(self.hide)
-            self._anim.start()
+
+            self._hide_anim.setStartValue(QRect(x, start_y, self.width(), self.height()))
+            self._hide_anim.setEndValue(QRect(x, end_y, self.width(), self.height()))
+            self._hide_anim.start()
