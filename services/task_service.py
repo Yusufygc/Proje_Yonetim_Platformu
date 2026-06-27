@@ -254,7 +254,11 @@ class TaskService:
         metadata: dict | None = None,
     ) -> None:
         if self._activity_logs is not None:
-            self._activity_logs.create(project_id, action, summary, entity_type, entity_id, metadata)
+            try:
+                self._activity_logs.create(project_id, action, summary, entity_type, entity_id, metadata)
+            except Exception as exc:  # noqa: BLE001
+                # FK ihlali (silinmiş proje) gibi loglama hataları asıl işlemi durdurmamalı
+                logger.warning("Aktivite logu yazılamadı (project_id=%s): %s", project_id, exc)
 
     def _recalculate_project(self, project_id: int) -> None:
         if self._project_service is not None:

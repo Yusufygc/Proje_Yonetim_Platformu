@@ -140,6 +140,10 @@ class TasksPage(QWidget):
         self._filter_bar.set_projects(projects, self._selected_project_id)
 
         if not projects:
+            # Önceki oturumdan kalan geçersiz proje ID'si temizlenir;
+            # aksi hâlde silinmiş projeye görev ekleme denenebilir.
+            self._selected_project_id = None
+            TasksPage._last_selected_project_id = None
             self._tree.hide()
             self._empty_state.hide()
             self._empty_label.setText(

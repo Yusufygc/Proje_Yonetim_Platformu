@@ -7,8 +7,6 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from PySide6.QtGui import QFontDatabase
-
 logger = logging.getLogger(__name__)
 
 _UI_FAMILY = "Plus Jakarta Sans"
@@ -48,6 +46,8 @@ class FontManager:
             self._register(font_file)
 
     def _register(self, font_file: Path) -> None:
+        # QApplication oluşturulduktan sonra çağrılır; geç import zorunludur
+        from PySide6.QtGui import QFontDatabase  # noqa: PLC0415
         font_id = QFontDatabase.addApplicationFont(str(font_file))
         if font_id == -1:
             logger.warning("Font yüklenemedi: %s", font_file.name)

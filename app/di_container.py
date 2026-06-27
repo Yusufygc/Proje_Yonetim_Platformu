@@ -70,8 +70,6 @@ class DIContainer:
 
         logger.info("%s v%s başlatılıyor...", config.APP_NAME, config.APP_VERSION)
 
-        BackupManager(config.DATABASE_PATH, config.BACKUPS_DIR).run_startup_backup()
-
         self._db = DatabaseManager.instance(str(config.DATABASE_URL))
         self._db.run_migrations()
 
@@ -94,6 +92,13 @@ class DIContainer:
 
         self._initialized = True
         logger.info("DI Container başarıyla kuruldu.")
+
+    def run_deferred_startup_tasks(self) -> None:
+        """window.show() sonrası çalıştırılacak; UI'ı bloke etmez."""
+        try:
+            BackupManager(config.DATABASE_PATH, config.BACKUPS_DIR).run_startup_backup()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Başlangıç yedeği alınamadı: %s", exc)
 
     # ── Infrastructure (bootstrap() tarafından eager başlatılır) ─────────────
 

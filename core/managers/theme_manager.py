@@ -45,6 +45,9 @@ class ThemeManager(QObject):
         self._current_theme = "dark"
         self._preview_saved_theme: str | None = None
         self._preview_saved_palette: dict | None = None
+        # QSS önbelleği — tema değişene kadar disk I/O tekrarlanmaz
+        self._qss_cache: str | None = None
+        self._compiled_patterns: dict[str, re.Pattern] = {}
         self._load_theme(self._current_theme)
 
     @classmethod
@@ -78,6 +81,9 @@ class ThemeManager(QObject):
                 "Tema dosyası bulunamadı (%s), varsayılan kullanılıyor.", theme_file
             )
             self._palette = self._default_dark_palette()
+        # Palette değişti; önbellek ve derlenmiş regex'ler geçersiz
+        self._qss_cache = None
+        self._compiled_patterns = {}
 
     def switch_theme(self, theme_name: str) -> None:
         """Temayı çalışma zamanında değiştirir."""
@@ -100,9 +106,16 @@ class ThemeManager(QObject):
 
         Regex kullanımı: @warning, @warning_alpha içinde kısmen eşleşip
         '#F59E0B_alpha' gibi geçersiz renk isimleri oluşmasını engeller.
+        Derlenmiş pattern varsa yeniden derleme yapılmaz.
         """
-        for key, value in sorted(self._palette.items(), key=lambda kv: len(kv[0]), reverse=True):
-            qss = re.sub(r"@" + re.escape(key) + r"(?![A-Za-z0-9_])", str(value), qss)
+        if self._compiled_patterns:
+            for key, pattern in sorted(
+                self._compiled_patterns.items(), key=lambda kv: len(kv[0]), reverse=True
+            ):
+                qss = pattern.sub(str(self._palette[key]), qss)
+        else:
+            for key, value in sorted(self._palette.items(), key=lambda kv: len(kv[0]), reverse=True):
+                qss = re.sub(r"@" + re.escape(key) + r"(?![A-Za-z0-9_])", str(value), qss)
         return qss
 
     def _load_styles(self) -> str:
@@ -157,9 +170,21 @@ class ThemeManager(QObject):
         return self._interpolate_tokens(text)
 
     def build_global_qss(self) -> str:
-        """Tüm uygulama için merkezi QSS stil dizgesini üretir."""
+        """Tüm uygulama için merkezi QSS stil dizgesini üretir.
+
+        İkon token'ları palette'e eklendikten sonra pattern'lar derlenir;
+        tema değişene kadar disk I/O ve regex tekrarlanmaz.
+        """
+        if self._qss_cache is not None:
+            return self._qss_cache
         self._generate_icon_tokens()
-        return self._load_styles()
+        # İkon token'ları da dahil tüm palette için pattern'ları derle
+        self._compiled_patterns = {
+            key: re.compile(r"@" + re.escape(key) + r"(?![A-Za-z0-9_])")
+            for key in self._palette
+        }
+        self._qss_cache = self._load_styles()
+        return self._qss_cache
 
     # ── Kullanıcı Tema Yönetimi ──────────────────────────────────────────────
 

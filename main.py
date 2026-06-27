@@ -48,13 +48,6 @@ def main() -> None:
     if _icon_path.exists():
         app.setWindowIcon(QIcon(str(_icon_path)))
 
-    # Premium fontlar eksikse arka planda indir (hata olursa fallback devreye girer)
-    try:
-        from scripts.download_fonts import ensure_fonts  # noqa: PLC0415
-        ensure_fonts()
-    except Exception:  # noqa: BLE001
-        pass
-
     # Fontları yükle ve uygula (kullanıcı tercihi varsa önceliği alır)
     from PySide6.QtGui import QFont
     font_mgr = container.fonts
@@ -74,6 +67,20 @@ def main() -> None:
 
     window = MainWindow()
     window.show()
+
+    # Pencere açıldıktan sonra ağır ama kritik-olmayan görevleri arka plana al
+    from PySide6.QtCore import QTimer  # noqa: PLC0415
+
+    QTimer.singleShot(200, container.run_deferred_startup_tasks)
+
+    def _deferred_font_download() -> None:
+        try:
+            from scripts.download_fonts import ensure_fonts  # noqa: PLC0415
+            ensure_fonts()
+        except Exception:  # noqa: BLE001
+            pass
+
+    QTimer.singleShot(500, _deferred_font_download)
 
     sys.exit(app.exec())
 
