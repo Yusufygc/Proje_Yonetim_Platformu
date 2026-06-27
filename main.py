@@ -19,6 +19,13 @@ def main() -> None:
     setup_logging()
     setup_global_exception_handler()
 
+    # Windows görev çubuğunda doğru gruplama ve ikon için AppUserModelID zorunlu
+    if sys.platform == "win32":
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "ProjeTakip.ProjeTakipPlatformu.0.1.0"
+        )
+
     # DI Container yalnızca infrastructure'ı (DB, tema, font) başlatır
     container = DIContainer.instance()
     container.bootstrap()
@@ -34,6 +41,12 @@ def main() -> None:
     app = QApplication(sys.argv)
     app.setApplicationName(config.APP_NAME)
     app.setOrganizationName(config.APP_ORGANIZATION)
+
+    # Uygulama ve görev çubuğu ikonu — hem kaynak hem EXE modunda çalışır
+    from PySide6.QtGui import QIcon  # noqa: PLC0415
+    _icon_path = Path(__file__).parent / "icons" / "icon.ico"
+    if _icon_path.exists():
+        app.setWindowIcon(QIcon(str(_icon_path)))
 
     # Premium fontlar eksikse arka planda indir (hata olursa fallback devreye girer)
     try:
