@@ -90,6 +90,8 @@ logs/
 # --- PAKETLEME VE DAĞITIM (PYINSTALLER / NUITKA) ---
 # 15_ALTYAPI_VE_DAGITIM_PLANI.md paketleme çıktıları
 *.spec
+# Kullanıcı tarafından oluşturulan özel temalar — kişisel, depoya eklenmez
+resources/themes/user/
 pyinstaller/
 .nuitka/
 
