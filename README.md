@@ -20,6 +20,7 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 - 🌐 **Yerelleştirme** — Türkçe ve İngilizce arayüz; tüm metinler çeviri anahtarları üzerinden yönetilir
 - 🔔 **Toast Bildirimleri** — İşlem sonuçları için animasyonlu, otomatik kapanan bildirim sistemi
 - 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `~/.proje_takip/.backups/` altında saklanır
+- 🎤 **Sesli Komut (Çevrimdışı)** — Vosk Türkçe modeliyle mikrofondan görev/fikir başlığı, açıklama ve notları sese dönüştürerek girme; internet/API anahtarı gerektirmez
 
 ---
 
@@ -66,6 +67,8 @@ Bileşenler arası iletişim `EventBus` üzerinden sağlanır; bağımlılıklar
 | Python | CPython | 3.10+ |
 | EXE paketleme | PyInstaller | 6.0+ |
 | Kimlik bilgisi depolama | keyring | 25.0+ |
+| Sesli komut (STT) | Vosk (çevrimdışı) | 0.3+ |
+| Ses yakalama | sounddevice | 0.4+ |
 | Linting | ruff | 0.6+ |
 | Tip denetimi | mypy | 1.8+ |
 | Test | pytest + pytest-qt | 8.0+ |
@@ -128,7 +131,18 @@ pip install -e .
 
 Bu komut `pyproject.toml` içindeki tüm bağımlılıkları yükler.
 
-#### 4. Uygulamayı başlat
+#### 4. Sesli komut modelini indir (opsiyonel)
+
+Sesli komut özelliği [Vosk](https://alphacephei.com/vosk/models) Türkçe modelini kullanır.
+Model boyutu (~35 MB) nedeniyle depoya dahil değildir; özelliği kullanmak için:
+
+1. [`vosk-model-small-tr-0.3.zip`](https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip) indir.
+2. `resources/models/vosk-model-small-tr-0.3/` altına çıkar (zip içeriği doğrudan bu klasöre).
+
+Model yoksa uygulama normal çalışır; mikrofon butonuna tıklandığında bilgilendirici bir
+uyarı (toast) gösterilir, diğer özellikler etkilenmez.
+
+#### 5. Uygulamayı başlat
 
 ```bash
 python main.py
@@ -163,7 +177,8 @@ proje_takip_platformu/
 ├── controllers/              # UI ile servis katmanı arasındaki köprü
 ├── core/
 │   ├── events/               # EventBus — bileşenler arası gevşek bağlantı
-│   └── managers/             # ThemeManager, StringManager, FontManager, BackupManager…
+│   ├── managers/             # ThemeManager, StringManager, FontManager, BackupManager…
+│   └── workers/              # QThreadPool worker'ları (Worker, TranscriptionWorker)
 ├── domain/
 │   ├── enums/                # TaskStatus, Priority, TaskType, IdeaStatus…
 │   └── models/               # SQLAlchemy model tanımları (14 model)
@@ -175,13 +190,14 @@ proje_takip_platformu/
 │   ├── pages/                # Ana Panel, Projeler, Görevler (WBS), Fikirler, Ayarlar…
 │   ├── shell/                # Ana pencere ve kenar çubuğu
 │   ├── utils/                # i18n (tr()), stil yardımcıları, filtreler
-│   └── widgets/              # Toast, proje kartı, detay paneli, skeleton loader…
+│   └── widgets/              # Toast, proje kartı, detay paneli, skeleton loader, VoiceInputButton…
 ├── resources/
 │   ├── fonts/                # JetBrains Mono, Plus Jakarta Sans
 │   ├── locales/              # strings.tr.json, strings.en.json
+│   ├── models/               # Vosk STT modeli (depoya dahil değil — bkz. "Başlarken")
 │   ├── styles/               # QSS tema dosyaları (18 dosya)
 │   └── themes/               # Renk paleti JSON dosyaları
-├── services/                 # İş mantığı katmanı (10 servis)
+├── services/                 # İş mantığı katmanı (10 servis + speech/ — sesli komut)
 ├── tests/                    # pytest test paketi
 ├── icons/                    # Uygulama ikonu
 ├── packaging/                # PyInstaller spec ve EXE meta verisi

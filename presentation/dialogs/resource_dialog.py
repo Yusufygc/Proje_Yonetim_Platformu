@@ -16,6 +16,7 @@ from domain.enums.resource_type import ResourceType
 from domain.models.resource import Resource
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.voice_input_button import attach_voice_button
 
 
 class ResourceDialog(QDialog):
@@ -76,7 +77,7 @@ class ResourceDialog(QDialog):
         self._desc_edit = QTextEdit(parent=self)
         self._desc_edit.setPlaceholderText(tr("resource_dialog_desc_placeholder", "Kaynak hakkında ek bilgi..."))
         self._desc_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
-        layout.addWidget(self._desc_edit)
+        layout.addWidget(attach_voice_button(self._desc_edit, self))
 
         layout.addStretch()
 

@@ -1,5 +1,14 @@
 # Wiki Kayıt Defteri
 
+## [2026-06-30] FEATURE | Sesli komut (speech-to-text)
+Vosk çevrimdışı motoru ile mikrofon dikteleme: `SpeechToTextService` (lazy model yükleme) →
+`TranscriptionWorker` (`QThreadPool`, [[worker-altyapisi]] deseni, sürekli döngü + `stop()`) →
+`VoiceInputButton`/`attach_voice_button` (`QLineEdit` + `QTextEdit` ortak destek). Görev/fikir
+başlığı, hızlı görev ekle ve tüm uzun açıklama/not alanlarına 🎤 eklendi. Model
+(`vosk-model-small-tr-0.3`, ~35 MB) `resources/models/` altında, repoya dahil değil. Hata
+yolları (`SpeechModelNotFoundError`, `MicrophoneUnavailableError`) toast'a bağlandı, UI
+bloklanmıyor. Detay: [[sesli-komut]].
+
 ## [2026-06-13] UX | Palet geçişi sonrası kontrast ve hiyerarşi onarımı
 Sidebar yeni token seti (`sidebar_text`, `sidebar_text_active`, `sidebar_hover_bg`, `sidebar_active_bg`); aktif öğe 3px sol kenar + opak metin desenine geçti (alpha blend kaldırıldı). Koyu temada `text_secondary` lavanta, `border` ayrı ton, `stage_done` success yeşili. Stat kart KPI değeri primary + büyük punto. Stage row 36px sabit (`Size.STAGE_ROW_H`). Tab stili browser-tab desenine geçti. Stage butonları StringManager'a taşındı. Detay: [[tema-sistemi]], `Project_docs/UX_TEMA_GERI_BILDIRIMI_2026-06-13.md`.
 

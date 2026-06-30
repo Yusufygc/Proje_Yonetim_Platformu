@@ -263,3 +263,35 @@ Kaydedilecek olaylar:
 
 MVP'de bu modül otomatik arka plan kaydı olarak çalışabilir; UI'da sadece proje detayında "Son Aktiviteler" listesi gösterilir.
 
+## 11. Sesli Komut (Dikte)
+
+Amaç: Klavyeyle yazmak yerine mikrofona konuşarak metin alanlarını doldurmak; erişilebilirlik
+ve hız kazandırır.
+
+Kapsam: ayrı bir modül/sayfa değil, mevcut metin alanlarına eklenen **çapraz kesit (cross-cutting)
+yetenek**. Mikrofon butonu eklenen alanlar:
+
+- Proje, görev, fikir, karar, not, kaynak başlık alanları (tek satır).
+- Açıklama, problem, çözüm, gerekçe, notlar gibi çok satırlı alanlar.
+- Görevler sayfasındaki "Hızlı Ekle" kutusu.
+- Notlarım (memo) sayfası editörü.
+
+Çalışma şekli:
+
+- Mikrofon ikonuna tıkla → dinleme başlar (buton görsel olarak "kayıt" durumuna geçer).
+- Konuşulan metin, çevrimdışı bir tanıma motoruyla (Vosk, Türkçe model) yazıya çevrilir ve
+  imleç konumuna eklenir.
+- Tekrar tıklamak dinlemeyi durdurur.
+
+Tasarım kararları:
+
+- **Çevrimdışı çalışır** — internet bağlantısı veya üçüncü taraf API anahtarı gerekmez;
+  ses verisi cihaz dışına çıkmaz (gizlilik).
+- Model dosyası uygulamayla birlikte dağıtılmaz (boyut nedeniyle), kullanıcı/kurulum
+  sürecinde ayrıca indirilir; model yoksa özellik sessizce devre dışı kalır (uygulama
+  diğer işlevlerini etkilemeden çalışmaya devam eder), kullanıcıya bilgilendirici uyarı gösterilir.
+- Mikrofon erişilemezse (cihaz yok/izin yok) aynı şekilde kullanıcıya anlaşılır bir uyarı
+  gösterilir; uygulama kilitlenmez.
+
+Teknik mimari detayı: `07_TEKNIK_MIMARI.md` ve `docs/wiki/sesli-komut.md`.
+

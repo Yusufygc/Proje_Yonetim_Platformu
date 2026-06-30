@@ -28,6 +28,7 @@ from presentation.pages.tasks.wbs_tree import WBSTreeWidget
 from presentation.utils.i18n import tr
 from presentation.widgets.empty_state import EmptyState
 from presentation.widgets.skeleton_loader import SkeletonLoader
+from presentation.widgets.voice_input_button import attach_voice_button
 
 
 class TasksPage(QWidget):
@@ -111,7 +112,7 @@ class TasksPage(QWidget):
             tr("task_quick_add_placeholder", "Seçili görevin altına hızlı görev ekle...")
         )
         self._quick_add_edit.returnPressed.connect(self._on_quick_add_task)
-        row_layout.addWidget(self._quick_add_edit, 1)
+        row_layout.addWidget(attach_voice_button(self._quick_add_edit, row), 1)
         quick_add_btn = QPushButton(tr("task_quick_add_button", "Hızlı Ekle"), parent=row)
         quick_add_btn.setProperty("cssClass", "btn-secondary")
         quick_add_btn.clicked.connect(self._on_quick_add_task)

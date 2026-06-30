@@ -27,6 +27,7 @@ from presentation.dialogs.form_utils import (
 )
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.voice_input_button import attach_voice_button
 
 
 def _task_status_items() -> list[tuple[str, str]]:
@@ -114,7 +115,7 @@ class TaskDialog(QDialog):
         self._title_edit = QLineEdit(parent=self)
         self._title_edit.setPlaceholderText(tr("task_dialog_title_placeholder", "Görevin adını girin..."))
         self._title_edit.setMinimumHeight(Size.INPUT_H_LG)
-        layout.addWidget(self._title_edit)
+        layout.addWidget(attach_voice_button(self._title_edit, self))
         layout.addSpacing(16)
 
         layout.addWidget(self._make_field_label(tr("label_description", "Açıklama")))
@@ -122,7 +123,7 @@ class TaskDialog(QDialog):
         self._desc_edit = QTextEdit(parent=self)
         self._desc_edit.setPlaceholderText(tr("task_dialog_desc_placeholder", "Görevi açıklayın (isteğe bağlı)..."))
         self._desc_edit.setMaximumHeight(Size.TEXTAREA_H_MD)
-        layout.addWidget(self._desc_edit)
+        layout.addWidget(attach_voice_button(self._desc_edit, self))
         layout.addSpacing(16)
 
         layout.addWidget(self._build_combos_row())

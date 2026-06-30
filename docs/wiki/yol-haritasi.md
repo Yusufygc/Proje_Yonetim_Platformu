@@ -22,6 +22,12 @@ Kaynak analiz: `Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu 
 - ✅ **Sidebar hamburger düzeltmesi**: `_toggle_btn` `btn-secondary` yerine `#sidebar_toggle_btn` objectName ile özel şeffaf QSS kuralı aldı; light modda çizgiler artık görünüyor.
 - ✅ **InfoPage yeniden tasarımı**: `QTextBrowser + HTML` → native PySide6 widget'ları; `IconManager` ile tema uyumlu SVG ikonlar; hero bölümü, iş akışı, özellik kartları, ipuçları, kısayollar bölümleri.
 
+## P5 — Tamamlandı (2026-06-30)
+- ✅ **Sesli komut (speech-to-text)**: Vosk çevrimdışı Türkçe model + `sounddevice`;
+  `SpeechToTextService` → `TranscriptionWorker` ([[worker-altyapisi]] deseni) →
+  `VoiceInputButton`/`attach_voice_button`. Görev/fikir başlığı, hızlı ekle ve tüm uzun
+  metin alanlarında mikrofon. InfoPage'e özellik kartı + ipucu eklendi ([[sesli-komut]]).
+
 ## Sürekli kuyruk
 - L10N migrasyonu: 21 dosya allowlist'te ([[l10n-string-yonetimi]]).
 - ✅ Tamamlandı (2026-06-13): UI'daki Service Locator çağrıları (Theme/Icon/String/Pref/EventBus) constructor injection'a çevrildi; factory'ler `di.<manager>` ile besler ([[di-container]]).

@@ -48,6 +48,12 @@ _FEATURES: list[tuple[str, str, str, str, str]] = [
         "info_feat_tasks_desc",
         "Hiyerarşik iş kırılımı (WBS). Durum, öncelik ve tür filtreleriyle görev yoğunluğunu kontrol edin.",
     ),
+    (
+        Icons.MIC,
+        "info_feat_voice_title", "Sesli Komut",
+        "info_feat_voice_desc",
+        "Mikrofona konuşarak görev/fikir başlığı, açıklama ve notları yazın. Vosk ile çevrimdışı, internet gerektirmez.",
+    ),
 ]
 
 # (keys_display, desc_key, desc_default)
@@ -286,6 +292,11 @@ class InfoPage(QWidget):
              tr("info_tip_data_desc",
                 "Tüm veriler SQLite veritabanı olarak yerel sisteminizde tutulur. "
                 "Ayarlar → Veri Yönetimi'nden JSON formatında dışa aktarabilirsiniz.")),
+            (Icons.MIC, "accent_start",
+             tr("info_tip_voice_title", "Sesle Yazma"),
+             tr("info_tip_voice_desc",
+                "Başlık, açıklama ve not alanlarının yanındaki 🎤 simgesine tıklayıp konuşarak "
+                "metin girebilirsiniz; tekrar tıklamak dinlemeyi durdurur.")),
         ]
         for icon_name, color_key, tip_title, tip_desc in tips:
             card = QFrame(parent=section)

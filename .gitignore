@@ -128,3 +128,9 @@ Desktop.ini
 # --- GRAPHIFY ÇIKTI DOSYALARI ---
 # Mimari bilgi grafiği çıktıları; yerel analiz aracı, versiyon kontrolüne alınmaz
 graphify-out/
+
+# --- SESLİ KOMUT MODEL DOSYALARI ---
+# Vosk Türkçe modeli ~50 MB; repoya commit edilmez.
+# İndirme: https://alphacephei.com/vosk/models → vosk-model-small-tr-0.3
+# resources/models/ altına çıkarın.
+resources/models/

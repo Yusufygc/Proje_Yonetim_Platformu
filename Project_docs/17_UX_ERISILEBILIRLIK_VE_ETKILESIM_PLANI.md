@@ -24,6 +24,7 @@ Profesyonel masaüstü uygulamaları fareye bağımlı kalamaz. Hızlı ve akıc
     * `Ctrl + K` veya `Cmd + K`: Uygulama içi genel arama çubuğunu açar (Spotlight benzeri).
     * `Esc`: Açık olan modalları, dialogları kapatır veya arama kutusunu temizler.
 * **Ağaç Gezinimi:** Görev listesinde ok tuşları (`Aşağı/Yukarı`) ile gezinilebilmeli, `Sağ Ok` klasörü açmalı, `Sol Ok` klasörü kapatmalıdır.
+* **Sesli Girdi (Uygulandı):** Klavye kullanmakta zorlanan veya hızlı veri girmek isteyen kullanıcılar için metin alanlarının yanında mikrofon butonu bulunur — bkz. madde 6.
 
 ---
 
@@ -53,3 +54,25 @@ Görevleri veya aşamaları sıralarken görsel geri bildirimler net olmalıdır
 
 * **Sürükleme Hissiyatı (Ghosting):** Bir görev tutulup sürüklendiğinde, farenin ucunda o görevin %70 opaklığında bir kopyası (Ghost) gelmeli, asıl liste üzerindeki yerinde ise hafif soluk veya kesik çizgili bir boşluk (Placeholder) kalmalıdır.
 * **Bırakma Alanları (Drop Zones):** Sürüklenen öğe, hedefin üzerine geldiğinde hedefin arka plan rengi çok hafif değişmeli veya iki öğe arasına net bir yatay/dikey çizgi (Insertion Indicator) çizilerek öğenin tam olarak nereye düşeceği gösterilmelidir.
+
+---
+
+## 6. Sesli Girdi (Voice Input) — Uygulandı (2026-06-30)
+
+Klavyeye alternatif, motor becerisi/hız kısıtı olan kullanıcılar veya elleri meşgulken hızlı
+not almak isteyenler için erişilebilirlik kazandıran bir giriş yöntemidir.
+
+* **Çevrimdışı çalışır:** Konuşma tanıma cihaz üzerinde (Vosk, Türkçe model) gerçekleşir;
+  ses verisi ağa çıkmaz, internet bağlantısı gerekmez — gizlilik ve erişilebilirlik bir arada.
+* **Tutarlı yerleşim:** Mikrofon ikonu her zaman ilgili metin alanının sağında, mevcut
+  `IconActionButton` görsel diline uygun (28×28, hover'da renk değişimi) — yeni bir etkileşim
+  paterni öğrenmeyi gerektirmez.
+* **Net durum geri bildirimi:** Dinleme sırasında buton kırmızımsı arka plana döner ve
+  tooltip "Dinleniyor… durdurmak için tıkla" olarak değişir; sistem asla sessizce ne
+  yaptığını belirsiz bırakmaz (bkz. madde 3, Sistem Geri Bildirimi ilkesiyle tutarlı).
+* **Zarif bozulma (graceful degradation):** Model dosyası kurulu değilse veya mikrofon
+  erişilemezse, özellik sessizce uygulamayı kilitlemez — kullanıcıya Toast ile anlaşılır
+  bir uyarı gösterilir, diğer tüm işlevler normal çalışmaya devam eder.
+* **Kapsam:** Başlık alanları (görev, fikir, hızlı ekle) ve tüm uzun açıklama/not/gerekçe
+  alanları. Teknik detay: `03_MODULLER_VE_ISLEVLER.md` §11, `07_TEKNIK_MIMARI.md`,
+  `docs/wiki/sesli-komut.md`.

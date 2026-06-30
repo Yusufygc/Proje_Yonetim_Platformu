@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from services.stage_service import StageService
     from services.analytics_service import AnalyticsService
     from services.task_service import TaskService
+    from services.speech.speech_to_text_service import SpeechToTextService
 
 
 class RepositoryRegistry:
@@ -212,6 +213,12 @@ class ServiceRegistry:
     def analytics(self) -> AnalyticsService:
         from services.analytics_service import AnalyticsService
         return AnalyticsService(db=self._db)
+
+    @cached_property
+    def speech_to_text(self) -> SpeechToTextService:
+        from services.speech.speech_to_text_service import SpeechToTextService
+        from app.config import VOSK_TR_MODEL_DIR
+        return SpeechToTextService(model_dir=VOSK_TR_MODEL_DIR)
 
 
 class ControllerRegistry:

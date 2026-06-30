@@ -158,6 +158,33 @@ PySide6 ile başlanırsa önerilen ekranlar:
 - `ResourceList`
 - `ActivityFeed`
 
+## Sesli Komut (Speech-to-Text) Altyapısı — Uygulandı (2026-06-30)
+
+Diğer bölümlerin aksine bu bir öneri değil, gerçekleştirilmiş bir mimari karardır.
+
+Sorumluluk zinciri (UI → arka plan iş → servis), mevcut Worker desenine sadık kalır:
+
+```
+presentation/widgets/voice_input_button.py   (UI: toggle buton, QLineEdit/QTextEdit hedef)
+  → core/workers/transcription_worker.py     (QRunnable + QThreadPool; sürekli ses döngüsü)
+    → services/speech/speech_to_text_service.py  (Vosk model yaşam döngüsü, lazy yükleme)
+      → vosk (tanıma motoru) + sounddevice (mikrofon yakalama)
+```
+
+Teknoloji kararı: **Vosk** (çevrimdışı, küçük Türkçe model) + **sounddevice**. Gerekçe:
+internet/API anahtarı gerektirmeyen, ücretsiz, gizliliği koruyan (ses cihaz dışına çıkmaz)
+bir çözüm; cloud STT alternatiflerine (Whisper API, Google Speech) göre kurulum sonrası
+tamamen yerel çalışır.
+
+Model `resources/models/vosk-model-small-tr-0.3/` altında tutulur, repoya dahil edilmez
+(boyut), `app/config.py::VOSK_TR_MODEL_DIR` ile referans edilir. DI'a `ServiceRegistry`
+üzerinden `@cached_property` ile lazy kaydedilir — uygulama açılışında model yüklenmez,
+yalnızca ilk mikrofon kullanımında.
+
+Hata yönetimi mevcut istisna deseniyle uyumlu: `core/exceptions/speech_exceptions.py`
+(`SpeechModelNotFoundError`, `MicrophoneUnavailableError`) → UI'da toast, stack trace
+kullanıcıya gösterilmez. Detay: `docs/wiki/sesli-komut.md`.
+
 ## Depolama
 
 MVP için:

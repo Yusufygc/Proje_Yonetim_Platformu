@@ -38,6 +38,7 @@ class Icons:
     SETTINGS = "settings"
     SQUARE_CHECK = "square-check"
     TRASH = "trash"
+    MIC = "microphone"
 
 
 class IconManager:

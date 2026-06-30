@@ -11,6 +11,10 @@ from __future__ import annotations
 
 import logging
 from functools import cached_property
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from services.speech.speech_to_text_service import SpeechToTextService
 
 from app import config
 from core.events.event_bus import EventBus
@@ -151,6 +155,11 @@ class DIContainer:
     @cached_property
     def services(self) -> ServiceRegistry:
         return ServiceRegistry(repos=self.repos, db=self.db)
+
+    @property
+    def speech_service(self) -> "SpeechToTextService":
+        """Vosk tabanlı konuşma-metin servisi (lazy — model boot'ta yüklenmez)."""
+        return self.services.speech_to_text
 
     @cached_property
     def controllers(self) -> ControllerRegistry:

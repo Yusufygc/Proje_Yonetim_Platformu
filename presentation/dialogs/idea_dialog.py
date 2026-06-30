@@ -26,6 +26,7 @@ from presentation.dialogs.form_utils import (
 )
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.voice_input_button import attach_voice_button
 
 
 def _idea_status_labels() -> dict[str, str]:
@@ -109,7 +110,7 @@ class IdeaDialog(QDialog):
         self._title_edit = QLineEdit(parent=form_widget)
         self._title_edit.setPlaceholderText(tr("idea_dialog_title_placeholder", "Örn: Yeni mobil uygulama fikri..."))
         self._title_edit.setMinimumHeight(Size.INPUT_H_MD)
-        layout.addWidget(self._title_edit)
+        layout.addWidget(attach_voice_button(self._title_edit, form_widget))
 
         # Durum ve Öncelik yan yana
         status_labels = _idea_status_labels()
@@ -137,19 +138,19 @@ class IdeaDialog(QDialog):
         self._problem_edit = QTextEdit(parent=form_widget)
         self._problem_edit.setPlaceholderText(tr("idea_dialog_problem_placeholder", "Bu fikir hangi problemi çözüyor?"))
         self._problem_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
-        layout.addWidget(self._problem_edit)
+        layout.addWidget(attach_voice_button(self._problem_edit, form_widget))
 
         # Çözüm
         layout.addWidget(self._make_label(tr("idea_dialog_solution_label", "Önerilen Çözüm")))
         self._solution_edit = QTextEdit(parent=form_widget)
         self._solution_edit.setPlaceholderText(tr("idea_dialog_solution_placeholder", "Önerdiğiniz çözüm detayları..."))
         self._solution_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
-        layout.addWidget(self._solution_edit)
+        layout.addWidget(attach_voice_button(self._solution_edit, form_widget))
 
         layout.addWidget(self._make_label(tr("label_notes", "Notlar")))
         self._notes_edit = QTextEdit(parent=form_widget)
         self._notes_edit.setMaximumHeight(Size.TEXTAREA_H_SM)
-        layout.addWidget(self._notes_edit)
+        layout.addWidget(attach_voice_button(self._notes_edit, form_widget))
 
         layout.addWidget(self._make_label(tr("label_source_url", "Kaynak URL")))
         self._source_edit = QLineEdit(parent=form_widget)

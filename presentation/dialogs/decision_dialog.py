@@ -16,6 +16,7 @@ from domain.enums.decision_status import DecisionStatus
 from domain.models.decision_record import DecisionRecord
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.voice_input_button import attach_voice_button
 
 
 class DecisionDialog(QDialog):
@@ -66,14 +67,14 @@ class DecisionDialog(QDialog):
         self._decision_edit = QTextEdit(parent=self)
         self._decision_edit.setPlaceholderText(tr("decision_dialog_decision_placeholder", "Verilen karar nedir?"))
         self._decision_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
-        layout.addWidget(self._decision_edit)
+        layout.addWidget(attach_voice_button(self._decision_edit, self))
 
         # Gerekçe
         layout.addWidget(QLabel(tr("decision_dialog_rationale_label", "Gerekçe"), parent=self))
         self._rationale_edit = QTextEdit(parent=self)
         self._rationale_edit.setPlaceholderText(tr("decision_dialog_rationale_placeholder", "Neden bu karar alındı?"))
         self._rationale_edit.setMaximumHeight(Size.TEXTAREA_H_LG)
-        layout.addWidget(self._rationale_edit)
+        layout.addWidget(attach_voice_button(self._rationale_edit, self))
 
         layout.addStretch()
 

@@ -22,6 +22,12 @@ FONTS_DIR = RESOURCES_DIR / "fonts"
 ICONS_DIR = RESOURCES_DIR / "icons"
 LOCALES_DIR = RESOURCES_DIR / "locales"
 
+# --- Sesli Komut Modeli ---
+# Model repoya commit edilmez (~50 MB). resources/models/ .gitignore kapsamında.
+# İndirme: https://alphacephei.com/vosk/models → vosk-model-small-tr-0.3
+MODELS_DIR = RESOURCES_DIR / "models"
+VOSK_TR_MODEL_DIR = MODELS_DIR / "vosk-model-small-tr-0.3"
+
 # --- Uygulama Kimliği ---
 APP_NAME = "Proje Takip Platformu"
 APP_VERSION = "0.1.0"

@@ -33,6 +33,7 @@ from presentation.dialogs.form_utils import (
 )
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.voice_input_button import attach_voice_button
 
 
 def _status_labels() -> dict[str, str]:
@@ -173,16 +174,16 @@ class ProjectDialog(QDialog):
         self._desc_edit.setPlaceholderText(
             tr("project_dialog_desc_placeholder", "Projeyi açıklayın (isteğe bağlı)...")
         )
-        add_field(layout, tr("project_dialog_desc", "Açıklama"), self._desc_edit)
+        add_field(layout, tr("project_dialog_desc", "Açıklama"), attach_voice_button(self._desc_edit, form_widget))
 
         layout.addWidget(self._build_status_priority_row(form_widget))
         layout.addSpacing(Spacing.XL)
 
         self._problem_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_MD)
-        add_field(layout, tr("project_dialog_problem", "Problem Tanımı"), self._problem_edit)
+        add_field(layout, tr("project_dialog_problem", "Problem Tanımı"), attach_voice_button(self._problem_edit, form_widget))
 
         self._target_edit = self._make_text_area(form_widget, Size.TEXTAREA_H_MD)
-        add_field(layout, tr("project_dialog_target", "Hedef Çıktı"), self._target_edit)
+        add_field(layout, tr("project_dialog_target", "Hedef Çıktı"), attach_voice_button(self._target_edit, form_widget))
 
         layout.addWidget(self._build_type_health_row(form_widget))
         layout.addSpacing(Spacing.XL)

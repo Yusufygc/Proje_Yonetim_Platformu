@@ -17,6 +17,7 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[l10n-string-yonetimi]] — StringManager, `tr()` yardımcısı, `language_changed` → MainWindow UI yeniden kurulum, ratchet testi.
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve planlanan iyileştirmeler.
 - [[gorevler-modulu]] — WBS görev sayfası paketi (`pages/tasks/`): filter bar + ağaç + sayfa kompozisyonu.
+- [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton` + `TranscriptionWorker` + `SpeechToTextService`.
 
 ## Kurallar ve Süreç
 - [[kurallar-ve-sozlesmeler]] — RULES.md limitleri, bellek yönetimi, tema/L10N sözleşmeleri ve commit kuralları.

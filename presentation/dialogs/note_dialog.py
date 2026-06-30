@@ -16,6 +16,7 @@ from domain.enums.note_type import NoteType
 from domain.models.note import Note
 from presentation.dimensions import Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.voice_input_button import attach_voice_button
 
 
 class NoteDialog(QDialog):
@@ -68,7 +69,7 @@ class NoteDialog(QDialog):
         self._body_edit = QTextEdit(parent=self)
         self._body_edit.setPlaceholderText(tr("note_dialog_body_placeholder", "Notunuz..."))
         self._body_edit.setMinimumHeight(150)
-        layout.addWidget(self._body_edit)
+        layout.addWidget(attach_voice_button(self._body_edit, self))
 
         layout.addStretch()
 

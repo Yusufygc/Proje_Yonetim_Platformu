@@ -28,6 +28,7 @@ from presentation.utils.i18n import tr
 from presentation.widgets.delete_icon_button import DeleteIconButton
 from presentation.widgets.drawing_canvas import DrawingCanvas, DrawingToolbar
 from presentation.widgets.format_toolbar import FormatToolbar
+from presentation.widgets.voice_input_button import attach_voice_button
 
 _MEMO_ROW_H = 52
 
@@ -167,7 +168,7 @@ class MemoPage(QWidget):
         self._editor.setFrameShape(QFrame.Shape.NoFrame)
         self._format_toolbar = FormatToolbar(self._editor, parent=text_tab)
         text_layout.addWidget(self._format_toolbar)
-        text_layout.addWidget(self._editor, 1)
+        text_layout.addWidget(attach_voice_button(self._editor, text_tab), 1)
         self._tab_widget.addTab(text_tab, tr("memo_tab_text", "Metin"))
 
         drawing_tab = QWidget(parent=self._tab_widget)
