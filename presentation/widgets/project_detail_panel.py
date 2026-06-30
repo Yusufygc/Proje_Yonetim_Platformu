@@ -32,7 +32,6 @@ from presentation.widgets.decision_list_widget import DecisionListWidget
 from presentation.widgets.note_list_widget import NoteListWidget
 from presentation.widgets.resource_list_widget import ResourceListWidget
 from presentation.widgets.stage_timeline_widget import StageTimelineWidget
-from presentation.widgets.task_list_widget import TaskListWidget
 
 
 def _status_theme_keys() -> dict[str, tuple[str, str]]:
@@ -167,6 +166,7 @@ class ProjectDetailPanel(QWidget):
             controller=self._di.task_controller,
             project_controller=self._di.project_controller,
             theme=self._di.theme,
+            embedded=True,
         )
         self._tab_widget.addTab(self._tasks_page, tr("tab_tasks", "Görevler"))
 

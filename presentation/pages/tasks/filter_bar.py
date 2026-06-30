@@ -59,8 +59,10 @@ class TaskFilterBar(QWidget):
     filters_changed = Signal()
     add_root_requested = Signal()
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None, embedded: bool = False) -> None:
         super().__init__(parent=parent)
+        self._embedded = embedded
+        self._project_combo: QComboBox | None = None
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -86,14 +88,15 @@ class TaskFilterBar(QWidget):
         r2 = QHBoxLayout(row2)
         r2.setContentsMargins(0, 0, 0, 0)
         r2.setSpacing(Spacing.SM)
-        lbl = QLabel(tr("label_project", "Proje:"), parent=row2)
-        lbl.setProperty("cssClass", "text-secondary")
-        r2.addWidget(lbl)
-        self._project_combo = QComboBox(parent=row2)
-        self._project_combo.setMinimumWidth(120)
-        self._project_combo.setMinimumHeight(Size.BTN_SM_H)
-        self._project_combo.currentIndexChanged.connect(self._on_project_index_changed)
-        r2.addWidget(self._project_combo, 1)
+        if not self._embedded:
+            lbl = QLabel(tr("label_project", "Proje:"), parent=row2)
+            lbl.setProperty("cssClass", "text-secondary")
+            r2.addWidget(lbl)
+            self._project_combo = QComboBox(parent=row2)
+            self._project_combo.setMinimumWidth(120)
+            self._project_combo.setMinimumHeight(Size.BTN_SM_H)
+            self._project_combo.currentIndexChanged.connect(self._on_project_index_changed)
+            r2.addWidget(self._project_combo, 1)
         self._status_filter = self._make_filter_combo(tr("filter_status", "Durum"), _status_items())
         r2.addWidget(self._status_filter)
         self._priority_filter = self._make_filter_combo(tr("filter_priority", "Öncelik"), _priority_items())
@@ -113,12 +116,15 @@ class TaskFilterBar(QWidget):
         return combo
 
     def _on_project_index_changed(self, index: int) -> None:
-        self.project_changed.emit(self._project_combo.itemData(index))
+        if self._project_combo is not None:
+            self.project_changed.emit(self._project_combo.itemData(index))
 
     # ── Proje seçimi ─────────────────────────────────────────────────────────
 
     def set_projects(self, projects: list[Project], selected_id: int | None) -> None:
         """Combobox'ı doldurur; sinyal tetiklemeden mevcut seçimi korur."""
+        if self._project_combo is None:
+            return
         self._project_combo.blockSignals(True)
         self._project_combo.clear()
         if not projects:
@@ -133,9 +139,13 @@ class TaskFilterBar(QWidget):
         self._project_combo.blockSignals(False)
 
     def select_project(self, project_id: int) -> None:
+        if self._project_combo is None:
+            return
+        self._project_combo.blockSignals(True)
         idx = self._project_combo.findData(project_id)
         if idx >= 0:
             self._project_combo.setCurrentIndex(idx)
+        self._project_combo.blockSignals(False)
 
     # ── Filtreleme ───────────────────────────────────────────────────────────
 

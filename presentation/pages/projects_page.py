@@ -200,7 +200,6 @@ class ProjectsPage(QWidget):
             if project:
                 self._detail_panel.show_project(project)
                 self._stage_controller.load_stages(self._selected_project_id)
-                self._task_controller.load_tasks(self._selected_project_id)
         else:
             self._selected_project_id = None
             self._detail_panel.show_empty_state()
@@ -231,7 +230,6 @@ class ProjectsPage(QWidget):
         if project:
             self._detail_panel.show_project(project)
             self._stage_controller.load_stages(project_id)
-            self._task_controller.load_tasks(project_id)
 
     def open_project_detail(self, project_id: int) -> None:
         self._on_item_clicked(project_id)

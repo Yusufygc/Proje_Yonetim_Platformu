@@ -42,13 +42,18 @@ class TasksPage(QWidget):
         controller: TaskController,
         project_controller: ProjectController,
         theme: ThemeManager | None = None,
+        embedded: bool = False,
     ) -> None:
         super().__init__(parent=parent)
         self._task_controller = controller
         self._project_controller = project_controller
         # Constructor injection tercih edilir; None ise singleton'a düşülür.
         self._theme = theme or ThemeManager.instance()
-        self._selected_project_id: Optional[int] = TasksPage._last_selected_project_id
+        # Gömülü mod: ProjectDetailPanel içinde kullanılır. Class var'ı kirletmez.
+        self._embedded = embedded
+        self._selected_project_id: Optional[int] = (
+            None if embedded else TasksPage._last_selected_project_id
+        )
         self._all_projects: list[Project] = []
         self._tasks: list[Task] = []
         self._setup_ui()
@@ -67,7 +72,7 @@ class TasksPage(QWidget):
         layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
         layout.setSpacing(Spacing.LG)
 
-        self._filter_bar = TaskFilterBar(parent=self)
+        self._filter_bar = TaskFilterBar(parent=self, embedded=self._embedded)
         layout.addWidget(self._filter_bar)
 
         self._tree = WBSTreeWidget(parent=self, theme=self._theme)
@@ -143,7 +148,8 @@ class TasksPage(QWidget):
             # Önceki oturumdan kalan geçersiz proje ID'si temizlenir;
             # aksi hâlde silinmiş projeye görev ekleme denenebilir.
             self._selected_project_id = None
-            TasksPage._last_selected_project_id = None
+            if not self._embedded:
+                TasksPage._last_selected_project_id = None
             self._tree.hide()
             self._empty_state.hide()
             self._empty_label.setText(
@@ -155,6 +161,8 @@ class TasksPage(QWidget):
             self._empty_label.show()
         elif not self._selected_project_id:
             self._selected_project_id = projects[0].id
+            if not self._embedded:
+                TasksPage._last_selected_project_id = self._selected_project_id
 
         if self._selected_project_id:
             self._tree.hide()
@@ -165,13 +173,16 @@ class TasksPage(QWidget):
 
     def _on_project_changed(self, project_id: object) -> None:
         self._selected_project_id = project_id if isinstance(project_id, int) else None
-        TasksPage._last_selected_project_id = self._selected_project_id
+        if not self._embedded:
+            TasksPage._last_selected_project_id = self._selected_project_id
         if self._selected_project_id:
             self._task_controller.load_tasks(self._selected_project_id)
         else:
             self._tree.clear()
 
-    def _on_tasks_loaded(self, tasks: list[Task]) -> None:
+    def _on_tasks_loaded(self, project_id: int, tasks: list[Task]) -> None:
+        if project_id != self._selected_project_id:
+            return  # stale sonuç — başka örneğin veya önceki seçimin yükü
         self._skeleton.hide()
         self._tree.clear()
         self._tasks = tasks
@@ -214,6 +225,23 @@ class TasksPage(QWidget):
             menu.addSeparator()
             delete_action = menu.addAction(tr("action_delete", "Sil"))
             delete_action.triggered.connect(lambda: self._on_delete_task(task_id))
+            menu.addSeparator()
+            selected_task_ids = [
+                i.data(0, Qt.ItemDataRole.UserRole)
+                for i in self._tree.selectedItems()
+                if i.data(0, Qt.ItemDataRole.UserRole + 1) == "task"
+            ]
+            if len(selected_task_ids) > 1:
+                copy_label = tr(
+                    "action_copy_selected", "Seçilileri Kopyala ({n})"
+                ).format(n=len(selected_task_ids))
+                copy_action = menu.addAction(copy_label)
+                copy_action.triggered.connect(self._tree._copy_selected_to_clipboard)
+            else:
+                copy_action = menu.addAction(tr("action_copy", "Kopyala"))
+                copy_action.triggered.connect(
+                    lambda: self._tree.copy_items_to_clipboard({task_id})
+                )
         else:
             add_root_action = menu.addAction(tr("task_add_root_plain", "Ana Görev Ekle"))
             add_root_action.triggered.connect(self._on_add_root_task)

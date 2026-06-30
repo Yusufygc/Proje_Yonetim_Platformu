@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class TaskController(QObject):
     """Görev işlemlerini sinyal tabanlı olarak yönetir."""
 
-    tasks_loaded = Signal(list)
+    tasks_loaded = Signal(int, list)  # (project_id, tasks) — stale sonuçları ayırt etmek için
     all_tasks_loaded = Signal(list)
     task_created = Signal(object)
     task_updated = Signal(object)
@@ -40,13 +40,15 @@ class TaskController(QObject):
     def load_tasks(self, project_id: int) -> None:
         def _fetch() -> list[Task]:
             return self._service.get_tasks(project_id)
-            
+
         def _on_error(err: str) -> None:
             logger.error("Görevler yüklenemedi: %s", err)
             self.error_occurred.emit(str(err))
-            
+
         worker = Worker(_fetch)
-        worker.signals.result.connect(self.tasks_loaded.emit)
+        worker.signals.result.connect(
+            lambda tasks, pid=project_id: self.tasks_loaded.emit(pid, tasks)
+        )
         worker.signals.error.connect(_on_error)
         worker.start()
 

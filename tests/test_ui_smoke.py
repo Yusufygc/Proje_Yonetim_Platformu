@@ -43,7 +43,7 @@ class FakeProjectController(QObject):
 
 
 class FakeTaskController(QObject):
-    tasks_loaded = Signal(list)
+    tasks_loaded = Signal(int, list)
     all_tasks_loaded = Signal(list)
     task_created = Signal(object)
     task_updated = Signal(object)
@@ -57,7 +57,7 @@ class FakeTaskController(QObject):
     def load_tasks(self, project_id: int) -> None:
         parent = Task(id=1, project_id=project_id, title="Ana", task_type=TaskType.GROUP.value)
         child = Task(id=2, project_id=project_id, title="Alt", parent_task_id=1)
-        self.tasks_loaded.emit([parent, child])
+        self.tasks_loaded.emit(project_id, [parent, child])
 
     def create_task(self, project_id: int, title: str, **kwargs: object) -> None:
         self.created.append((project_id, title, kwargs))
