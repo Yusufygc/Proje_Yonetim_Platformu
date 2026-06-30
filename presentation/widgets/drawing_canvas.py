@@ -196,8 +196,8 @@ class DrawingToolbar(QWidget):
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.setStyleSheet(
             f"QPushButton {{ color: {self._current_color.name()}; border: 1px solid rgba(128,128,128,0.4);"
-            " border-radius: 4px; background: transparent; font-size: 18px; }}"
-            " QPushButton:hover { background: rgba(128,128,128,0.1); }"
+            f" border-radius: 4px; background: transparent; font-size: 18px; }}"
+            f" QPushButton:hover {{ background: rgba(128,128,128,0.1); }}"
         )
         btn.clicked.connect(self._pick_color)
         return btn
@@ -237,6 +237,6 @@ class DrawingToolbar(QWidget):
         self._canvas.set_pen_color(color)
         self._color_btn.setStyleSheet(
             f"QPushButton {{ color: {color.name()}; border: 1px solid rgba(128,128,128,0.4);"
-            " border-radius: 4px; background: transparent; font-size: 18px; }}"
-            " QPushButton:hover { background: rgba(128,128,128,0.1); }"
+            f" border-radius: 4px; background: transparent; font-size: 18px; }}"
+            f" QPushButton:hover {{ background: rgba(128,128,128,0.1); }}"
         )
