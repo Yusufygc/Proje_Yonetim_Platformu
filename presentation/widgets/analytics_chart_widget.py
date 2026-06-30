@@ -43,6 +43,7 @@ class AnalyticsChartWidget(QWidget):
         color: str = "#5C6BC0",
         show_legend: bool = False,
     ) -> None:
+        self._chart.setTitle(self._title)
         self._chart.removeAllSeries()
         for ax in self._chart.axes():
             self._chart.removeAxis(ax)
@@ -67,6 +68,7 @@ class AnalyticsChartWidget(QWidget):
         self._chart.legend().setVisible(show_legend)
 
     def set_pie_chart(self, data: dict[str, int]) -> None:
+        self._chart.setTitle(self._title)
         self._chart.removeAllSeries()
         series = QPieSeries()
         for i, (label, value) in enumerate(data.items()):
@@ -82,6 +84,7 @@ class AnalyticsChartWidget(QWidget):
     def set_horizontal_bar_chart(
         self, labels: list[str], values: list[int], color: str = "#42A5F5"
     ) -> None:
+        self._chart.setTitle(self._title)
         self._chart.removeAllSeries()
         for ax in self._chart.axes():
             self._chart.removeAxis(ax)
@@ -110,6 +113,7 @@ class AnalyticsChartWidget(QWidget):
         self._chart.setTheme(theme)
 
     def clear(self) -> None:
+        self._chart.setTitle("")
         self._chart.removeAllSeries()
         for ax in self._chart.axes():
             self._chart.removeAxis(ax)

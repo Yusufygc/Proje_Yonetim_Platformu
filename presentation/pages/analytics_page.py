@@ -113,17 +113,17 @@ class AnalyticsPage(QWidget):
         row = QHBoxLayout()
         row.setSpacing(Spacing.XL)
         kpi_defs = [
-            ("total_completed", "Tamamlanan"),
-            ("completion_rate", "Oran %"),
-            ("streak_days", "Seri (gün)"),
-            ("on_time_rate", "Zamanında %"),
+            ("total_completed", "Tamamlanan", "Dönemde biten görev"),
+            ("completion_rate", "Oran %", "Biten / (biten + açık)"),
+            ("streak_days", "Seri (gün)", "Arka arkaya aktif gün"),
+            ("on_time_rate", "Zamanında %", "Vadesi geçmeden biten"),
         ]
-        for key, label in kpi_defs:
-            val_label = self._make_kpi_card(row, label)
+        for key, label, desc in kpi_defs:
+            val_label = self._make_kpi_card(row, label, desc)
             self._kpi_labels[key] = val_label
         return row
 
-    def _make_kpi_card(self, layout: QHBoxLayout, title: str) -> QLabel:
+    def _make_kpi_card(self, layout: QHBoxLayout, title: str, description: str = "") -> QLabel:
         card = QFrame(parent=self)
         card.setProperty("cssClass", "panel")
         apply_shadow(card, blur_radius=Shadow.CARD_BLUR, y_offset=Shadow.CARD_Y, alpha=Shadow.CARD_ALPHA)
@@ -136,6 +136,10 @@ class AnalyticsPage(QWidget):
         lbl_val = QLabel("—", parent=card)
         lbl_val.setProperty("cssClass", "stat-card-value")
         inner.addWidget(lbl_val)
+        if description:
+            lbl_desc = QLabel(description, parent=card)
+            lbl_desc.setProperty("cssClass", "project-list-meta")
+            inner.addWidget(lbl_desc)
         layout.addWidget(card)
         return lbl_val
 
@@ -147,22 +151,54 @@ class AnalyticsPage(QWidget):
 
         self._time_chart = AnalyticsChartWidget("Tamamlanan Görev", parent=container)
         self._time_chart.setMinimumHeight(220)
-        vbox.addWidget(self._time_chart)
+        vbox.addWidget(self._build_chart_panel(
+            container,
+            "Zaman İçinde Tamamlanan Görevler",
+            "Seçilen dönemde her zaman biriminde biten görev adedi",
+            self._time_chart,
+        ))
 
         bottom = QHBoxLayout()
         bottom.setSpacing(Spacing.XL)
         self._pie_chart = AnalyticsChartWidget("Öncelik Dağılımı", parent=container)
         self._pie_chart.setMinimumHeight(200)
-        self._pie_chart.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        bottom.addWidget(self._pie_chart, 1)
+        bottom.addWidget(self._build_chart_panel(
+            container,
+            "Öncelik Dağılımı",
+            "Tamamlanan görevlerin öncelik sınıflarına göre dağılımı",
+            self._pie_chart,
+        ), 1)
         self._project_chart = AnalyticsChartWidget("Proje Dağılımı", parent=container)
         self._project_chart.setMinimumHeight(200)
-        self._project_chart.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        bottom.addWidget(self._project_chart, 1)
+        bottom.addWidget(self._build_chart_panel(
+            container,
+            "Proje Dağılımı",
+            "Hangi projede kaç görev tamamlandığı",
+            self._project_chart,
+        ), 1)
         vbox.addLayout(bottom)
 
         vbox.addWidget(self._build_time_totals_band(container))
         return container
+
+    def _build_chart_panel(
+        self, parent: QWidget, title: str, description: str, chart: AnalyticsChartWidget
+    ) -> QFrame:
+        panel = QFrame(parent=parent)
+        panel.setProperty("cssClass", "panel")
+        apply_shadow(panel, blur_radius=Shadow.CARD_BLUR, y_offset=Shadow.CARD_Y, alpha=Shadow.CARD_ALPHA)
+        inner = QVBoxLayout(panel)
+        inner.setContentsMargins(Spacing.XL, Spacing.LG, Spacing.XL, Spacing.LG)
+        inner.setSpacing(Spacing.XS)
+        lbl_title = QLabel(title, parent=panel)
+        lbl_title.setProperty("cssClass", "section-header")
+        inner.addWidget(lbl_title)
+        lbl_desc = QLabel(description, parent=panel)
+        lbl_desc.setProperty("cssClass", "project-list-meta")
+        inner.addWidget(lbl_desc)
+        chart.setParent(panel)
+        inner.addWidget(chart, 1)
+        return panel
 
     def _build_time_totals_band(self, parent: QWidget) -> QFrame:
         band = QFrame(parent=parent)
