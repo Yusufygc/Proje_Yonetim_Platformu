@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QPropertyAnimation, Qt, Signal
-from PySide6.QtGui import QColor, QDropEvent
+from PySide6.QtGui import QColor, QDropEvent, QKeyEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QGraphicsOpacityEffect,
     QHeaderView,
     QTreeWidget,
@@ -12,10 +13,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from core.events.event_bus import EventBus
+from core.managers.icon_manager import Icons
 from core.managers.theme_manager import ThemeManager
 from domain.enums.task_status import TaskStatus
 from domain.models.task import Task
 from presentation.utils.i18n import tr
+from presentation.widgets.icon_action_button import IconActionButton
 
 
 def _label_status(value: str) -> str:
@@ -93,11 +97,15 @@ class WBSTreeWidget(QTreeWidget):
             tr("task_tree_status", "Durum"),
             tr("task_tree_priority", "Öncelik"),
             tr("task_tree_type", "Tip"),
+            "",   # kopyalama ikonu sütunu
         ])
         header = self.header()
-        for i in range(4):
+        for i in range(5):
             header.setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
+        # Kopyalama ikonu sütunu sabit genişlikte kalmalı; kullanıcı yeniden boyutlandıramasın.
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Fixed)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.setDropIndicatorShown(True)
@@ -108,10 +116,12 @@ class WBSTreeWidget(QTreeWidget):
     def resizeEvent(self, event: object) -> None:
         super().resizeEvent(event)
         total_width = self.viewport().width()
-        self.setColumnWidth(0, int(total_width * 0.55))
-        self.setColumnWidth(1, int(total_width * 0.15))
-        self.setColumnWidth(2, int(total_width * 0.15))
-        self.setColumnWidth(3, int(total_width * 0.15))
+        self.setColumnWidth(4, 34)
+        remaining = total_width - 34
+        self.setColumnWidth(0, int(remaining * 0.55))
+        self.setColumnWidth(1, int(remaining * 0.15))
+        self.setColumnWidth(2, int(remaining * 0.15))
+        self.setColumnWidth(3, int(remaining * 0.15))
 
     # ── Render ───────────────────────────────────────────────────────────────
 
@@ -197,6 +207,7 @@ class WBSTreeWidget(QTreeWidget):
 
             self.addTopLevelItems(root_items)
             self.expandAll()
+            self._attach_copy_buttons()
         finally:
             self.setUpdatesEnabled(True)
             self.blockSignals(False)
@@ -206,6 +217,109 @@ class WBSTreeWidget(QTreeWidget):
         self._fade.setStartValue(0.0)
         self._fade.setEndValue(1.0)
         self._fade.start()
+
+    # ── Kopyalama ────────────────────────────────────────────────────────────
+
+    def _attach_copy_buttons(self) -> None:
+        """Her task öğesinin 4. sütununa kopyalama ikonu ekler."""
+        idle_color = self._theme.color("text_muted")
+        hover_color = self._theme.color("text_primary")
+        stack: list[QTreeWidgetItem] = [
+            self.topLevelItem(i) for i in range(self.topLevelItemCount())
+        ]
+        while stack:
+            item = stack.pop()
+            if item is None:
+                continue
+            if item.data(0, Qt.ItemDataRole.UserRole + 1) == "task":
+                task_id: int = item.data(0, Qt.ItemDataRole.UserRole)
+                btn = IconActionButton(
+                    icon_name=Icons.COPY,
+                    idle_color=idle_color,
+                    hover_color=hover_color,
+                    tooltip=tr("action_copy", "Kopyala"),
+                    parent=self,
+                )
+                btn.clicked.connect(
+                    lambda checked=False, tid=task_id: self.copy_items_to_clipboard({tid})
+                )
+                self.setItemWidget(item, 4, btn)
+            stack.extend(item.child(i) for i in range(item.childCount()))
+
+    def _copy_selected_to_clipboard(self) -> None:
+        """Seçili task öğelerini girintili metin olarak panoya yazar."""
+        selected_items = self.selectedItems()
+        if not selected_items:
+            return
+        selected_set = {
+            id(item)
+            for item in selected_items
+            if item.data(0, Qt.ItemDataRole.UserRole + 1) == "task"
+        }
+        if not selected_set:
+            return
+        lines = self._collect_copy_lines(selected_set)
+        if lines:
+            QApplication.clipboard().setText("\n".join(lines))
+            EventBus.instance().publish(
+                "toast.show",
+                message=tr("toast_copied", "Kopyalandı"),
+                type_="success",
+            )
+
+    def copy_items_to_clipboard(self, task_ids: set[int]) -> None:
+        """Belirtilen ID'lere sahip task öğelerini panoya yazar."""
+        id_set: set[int] = set()
+        stack: list[QTreeWidgetItem] = [
+            self.topLevelItem(i) for i in range(self.topLevelItemCount())
+        ]
+        while stack:
+            item = stack.pop()
+            if item is None:
+                continue
+            if (
+                item.data(0, Qt.ItemDataRole.UserRole + 1) == "task"
+                and item.data(0, Qt.ItemDataRole.UserRole) in task_ids
+            ):
+                id_set.add(id(item))
+            stack.extend(item.child(i) for i in range(item.childCount()))
+        lines = self._collect_copy_lines(id_set)
+        if lines:
+            QApplication.clipboard().setText("\n".join(lines))
+            EventBus.instance().publish(
+                "toast.show",
+                message=tr("toast_copied", "Kopyalandı"),
+                type_="success",
+            )
+
+    def _collect_copy_lines(self, selected_id_set: set[int]) -> list[str]:
+        """Seçili item'ları ağaç sırasıyla, derinliğe göre girintili toplar."""
+        lines: list[str] = []
+        stack: list[tuple[QTreeWidgetItem, int]] = []
+        for i in range(self.topLevelItemCount() - 1, -1, -1):
+            stack.append((self.topLevelItem(i), 0))
+        while stack:
+            item, depth = stack.pop()
+            if item is None:
+                continue
+            if item.data(0, Qt.ItemDataRole.UserRole + 1) == "task":
+                if id(item) in selected_id_set:
+                    indent = "  " * depth
+                    status = item.text(1)
+                    title = item.text(0)
+                    lines.append(f"{indent}[{status}] {title}")
+                for i in range(item.childCount() - 1, -1, -1):
+                    stack.append((item.child(i), depth + 1))
+        return lines
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if (
+            event.modifiers() == Qt.KeyboardModifier.ControlModifier
+            and event.key() == Qt.Key.Key_C
+        ):
+            self._copy_selected_to_clipboard()
+        else:
+            super().keyPressEvent(event)
 
     # ── Sürükle-bırak ────────────────────────────────────────────────────────
 

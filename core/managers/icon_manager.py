@@ -24,6 +24,7 @@ class Icons:
     CHEVRON_DOWN = "chevron-down"
     CHEVRON_UP = "chevron-up"
     CIRCLE_INFO = "circle-info"
+    COPY = "copy"
     EXTERNAL_LINK = "external-link"
     FOLDER = "folder"
     HOME = "home"
