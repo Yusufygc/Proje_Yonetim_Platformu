@@ -31,6 +31,7 @@ class Icons:
     HOUSE = "house"
     LIGHTBULB = "lightbulb"
     MENU = "menu"
+    NOTE_STICKY = "note-sticky"
     PENCIL = "pencil"
     SEARCH = "search"
     SETTINGS = "settings"
