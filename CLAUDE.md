@@ -120,6 +120,7 @@ Kod teslim edilmeden önce şu sorular cevaplanmış olmalı:
 6. Test eklendi mi? Kritik yol kapsandı mı?
 7. `parent` atanmamış PySide6 nesnesi var mı?
 8. Commit mesajı `Project_docs/RULES.md §6` formatına uygun mu?
+9. Yeni özellik veya davranış değişikliği varsa `README.md`, `docs/wiki/` ve `Project_docs/` ilgili dosyaları güncellendi mi?
 
 ---
 
