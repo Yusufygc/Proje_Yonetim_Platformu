@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QStackedWidget,
-    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -31,6 +30,7 @@ from presentation.utils.i18n import tr
 from presentation.widgets.decision_list_widget import DecisionListWidget
 from presentation.widgets.note_list_widget import NoteListWidget
 from presentation.widgets.resource_list_widget import ResourceListWidget
+from presentation.widgets.project_tab_bar import ProjectTabBar
 from presentation.widgets.stage_timeline_widget import StageTimelineWidget
 
 
@@ -155,50 +155,68 @@ class ProjectDetailPanel(QWidget):
         layout.addWidget(self._stage_timeline)
         layout.addSpacing(16)
 
-        self._tab_widget = QTabWidget(parent=container)
-        # QTabWidget stilleri global QSS içinde yönetiliyor
+        # Navbar sekme çubuğu
+        tab_labels = [
+            tr("tab_summary",   "Özet"),
+            tr("tab_tasks",     "Görevler"),
+            tr("tab_decisions", "Kararlar"),
+            tr("tab_notes",     "Notlar"),
+            tr("tab_resources", "Kaynaklar"),
+            tr("tab_outputs",   "Çıktılar"),
+        ]
+        self._tab_bar = ProjectTabBar(tabs=tab_labels, parent=container)
+        layout.addWidget(self._tab_bar)
+
+        tab_divider = QFrame(parent=container)
+        tab_divider.setFrameShape(QFrame.Shape.HLine)
+        tab_divider.setProperty("cssClass", "divider")
+        layout.addWidget(tab_divider)
+
+        # İçerik yığını — sekme butonlarıyla senkron indeks sırasında olmalı
+        self._tab_stack = QStackedWidget(parent=container)
 
         self._summary_page = self._build_summary_tab()
-        self._tab_widget.addTab(self._summary_page, tr("tab_summary", "Özet"))
+        self._tab_stack.addWidget(self._summary_page)
 
         self._tasks_page = TasksPage(
-            parent=self._tab_widget,
+            parent=self._tab_stack,
             controller=self._di.task_controller,
             project_controller=self._di.project_controller,
             theme=self._di.theme,
             embedded=True,
         )
-        self._tab_widget.addTab(self._tasks_page, tr("tab_tasks", "Görevler"))
+        self._tab_stack.addWidget(self._tasks_page)
 
         self._decisions_page = DecisionListWidget(
             controller=self._di.decision_controller,
-            parent=self._tab_widget
+            parent=self._tab_stack,
         )
-        self._tab_widget.addTab(self._decisions_page, tr("tab_decisions", "Kararlar"))
+        self._tab_stack.addWidget(self._decisions_page)
 
         self._notes_page = NoteListWidget(
             controller=self._di.note_controller,
-            parent=self._tab_widget
+            parent=self._tab_stack,
         )
-        self._tab_widget.addTab(self._notes_page, tr("tab_notes", "Notlar"))
+        self._tab_stack.addWidget(self._notes_page)
 
         self._resources_page = ResourceListWidget(
             controller=self._di.resource_controller,
-            parent=self._tab_widget,
+            parent=self._tab_stack,
             theme=self._di.theme,
         )
-        self._tab_widget.addTab(self._resources_page, tr("tab_resources", "Kaynaklar"))
+        self._tab_stack.addWidget(self._resources_page)
 
         self._outputs_page = self._build_outputs_tab()
-        self._tab_widget.addTab(self._outputs_page, tr("tab_outputs", "Çıktılar"))
+        self._tab_stack.addWidget(self._outputs_page)
 
-        layout.addWidget(self._tab_widget, 1)
+        self._tab_bar.tab_changed.connect(self._tab_stack.setCurrentIndex)
+        layout.addWidget(self._tab_stack, 1)
         layout.addStretch()
 
         return scroll
 
     def _build_summary_tab(self) -> QWidget:
-        page = QWidget(parent=self._tab_widget)
+        page = QWidget(parent=self._tab_stack)
         layout = QVBoxLayout(page)
         layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
         layout.setSpacing(Spacing.MD)
@@ -214,7 +232,7 @@ class ProjectDetailPanel(QWidget):
         return page
 
     def _build_outputs_tab(self) -> QWidget:
-        page = QWidget(parent=self._tab_widget)
+        page = QWidget(parent=self._tab_stack)
         layout = QVBoxLayout(page)
         layout.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
         add_btn = QPushButton(tr("detail_add_output_btn", "+ Çıktı / Dosya Yolu Ekle"), parent=page)
