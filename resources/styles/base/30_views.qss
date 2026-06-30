@@ -83,13 +83,16 @@ QListWidget::item:focus {
     border: none;
     border-bottom: 1px solid @border;
 }
-/* Fikir listesi: satır içi widget (başlık + silme ikonu) kendi boşluğunu
-   yönettiği için item padding'i sıfırlanır; aksi halde hover zemini kesilir. */
-QListWidget#ideas_list::item {
+/* Fikir ve memo listeleri: satır içi widget (başlık + silme ikonu) kendi
+   boşluğunu yönettiği için item padding'i sıfırlanır; aksi halde çift padding
+   oluşur ve satırlar ayrı kart gibi görünür. */
+QListWidget#ideas_list::item,
+QListWidget#memo_list::item {
     padding: 0px;
     border-bottom: 1px solid @border;
 }
-QListWidget#ideas_list::item:selected {
+QListWidget#ideas_list::item:selected,
+QListWidget#memo_list::item:selected {
     background-color: @surface_raised;
     border-radius: 6px;
 }
