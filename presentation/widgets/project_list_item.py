@@ -72,12 +72,13 @@ class ProjectListItem(QFrame):
         title_lbl.setProperty("cssClass", "project-list-title")
         title_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         title_lbl.setMinimumWidth(0)
+        title_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         top_layout.addWidget(title_lbl, 1)
 
         status_lbl = QLabel(_status_labels().get(project.status, project.status), parent=top_row)
         status_lbl.setProperty("inline-status", project.status)
         status_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        status_lbl.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
+        status_lbl.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         top_layout.addWidget(status_lbl)
         layout.addWidget(top_row)
 
