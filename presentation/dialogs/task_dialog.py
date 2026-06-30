@@ -185,6 +185,7 @@ class TaskDialog(QDialog):
         self._save_btn = QPushButton(save_label, parent=row)
         self._save_btn.setMinimumSize(Size.BTN_MD_W, Size.BTN_MD_H38)
         self._save_btn.setObjectName("accent_button")
+        self._save_btn.setDefault(True)
         self._save_btn.clicked.connect(self._on_save)
         layout.addWidget(self._save_btn)
 

@@ -82,6 +82,7 @@ class NoteDialog(QDialog):
 
         save_btn = QPushButton(tr("action_save", "Kaydet"), parent=self)
         save_btn.setObjectName("accent_button")
+        save_btn.setDefault(True)
         save_btn.clicked.connect(self.accept)
         btn_layout.addWidget(save_btn)
         

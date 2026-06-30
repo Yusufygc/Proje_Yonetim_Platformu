@@ -298,6 +298,7 @@ class ThemeEditorDialog(QDialog):
 
         save_btn = QPushButton("Kaydet", parent=self)
         save_btn.setProperty("cssClass", "btn-primary")
+        save_btn.setDefault(True)
         save_btn.clicked.connect(self._on_save)
         btn_row.addWidget(save_btn)
 

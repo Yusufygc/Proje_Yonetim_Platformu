@@ -183,6 +183,7 @@ class IdeaDialog(QDialog):
         save_btn = QPushButton(tr("action_save", "Kaydet"), parent=self)
         save_btn.setObjectName("accent_button")
         save_btn.setMinimumSize(Size.BTN_LG_W, Size.INPUT_H_MD)
+        save_btn.setDefault(True)
         save_btn.clicked.connect(self._on_save)
         btn_layout.addWidget(save_btn)
 
