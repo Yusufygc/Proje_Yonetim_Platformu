@@ -109,18 +109,15 @@ class MemoPage(QWidget):
         panel = QFrame(parent=splitter)
         panel.setProperty("cssClass", "panel")
         layout = QVBoxLayout(panel)
-        layout.setContentsMargins(Spacing.SM, Spacing.SM, Spacing.SM, Spacing.SM)
-        layout.setSpacing(0)
         self._list_widget = QListWidget(parent=panel)
         self._list_widget.setObjectName("memo_list")
-        layout.addWidget(self._list_widget, 1)
+        layout.addWidget(self._list_widget)
         self._list_empty_label = QLabel(
             tr("memo_list_empty", "Henüz memo yok.\n+ Yeni Memo ile başlayın."),
             parent=panel,
         )
+        self._list_empty_label.setProperty("cssClass", "text-secondary")
         self._list_empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._list_empty_label.setProperty("cssClass", "text-muted")
-        self._list_empty_label.setWordWrap(True)
         self._list_empty_label.hide()
         layout.addWidget(self._list_empty_label)
         return panel
@@ -218,18 +215,21 @@ class MemoPage(QWidget):
     def _on_memos_loaded(self, memos: list[Memo]) -> None:
         self._list_widget.blockSignals(True)
         self._list_widget.clear()
-        has_items = bool(memos)
-        for memo in memos:
-            item = MemoListItem(memo)
-            self._list_widget.addItem(item)
-            row = MemoRowWidget(memo, parent=self._list_widget)
-            row.delete_requested.connect(self._on_delete_by_id)
-            self._list_widget.setItemWidget(item, row)
-            if memo.id == self._selected_memo_id:
-                item.setSelected(True)
+        if not memos:
+            self._list_widget.hide()
+            self._list_empty_label.show()
+        else:
+            self._list_empty_label.hide()
+            self._list_widget.show()
+            for memo in memos:
+                item = MemoListItem(memo)
+                self._list_widget.addItem(item)
+                row = MemoRowWidget(memo, parent=self._list_widget)
+                row.delete_requested.connect(self._on_delete_by_id)
+                self._list_widget.setItemWidget(item, row)
+                if memo.id == self._selected_memo_id:
+                    item.setSelected(True)
         self._list_widget.blockSignals(False)
-        self._list_empty_label.setVisible(not has_items)
-        self._list_widget.setVisible(has_items)
 
     def _on_memo_created(self, memo: Memo) -> None:
         self._selected_memo_id = memo.id
