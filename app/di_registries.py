@@ -12,6 +12,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from controllers.analytics_controller import AnalyticsController
     from controllers.dashboard_controller import DashboardController
     from controllers.memo_controller import MemoController
     from infrastructure.repositories.memo_repository import MemoRepository
@@ -48,6 +49,7 @@ if TYPE_CHECKING:
     from services.resource_service import ResourceService
     from services.search_service import SearchService
     from services.stage_service import StageService
+    from services.analytics_service import AnalyticsService
     from services.task_service import TaskService
 
 
@@ -206,6 +208,11 @@ class ServiceRegistry:
         from services.memo_service import MemoService
         return MemoService(repository=self._repos.memo)
 
+    @cached_property
+    def analytics(self) -> AnalyticsService:
+        from services.analytics_service import AnalyticsService
+        return AnalyticsService(db=self._db)
+
 
 class ControllerRegistry:
     """Sinyal köprüsü katmanı fabrikaları; service registry üzerinden beslenir."""
@@ -270,3 +277,11 @@ class ControllerRegistry:
     def memo_controller(self) -> MemoController:
         from controllers.memo_controller import MemoController
         return MemoController(service=self._services.memo)
+
+    @cached_property
+    def analytics_controller(self) -> AnalyticsController:
+        from controllers.analytics_controller import AnalyticsController
+        return AnalyticsController(
+            service=self._services.analytics,
+            event_bus=self._event_bus,
+        )

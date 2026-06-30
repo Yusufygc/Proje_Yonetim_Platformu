@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 def setup_modules(di: DIContainer) -> None:
     """Tüm Feature Plugin'leri ModuleRegistry'ye kayıt eder. QApplication'dan sonra çağrılmalıdır."""
+    from presentation.pages.analytics_page import AnalyticsPage
     from presentation.pages.archive_page import ArchivePage
     from presentation.pages.dashboard_page import DashboardPage
     from presentation.pages.ideas_page import IdeasPage
@@ -78,6 +79,18 @@ def setup_modules(di: DIContainer) -> None:
         factory=lambda parent: MemoPage(
             parent=parent,
             controller=di.memo_controller,
+        ),
+    ))
+    registry.register(FeaturePlugin(
+        page_key="analytics",
+        nav_label_key="nav_analytics",
+        nav_label_default="Analitik",
+        nav_icon="chart-bar",
+        factory=lambda parent: AnalyticsPage(
+            parent=parent,
+            controller=di.analytics_controller,
+            project_controller=di.project_controller,
+            theme=di.theme,
         ),
     ))
     registry.register(FeaturePlugin(

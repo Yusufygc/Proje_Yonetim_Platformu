@@ -20,6 +20,7 @@ class Icons:
     """resources/icons/ altındaki ikon adları — çıplak string typo'larını önler."""
 
     ARCHIVE = "archive"
+    CHART_BAR = "chart-bar"
     CHECK_SQUARE = "check_square"
     CHEVRON_DOWN = "chevron-down"
     CHEVRON_UP = "chevron-up"
