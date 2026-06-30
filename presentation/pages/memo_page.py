@@ -14,7 +14,6 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
-    QSizePolicy,
     QSplitter,
     QTabWidget,
     QTextEdit,
@@ -30,7 +29,7 @@ from presentation.widgets.delete_icon_button import DeleteIconButton
 from presentation.widgets.drawing_canvas import DrawingCanvas, DrawingToolbar
 from presentation.widgets.format_toolbar import FormatToolbar
 
-_MEMO_ROW_H = 44
+_MEMO_ROW_H = 52
 
 
 class MemoRowWidget(QWidget):
@@ -43,12 +42,10 @@ class MemoRowWidget(QWidget):
         self.memo_id = memo.id
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(12, 4, 10, 4)
+        layout.setContentsMargins(12, 6, 10, 6)
         layout.setSpacing(8)
 
         self._title_lbl = QLabel(memo.title, parent=self)
-        self._title_lbl.setMinimumWidth(0)
-        self._title_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         layout.addWidget(self._title_lbl, 1)
 
         del_btn = DeleteIconButton(parent=self)
