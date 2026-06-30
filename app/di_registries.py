@@ -13,6 +13,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from controllers.dashboard_controller import DashboardController
+    from controllers.memo_controller import MemoController
+    from infrastructure.repositories.memo_repository import MemoRepository
+    from services.memo_service import MemoService
     from controllers.decision_controller import DecisionController
     from controllers.idea_controller import IdeaController
     from controllers.note_controller import NoteController
@@ -114,6 +117,11 @@ class RepositoryRegistry:
         from infrastructure.repositories.resource_repository import ResourceRepository
         return ResourceRepository(db=self._db)
 
+    @cached_property
+    def memo(self) -> MemoRepository:
+        from infrastructure.repositories.memo_repository import MemoRepository
+        return MemoRepository(db=self._db)
+
 
 class ServiceRegistry:
     """İş kuralı katmanı fabrikaları; repository registry üzerinden beslenir."""
@@ -193,6 +201,11 @@ class ServiceRegistry:
         from services.export_service import ExportService
         return ExportService(db=self._db)
 
+    @cached_property
+    def memo(self) -> MemoService:
+        from services.memo_service import MemoService
+        return MemoService(repository=self._repos.memo)
+
 
 class ControllerRegistry:
     """Sinyal köprüsü katmanı fabrikaları; service registry üzerinden beslenir."""
@@ -252,3 +265,8 @@ class ControllerRegistry:
     def settings_controller(self) -> SettingsController:
         from controllers.settings_controller import SettingsController
         return SettingsController(service=self._services.export)
+
+    @cached_property
+    def memo_controller(self) -> MemoController:
+        from controllers.memo_controller import MemoController
+        return MemoController(service=self._services.memo)

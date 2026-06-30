@@ -18,6 +18,7 @@ def setup_modules(di: DIContainer) -> None:
     from presentation.pages.dashboard_page import DashboardPage
     from presentation.pages.ideas_page import IdeasPage
     from presentation.pages.info_page import InfoPage
+    from presentation.pages.memo_page import MemoPage
     from presentation.pages.projects_page import ProjectsPage
     from presentation.pages.settings_page import SettingsPage
     from presentation.pages.tasks import TasksPage
@@ -67,6 +68,16 @@ def setup_modules(di: DIContainer) -> None:
             controller=di.task_controller,
             project_controller=di.project_controller,
             theme=di.theme,
+        ),
+    ))
+    registry.register(FeaturePlugin(
+        page_key="memo",
+        nav_label_key="nav_memo",
+        nav_label_default="Notlarım",
+        nav_icon="note-sticky",
+        factory=lambda parent: MemoPage(
+            parent=parent,
+            controller=di.memo_controller,
         ),
     ))
     registry.register(FeaturePlugin(

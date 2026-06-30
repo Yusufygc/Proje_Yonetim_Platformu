@@ -5,6 +5,7 @@ table creation or migrations run.
 """
 
 from domain.models.activity_log import ActivityLog
+from domain.models.memo import Memo
 from domain.models.attachment import Attachment
 from domain.models.checklist_item import ChecklistItem
 from domain.models.decision_record import DecisionRecord
@@ -22,6 +23,7 @@ from domain.models.workflow_stage import WorkflowStage
 __all__ = [
     "ActivityLog",
     "Attachment",
+    "Memo",
     "ChecklistItem",
     "DecisionRecord",
     "Idea",

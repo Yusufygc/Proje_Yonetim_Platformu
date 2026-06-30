@@ -13,7 +13,7 @@ from infrastructure.database.migration_runner import run_migrations as run_legac
 
 logger = logging.getLogger(__name__)
 
-HEAD_REVISION = "0001_current_schema"
+HEAD_REVISION = "0004_create_memos_table"
 
 if TYPE_CHECKING:
     from alembic.config import Config

@@ -15,11 +15,16 @@ depends_on = None
 
 
 def upgrade() -> None:
+    from sqlalchemy import inspect
+    conn = op.get_bind()
+    existing = {col["name"] for col in inspect(conn).get_columns("ideas")}
+    columns_to_drop = ["expected_value", "difficulty", "effort", "confidence"]
+    cols_present = [c for c in columns_to_drop if c in existing]
+    if not cols_present:
+        return
     with op.batch_alter_table("ideas") as batch_op:
-        batch_op.drop_column("expected_value")
-        batch_op.drop_column("difficulty")
-        batch_op.drop_column("effort")
-        batch_op.drop_column("confidence")
+        for col in cols_present:
+            batch_op.drop_column(col)
 
 
 def downgrade() -> None:
