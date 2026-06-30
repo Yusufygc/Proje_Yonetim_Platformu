@@ -31,9 +31,9 @@ class MemoController(QObject):
             logger.error("Memolar yüklenemedi: %s", exc)
             self.error_occurred.emit(str(exc))
 
-    def create(self, title: str, body: str = "") -> None:
+    def create(self, title: str, body: str = "", drawing_data: str | None = None) -> None:
         try:
-            memo = self._service.create(title, body)
+            memo = self._service.create(title, body, drawing_data)
             self.memo_created.emit(memo)
         except Exception as exc:
             logger.error("Memo oluşturulamadı: %s", exc)

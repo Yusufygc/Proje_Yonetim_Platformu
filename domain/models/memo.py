@@ -10,6 +10,7 @@ from infrastructure.database.base_model import Base, TimestampMixin
 class Memo(Base, TimestampMixin):
     __tablename__ = "memos"
 
-    id:    Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    body:  Mapped[str] = mapped_column(Text, nullable=False, default="")
+    id:           Mapped[int]       = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title:        Mapped[str]       = mapped_column(String(255), nullable=False)
+    body:         Mapped[str]       = mapped_column(Text, nullable=False, default="")
+    drawing_data: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)

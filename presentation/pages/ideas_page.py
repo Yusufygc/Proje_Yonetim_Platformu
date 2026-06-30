@@ -21,14 +21,13 @@ from PySide6.QtWidgets import (
 
 from controllers.idea_controller import IdeaController
 from controllers.project_controller import ProjectController
-from core.managers.icon_manager import IconManager, Icons
-from core.managers.theme_manager import ThemeManager
 from domain.enums.idea_status import IdeaStatus
 from domain.models.idea import Idea
 from presentation.dialogs.idea_dialog import IdeaDialog, _idea_status_labels
 from presentation.dialogs.project_dialog import ProjectDialog
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.delete_icon_button import DeleteIconButton
 
 _STATUS_THEME_KEYS = {
     IdeaStatus.RAW.value: "text_muted",
@@ -40,41 +39,6 @@ _STATUS_THEME_KEYS = {
 }
 
 _IDEA_ROW_H = 52
-
-
-class DeleteIconButton(QPushButton):
-    """Çöp kutusu ikonlu silme butonu; hover'da kırmızı zemin + beyaz ikon.
-
-    QIcon CSS :hover ile yeniden renklenmediğinden ikon enter/leave olaylarında
-    elle değiştirilir (sidebar navigasyon butonu deseni).
-    """
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent=parent)
-        self._icons = IconManager.try_instance()
-        self._theme = ThemeManager.instance()
-        self.setFixedSize(28, 28)
-        self.setIconSize(QSize(16, 16))
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setToolTip(tr("action_delete", "Sil"))
-        self.setStyleSheet(
-            "QPushButton { background: transparent; border: none; border-radius: 6px; padding: 0; }"
-            " QPushButton:hover { background-color: #e53935; }"
-        )
-        self._apply_idle_icon()
-
-    def _apply_idle_icon(self) -> None:
-        if self._icons is not None:
-            self.setIcon(self._icons.get_icon(Icons.TRASH, self._theme.color("text_muted")))
-
-    def enterEvent(self, event: object) -> None:
-        if self._icons is not None:
-            self.setIcon(self._icons.get_icon(Icons.TRASH, "#FFFFFF"))
-        super().enterEvent(event)
-
-    def leaveEvent(self, event: object) -> None:
-        self._apply_idle_icon()
-        super().leaveEvent(event)
 
 
 class IdeaRowWidget(QWidget):

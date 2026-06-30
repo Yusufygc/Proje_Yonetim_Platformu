@@ -24,10 +24,10 @@ class MemoService:
     def get_by_id_optional(self, memo_id: int) -> Optional[Memo]:
         return self._repo.get_by_id(memo_id)
 
-    def create(self, title: str, body: str = "") -> Memo:
+    def create(self, title: str, body: str = "", drawing_data: str | None = None) -> Memo:
         if not title or not title.strip():
             raise MemoValidationError("Memo başlığı boş olamaz.")
-        memo = Memo(title=title.strip(), body=body)
+        memo = Memo(title=title.strip(), body=body, drawing_data=drawing_data)
         return self._repo.create(memo)
 
     def update(self, memo_id: int, **kwargs: Any) -> Memo:
