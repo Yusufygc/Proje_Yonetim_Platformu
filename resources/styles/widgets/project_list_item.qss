@@ -2,6 +2,11 @@
    PROJECT LIST ITEM — Proje listesi satir karti
    ================================================================ */
 
-ProjectListItem { background: transparent; border-left: 3px solid transparent; border-radius: 8px; }
+ProjectListItem {
+    background-color: @surface;
+    border: 1px solid @border;
+    border-left: 3px solid transparent;
+    border-radius: 8px;
+}
 ProjectListItem:hover { background-color: @surface_raised; }
 ProjectListItem[selected="true"] { background-color: @surface_raised; border-left: 3px solid @accent_start; }

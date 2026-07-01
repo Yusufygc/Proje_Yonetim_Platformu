@@ -12,8 +12,11 @@ class MemoRepository(BaseRepository[Memo]):
 
     def get_all(self) -> list[Memo]:
         with self._db.session() as sess:
-            stmt = select(Memo).order_by(Memo.updated_at.desc())
+            stmt = select(Memo).order_by(Memo.sort_order, Memo.id)
             entities = list(sess.scalars(stmt).all())
             for e in entities:
                 sess.expunge(e)
             return entities
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        self._apply_order(ordered_ids, "sort_order")

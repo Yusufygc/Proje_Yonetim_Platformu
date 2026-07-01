@@ -52,3 +52,6 @@ class ProjectRepository(BaseRepository[Project]):
             project = sess.get(Project, project_id)
             if project is not None:
                 project.is_archived = archived
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        self._apply_order(ordered_ids, "display_order")

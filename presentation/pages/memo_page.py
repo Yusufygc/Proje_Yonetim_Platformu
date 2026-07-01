@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -112,6 +113,8 @@ class MemoPage(QWidget):
         layout = QVBoxLayout(panel)
         self._list_widget = QListWidget(parent=panel)
         self._list_widget.setObjectName("memo_list")
+        self._list_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self._list_widget.setDefaultDropAction(Qt.DropAction.MoveAction)
         layout.addWidget(self._list_widget)
         self._list_empty_label = QLabel(
             tr("memo_list_empty", "Henüz memo yok.\n+ Yeni Memo ile başlayın."),
@@ -203,6 +206,7 @@ class MemoPage(QWidget):
         self._controller.memo_deleted.connect(self._on_memo_deleted)
         self._controller.error_occurred.connect(self._on_error)
         self._list_widget.itemSelectionChanged.connect(self._on_selection_changed)
+        self._list_widget.model().rowsMoved.connect(self._on_memos_row_moved)
         self._autosave_timer = QTimer(self)
         self._autosave_timer.setSingleShot(True)
         self._autosave_timer.setInterval(1000)
@@ -256,6 +260,13 @@ class MemoPage(QWidget):
         self._autosave_label.setText(f"Hata: {message}")
 
     # ── Seçim / Yükleme ────────────────────────────────────────────────────
+
+    def _on_memos_row_moved(self, *_args: object) -> None:
+        ordered_ids = [
+            self._list_widget.item(i).data(Qt.ItemDataRole.UserRole)
+            for i in range(self._list_widget.count())
+        ]
+        self._controller.reorder(ordered_ids)
 
     def _on_selection_changed(self) -> None:
         self._autosave_timer.stop()

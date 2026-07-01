@@ -140,6 +140,14 @@ class ProjectController(QObject):
             logger.error("Proje arsivden geri alinamadi: %s", exc)
             self.error_occurred.emit(str(exc))
 
+    def reorder(self, ordered_ids: list[int]) -> None:
+        try:
+            self._service.reorder(ordered_ids)
+            self._event_bus.publish("project.reordered", ordered_ids=ordered_ids)
+        except Exception as exc:
+            logger.error("Projeler yeniden siralanamadi: %s", exc)
+            self.error_occurred.emit("Projeler sıralanırken hata oluştu.")
+
     def delete_project(self, project_id: int) -> None:
         try:
             self._service.delete_project(project_id)

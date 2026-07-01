@@ -21,6 +21,7 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 - 🔔 **Toast Bildirimleri** — İşlem sonuçları için animasyonlu, otomatik kapanan bildirim sistemi
 - 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `~/.proje_takip/.backups/` altında saklanır
 - 🎤 **Sesli Komut (Çevrimdışı)** — Vosk Türkçe modeliyle mikrofondan görev/fikir başlığı, açıklama ve notları sese dönüştürerek girme; internet/API anahtarı gerektirmez
+- 🖱️ **Sürükle-Bırak Sıralama** — Notlar, Fikirler ve Projeler listelerinde elemanları sürükleyerek istediğiniz sırayı belirleme; sıra kalıcı olarak saklanır
 
 ---
 

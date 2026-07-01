@@ -14,3 +14,5 @@ class Memo(Base, TimestampMixin):
     title:        Mapped[str]       = mapped_column(String(255), nullable=False)
     body:         Mapped[str]       = mapped_column(Text, nullable=False, default="")
     drawing_data: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+    # Kullanıcının sürükle-bırak ile belirlediği görüntüleme sırası.
+    sort_order:   Mapped[int]       = mapped_column(Integer, nullable=False, default=0)

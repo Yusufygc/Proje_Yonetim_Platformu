@@ -35,6 +35,8 @@ def run_migrations(engine: Engine) -> None:
         ("003_normalize_enums_and_seed_workflow", _normalize_enums_and_seed_workflow),
         ("004_add_task_hierarchy_columns", _add_task_hierarchy_columns),
         ("005_add_performance_indexes", _add_performance_indexes),
+        ("006_add_list_sort_order", _add_list_sort_order),
+        ("007_add_memo_sort_order", _add_memo_sort_order),
     ]
     for migration_id, migration in migrations:
         if _is_applied(engine, migration_id):
@@ -119,6 +121,45 @@ def _add_performance_indexes(engine: Engine) -> None:
     _create_index(engine, "idx_projects_status", "projects", "status")
     _create_index(engine, "idx_projects_is_archived", "projects", "is_archived")
     _create_index(engine, "idx_ideas_status", "ideas", "status")
+
+
+def _add_list_sort_order(engine: Engine) -> None:
+    # notes/ideas ilk kez sıralama kolonu kazanıyor; projects zaten display_order'a
+    # sahip ama eski veritabanlarında kolon eksik kalmış olabilir (savunmacı ekleme).
+    _add_column(engine, "notes", "sort_order", "INTEGER NOT NULL DEFAULT 0")
+    _add_column(engine, "ideas", "sort_order", "INTEGER NOT NULL DEFAULT 0")
+    _add_column(engine, "projects", "display_order", "INTEGER NOT NULL DEFAULT 0")
+    _backfill_list_sort_order(engine, "notes", "sort_order")
+    _backfill_list_sort_order(engine, "ideas", "sort_order")
+
+
+def _backfill_list_sort_order(
+    engine: Engine, table_name: str, column_name: str, order_column: str = "created_at"
+) -> None:
+    """Mevcut satırlara eski görüntüleme sırasına göre artan bir değer atar.
+
+    Kolon yeni eklendiği için tüm satırlar aynı varsayılanı (0) taşıyor; bu da
+    ilk sürükle-bırak öncesi tüm kayıtların aynı sırada görünmesine (ve
+    kullanıcının önceden alıştığı görsel sıranın bozulmasına) yol açar.
+    `order_column`, migrasyon öncesi repository'nin ORDER BY'ına eşleşmeli
+    (ör. memos `updated_at` ile sıralanıyordu, notes/ideas `created_at` ile).
+    """
+    if not inspect(engine).has_table(table_name):
+        return
+    with engine.begin() as conn:
+        rows = conn.execute(
+            text(f"SELECT id FROM {table_name} ORDER BY {order_column} DESC, id DESC")
+        ).fetchall()
+        for index, row in enumerate(rows):
+            conn.execute(
+                text(f"UPDATE {table_name} SET {column_name} = :idx WHERE id = :row_id"),
+                {"idx": index, "row_id": row[0]},
+            )
+
+
+def _add_memo_sort_order(engine: Engine) -> None:
+    _add_column(engine, "memos", "sort_order", "INTEGER NOT NULL DEFAULT 0")
+    _backfill_list_sort_order(engine, "memos", "sort_order", order_column="updated_at")
 
 
 def _add_column(engine: Engine, table_name: str, column_name: str, column_sql: str) -> None:

@@ -89,3 +89,11 @@ class IdeaController(QObject):
 
     def get_idea_sync(self, idea_id: int) -> Idea | None:
         return self._service.get_idea(idea_id)
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        try:
+            self._service.reorder(ordered_ids)
+            self._event_bus.publish("idea.reordered", ordered_ids=ordered_ids)
+        except Exception as exc:
+            logger.error("Ideas could not be reordered: %s", exc)
+            self.error_occurred.emit("Fikirler sıralanırken hata oluştu.")

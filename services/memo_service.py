@@ -41,3 +41,8 @@ class MemoService:
 
     def delete(self, memo_id: int) -> None:
         self._repo.delete(memo_id)
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        if not ordered_ids:
+            return
+        self._repo.reorder(ordered_ids)

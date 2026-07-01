@@ -48,12 +48,16 @@ Kullanıcı pencereyi küçülttüğünde veya çok uzun metinler girdiğinde ar
 
 ---
 
-## 5. Sürükle ve Bırak (Drag & Drop) Mikroskobik Etkileşimi
+## 5. Sürükle ve Bırak (Drag & Drop) Mikroskobik Etkileşimi — Uygulandı (2026-07-01)
 
 Görevleri veya aşamaları sıralarken görsel geri bildirimler net olmalıdır.
 
 * **Sürükleme Hissiyatı (Ghosting):** Bir görev tutulup sürüklendiğinde, farenin ucunda o görevin %70 opaklığında bir kopyası (Ghost) gelmeli, asıl liste üzerindeki yerinde ise hafif soluk veya kesik çizgili bir boşluk (Placeholder) kalmalıdır.
 * **Bırakma Alanları (Drop Zones):** Sürüklenen öğe, hedefin üzerine geldiğinde hedefin arka plan rengi çok hafif değişmeli veya iki öğe arasına net bir yatay/dikey çizgi (Insertion Indicator) çizilerek öğenin tam olarak nereye düşeceği gösterilmelidir.
+* **Kapsam:** WBS görev ağacının yanı sıra artık Notlar, Fikirler ve Projeler
+  listelerinde de sürükle-bırak sıralama var; %70 opaklık ghost uygulandı,
+  insertion-indicator çizgisi MVP kapsamı dışında bırakıldı (bırakma anında sıra
+  görsel olarak güncelleniyor). Teknik detay: `docs/wiki/liste-siralama.md`.
 
 ---
 

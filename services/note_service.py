@@ -52,3 +52,8 @@ class NoteService:
 
     def get_project_notes(self, project_id: int) -> list[Note]:
         return list(self._repo.get_by_project(project_id))
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        if not ordered_ids:
+            return
+        self._repo.reorder(ordered_ids)

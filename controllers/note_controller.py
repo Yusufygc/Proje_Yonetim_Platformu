@@ -60,3 +60,10 @@ class NoteController(QObject):
 
     def get_note_sync(self, note_id: int) -> Optional[Note]:
         return self._service.get_note(note_id)
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        try:
+            self._service.reorder(ordered_ids)
+        except Exception as exc:
+            logger.error("Notlar yeniden siralanamadi: %s", exc)
+            self.error_occurred.emit("Notlar sıralanırken hata oluştu.")

@@ -55,6 +55,10 @@ class ProjectListItem(QFrame):
         self._setup_ui(project)
         self._apply_style(selected=False)
 
+    @property
+    def project_id(self) -> int:
+        return self._project_id
+
     def _setup_ui(self, project: Project) -> None:
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumHeight(Size.LIST_ITEM_MIN_H)

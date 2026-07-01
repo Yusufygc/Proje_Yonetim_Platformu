@@ -17,14 +17,19 @@ from domain.enums.task_type import TaskType
 from infrastructure.database.db_manager import DatabaseManager
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.idea_repository import IdeaRepository
+from infrastructure.repositories.note_repository import NoteRepository
 from infrastructure.repositories.project_idea_repository import ProjectIdeaRepository
 from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.project_tag_repository import ProjectTagRepository
 from infrastructure.repositories.stage_repository import StageRepository
 from infrastructure.repositories.task_repository import TaskRepository
 from infrastructure.repositories.workflow_stage_repository import WorkflowStageRepository
+from infrastructure.repositories.memo_repository import MemoRepository
+from services.analytics_service import AnalyticsService
 from services.export_service import ExportService
 from services.idea_service import IdeaService
+from services.memo_service import MemoService
+from services.note_service import NoteService
 from services.project_service import ProjectService
 from services.stage_service import StageService
 from services.task_service import TaskService
@@ -244,6 +249,102 @@ def test_performance_index_migration_is_idempotent(service_stack):
     assert "idx_projects_status" in index_names
     assert "idx_projects_is_archived" in index_names
     assert "idx_ideas_status" in index_names
+
+
+def test_create_task_appends_to_end_of_sibling_group_when_order_index_omitted(service_stack):
+    project = service_stack["project_service"].create_project("Sıra Testi")
+
+    first = service_stack["task_service"].create_task(project.id, "Birinci")
+    second = service_stack["task_service"].create_task(project.id, "İkinci")
+    third = service_stack["task_service"].create_task(project.id, "Üçüncü")
+
+    assert (first.order_index, second.order_index, third.order_index) == (0, 1, 2)
+
+
+def test_create_task_order_index_scoped_to_own_parent_group(service_stack):
+    project = service_stack["project_service"].create_project("Alt Sıra Testi")
+    parent = service_stack["task_service"].create_task(
+        project.id, "Grup", task_type=TaskType.GROUP.value
+    )
+    service_stack["task_service"].create_task(project.id, "Kök görev")
+
+    first_child = service_stack["task_service"].create_task(
+        project.id, "Alt bir", parent_task_id=parent.id
+    )
+    second_child = service_stack["task_service"].create_task(
+        project.id, "Alt iki", parent_task_id=parent.id
+    )
+
+    assert first_child.order_index == 0
+    assert second_child.order_index == 1
+
+
+def test_idea_reorder_persists_new_sort_order(service_stack):
+    first = service_stack["idea_service"].create_idea("Birinci fikir")
+    second = service_stack["idea_service"].create_idea("İkinci fikir")
+    third = service_stack["idea_service"].create_idea("Üçüncü fikir")
+
+    service_stack["idea_service"].reorder([third.id, first.id, second.id])
+    ideas = service_stack["idea_service"].get_all_ideas()
+
+    assert [idea.id for idea in ideas] == [third.id, first.id, second.id]
+
+
+def test_project_reorder_persists_new_display_order(service_stack):
+    first = service_stack["project_service"].create_project("Birinci proje")
+    second = service_stack["project_service"].create_project("İkinci proje")
+    third = service_stack["project_service"].create_project("Üçüncü proje")
+
+    service_stack["project_service"].reorder([second.id, third.id, first.id])
+    projects = service_stack["project_service"].get_all_projects()
+
+    assert [project.id for project in projects] == [second.id, third.id, first.id]
+
+
+def test_note_reorder_persists_new_sort_order(service_stack):
+    db = service_stack["db"]
+    project = service_stack["project_service"].create_project("Not Sıra Testi")
+    note_service = NoteService(NoteRepository(db))
+
+    first = note_service.create_note(project.id, "İlk not", "İçerik")
+    second = note_service.create_note(project.id, "İkinci not", "İçerik")
+    third = note_service.create_note(project.id, "Üçüncü not", "İçerik")
+
+    note_service.reorder([third.id, second.id, first.id])
+    notes = note_service.get_project_notes(project.id)
+
+    assert [note.id for note in notes] == [third.id, second.id, first.id]
+
+
+def test_memo_reorder_persists_new_sort_order(service_stack):
+    db = service_stack["db"]
+    memo_service = MemoService(MemoRepository(db))
+
+    first = memo_service.create("İlk memo")
+    second = memo_service.create("İkinci memo")
+    third = memo_service.create("Üçüncü memo")
+
+    memo_service.reorder([third.id, first.id, second.id])
+    memos = memo_service.get_all()
+
+    assert [memo.id for memo in memos] == [third.id, first.id, second.id]
+
+
+def test_analytics_priority_distribution_keyed_by_enum_value_not_label(service_stack):
+    """priority_distribution UI etiketiyle değil enum değeriyle (LOW/HIGH/...) anahtarlanmalı.
+
+    Aksi halde dil değişince (analytics_chart_widget.py'deki renk lookup'ı
+    Türkçe etikete göre eşleştiği için) öncelik renkleri sessizce kırılır.
+    """
+    project = service_stack["project_service"].create_project("Analitik Testi")
+    high_task = service_stack["task_service"].create_task(project.id, "Acil is", priority="HIGH")
+    service_stack["task_service"].update_task(high_task.id, status=TaskStatus.DONE.value)
+
+    analytics = AnalyticsService(service_stack["db"]).get_analytics("yearly", None)
+    priority_dist = analytics["priority_distribution"]
+
+    assert "HIGH" in priority_dist
+    assert "Yüksek" not in priority_dist
 
 
 def test_project_auto_completed_when_all_stages_completed(service_stack):

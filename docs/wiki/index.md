@@ -18,6 +18,7 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve planlanan iyileştirmeler.
 - [[gorevler-modulu]] — WBS görev sayfası paketi (`pages/tasks/`): filter bar + ağaç + sayfa kompozisyonu.
 - [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton` + `TranscriptionWorker` + `SpeechToTextService`.
+- [[liste-siralama]] — Notlar/Fikirler/Projeler listelerinde sürükle-bırak sıralama; `DragReorderController` + `sort_order`/`display_order` kolonları.
 
 ## Kurallar ve Süreç
 - [[kurallar-ve-sozlesmeler]] — RULES.md limitleri, bellek yönetimi, tema/L10N sözleşmeleri ve commit kuralları.

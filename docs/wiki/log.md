@@ -1,5 +1,27 @@
 # Wiki Kayıt Defteri
 
+## [2026-07-01] FIX | Notlarım (memo) sayfasında sürükle-sırala eksikti
+Kullanıcı "Notlarım sayfasında sıralama çalışmıyor" diye bildirdi; incelemede
+`MemoPage`'in hiç sıralama mekanizması olmadığı görüldü (önceki liste-sıralama
+işi yalnızca Notlar/Fikirler/Projeler'i kapsamıştı). `Memo.sort_order` kolonu
+eklendi (migration `007_add_memo_sort_order`, `updated_at` sırasına göre
+backfill), `MemoRepository`/`MemoService`/`MemoController.reorder` zinciri ve
+`MemoPage`'te `QListWidget.setDragDropMode(InternalMove)` + `model().rowsMoved`
+(Fikirler ile aynı desen) eklendi. Detay: [[liste-siralama]].
+
+## [2026-07-01] FEATURE + FIX | Liste sıralama, soluk proje kartı, hızlı ekle sıra düzeltmesi
+Notlar/Fikirler/Projeler listelerinde sürükle-bırak sıralama: `Note`/`Idea` modellerine
+`sort_order` kolonu (migration `006_add_list_sort_order`, backfill dahil), `Project`
+zaten sahip olduğu `display_order`'ı kullanıyor. UI: manuel `QVBoxLayout` listeleri
+(Notlar, Projeler) için yeniden kullanılabilir `DragReorderController`
+(`presentation/widgets/drag_reorder.py`); Fikirler zaten `QListWidget` olduğundan
+`InternalMove` moduyla çözüldü. Detay: [[liste-siralama]]. Ayrıca: Projeler sayfası kart
+görünümü artık soluk dolgu zeminli (`project_list_item.qss`) — kartlar birbirinden
+görsel olarak ayrışıyor. Bugfix: "Hızlı Görev Ekle" ile eklenen görev artık her zaman
+kardeş grubunun sonuna ekleniyor (`TaskRepository.next_order_index`,
+`TaskService.create_task` artık `order_index`'i hiç boş bırakmıyor); önceden hesaplanmadığı
+için varsayılan `0` kalıp listenin başına/ortasına düşüyordu.
+
 ## [2026-06-30] FEATURE | Sesli komut (speech-to-text)
 Vosk çevrimdışı motoru ile mikrofon dikteleme: `SpeechToTextService` (lazy model yükleme) →
 `TranscriptionWorker` (`QThreadPool`, [[worker-altyapisi]] deseni, sürekli döngü + `stop()`) →

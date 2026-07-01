@@ -8,4 +8,7 @@ class NoteRepository(ProjectScopedRepository[Note]):
     model = Note
 
     def _project_order(self) -> tuple:
-        return (Note.created_at.desc(),)
+        return (Note.sort_order, Note.id)
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        self._apply_order(ordered_ids, "sort_order")

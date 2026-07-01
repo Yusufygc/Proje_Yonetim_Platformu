@@ -29,7 +29,9 @@ class Idea(Base, TimestampMixin):
     
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     source_link: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    
+    # Kullanıcının sürükle-bırak ile belirlediği görüntüleme sırası.
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
     # Eğer bu fikir bir projeye dönüştüyse o projenin ID'sini tutar
     converted_project_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("projects.id", ondelete="SET NULL"), nullable=True

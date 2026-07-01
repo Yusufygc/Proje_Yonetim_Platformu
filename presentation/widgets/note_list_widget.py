@@ -21,16 +21,22 @@ from domain.models.note import Note
 from presentation.dialogs.note_dialog import NoteDialog
 from presentation.dimensions import Spacing
 from presentation.utils.i18n import tr
+from presentation.widgets.drag_reorder import DragReorderController
 from presentation.widgets.icon_action_button import IconActionButton
 
 _NOTE_TYPE_META: dict[str, tuple[str, str]] = {
-    "GENERAL":        ("#78909C", "Genel"),
-    "MEETING":        ("#42A5F5", "Toplantı"),
-    "RESEARCH":       ("#26A69A", "Araştırma"),
-    "DEBUG":          ("#EF5350", "Hata Ayıklama"),
-    "LESSON_LEARNED": ("#66BB6A", "Öğrenilen Ders"),
-    "RELEASE":        ("#AB47BC", "Yayın"),
+    "GENERAL":        ("#78909C", "Genel"),  # l10n: data — anahtar + varsayılan, tr() ile _note_type_color_and_label'da tüketilir
+    "MEETING":        ("#42A5F5", "Toplantı"),  # l10n: data
+    "RESEARCH":       ("#26A69A", "Araştırma"),  # l10n: data
+    "DEBUG":          ("#EF5350", "Hata Ayıklama"),  # l10n: data
+    "LESSON_LEARNED": ("#66BB6A", "Öğrenilen Ders"),  # l10n: data
+    "RELEASE":        ("#AB47BC", "Yayın"),  # l10n: data
 }
+
+
+def _note_type_color_and_label(note_type: str) -> tuple[str, str]:
+    color, default_label = _NOTE_TYPE_META.get(note_type, ("#888888", note_type))
+    return color, tr(f"note_type_{note_type.lower()}", default_label)
 
 
 class _NoteRow(QFrame):
@@ -50,7 +56,7 @@ class _NoteRow(QFrame):
         top = QHBoxLayout()
         top.setSpacing(Spacing.SM)
 
-        color, label = _NOTE_TYPE_META.get(note.note_type, ("#888888", note.note_type))
+        color, label = _note_type_color_and_label(note.note_type)
         badge = QLabel(label, parent=self)
         badge.setStyleSheet(
             f"QLabel {{ background-color: transparent; color: {color};"
@@ -96,6 +102,9 @@ class NoteListWidget(QWidget):
         self._project_id: int | None = None
         self._rows: dict[int, _NoteRow] = {}
         self._setup_ui()
+        self._drag_controller = DragReorderController(
+            self._list_layout, self._row_note_id, self._on_rows_reordered, parent=self
+        )
         self._connect_signals()
 
     def _setup_ui(self) -> None:
@@ -164,8 +173,14 @@ class NoteListWidget(QWidget):
             pos = self._list_layout.count() - 1
             self._list_layout.insertWidget(pos, row)
             self._rows[n.id] = row
+            self._drag_controller.install(row)
 
+    @staticmethod
+    def _row_note_id(row: QWidget) -> int | None:
+        return getattr(row, "note_id", None)
 
+    def _on_rows_reordered(self, ordered_ids: list[int]) -> None:
+        self._controller.reorder(ordered_ids)
 
     def _clear(self) -> None:
         while self._list_layout.count() > 1:

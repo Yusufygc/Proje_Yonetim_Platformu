@@ -28,38 +28,38 @@ _FEATURES: list[tuple[str, str, str, str, str]] = [
         Icons.HOUSE,
         "nav_dashboard", "Dashboard",
         "info_feat_dashboard_desc",
-        "Proje sayısı, bekleyen ve tamamlanan görevler. Tıkanan projeler ile acil işler tek bakışta.",
+        "Proje sayısı, bekleyen ve tamamlanan görevler. Tıkanan projeler ile acil işler tek bakışta.",  # l10n: data — desc_default, tr() ile satır 264'te tüketilir
     ),
     (
         Icons.FOLDER,
         "nav_projects", "Projeler",
         "info_feat_projects_desc",
-        "Aşama aşama takip: Planlandı → Geliştirme → Test → Tamamlandı. Kararlar, notlar, kaynak bağlantıları.",
+        "Aşama aşama takip: Planlandı → Geliştirme → Test → Tamamlandı. Kararlar, notlar, kaynak bağlantıları.",  # l10n: data
     ),
     (
         Icons.LIGHTBULB,
         "nav_ideas", "Fikirler",
         "info_feat_ideas_desc",
-        "Ham fikirleri kaydedin, puanlayın. 'Projeye Dönüştür' ile veri kaybetmeden doğrudan projeye aktarın.",
+        "Ham fikirleri kaydedin, puanlayın. 'Projeye Dönüştür' ile veri kaybetmeden doğrudan projeye aktarın.",  # l10n: data
     ),
     (
         Icons.SQUARE_CHECK,
-        "nav_tasks", "Görevler",
+        "nav_tasks", "Görevler",  # l10n: data — title_default, tr() ile satır 258'de tüketilir
         "info_feat_tasks_desc",
-        "Hiyerarşik iş kırılımı (WBS). Durum, öncelik ve tür filtreleriyle görev yoğunluğunu kontrol edin.",
+        "Hiyerarşik iş kırılımı (WBS). Durum, öncelik ve tür filtreleriyle görev yoğunluğunu kontrol edin.",  # l10n: data
     ),
     (
         Icons.MIC,
         "info_feat_voice_title", "Sesli Komut",
         "info_feat_voice_desc",
-        "Mikrofona konuşarak görev/fikir başlığı, açıklama ve notları yazın. Vosk ile çevrimdışı, internet gerektirmez.",
+        "Mikrofona konuşarak görev/fikir başlığı, açıklama ve notları yazın. Vosk ile çevrimdışı, internet gerektirmez.",  # l10n: data
     ),
 ]
 
 # (keys_display, desc_key, desc_default)
 _SHORTCUTS: list[tuple[str, str, str]] = [
-    ("Ctrl+F  /  Ctrl+K", "info_shortcut_search", "Hızlı Arama kutusunu açar"),
-    ("Ctrl+N",            "info_shortcut_new",    "Yeni Proje oluşturur"),
+    ("Ctrl+F  /  Ctrl+K", "info_shortcut_search", "Hızlı Arama kutusunu açar"),  # l10n: data — tr() ile satır 371'de tüketilir
+    ("Ctrl+N",            "info_shortcut_new",    "Yeni Proje oluşturur"),  # l10n: data
 ]
 
 
@@ -186,7 +186,7 @@ class InfoPage(QWidget):
         nodes = [
             (Icons.LIGHTBULB,    "info_flow_ideas",    "Fikir Havuzu"),
             (Icons.FOLDER,       "info_flow_projects", "Projeler"),
-            (Icons.SQUARE_CHECK, "info_flow_tasks",    "Görevler (WBS)"),
+            (Icons.SQUARE_CHECK, "info_flow_tasks",    "Görevler (WBS)"),  # l10n: data — tr() ile satır 203'te tüketilir
         ]
         for i, (icon_name, label_key, label_default) in enumerate(nodes):
             node = QFrame(parent=section)
@@ -297,6 +297,11 @@ class InfoPage(QWidget):
              tr("info_tip_voice_desc",
                 "Başlık, açıklama ve not alanlarının yanındaki 🎤 simgesine tıklayıp konuşarak "
                 "metin girebilirsiniz; tekrar tıklamak dinlemeyi durdurur.")),
+            (Icons.MENU, "success",
+             tr("info_tip_reorder_title", "Sürükle-Bırak Sıralama"),
+             tr("info_tip_reorder_desc",
+                "Notlar, Fikirler ve Projeler listelerinde bir öğeyi tutup sürükleyerek "
+                "istediğiniz sıraya bırakabilirsiniz; yeni sıra otomatik kaydedilir.")),
         ]
         for icon_name, color_key, tip_title, tip_desc in tips:
             card = QFrame(parent=section)

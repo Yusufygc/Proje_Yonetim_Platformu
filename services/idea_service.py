@@ -60,6 +60,11 @@ class IdeaService:
     def get_all_ideas(self, include_converted: bool = False) -> list[Idea]:
         return list(self._repo.get_all(include_converted))
 
+    def reorder(self, ordered_ids: list[int]) -> None:
+        if not ordered_ids:
+            return
+        self._repo.reorder(ordered_ids)
+
     def convert_idea_to_project(self, idea_id: int, project_overrides: dict[str, Any] | None = None) -> int:
         """
         Fikri projeye dönüştürür.

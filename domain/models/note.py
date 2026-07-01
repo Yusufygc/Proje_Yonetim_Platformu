@@ -19,12 +19,14 @@ class Note(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
-    
+
     note_type: Mapped[str] = mapped_column(
         String(50), nullable=False, default=NoteType.GENERAL.value
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
+    # Kullanıcının sürükle-bırak ile belirlediği görüntüleme sırası.
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     # Optional bindings
     stage_id: Mapped[Optional[int]] = mapped_column(

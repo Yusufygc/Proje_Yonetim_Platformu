@@ -185,6 +185,25 @@ Hata yönetimi mevcut istisna deseniyle uyumlu: `core/exceptions/speech_exceptio
 (`SpeechModelNotFoundError`, `MicrophoneUnavailableError`) → UI'da toast, stack trace
 kullanıcıya gösterilmez. Detay: `docs/wiki/sesli-komut.md`.
 
+## Liste Sıralama (Sürükle-Bırak) Altyapısı — Uygulandı (2026-07-01)
+
+Notlar, Fikirler ve Projeler listelerinde kullanıcı sıralaması eklendi:
+
+```
+satır widget (sürükle) → DragReorderController / QListWidget InternalMove
+  → Controller.reorder(ids) → Service.reorder(ids)
+    → Repository.reorder(ids) → BaseRepository._apply_order (generic)
+```
+
+`BaseRepository._apply_order(ordered_ids, order_field)` her modele özgü sıra
+kolonunu (`Note.sort_order`, `Idea.sort_order`, `Project.display_order`) tek bir
+generic metodla yazar (DRY). Manuel `QVBoxLayout` tabanlı listeler (Notlar,
+Projeler) için `presentation/widgets/drag_reorder.py::DragReorderController`
+yeniden kullanılabilir bir yardımcı olarak yazıldı; `QListWidget` tabanlı
+Fikirler listesi ise yerleşik `InternalMove` modunu kullanır. Migration
+`006_add_list_sort_order`, yeni kolonları önceki görsel sırayı koruyacak
+şekilde backfill eder. Detay: `docs/wiki/liste-siralama.md`.
+
 ## Depolama
 
 MVP için:

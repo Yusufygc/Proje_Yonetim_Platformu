@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QDialog,
     QFrame,
     QHBoxLayout,
@@ -123,6 +124,8 @@ class IdeasPage(QWidget):
 
         self._list_widget = QListWidget(parent=list_container)
         self._list_widget.setObjectName("ideas_list")
+        self._list_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self._list_widget.setDefaultDropAction(Qt.DropAction.MoveAction)
         self._list_widget.itemSelectionChanged.connect(self._on_selection_changed)
         list_layout.addWidget(self._list_widget)
 
@@ -199,6 +202,7 @@ class IdeasPage(QWidget):
         self._controller.idea_deleted.connect(self._on_idea_deleted)
         self._controller.idea_converted.connect(self._on_idea_changed)
         self._controller.error_occurred.connect(self._on_error)
+        self._list_widget.model().rowsMoved.connect(self._on_ideas_row_moved)
 
     def _on_ideas_loaded(self, ideas: list[Idea]) -> None:
         self._list_widget.clear()
@@ -220,6 +224,10 @@ class IdeasPage(QWidget):
 
         if not self._selected_idea_id or not self._list_widget.selectedItems():
             self._show_empty_state()
+
+    def _on_ideas_row_moved(self, *_args: object) -> None:
+        ordered_ids = [self._list_widget.item(i).idea.id for i in range(self._list_widget.count())]
+        self._controller.reorder(ordered_ids)
 
     def _on_selection_changed(self) -> None:
         selected = self._list_widget.selectedItems()

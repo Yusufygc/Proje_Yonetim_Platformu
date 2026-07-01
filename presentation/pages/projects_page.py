@@ -28,6 +28,7 @@ from presentation.dialogs.project_dialog import ProjectDialog
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
 from presentation.widgets.animated_button import AnimatedButton
+from presentation.widgets.drag_reorder import DragReorderController
 from presentation.widgets.project_detail_panel import ProjectDetailPanel
 from presentation.widgets.project_list_item import ProjectListItem
 from presentation.widgets.skeleton_loader import SkeletonLoader
@@ -52,6 +53,9 @@ class ProjectsPage(QWidget):
         self._list_items: dict[int, ProjectListItem] = {}
         self._stages = []
         self._setup_ui()
+        self._drag_controller = DragReorderController(
+            self._list_layout, self._row_project_id, self._on_rows_reordered, parent=self
+        )
         self._connect_signals()
         self._subscribe_events()
         self._controller.load_projects()
@@ -210,6 +214,14 @@ class ProjectsPage(QWidget):
         count = self._list_layout.count()
         self._list_layout.insertWidget(count - 1, item)
         self._list_items[project.id] = item
+        self._drag_controller.install(item)
+
+    @staticmethod
+    def _row_project_id(row: QWidget) -> int | None:
+        return getattr(row, "project_id", None)
+
+    def _on_rows_reordered(self, ordered_ids: list[int]) -> None:
+        self._controller.reorder(ordered_ids)
 
     def _clear_list(self) -> None:
         for item in self._list_items.values():

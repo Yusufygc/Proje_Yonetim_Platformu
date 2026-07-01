@@ -192,6 +192,11 @@ class ProjectService:
         self._repo.delete(project_id)
         logger.info("Proje silindi: id=%d", project_id)
 
+    def reorder(self, ordered_ids: list[int]) -> None:
+        if not ordered_ids:
+            return
+        self._repo.reorder(ordered_ids)
+
     def recalculate_progress(self, project_id: int) -> Project:
         """Görev tamamlanma oranından proje ilerlemesini günceller."""
         project = self.get_project(project_id)

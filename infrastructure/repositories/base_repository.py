@@ -81,6 +81,21 @@ class BaseRepository(Generic[T]):
             if entity is not None:
                 sess.delete(entity)
 
+    def _apply_order(self, ordered_ids: list[int], order_field: str) -> None:
+        """ID listesindeki sırayı 0'dan başlayarak order_field kolonuna yazar.
+
+        Sürükle-bırak sonrası kalıcılaştırma için kullanılır (Not/Fikir/Proje
+        listeleri); kolon adı modele göre değiştiğinden alt sınıf belirler.
+        """
+        if not ordered_ids:
+            return
+        with self._db.session() as sess:
+            for index, entity_id in enumerate(ordered_ids):
+                entity = sess.get(self.model, entity_id)
+                if entity is not None:
+                    setattr(entity, order_field, index)
+            sess.flush()
+
 
 class ProjectScopedRepository(BaseRepository[T]):
     """project_id kolonuna sahip modeller için ortak proje-bazlı sorgu."""

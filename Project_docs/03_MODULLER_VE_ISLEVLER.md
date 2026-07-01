@@ -48,6 +48,10 @@ Temel alanlar:
 - Portfolyoya eklensin mi?
 - Arşivlendi mi?
 
+Liste görünümü (Uygulandı, 2026-07-01): kullanıcı sol panelde projeleri sürükleyerek
+kendi sırasını (`display_order`) belirleyebilir; kartlar soluk dolgu zeminli, ayrık
+görünümdedir. Detay: `07_TEKNIK_MIMARI.md`, `docs/wiki/liste-siralama.md`.
+
 Önerilen proje türleri:
 
 - Yazılım.
@@ -91,6 +95,9 @@ Fikir durumları:
 
 - "Projeye dönüştür" butonu.
 - Bu aksiyon yeni proje oluşturur ve fikri kaynak fikir olarak bağlar.
+
+Liste görünümü (Uygulandı, 2026-07-01): fikirler sürükle-bırak ile yeniden
+sıralanabilir (`sort_order`). Detay: `docs/wiki/liste-siralama.md`.
 
 ## 4. Süreç İzleme
 
@@ -147,6 +154,11 @@ Görev türleri:
 - Dokümantasyon.
 - Tasarım.
 - Test.
+
+Sıralama (Düzeltildi, 2026-07-01): yeni görev oluşturulurken `order_index`
+otomatik hesaplanır (`TaskRepository.next_order_index`, kardeş grubunun
+`max+1`'i); "Hızlı Ekle" ile eklenen görev artık listenin başına değil
+sonuna düşer.
 
 Görev görünümleri:
 
@@ -218,6 +230,9 @@ Not türleri:
 - Yayın notu.
 
 Notlar Markdown desteklemeli. İlk sürümde basit plain text yeterli olabilir, ama veri modeli Markdown'a uygun tutulmalı.
+
+Liste görünümü (Uygulandı, 2026-07-01): notlar sürükle-bırak ile yeniden
+sıralanabilir (`sort_order`). Detay: `docs/wiki/liste-siralama.md`.
 
 ## 9. Kaynaklar
 

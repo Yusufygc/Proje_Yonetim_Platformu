@@ -57,3 +57,10 @@ class MemoController(QObject):
 
     def get_sync(self, memo_id: int) -> Optional[Memo]:
         return self._service.get_by_id_optional(memo_id)
+
+    def reorder(self, ordered_ids: list[int]) -> None:
+        try:
+            self._service.reorder(ordered_ids)
+        except Exception as exc:
+            logger.error("Memolar yeniden siralanamadi: %s", exc)
+            self.error_occurred.emit("Memolar sıralanırken hata oluştu.")

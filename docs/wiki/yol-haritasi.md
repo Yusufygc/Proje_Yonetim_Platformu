@@ -28,6 +28,15 @@ Kaynak analiz: `Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu 
   `VoiceInputButton`/`attach_voice_button`. Görev/fikir başlığı, hızlı ekle ve tüm uzun
   metin alanlarında mikrofon. InfoPage'e özellik kartı + ipucu eklendi ([[sesli-komut]]).
 
+## P6 — Tamamlandı (2026-07-01)
+- ✅ **Liste sıralama**: Notlar/Fikirler/Projeler'de sürükle-bırak; `sort_order`/
+  `display_order` + `DragReorderController` ([[liste-siralama]]).
+- ✅ **Soluk proje kartı**: `ProjectListItem` varsayılan zemin `@surface` + `1px @border`
+  ile ayrık kart görünümüne kavuştu (`project_list_item.qss`).
+- ✅ **Hızlı ekle sıra düzeltmesi**: yeni görev artık kardeş grubunun sonuna ekleniyor
+  (`TaskRepository.next_order_index`), önceden `order_index` hesaplanmadığı için başa
+  düşüyordu.
+
 ## Sürekli kuyruk
 - L10N migrasyonu: 21 dosya allowlist'te ([[l10n-string-yonetimi]]).
 - ✅ Tamamlandı (2026-06-13): UI'daki Service Locator çağrıları (Theme/Icon/String/Pref/EventBus) constructor injection'a çevrildi; factory'ler `di.<manager>` ile besler ([[di-container]]).
