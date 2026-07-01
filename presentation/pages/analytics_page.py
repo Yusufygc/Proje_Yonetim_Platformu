@@ -118,6 +118,7 @@ class AnalyticsPage(QWidget):
             ("completion_rate", "analytics_kpi_completion_rate", "Oran %", "analytics_kpi_completion_rate_desc", "Biten / (biten + açık)"),  # l10n: data
             ("streak_days", "analytics_kpi_streak_days", "Seri (gün)", "analytics_kpi_streak_days_desc", "Arka arkaya aktif gün"),  # l10n: data
             ("on_time_rate", "analytics_kpi_on_time_rate", "Zamanında %", "analytics_kpi_on_time_rate_desc", "Vadesi geçmeden biten"),  # l10n: data
+            ("best_period", "analytics_kpi_best_period", "En İyi Dönem", "analytics_kpi_best_period_desc", "En çok görev biten dönem"),  # l10n: data
         ]
         for key, label_key, label_default, desc_key, desc_default in kpi_defs:
             val_label = self._make_kpi_card(row, tr(label_key, label_default), tr(desc_key, desc_default))
@@ -132,14 +133,14 @@ class AnalyticsPage(QWidget):
         inner.setContentsMargins(Spacing.XL, Spacing.XL, Spacing.XL, Spacing.XL)
         inner.setSpacing(Spacing.XS)
         lbl_title = QLabel(title, parent=card)
-        lbl_title.setProperty("cssClass", "stat-card-title")
+        lbl_title.setProperty("cssClass", "analytics-card-title")
         inner.addWidget(lbl_title)
         lbl_val = QLabel("—", parent=card)
         lbl_val.setProperty("cssClass", "stat-card-value")
         inner.addWidget(lbl_val)
         if description:
             lbl_desc = QLabel(description, parent=card)
-            lbl_desc.setProperty("cssClass", "project-list-meta")
+            lbl_desc.setProperty("cssClass", "analytics-card-desc")
             inner.addWidget(lbl_desc)
         layout.addWidget(card)
         return lbl_val
@@ -179,7 +180,6 @@ class AnalyticsPage(QWidget):
         ), 1)
         vbox.addLayout(bottom)
 
-        vbox.addWidget(self._build_time_totals_band(container))
         return container
 
     def _build_chart_panel(
@@ -192,40 +192,14 @@ class AnalyticsPage(QWidget):
         inner.setContentsMargins(Spacing.LG, Spacing.MD, Spacing.LG, Spacing.MD)
         inner.setSpacing(Spacing.XS)
         lbl_title = QLabel(title, parent=panel)
-        lbl_title.setProperty("cssClass", "section-header")
+        lbl_title.setProperty("cssClass", "analytics-panel-title")
         inner.addWidget(lbl_title)
         lbl_desc = QLabel(description, parent=panel)
-        lbl_desc.setProperty("cssClass", "project-list-meta")
+        lbl_desc.setProperty("cssClass", "analytics-card-desc")
         inner.addWidget(lbl_desc)
         chart.setParent(panel)
         inner.addWidget(chart, 1)
         return panel
-
-    def _build_time_totals_band(self, parent: QWidget) -> QFrame:
-        band = QFrame(parent=parent)
-        band.setProperty("cssClass", "panel")
-        apply_shadow(band, blur_radius=Shadow.CARD_BLUR, y_offset=Shadow.CARD_Y, alpha=Shadow.CARD_ALPHA)
-        row = QHBoxLayout(band)
-        row.setContentsMargins(Spacing.XL, Spacing.MD, Spacing.XL, Spacing.MD)
-        row.setSpacing(Spacing.XXXL)
-        self._kpi_labels["estimated"] = self._add_inline_kpi(row, band, tr("analytics_kpi_estimated", "Tahmini Süre"))
-        self._kpi_labels["spent"] = self._add_inline_kpi(row, band, tr("analytics_kpi_spent", "Harcanan Süre"))
-        self._kpi_labels["best_period"] = self._add_inline_kpi(row, band, tr("analytics_kpi_best_period", "En İyi Dönem"))
-        row.addStretch()
-        return band
-
-    @staticmethod
-    def _add_inline_kpi(layout: QHBoxLayout, parent: QWidget, title: str) -> QLabel:
-        grp = QVBoxLayout()
-        grp.setSpacing(2)
-        t = QLabel(title, parent=parent)
-        t.setProperty("cssClass", "stat-card-title")
-        grp.addWidget(t)
-        v = QLabel("—", parent=parent)
-        v.setProperty("cssClass", "section-header")
-        grp.addWidget(v)
-        layout.addLayout(grp)
-        return v
 
     # ── Sinyal bağlantıları ──────────────────────────────────────────────────
 
@@ -284,10 +258,6 @@ class AnalyticsPage(QWidget):
         self._kpi_labels["streak_days"].setText(str(kpis.get("streak_days", 0)))
         on_time = kpis.get("on_time_rate", 0.0)
         self._kpi_labels["on_time_rate"].setText(f"{on_time:.1f} %")
-        est = kpis.get("estimated_minutes_total", 0)
-        spent = kpis.get("spent_minutes_total", 0)
-        self._kpi_labels["estimated"].setText(_fmt_minutes(est))
-        self._kpi_labels["spent"].setText(_fmt_minutes(spent))
         best = kpis.get("best_period_label", "—")
         best_cnt = kpis.get("best_period_count", 0)
         self._kpi_labels["best_period"].setText(f"{best} ({best_cnt})")
@@ -333,10 +303,3 @@ class AnalyticsPage(QWidget):
 
     def _on_error(self, message: str) -> None:
         logger.error("Analitik sayfası hatası: %s", message)  # l10n: log
-
-
-def _fmt_minutes(minutes: int) -> str:
-    if minutes < 60:
-        return f"{minutes} dk"
-    h, m = divmod(minutes, 60)
-    return f"{h}s {m}dk" if m else f"{h}s"

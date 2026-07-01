@@ -156,8 +156,6 @@ class AnalyticsService:
             "best_period_label": best_label,
             "best_period_count": best_count,
             "on_time_rate": self._on_time_rate(sess, start, end, project_id),
-            "estimated_minutes_total": self._time_total(sess, start, end, project_id, Task.estimated_minutes),
-            "spent_minutes_total": self._time_total(sess, start, end, project_id, Task.spent_minutes),
         }
 
     def _total_completed(
@@ -218,19 +216,6 @@ class AnalyticsService:
             return 0.0
         on_time = sum(1 for r in rows if r.completed_at and r.completed_at.date() <= r.due_date)
         return round(on_time / len(rows) * 100, 1)
-
-    def _time_total(
-        self, sess: Any, start: datetime, end: datetime, project_id: int | None, col: Any
-    ) -> int:
-        stmt = (
-            select(func.coalesce(func.sum(col), 0))
-            .where(Task.status == TaskStatus.DONE.value)
-            .where(Task.completed_at >= start)
-            .where(Task.completed_at <= end)
-        )
-        if project_id is not None:
-            stmt = stmt.where(Task.project_id == project_id)
-        return sess.scalar(stmt) or 0
 
     @staticmethod
     def _best_period(time_series: list[tuple[str, int]]) -> tuple[str, int]:

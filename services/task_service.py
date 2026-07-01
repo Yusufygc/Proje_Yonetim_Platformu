@@ -191,6 +191,8 @@ class TaskService:
     def _apply_status_side_effects(self, task: Task, old_status: str | None) -> None:
         if task.status == TaskStatus.DONE.value and old_status != TaskStatus.DONE.value:
             task.completed_at = datetime.now(timezone.utc)
+            # Tamamlanan gorev kardes grubunun sonuna alinir (WBS listesinde en alta iner).
+            task.order_index = self._repo.next_order_index(task.project_id, task.parent_task_id)
         elif task.status != TaskStatus.DONE.value:
             task.completed_at = None
         if task.status != TaskStatus.BLOCKED.value:

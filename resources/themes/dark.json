@@ -20,7 +20,7 @@
   "sidebar_hover_bg": "#2A4848",
   "sidebar_active_bg": "#2F4F4F",
   "h-sidebar_bg": "#2A4848",
-  "stage_active": "#678180",
+  "stage_active": "#3B82F6",
   "stage_done": "#22C55E",
   "success_alpha": "#22C55E22",
   "warning_alpha": "#F59E0B22",
@@ -28,7 +28,7 @@
   "accent_alpha": "#67818022",
   "secondary_alpha": "#A7B7B422",
   "muted_alpha": "#8FA2A022",
-  "stage_active_alpha": "#67818022",
+  "stage_active_alpha": "#3B82F622",
   "stage_done_alpha": "#22C55E22",
   "icon_on_accent": "#FFFFFF"
 }
