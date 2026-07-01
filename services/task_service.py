@@ -51,6 +51,9 @@ class TaskService:
         parent_task_id = kwargs.get("parent_task_id")
         if parent_task_id is not None:
             self._validate_parent(project_id, int(parent_task_id))
+        if "order_index" not in kwargs:
+            parent_id = int(parent_task_id) if parent_task_id is not None else None
+            kwargs["order_index"] = self._repo.next_order_index(project_id, parent_id)
         task = Task(project_id=project_id, title=str(title).strip(), **kwargs)
         created = self._repo.create(task)
         self._log(project_id, "TASK_CREATED", f"{created.title} gorevi olusturuldu.", "task", created.id)

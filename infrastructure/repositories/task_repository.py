@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from domain.models.checklist_item import ChecklistItem
@@ -23,6 +23,23 @@ class TaskRepository(ProjectScopedRepository[Task]):
     def _project_order(self) -> tuple:
         # Kök görevler önce, ardından parent ve sıra indeksine göre WBS düzeni.
         return (Task.parent_task_id.is_not(None), Task.parent_task_id, Task.order_index, Task.id)
+
+    def next_order_index(self, project_id: int, parent_task_id: Optional[int]) -> int:
+        """Aynı proje + aynı üst görev (kardeş grubu) içindeki bir sonraki sıra değeri.
+
+        Yeni görev her zaman kardeş grubunun sonuna eklensin diye kullanılır;
+        aksi halde model varsayılanı (0) ile başa/ortaya düşer.
+        """
+        with self._db.session() as sess:
+            stmt = select(func.coalesce(func.max(Task.order_index), -1) + 1).where(
+                Task.project_id == project_id
+            )
+            stmt = (
+                stmt.where(Task.parent_task_id.is_(None))
+                if parent_task_id is None
+                else stmt.where(Task.parent_task_id == parent_task_id)
+            )
+            return int(sess.scalar(stmt) or 0)
 
     def get_all(self) -> list[Task]:
         with self._db.session() as sess:
