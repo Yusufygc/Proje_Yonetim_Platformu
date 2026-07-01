@@ -11,11 +11,11 @@ QFrame#stage_card[stage-status="DONE"]        { border-left: 2px solid @stage_do
 QFrame#stage_card[stage-status="NOT_STARTED"] { border: none; }
 QFrame#stage_card[stage-status="SKIPPED"]     { border: none; }
 
-QLabel#stage_dot { font-size: 10px; }
-QLabel#stage_dot[stage-status="ACTIVE"]      { color: @stage_active; }
-QLabel#stage_dot[stage-status="DONE"]        { color: @stage_done;   }
-QLabel#stage_dot[stage-status="NOT_STARTED"] { color: @border;       }
-QLabel#stage_dot[stage-status="SKIPPED"]     { color: @border;       }
+QFrame#stage_dot { border-radius: 4px; }
+QFrame#stage_dot[stage-status="ACTIVE"]      { background-color: @stage_active; }
+QFrame#stage_dot[stage-status="DONE"]        { background-color: @stage_done;   }
+QFrame#stage_dot[stage-status="NOT_STARTED"] { background-color: @border;       }
+QFrame#stage_dot[stage-status="SKIPPED"]     { background-color: @border;       }
 
 QLabel#stage_name { font-size: 13px; font-weight: 500; }
 QLabel#stage_name[stage-status="ACTIVE"]      { color: @text_primary;   font-weight: 700; }

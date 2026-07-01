@@ -4,7 +4,7 @@ complete_requested(int) ve activate_requested(int) sinyalleri üzerinden aksiyon
 """
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -64,9 +64,6 @@ class StageTimelineWidget(QWidget):
 
     def _build_row(self, stage: ProjectStage, has_active: bool) -> QFrame:
         """Tek bir aşama satırı oluşturur; duruma göre buton ve QSS property uygular."""
-        is_active = stage.status == StageStatus.ACTIVE.value
-        is_pending = stage.status == StageStatus.NOT_STARTED.value
-
         card = QFrame(parent=self)
         card.setObjectName("stage_card")
         card.setProperty("stage-status", stage.status)
@@ -76,22 +73,43 @@ class StageTimelineWidget(QWidget):
         layout.setContentsMargins(14, Spacing.XS, 14, Spacing.XS)
         layout.setSpacing(Spacing.MD)
 
-        dot = QLabel("●", parent=card)
-        dot.setObjectName("stage_dot")
-        dot.setProperty("stage-status", stage.status)
-        layout.addWidget(dot)
+        layout.addWidget(self._build_dot(card, stage.status), 0, Qt.AlignmentFlag.AlignVCenter)
+        layout.addWidget(self._build_name_label(card, stage), 1)
+        layout.addWidget(self._build_badge(card, stage))
+        self._add_action_button(layout, card, stage, has_active)
 
+        return card
+
+    def _build_dot(self, card: QFrame, status: str) -> QFrame:
+        """Sabit boyutlu daire; unicode karakterin font-bağımlı dikey kaymasını önler."""
+        dot = QFrame(parent=card)
+        dot.setObjectName("stage_dot")
+        dot.setProperty("stage-status", status)
+        dot.setFixedSize(8, 8)
+        return dot
+
+    def _build_name_label(self, card: QFrame, stage: ProjectStage) -> QLabel:
         name_lbl = QLabel(stage.name, parent=card)
         name_lbl.setObjectName("stage_name")
         name_lbl.setProperty("stage-status", stage.status)
-        layout.addWidget(name_lbl, 1)
+        return name_lbl
 
+    def _build_badge(self, card: QFrame, stage: ProjectStage) -> QLabel:
         status_text = _status_labels().get(stage.status, stage.status)
         badge = QLabel(status_text, parent=card)
         badge.setObjectName("stage_badge")
         badge.setProperty("stage-status", stage.status)
-        layout.addWidget(badge)
+        return badge
 
+    def _add_action_button(
+        self,
+        layout: QHBoxLayout,
+        card: QFrame,
+        stage: ProjectStage,
+        has_active: bool,
+    ) -> None:
+        is_active = stage.status == StageStatus.ACTIVE.value
+        is_pending = stage.status == StageStatus.NOT_STARTED.value
         if is_active:
             btn = QPushButton(tr("stage_complete_btn", "Tamamla"), parent=card)
             btn.setProperty("cssClass", "btn-primary")
@@ -99,7 +117,6 @@ class StageTimelineWidget(QWidget):
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.complete_requested.emit(sid)
             )
-            layout.addWidget(btn)
         elif is_pending and not has_active:
             btn = QPushButton(tr("stage_activate_btn", "Aktif Et"), parent=card)
             btn.setProperty("cssClass", "btn-secondary")
@@ -107,6 +124,7 @@ class StageTimelineWidget(QWidget):
             btn.clicked.connect(
                 lambda checked=False, sid=stage.id: self.activate_requested.emit(sid)
             )
-            layout.addWidget(btn)
-
-        return card
+        else:
+            return
+        layout.addSpacing(Spacing.SM)
+        layout.addWidget(btn)

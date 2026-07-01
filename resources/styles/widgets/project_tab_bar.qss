@@ -2,9 +2,8 @@
 
 ProjectTabButton {
     background-color: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    border-radius: 0px;
+    border: 2px solid transparent;
+    border-radius: 18px;
     color: @text_secondary;
     font-size: 13px;
     font-weight: 600;
@@ -15,13 +14,11 @@ ProjectTabButton {
 ProjectTabButton:hover:!checked {
     background-color: @surface_raised;
     color: @text_primary;
-    border-radius: 6px 6px 0px 0px;
 }
 
 ProjectTabButton:checked {
     background-color: @accent_alpha;
+    border: 2px solid transparent;
     color: @accent_start;
-    border-bottom: 2px solid @accent_start;
-    border-radius: 6px 6px 0px 0px;
     font-weight: 700;
 }
