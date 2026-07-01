@@ -294,9 +294,16 @@ class ProjectsPage(QWidget):
             item.setVisible(item.matches_filter(text_lower))
 
     def _on_stage_updated(self, _stage: object) -> None:
-        if self._selected_project_id is not None:
-            self._stage_controller.load_stages(self._selected_project_id)
-            self._controller.load_projects()
+        if self._selected_project_id is None:
+            return
+        self._stage_controller.load_stages(self._selected_project_id)
+        project = self._controller.get_project_sync(self._selected_project_id)
+        if project is None:
+            return
+        item = self._list_items.get(project.id)
+        if item:
+            item.update_project(project)
+        self._detail_panel.refresh_header(project)
 
     def _on_stages_loaded(self, stages: list) -> None:
         self._stages = stages

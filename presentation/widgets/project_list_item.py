@@ -62,6 +62,13 @@ class ProjectListItem(QFrame):
     def _setup_ui(self, project: Project) -> None:
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumHeight(Size.LIST_ITEM_MIN_H)
+        # Öncelik kart çerçevesine, durum tek renkli noktaya kodlanır;
+        # metin gitti, erişilebilirlik için ikisi de tooltip'te.
+        self.setProperty("card-priority", project.priority)
+        self.setToolTip(
+            f"{_status_labels().get(project.status, project.status)}  ·  "
+            f"{_priority_labels().get(project.priority, project.priority)}"
+        )
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(Spacing.LG, Spacing.MD, Spacing.LG, Spacing.MD)
@@ -72,18 +79,19 @@ class ProjectListItem(QFrame):
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(Spacing.MD)
 
-        title_lbl = QLabel(project.title, parent=top_row)
-        title_lbl.setProperty("cssClass", "project-list-title")
-        title_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        title_lbl.setMinimumWidth(0)
-        title_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
-        top_layout.addWidget(title_lbl, 1)
+        self._title_lbl = QLabel(project.title, parent=top_row)
+        self._title_lbl.setProperty("cssClass", "project-list-title")
+        self._title_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self._title_lbl.setMinimumWidth(0)
+        self._title_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        top_layout.addWidget(self._title_lbl, 1)
 
-        status_lbl = QLabel(_status_labels().get(project.status, project.status), parent=top_row)
-        status_lbl.setProperty("inline-status", project.status)
-        status_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        status_lbl.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
-        top_layout.addWidget(status_lbl)
+        self._status_dot = QFrame(parent=top_row)
+        self._status_dot.setObjectName("status_dot")
+        self._status_dot.setProperty("status", project.status)
+        self._status_dot.setFixedSize(Size.STATUS_DOT, Size.STATUS_DOT)
+        self._status_dot.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        top_layout.addWidget(self._status_dot, 0, Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(top_row)
 
         bottom_row = QWidget(parent=self)
@@ -91,22 +99,26 @@ class ProjectListItem(QFrame):
         bottom_layout.setContentsMargins(0, 0, 0, 0)
         bottom_layout.setSpacing(Spacing.MD)
 
-        priority_lbl = QLabel(f"● {_priority_labels().get(project.priority, project.priority)}", parent=bottom_row)
-        priority_lbl.setProperty("inline-priority", project.priority)
-        priority_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        bottom_layout.addWidget(priority_lbl)
         bottom_layout.addStretch()
 
-        progress = QProgressBar(parent=bottom_row)
-        progress.setRange(0, 100)
-        progress.setValue(project.progress_percent)
-        progress.setMaximumWidth(Size.PROGRESS_W)
-        progress.setMaximumHeight(Size.PROGRESS_H)
-        progress.setTextVisible(False)
-        progress.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        bottom_layout.addWidget(progress)
+        self._progress = QProgressBar(parent=bottom_row)
+        self._progress.setRange(0, 100)
+        self._progress.setValue(project.progress_percent)
+        self._progress.setMaximumWidth(Size.PROGRESS_W)
+        self._progress.setMaximumHeight(Size.PROGRESS_H)
+        self._progress.setTextVisible(False)
+        self._progress.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        bottom_layout.addWidget(self._progress)
         layout.addWidget(bottom_row)
 
+        self._meta_lbl = QLabel(self._build_meta_text(project), parent=self)
+        self._meta_lbl.setProperty("cssClass", "project-list-meta")
+        self._meta_lbl.setWordWrap(True)
+        self._meta_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        layout.addWidget(self._meta_lbl)
+
+    @staticmethod
+    def _build_meta_text(project: Project) -> str:
         meta_parts = []
         try:
             open_tasks = len([t for t in project.tasks if t.status not in {"DONE", "CANCELLED"}])
@@ -120,11 +132,7 @@ class ProjectListItem(QFrame):
                 meta_parts.append(tr("card_meta_tags", "Etiket: {tags}").format(tags=", ".join(tags)))
         except Exception:
             pass
-        meta_lbl = QLabel("   ·   ".join(meta_parts), parent=self)
-        meta_lbl.setProperty("cssClass", "project-list-meta")
-        meta_lbl.setWordWrap(True)
-        meta_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        layout.addWidget(meta_lbl)
+        return "   ·   ".join(meta_parts)
 
     def _apply_style(self, selected: bool) -> None:
         self.setProperty("selected", "true" if selected else "false")
@@ -133,6 +141,23 @@ class ProjectListItem(QFrame):
 
     def set_selected(self, selected: bool) -> None:
         self._apply_style(selected)
+
+    def update_project(self, project: Project) -> None:
+        """Widget'ı yok etmeden dinamik alanları günceller (örn. aşama tamamlama sonrası)."""
+        self._title_lbl.setText(project.title)
+        self._title_lower = project.title.lower()
+        self._status_dot.setProperty("status", project.status)
+        self._status_dot.style().unpolish(self._status_dot)
+        self._status_dot.style().polish(self._status_dot)
+        self.setProperty("card-priority", project.priority)
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self._progress.setValue(project.progress_percent)
+        self._meta_lbl.setText(self._build_meta_text(project))
+        self.setToolTip(
+            f"{_status_labels().get(project.status, project.status)}  ·  "
+            f"{_priority_labels().get(project.priority, project.priority)}"
+        )
 
     def matches_filter(self, text: str) -> bool:
         return not text or text in self._title_lower

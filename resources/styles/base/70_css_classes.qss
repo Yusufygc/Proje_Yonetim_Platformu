@@ -30,6 +30,23 @@
 *[cssClass="btn-danger"]           { color: @danger; background: transparent; border: 1px solid @danger; border-radius: 6px; padding: 6px 12px; }
 *[cssClass="btn-danger"]:hover     { background-color: @danger; color: #FFFFFF; }
 
+/* Analitik sayfası dönem butonları (Günlük/Haftalık/Aylık/Yıllık) */
+*[cssClass="btn-toggle"] {
+    background-color: transparent;
+    color: @text_secondary;
+    border: 1px solid @border;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+}
+*[cssClass="btn-toggle"]:hover:!checked { background-color: @surface_raised; color: @text_primary; }
+*[cssClass="btn-toggle"]:checked {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 @accent_start, stop:1 @accent_end);
+    color: #FFFFFF;
+    border: 1px solid transparent;
+}
+
 /* Checklist butonları */
 *[cssClass="chk-done"]    { color: @success; font-size: 14px; border: none; background: transparent; }
 *[cssClass="chk-pending"] { color: @text_muted; font-size: 14px; border: none; background: transparent; }

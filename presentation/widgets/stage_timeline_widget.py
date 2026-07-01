@@ -5,6 +5,7 @@ complete_requested(int) ve activate_requested(int) sinyalleri üzerinden aksiyon
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -14,21 +15,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from core.managers.icon_manager import IconManager, Icons
 from core.managers.theme_manager import ThemeManager
 from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
-from presentation.dimensions import Size, Spacing
+from presentation.dimensions import Shadow, Size, Spacing
 from presentation.utils.i18n import tr
-
-
-def _status_labels() -> dict[str, str]:
-    """Aşama durum etiketleri; dil değişimi her render'da yansısın diye fonksiyon."""
-    return {
-        StageStatus.NOT_STARTED.value: tr("stage_status_not_started", "Bekliyor"),
-        StageStatus.ACTIVE.value: tr("stage_status_active", "Aktif"),
-        StageStatus.DONE.value: tr("stage_status_done", "Tamamlandı"),
-        StageStatus.SKIPPED.value: tr("stage_status_skipped", "Atlandı"),
-    }
+from presentation.utils.ui_utils import apply_shadow
 
 
 class StageTimelineWidget(QWidget):
@@ -54,13 +47,17 @@ class StageTimelineWidget(QWidget):
     def update_stages(self, stages: list[ProjectStage]) -> None:
         """Aşama listesini temizler ve yeniden oluşturur."""
         self._stages = stages
-        while self._rows_layout.count() > 0:
-            item = self._rows_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        has_active = any(s.status == StageStatus.ACTIVE.value for s in stages)
-        for stage in stages:
-            self._rows_layout.addWidget(self._build_row(stage, has_active))
+        self.setUpdatesEnabled(False)
+        try:
+            while self._rows_layout.count() > 0:
+                item = self._rows_layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+            has_active = any(s.status == StageStatus.ACTIVE.value for s in stages)
+            for stage in stages:
+                self._rows_layout.addWidget(self._build_row(stage, has_active))
+        finally:
+            self.setUpdatesEnabled(True)
 
     def _build_row(self, stage: ProjectStage, has_active: bool) -> QFrame:
         """Tek bir aşama satırı oluşturur; duruma göre buton ve QSS property uygular."""
@@ -75,31 +72,51 @@ class StageTimelineWidget(QWidget):
 
         layout.addWidget(self._build_dot(card, stage.status), 0, Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(self._build_name_label(card, stage), 1)
-        layout.addWidget(self._build_badge(card, stage))
         self._add_action_button(layout, card, stage, has_active)
+
+        if stage.status == StageStatus.ACTIVE.value:
+            # Aktif aşamayı diğerlerinden ayıran accent renkli parlama.
+            apply_shadow(
+                card,
+                blur_radius=Shadow.GLOW_BLUR,
+                y_offset=0,
+                alpha=Shadow.GLOW_ALPHA,
+                color=QColor(self._theme.color("stage_active")),
+            )
 
         return card
 
-    def _build_dot(self, card: QFrame, status: str) -> QFrame:
-        """Sabit boyutlu daire; unicode karakterin font-bağımlı dikey kaymasını önler."""
+    def _build_dot(self, card: QFrame, status: str) -> QWidget:
+        """Tamamlanan aşamada tik ikonu, aksi halde durum renkli daire döndürür."""
+        if status == StageStatus.DONE.value:
+            check = self._build_check_icon(card)
+            if check is not None:
+                return check
+        # Sabit boyutlu daire; unicode karakterin font-bağımlı dikey kaymasını önler.
         dot = QFrame(parent=card)
         dot.setObjectName("stage_dot")
         dot.setProperty("stage-status", status)
-        dot.setFixedSize(8, 8)
+        dot.setFixedSize(Size.STAGE_DOT, Size.STAGE_DOT)
         return dot
+
+    def _build_check_icon(self, card: QFrame) -> QLabel | None:
+        """Tamamlanan aşama için tik ikonu; ikon yöneticisi yoksa None (daireye düşülür)."""
+        icons = IconManager.try_instance()
+        if icons is None:
+            return None
+        label = QLabel(parent=card)
+        pixmap = icons.get_icon(Icons.SQUARE_CHECK, self._theme.color("stage_done")).pixmap(
+            Size.STAGE_CHECK, Size.STAGE_CHECK
+        )
+        label.setPixmap(pixmap)
+        label.setFixedSize(Size.STAGE_CHECK, Size.STAGE_CHECK)
+        return label
 
     def _build_name_label(self, card: QFrame, stage: ProjectStage) -> QLabel:
         name_lbl = QLabel(stage.name, parent=card)
         name_lbl.setObjectName("stage_name")
         name_lbl.setProperty("stage-status", stage.status)
         return name_lbl
-
-    def _build_badge(self, card: QFrame, stage: ProjectStage) -> QLabel:
-        status_text = _status_labels().get(stage.status, stage.status)
-        badge = QLabel(status_text, parent=card)
-        badge.setObjectName("stage_badge")
-        badge.setProperty("stage-status", stage.status)
-        return badge
 
     def _add_action_button(
         self,

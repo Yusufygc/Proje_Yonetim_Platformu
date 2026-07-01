@@ -1,80 +1,69 @@
 /* ================================================================
-   BADGES — Durum ve oncelik rozeti stilleri
-   Token'lar ThemeManager tarafindan hex degere donusturulur.
+   BADGES — Durum ve öncelik göstergeleri
+   Dolgusuz (arka plansız) dil: durum renkli nokta, öncelik/rozet
+   renkli metin veya kart çerçevesi ile gösterilir.
+   Token'lar ThemeManager tarafından hex değere dönüştürülür.
    ================================================================ */
 
-/* ── Proje Durum Rozeti (project_detail_panel) ── */
-QLabel[badge-type="proj-status"] {
-    font-size: 14px; font-weight: bold; padding: 4px 10px; border-radius: 8px;
-}
-QLabel[badge-type="proj-status"][badge-value="PLANNED"]   { color: @text_secondary; background: @secondary_alpha; }
-QLabel[badge-type="proj-status"][badge-value="ACTIVE"]    { color: @success;        background: @success_alpha;  }
-QLabel[badge-type="proj-status"][badge-value="ON_HOLD"]   { color: @text_muted;     background: @muted_alpha;     }
-QLabel[badge-type="proj-status"][badge-value="BLOCKED"]   { color: @icon_on_accent; background: @danger;          }
-QLabel[badge-type="proj-status"][badge-value="COMPLETED"] { color: @success;        background: @success_alpha;  }
-QLabel[badge-type="proj-status"][badge-value="ARCHIVED"]  { color: @text_muted;     background: @muted_alpha;     }
-QLabel[badge-type="proj-status"][badge-value="CANCELLED"] { color: @icon_on_accent; background: @danger;          }
+/* ── Durum Noktası (ProjectListItem + project_detail_panel) ──
+   Aktif/Tamamlandı gibi aynı aileden durumlar ayrık renklerle
+   birbirinden ayrılır; metin yerine tek nokta taşır (tooltip destekli). */
+QFrame#status_dot { border-radius: 4px; background-color: @text_secondary; }
+QFrame#status_dot[status="PLANNED"]   { background-color: @text_secondary; }
+QFrame#status_dot[status="ACTIVE"]    { background-color: @success;        }
+QFrame#status_dot[status="ON_HOLD"]   { background-color: @warning;        }
+QFrame#status_dot[status="BLOCKED"]   { background-color: @danger;         }
+QFrame#status_dot[status="COMPLETED"] { background-color: @accent_start;    }
+QFrame#status_dot[status="ARCHIVED"]  { background-color: @text_muted;      }
+QFrame#status_dot[status="CANCELLED"] { background-color: @text_muted;      }
 
-/* ── Proje Oncelik Rozeti (project_detail_panel) ── */
-QLabel[badge-type="proj-priority"] {
-    font-size: 14px; font-weight: bold; padding: 4px 10px; border-radius: 8px;
-}
-QLabel[badge-type="proj-priority"][badge-value="LOW"]      { color: @text_secondary; background: @secondary_alpha; }
-QLabel[badge-type="proj-priority"][badge-value="MEDIUM"]   { color: @accent_start;   background: @accent_alpha;    }
-QLabel[badge-type="proj-priority"][badge-value="HIGH"]     { color: @icon_on_accent; background: @warning;         }
-QLabel[badge-type="proj-priority"][badge-value="CRITICAL"] { color: @icon_on_accent; background: @danger;          }
+/* ── Proje Durum Etiketi (project_detail_panel) — dolgusuz renkli metin ── */
+QLabel[badge-type="proj-status"] { font-size: 14px; font-weight: bold; }
+QLabel[badge-type="proj-status"][badge-value="PLANNED"]   { color: @text_secondary; }
+QLabel[badge-type="proj-status"][badge-value="ACTIVE"]    { color: @success;        }
+QLabel[badge-type="proj-status"][badge-value="ON_HOLD"]   { color: @warning;        }
+QLabel[badge-type="proj-status"][badge-value="BLOCKED"]   { color: @danger;         }
+QLabel[badge-type="proj-status"][badge-value="COMPLETED"] { color: @accent_start;   }
+QLabel[badge-type="proj-status"][badge-value="ARCHIVED"]  { color: @text_muted;     }
+QLabel[badge-type="proj-status"][badge-value="CANCELLED"] { color: @danger;         }
 
-/* ── Satirici durum etiketi (ProjectListItem) ── */
-QLabel[inline-status] { padding: 2px 6px; border-radius: 6px; }
-QLabel[inline-status="PLANNED"]   { font-size: 10px; font-weight: 600; color: @text_secondary; background: @secondary_alpha; }
-QLabel[inline-status="ACTIVE"]    { font-size: 10px; font-weight: 600; color: @success;        background: @success_alpha;  }
-QLabel[inline-status="ON_HOLD"]   { font-size: 10px; font-weight: 600; color: @text_muted;     background: @muted_alpha;     }
-QLabel[inline-status="BLOCKED"]   { font-size: 10px; font-weight: 600; color: @icon_on_accent; background: @danger;          }
-QLabel[inline-status="COMPLETED"] { font-size: 10px; font-weight: 600; color: @success;        background: @success_alpha;  }
-QLabel[inline-status="ARCHIVED"]  { font-size: 10px; font-weight: 600; color: @text_muted;     background: @muted_alpha;     }
-QLabel[inline-status="CANCELLED"] { font-size: 10px; font-weight: 600; color: @icon_on_accent; background: @danger;          }
+/* ── Proje Öncelik Etiketi (project_detail_panel) — dolgusuz renkli metin ── */
+QLabel[badge-type="proj-priority"] { font-size: 14px; font-weight: bold; }
+QLabel[badge-type="proj-priority"][badge-value="LOW"]      { color: @text_secondary; }
+QLabel[badge-type="proj-priority"][badge-value="MEDIUM"]   { color: @accent_start;   }
+QLabel[badge-type="proj-priority"][badge-value="HIGH"]     { color: @warning;        }
+QLabel[badge-type="proj-priority"][badge-value="CRITICAL"] { color: @danger;         }
 
-/* ── Satirici oncelik etiketi (ProjectListItem) ── */
-QLabel[inline-priority] { padding: 2px 6px; border-radius: 6px; }
-QLabel[inline-priority="LOW"]      { font-size: 11px; color: @text_muted;     background: @muted_alpha;     }
-QLabel[inline-priority="MEDIUM"]   { font-size: 11px; color: @accent_start;   background: @accent_alpha;    }
-QLabel[inline-priority="HIGH"]     { font-size: 11px; color: @icon_on_accent; background: @warning;         }
-QLabel[inline-priority="CRITICAL"] { font-size: 11px; color: @icon_on_accent; background: @danger;          }
-
-/* ── ProjectListItem ozel satirici etiketler ── */
+/* ── ProjectListItem özel satıriçi etiketler ── */
 QLabel[cssClass="project-list-title"] { color: @text_primary; font-size: 14px; font-weight: bold; }
 QLabel[cssClass="project-list-desc"]  { color: @text_secondary; font-size: 11px; }
 QLabel[cssClass="project-list-meta"]  { color: @text_muted; font-size: 10px; }
 
-/* ── Fikir Durum Rozeti (ideas_page) ── */
-QLabel[badge-type="idea-status"] {
-    padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;
-}
-QLabel[badge-type="idea-status"][badge-value="RAW"]        { color: @text_muted;     background: transparent;     }
-QLabel[badge-type="idea-status"][badge-value="REVIEWING"]  { color: @warning;        background: @warning_alpha;   }
-QLabel[badge-type="idea-status"][badge-value="VALIDATING"] { color: @accent_start;   background: @accent_alpha;    }
-QLabel[badge-type="idea-status"][badge-value="CONVERTED"]  { color: @success;        background: @success_alpha;   }
-QLabel[badge-type="idea-status"][badge-value="DEFERRED"]   { color: @text_secondary; background: @secondary_alpha; }
-QLabel[badge-type="idea-status"][badge-value="REJECTED"]   { color: @icon_on_accent; background: @danger;          }
+/* ── Fikir Durum Rozeti (ideas_page) — dolgusuz renkli metin ── */
+QLabel[badge-type="idea-status"] { font-weight: bold; font-size: 11px; }
+QLabel[badge-type="idea-status"][badge-value="RAW"]        { color: @text_muted;     }
+QLabel[badge-type="idea-status"][badge-value="REVIEWING"]  { color: @warning;        }
+QLabel[badge-type="idea-status"][badge-value="VALIDATING"] { color: @accent_start;   }
+QLabel[badge-type="idea-status"][badge-value="CONVERTED"]  { color: @success;        }
+QLabel[badge-type="idea-status"][badge-value="DEFERRED"]   { color: @text_secondary; }
+QLabel[badge-type="idea-status"][badge-value="REJECTED"]   { color: @danger;         }
 
-/* ── Gorev Oncelik Rozeti (task_list_widget) ── */
-QLabel[badge-type="task-priority"] {
-    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 7px;
-}
-QLabel[badge-type="task-priority"][badge-value="LOW"]      { color: @text_secondary; background: @secondary_alpha; }
-QLabel[badge-type="task-priority"][badge-value="MEDIUM"]   { color: @accent_start;   background: @accent_alpha;    }
-QLabel[badge-type="task-priority"][badge-value="HIGH"]     { color: @icon_on_accent; background: @warning;         }
-QLabel[badge-type="task-priority"][badge-value="CRITICAL"] { color: @icon_on_accent; background: @danger;          }
+/* ── Görev Öncelik Rozeti (task_list_widget) — dolgusuz renkli metin ── */
+QLabel[badge-type="task-priority"] { font-size: 10px; font-weight: 600; }
+QLabel[badge-type="task-priority"][badge-value="LOW"]      { color: @text_secondary; }
+QLabel[badge-type="task-priority"][badge-value="MEDIUM"]   { color: @accent_start;   }
+QLabel[badge-type="task-priority"][badge-value="HIGH"]     { color: @warning;        }
+QLabel[badge-type="task-priority"][badge-value="CRITICAL"] { color: @danger;         }
 
-/* ── Dashboard istatistik karti ──
-   KPI vurgu sayidadir: baslik secondary, deger primary + buyuk font. */
+/* ── Dashboard istatistik kartı ──
+   KPI vurgu sayıdadır: başlık secondary, değer primary + büyük font. */
 QLabel[cssClass="stat-card-title"] { font-size: 12px; font-weight: 600; color: @text_secondary; letter-spacing: 0.4px; }
 QLabel[cssClass="stat-card-value"] { font-size: 36px; font-weight: 800; color: @text_primary; }
 QLabel[cssClass="stat-card-value-danger"] { font-size: 36px; font-weight: 800; color: @danger; }
 
-/* ── Analitik sayfasi ozel yazi tipleri (okunabilirlik icin buyutulmus,
-   sadece bu sayfada kullanilir; diger sayfalar stat-card-title/section-header/
+/* ── Analitik sayfası özel yazı tipleri (okunabilirlik için büyütülmüş,
+   sadece bu sayfada kullanılır; diğer sayfalar stat-card-title/section-header/
    project-list-meta kullanmaya devam eder) ── */
-QLabel[cssClass="analytics-card-title"] { font-size: 13px; font-weight: 600; color: @text_secondary; letter-spacing: 0.4px; }
-QLabel[cssClass="analytics-card-desc"]  { font-size: 12px; color: @text_muted; }
-QLabel[cssClass="analytics-panel-title"] { font-size: 14px; font-weight: 700; color: @text_primary; }
+QLabel[cssClass="analytics-card-title"] { font-size: 12px; font-weight: 600; color: @text_secondary; letter-spacing: 0.4px; }
+QLabel[cssClass="analytics-card-desc"]  { font-size: 11px; color: @text_muted; }
+QLabel[cssClass="analytics-panel-title"] { font-size: 13px; font-weight: 700; color: @text_primary; }

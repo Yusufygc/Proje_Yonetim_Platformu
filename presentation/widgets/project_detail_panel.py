@@ -154,6 +154,8 @@ class ProjectDetailPanel(QWidget):
         self._stage_timeline.activate_requested.connect(self.activate_stage_requested)
         layout.addWidget(self._stage_timeline)
         layout.addSpacing(16)
+        layout.addWidget(self._build_divider(container))
+        layout.addSpacing(12)
 
         # Navbar sekme çubuğu
         tab_labels = [
@@ -166,11 +168,7 @@ class ProjectDetailPanel(QWidget):
         ]
         self._tab_bar = ProjectTabBar(tabs=tab_labels, parent=container)
         layout.addWidget(self._tab_bar)
-
-        tab_divider = QFrame(parent=container)
-        tab_divider.setFrameShape(QFrame.Shape.HLine)
-        tab_divider.setProperty("cssClass", "divider")
-        layout.addWidget(tab_divider)
+        layout.addWidget(self._build_divider(container))
 
         # İçerik yığını — sekme butonlarıyla senkron indeks sırasında olmalı
         self._tab_stack = QStackedWidget(parent=container)
@@ -273,6 +271,11 @@ class ProjectDetailPanel(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(10)
 
+        self._status_dot = QFrame(parent=row)
+        self._status_dot.setObjectName("status_dot")
+        self._status_dot.setFixedSize(Size.STATUS_DOT, Size.STATUS_DOT)
+        layout.addWidget(self._status_dot, 0, Qt.AlignmentFlag.AlignVCenter)
+
         self._status_badge = QLabel("", parent=row)
         layout.addWidget(self._status_badge)
 
@@ -280,6 +283,13 @@ class ProjectDetailPanel(QWidget):
         layout.addWidget(self._priority_badge)
         layout.addStretch()
         return row
+
+    def _build_divider(self, parent: QWidget) -> QFrame:
+        """İnce yatay ayraç; bölümleri (aşamalar, sekme çubuğu, içerik) birbirinden ayırır."""
+        divider = QFrame(parent=parent)
+        divider.setFrameShape(QFrame.Shape.HLine)
+        divider.setProperty("cssClass", "divider")
+        return divider
 
     def _build_github_row(self, parent: QWidget) -> QWidget:
         row = QWidget(parent=parent)
@@ -297,12 +307,11 @@ class ProjectDetailPanel(QWidget):
         layout.addWidget(self._github_lbl, 1)
         return row
 
-    def show_project(self, project: Project) -> None:
-        """Proje detaylarını günceller ve detay sayfasını gösterir."""
-        self._project_id = project.id
-        self._title_lbl.setText(project.title)
-
+    def _refresh_badges(self, project: Project) -> None:
         status_text, _theme_key = _status_theme_keys().get(project.status, (project.status, "text_secondary"))
+        self._status_dot.setProperty("status", project.status)
+        self._status_dot.style().unpolish(self._status_dot)
+        self._status_dot.style().polish(self._status_dot)
         self._status_badge.setText(status_text)
         self._status_badge.setProperty("badge-type", "proj-status")
         self._status_badge.setProperty("badge-value", project.status)
@@ -319,6 +328,23 @@ class ProjectDetailPanel(QWidget):
         self._priority_badge.setProperty("badge-value", project.priority)
         self._priority_badge.style().unpolish(self._priority_badge)
         self._priority_badge.style().polish(self._priority_badge)
+
+    def refresh_header(self, project: Project) -> None:
+        """Alt sekmeleri (Görevler/Kararlar/Notlar/Kaynaklar) yeniden yüklemeden
+        sadece başlık/rozet/ilerleme günceller — örn. aşama tamamlama sonrası."""
+        if self._project_id != project.id:
+            return
+        self._title_lbl.setText(project.title)
+        self._refresh_badges(project)
+        self._summary_progress.setText(
+            tr("detail_summary_progress", "İlerleme: %{percent}").format(percent=project.progress_percent)
+        )
+
+    def show_project(self, project: Project) -> None:
+        """Proje detaylarını günceller ve detay sayfasını gösterir."""
+        self._project_id = project.id
+        self._title_lbl.setText(project.title)
+        self._refresh_badges(project)
 
         has_desc = bool(project.short_description)
         self._desc_header.setVisible(has_desc)

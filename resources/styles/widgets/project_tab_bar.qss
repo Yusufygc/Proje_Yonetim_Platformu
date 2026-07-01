@@ -3,12 +3,12 @@
 ProjectTabButton {
     background-color: transparent;
     border: 2px solid transparent;
-    border-radius: 18px;
+    border-radius: 14px;
     color: @text_secondary;
     font-size: 13px;
     font-weight: 600;
-    padding: 8px 16px;
-    min-height: 36px;
+    padding: 4px 16px;
+    min-height: 28px;
 }
 
 ProjectTabButton:hover:!checked {
@@ -17,8 +17,8 @@ ProjectTabButton:hover:!checked {
 }
 
 ProjectTabButton:checked {
-    background-color: @accent_alpha;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 @accent_start, stop:1 @accent_end);
     border: 2px solid transparent;
-    color: @accent_start;
+    color: #FFFFFF;
     font-weight: 700;
 }

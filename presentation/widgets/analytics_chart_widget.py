@@ -120,9 +120,22 @@ class AnalyticsChartWidget(QWidget):
         series.attachAxis(x_axis)
         self._chart.legend().setVisible(False)
 
-    def apply_theme(self, dark: bool) -> None:
+    def apply_theme(self, dark: bool, surface_color: str, text_color: str) -> None:
+        """Qt'nin hazır koyu/açık temasını uygular, ardından arka plan/metin
+        renklerini uygulamanın gerçek ThemeManager paletiyle senkronlar —
+        aksi halde grafik dark modda bile beyaz zeminde kalır."""
         theme = QChart.ChartTheme.ChartThemeDark if dark else QChart.ChartTheme.ChartThemeLight
         self._chart.setTheme(theme)
+        surface = QColor(surface_color)
+        text = QColor(text_color)
+        self._chart.setBackgroundBrush(surface)
+        self._chart.setBackgroundPen(surface)
+        self._chart.setTitleBrush(text)
+        self._chart.legend().setLabelColor(text)
+        for axis in self._chart.axes():
+            axis.setLabelsColor(text)
+            axis.setTitleBrush(text)
+        self._view.setBackgroundBrush(surface)
 
     def clear(self) -> None:
         self._chart.setTitle("")

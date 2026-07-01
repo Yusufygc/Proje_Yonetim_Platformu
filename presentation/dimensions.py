@@ -44,6 +44,9 @@ class Size:
     BTN_MD_H38 = 38                 # Dialog ana butonları (Cancel, Save)
     STAGE_BTN_H = 24                # Aşama satırı içi "Tamamla/Aktif Et" butonu — kompakt
     STAGE_ROW_H = 36                # Aşama satırı sabit yüksekliği (8 aşamayı yarım ekran yutmadan göstermek için)
+    STAGE_DOT = 8                   # Aşama madde imi (daire) kenarı
+    STAGE_CHECK = 14                # Tamamlanan aşama tik ikonu kenarı
+    STATUS_DOT = 8                  # Proje durum göstergesi (renkli nokta) kenarı
     BTN_LG_W = 90                   # Büyük dialog butonu min genişliği
     BTN_LG_H = 38                   # Büyük dialog butonu min yüksekliği
     BTN_NEW_PROJECT_W = 130         # "Yeni Proje" AnimatedButton genişliği
@@ -107,6 +110,10 @@ class Shadow:
     LIST_BLUR = 15
     LIST_Y = 3
     LIST_ALPHA = 15
+
+    # Aktif aşama glow (parlama) — accent renkli, dikey offset yok
+    GLOW_BLUR = 18
+    GLOW_ALPHA = 150
 
     # Toast gölgesi
     TOAST_BLUR = 20

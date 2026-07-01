@@ -148,10 +148,10 @@ class AnalyticsPage(QWidget):
         container = QWidget(parent=self)
         vbox = QVBoxLayout(container)
         vbox.setContentsMargins(0, 0, 0, 0)
-        vbox.setSpacing(Spacing.XL)
+        vbox.setSpacing(Spacing.LG)
 
         self._time_chart = AnalyticsChartWidget(tr("analytics_chart_completed_title", "Tamamlanan Görev"), parent=container)
-        self._time_chart.setMinimumHeight(220)
+        self._time_chart.setMinimumHeight(170)
         vbox.addWidget(self._build_chart_panel(
             container,
             tr("analytics_panel_time_title", "Zaman İçinde Tamamlanan Görevler"),
@@ -160,9 +160,9 @@ class AnalyticsPage(QWidget):
         ))
 
         bottom = QHBoxLayout()
-        bottom.setSpacing(Spacing.XL)
+        bottom.setSpacing(Spacing.LG)
         self._pie_chart = AnalyticsChartWidget(tr("analytics_panel_priority_title", "Öncelik Dağılımı"), parent=container)
-        self._pie_chart.setMinimumHeight(200)
+        self._pie_chart.setMinimumHeight(150)
         bottom.addWidget(self._build_chart_panel(
             container,
             tr("analytics_panel_priority_title", "Öncelik Dağılımı"),
@@ -170,7 +170,7 @@ class AnalyticsPage(QWidget):
             self._pie_chart,
         ), 1)
         self._project_chart = AnalyticsChartWidget(tr("analytics_panel_project_title", "Proje Dağılımı"), parent=container)
-        self._project_chart.setMinimumHeight(200)
+        self._project_chart.setMinimumHeight(150)
         bottom.addWidget(self._build_chart_panel(
             container,
             tr("analytics_panel_project_title", "Proje Dağılımı"),
@@ -189,7 +189,7 @@ class AnalyticsPage(QWidget):
         panel.setProperty("cssClass", "panel")
         apply_shadow(panel, blur_radius=Shadow.CARD_BLUR, y_offset=Shadow.CARD_Y, alpha=Shadow.CARD_ALPHA)
         inner = QVBoxLayout(panel)
-        inner.setContentsMargins(Spacing.XL, Spacing.LG, Spacing.XL, Spacing.LG)
+        inner.setContentsMargins(Spacing.LG, Spacing.MD, Spacing.LG, Spacing.MD)
         inner.setSpacing(Spacing.XS)
         lbl_title = QLabel(title, parent=panel)
         lbl_title.setProperty("cssClass", "section-header")
@@ -322,9 +322,11 @@ class AnalyticsPage(QWidget):
 
     def _apply_chart_theme(self) -> None:
         dark = self._theme.current_theme == "dark"
+        surface = self._theme.color("surface")
+        text = self._theme.color("text_primary")
         for chart in (self._time_chart, self._pie_chart, self._project_chart):
             if chart:
-                chart.apply_theme(dark)
+                chart.apply_theme(dark, surface, text)
 
     def _on_theme_changed(self, _theme: str) -> None:
         self._apply_chart_theme()

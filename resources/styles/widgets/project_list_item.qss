@@ -5,8 +5,13 @@
 ProjectListItem {
     background-color: @surface;
     border: 1px solid @border;
-    border-left: 3px solid transparent;
     border-radius: 8px;
 }
+/* Öncelik tüm kart çerçevesine kodlanır; kalınlık sabit (1px) tutulur
+   ki durum değişince satır yüksekliği/hizası kaymasın. Düşük/Orta nötr. */
+ProjectListItem[card-priority="HIGH"]     { border: 1px solid @warning; }
+ProjectListItem[card-priority="CRITICAL"] { border: 1px solid @danger; }
 ProjectListItem:hover { background-color: @surface_raised; }
-ProjectListItem[selected="true"] { background-color: @surface_raised; border-left: 3px solid @accent_start; }
+/* Seçim öncelik çerçevesini ezer (geçici durum, dikkat önceliği yüksek);
+   bu kural öncelik kurallarından SONRA gelmeli ki eşit özgüllükte kazansın. */
+ProjectListItem[selected="true"] { background-color: @surface_raised; border: 1px solid @accent_start; }
