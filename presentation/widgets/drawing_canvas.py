@@ -17,6 +17,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from presentation.utils.i18n import tr
+
 _Stroke = tuple[QPainterPath, QColor, int]
 
 
@@ -168,14 +170,14 @@ class DrawingToolbar(QWidget):
 
         self._color_btn = self._make_color_btn()
 
-        lbl = QLabel("Kalınlık:", parent=self)
+        lbl = QLabel(tr("drawing_toolbar_width_label", "Kalınlık:"), parent=self)
         lbl.setProperty("cssClass", "text-muted")
 
         self._width_slider = QSlider(Qt.Orientation.Horizontal, parent=self)
         self._width_slider.setRange(1, 20)
         self._width_slider.setValue(3)
         self._width_slider.setFixedWidth(100)
-        self._width_slider.setToolTip("Kalem kalınlığı")
+        self._width_slider.setToolTip(tr("drawing_toolbar_width_tooltip", "Kalem kalınlığı"))
         self._width_slider.valueChanged.connect(self._canvas.set_pen_width)
 
         sep = QFrame(parent=self)
@@ -191,7 +193,7 @@ class DrawingToolbar(QWidget):
 
     def _make_color_btn(self) -> QPushButton:
         btn = QPushButton("●", parent=self)
-        btn.setToolTip("Kalem rengi seç")
+        btn.setToolTip(tr("drawing_toolbar_pen_color_tooltip", "Kalem rengi seç"))
         btn.setFixedSize(28, 26)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.setStyleSheet(
@@ -230,7 +232,9 @@ class DrawingToolbar(QWidget):
         return btn
 
     def _pick_color(self) -> None:
-        color = QColorDialog.getColor(self._current_color, parent=self, title="Kalem rengi seç")
+        color = QColorDialog.getColor(
+            self._current_color, parent=self, title=tr("drawing_toolbar_pen_color_tooltip", "Kalem rengi seç")
+        )
         if not color.isValid():
             return
         self._current_color = color

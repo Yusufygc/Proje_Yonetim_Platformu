@@ -23,16 +23,7 @@ from core.managers.theme_manager import ThemeManager
 from domain.models.project import Project
 from presentation.dimensions import Spacing
 from presentation.utils.i18n import tr
-
-_STATUS_LABELS: dict[str, str] = {
-    "PLANNED": "Planlandı",
-    "ACTIVE": "Aktif",
-    "ON_HOLD": "Beklemede",
-    "BLOCKED": "Engellendi",
-    "COMPLETED": "Tamamlandı",
-    "CANCELLED": "İptal Edildi",
-    "ARCHIVED": "Arşivlendi",
-}
+from presentation.widgets.project_list_item import _status_labels
 
 
 class _TrashButton(QPushButton):
@@ -87,7 +78,7 @@ class _ArchiveRow(QFrame):
         title_lbl.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         layout.addWidget(title_lbl, 1)
 
-        status_text = _STATUS_LABELS.get(project.status, project.status)
+        status_text = _status_labels().get(project.status, project.status)
         status_lbl = QLabel(status_text, parent=self)
         status_lbl.setProperty("cssClass", "text-muted")
         status_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)

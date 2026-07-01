@@ -31,17 +31,18 @@ from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
 
 _LANGUAGES: list[tuple[str, str]] = [
-    ("Türkçe", "tr"),
+    ("Türkçe", "tr"),  # l10n: data — dil adı kendi dilinde gösterilir, çevrilmez
     ("English", "en"),
 ]
 
-_ACCENT_PRESETS: list[tuple[str, str]] = [
-    ("#6366F1", "İndigo"),
-    ("#0EA5E9", "Mavi"),
-    ("#10B981", "Yeşil"),
-    ("#F59E0B", "Amber"),
-    ("#EC4899", "Pembe"),
-    ("#678180", "Deniz"),
+# (hex, i18n_key, default_label) — tr() ile chip tooltip'inde tüketilir
+_ACCENT_PRESETS: list[tuple[str, str, str]] = [
+    ("#6366F1", "settings_accent_indigo", "İndigo"),  # l10n: data — tr() ile chip tooltip'inde tüketilir
+    ("#0EA5E9", "settings_accent_blue", "Mavi"),
+    ("#10B981", "settings_accent_green", "Yeşil"),  # l10n: data
+    ("#F59E0B", "settings_accent_amber", "Amber"),
+    ("#EC4899", "settings_accent_pink", "Pembe"),
+    ("#678180", "settings_accent_teal", "Deniz"),
 ]
 
 
@@ -160,10 +161,10 @@ class SettingsPage(QWidget):
         accent_lbl.setFixedWidth(130)
         accent_row.addWidget(accent_lbl)
 
-        for hex_color, label in _ACCENT_PRESETS:
+        for hex_color, label_key, default_label in _ACCENT_PRESETS:
             chip = QPushButton(parent=section)
             chip.setFixedSize(28, 28)
-            chip.setToolTip(label)
+            chip.setToolTip(tr(label_key, default_label))
             chip.setStyleSheet(
                 f"QPushButton {{ background: {hex_color}; border-radius: 14px;"
                 f" border: 2px solid transparent; }}"
@@ -329,7 +330,7 @@ class SettingsPage(QWidget):
         layout.addWidget(prev_lbl)
 
         self._font_preview = QLabel(
-            "Hızlı kahverengi tilki — The quick brown fox 0123456789",
+            tr("settings_font_preview_text", "Hızlı kahverengi tilki — The quick brown fox 0123456789"),
             parent=section,
         )
         self._font_preview.setProperty("cssClass", "text-primary")
@@ -464,7 +465,7 @@ class SettingsPage(QWidget):
     def _update_del_btn_state(self, btn: QPushButton, name: str) -> None:
         is_builtin = self._theme.is_builtin(name)
         btn.setEnabled(not is_builtin)
-        btn.setToolTip("Yerleşik tema silinemez." if is_builtin else "")
+        btn.setToolTip(tr("settings_theme_builtin_delete_disabled", "Yerleşik tema silinemez.") if is_builtin else "")
 
     def _update_font_preview(self) -> None:
         family = self._font_combo.currentText()
@@ -528,7 +529,7 @@ class SettingsPage(QWidget):
         dest, ok = QInputDialog.getText(
             self,
             tr("settings_theme_copy_btn", "Kopyala"),
-            "Yeni tema adı:",
+            tr("settings_theme_new_name_label", "Yeni tema adı:"),
             text=f"{name}_kopya",
         )
         if ok and dest.strip():
@@ -545,7 +546,7 @@ class SettingsPage(QWidget):
             return
         content = self._theme.export_theme(name)
         if not content:
-            QMessageBox.warning(self, "Hata", "Tema dosyası bulunamadı.")
+            QMessageBox.warning(self, tr("error_title", "Hata"), tr("settings_theme_file_not_found", "Tema dosyası bulunamadı."))
             return
         path, _ = QFileDialog.getSaveFileName(
             self,
@@ -558,7 +559,9 @@ class SettingsPage(QWidget):
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(content)
                 QMessageBox.information(
-                    self, tr("success_title", "Başarılı"), f"Tema dışa aktarıldı:\n{path}"
+                    self,
+                    tr("success_title", "Başarılı"),
+                    tr("settings_theme_exported_msg", "Tema dışa aktarıldı:\n{path}").format(path=path),
                 )
             except OSError as e:
                 QMessageBox.warning(self, tr("error_title", "Hata"), str(e))
@@ -620,7 +623,7 @@ class SettingsPage(QWidget):
         name, ok = QInputDialog.getText(
             self,
             tr("settings_theme_import_btn", "İçe Aktar"),
-            "Tema adı:",
+            tr("settings_theme_name_label", "Tema adı:"),
             text=suggested,
         )
         if not ok or not name.strip():
@@ -633,10 +636,12 @@ class SettingsPage(QWidget):
         if self._theme.import_theme(content, name):
             self._refresh_all_theme_combos()
             QMessageBox.information(
-                self, tr("success_title", "Başarılı"), f'"{name}" teması içe aktarıldı.'
+                self,
+                tr("success_title", "Başarılı"),
+                tr("settings_theme_imported_msg", '"{name}" teması içe aktarıldı.').format(name=name),
             )
         else:
-            QMessageBox.warning(self, tr("error_title", "Hata"), "Geçersiz tema dosyası.")
+            QMessageBox.warning(self, tr("error_title", "Hata"), tr("settings_theme_invalid_file", "Geçersiz tema dosyası."))
 
     def _on_accent_quick_change(self, hex_color: str) -> None:
         palette = dict(self._theme._palette)

@@ -26,45 +26,56 @@ from PySide6.QtWidgets import (
 
 from core.managers.theme_manager import ThemeManager
 from presentation.dimensions import Spacing
+from presentation.utils.i18n import tr
 from presentation.widgets.color_picker_button import ColorPickerButton
 
+# Token adları gerçek zamanlı renk editöründe kullanıcıya gösterilir;
+# tr() ile _token_label() üzerinden tüketilir (satır ~340'ta).
 _TOKEN_LABELS: dict[str, str] = {
     "background":        "Arkaplan",
-    "surface":           "Yüzey",
-    "surface_raised":    "Yüksek Yüzey",
+    "surface":           "Yüzey",  # l10n: data
+    "surface_raised":    "Yüksek Yüzey",  # l10n: data
     "border":            "Kenar",
     "text_primary":      "Ana Metin",
-    "text_secondary":    "İkincil Metin",
+    "text_secondary":    "İkincil Metin",  # l10n: data
     "text_muted":        "Soluk Metin",
-    "accent_start":      "Vurgu Başlangıç",
-    "accent_end":        "Vurgu Bitiş",
-    "icon_on_accent":    "İkon (Vurgu Üzeri)",
-    "success":           "Başarı",
-    "warning":           "Uyarı",
+    "accent_start":      "Vurgu Başlangıç",  # l10n: data
+    "accent_end":        "Vurgu Bitiş",  # l10n: data
+    "icon_on_accent":    "İkon (Vurgu Üzeri)",  # l10n: data
+    "success":           "Başarı",  # l10n: data
+    "warning":           "Uyarı",  # l10n: data
     "danger":            "Tehlike",
-    "sidebar_bg":        "Kenar Çubuğu Zemin",
-    "sidebar_active":    "Aktif Öğe",
+    "sidebar_bg":        "Kenar Çubuğu Zemin",  # l10n: data
+    "sidebar_active":    "Aktif Öğe",  # l10n: data
     "sidebar_text":      "Metin",
     "sidebar_text_active": "Aktif Metin",
     "sidebar_hover_bg":  "Hover Zemin",
     "sidebar_active_bg": "Aktif Zemin",
-    "h-sidebar_bg":      "Hover Çubuğu",
-    "stage_active":      "Aktif Aşama",
-    "stage_done":        "Tamamlanan Aşama",
+    "h-sidebar_bg":      "Hover Çubuğu",  # l10n: data
+    "stage_active":      "Aktif Aşama",  # l10n: data
+    "stage_done":        "Tamamlanan Aşama",  # l10n: data
     "scrollbar_bg":      "Scrollbar Zemin",
-    "scrollbar_handle":  "Scrollbar Tutamacı",
+    "scrollbar_handle":  "Scrollbar Tutamacı",  # l10n: data
 }
 
-_TOKEN_GROUPS: list[tuple[str, list[str]]] = [
-    ("Arkaplan",      ["background", "surface", "surface_raised", "border"]),
-    ("Metin",         ["text_primary", "text_secondary", "text_muted"]),
-    ("Vurgu",         ["accent_start", "accent_end", "icon_on_accent"]),
-    ("Durum",         ["success", "warning", "danger"]),
-    ("Kenar Çubuğu",  ["sidebar_bg", "sidebar_active", "sidebar_text",
+
+def _token_label(token: str) -> str:
+    default = _TOKEN_LABELS.get(token, token)
+    key = f"theme_token_{token.replace('-', '_')}"
+    return tr(key, default)
+
+
+# (i18n_key, default_title, tokens) — başlık tr() ile _build_group'ta tüketilir.
+_TOKEN_GROUPS: list[tuple[str, str, list[str]]] = [
+    ("theme_group_background", "Arkaplan",      ["background", "surface", "surface_raised", "border"]),
+    ("theme_group_text",       "Metin",         ["text_primary", "text_secondary", "text_muted"]),
+    ("theme_group_accent",     "Vurgu",         ["accent_start", "accent_end", "icon_on_accent"]),
+    ("theme_group_status",     "Durum",         ["success", "warning", "danger"]),
+    ("theme_group_sidebar",    "Kenar Çubuğu",  ["sidebar_bg", "sidebar_active", "sidebar_text",  # l10n: data
                         "sidebar_text_active", "sidebar_hover_bg",
                         "sidebar_active_bg", "h-sidebar_bg"]),
-    ("Aşama",         ["stage_active", "stage_done"]),
-    ("Scrollbar",     ["scrollbar_bg", "scrollbar_handle"]),
+    ("theme_group_stage",      "Aşama",         ["stage_active", "stage_done"]),  # l10n: data
+    ("theme_group_scrollbar",  "Scrollbar",     ["scrollbar_bg", "scrollbar_handle"]),
 ]
 
 
@@ -110,7 +121,7 @@ class _ThemePreview(QWidget):
         font.setPixelSize(6)
         painter.setFont(font)
         for i in range(3):
-            painter.drawText(10, 44 + i * 20, "▬  Menü")
+            painter.drawText(10, 44 + i * 20, f"▬  {tr('theme_preview_menu_item', 'Menü')}")
 
         # İçerik alanı — kart
         mx = sw + 14
@@ -125,13 +136,13 @@ class _ThemePreview(QWidget):
         font.setPixelSize(9)
         font.setBold(True)
         painter.setFont(font)
-        painter.drawText(mx + 10, 28, "Proje Başlığı")
+        painter.drawText(mx + 10, 28, tr("theme_preview_card_title", "Proje Başlığı"))
 
         font.setBold(False)
         font.setPixelSize(7)
         painter.setFont(font)
         painter.setPen(QPen(c("text_secondary")))
-        painter.drawText(mx + 10, 44, "Açıklama metni burada yer alır...")
+        painter.drawText(mx + 10, 44, tr("theme_preview_card_desc", "Açıklama metni burada yer alır..."))
 
         # Accent rozet
         ac = c("accent_start")
@@ -158,7 +169,7 @@ class _ThemePreview(QWidget):
         rx = mx + cw + 14
         if rx + 50 < w:
             for i, (key, lbl) in enumerate([("success", "✓ Tamam"),
-                                             ("warning", "! Uyarı"),
+                                             ("warning", f"! {tr('theme_preview_status_warn', 'Uyarı')}"),
                                              ("danger",  "✕ Hata")]):
                 col = c(key)
                 bg2 = QColor(col)
@@ -198,7 +209,11 @@ class ThemeEditorDialog(QDialog):
         else:
             self._working_palette = dict(theme_manager.get_palette_copy())
 
-        self.setWindowTitle("Yeni Tema" if self._is_new else f"Düzenle: {theme_name}")
+        self.setWindowTitle(
+            tr("theme_editor_title_new", "Yeni Tema")
+            if self._is_new
+            else tr("theme_editor_title_edit", "Düzenle: {name}").format(name=theme_name)
+        )
         self.resize(640, 720)
         self.setModal(True)
         self._build_ui()
@@ -226,7 +241,10 @@ class ThemeEditorDialog(QDialog):
         is_builtin = not self._is_new and self._manager.is_builtin(self._original_name or "")
         if is_builtin:
             notice = QLabel(
-                "Yerleşik tema değiştirilemez. Kaydet seçeneği yeni kopya oluşturur.",
+                tr(
+                    "theme_editor_builtin_notice",
+                    "Yerleşik tema değiştirilemez. Kaydet seçeneği yeni kopya oluşturur.",
+                ),
                 parent=self,
             )
             notice.setStyleSheet(
@@ -239,12 +257,12 @@ class ThemeEditorDialog(QDialog):
         # Tema adı
         name_row = QHBoxLayout()
         name_row.setSpacing(Spacing.MD)
-        name_lbl = QLabel("Tema Adı:", parent=self)
+        name_lbl = QLabel(tr("theme_editor_name_label", "Tema Adı:"), parent=self)
         name_lbl.setProperty("cssClass", "text-primary")
         name_lbl.setFixedWidth(80)
         name_row.addWidget(name_lbl)
         self._name_edit = QLineEdit(parent=self)
-        self._name_edit.setPlaceholderText("Tema adı girin...")
+        self._name_edit.setPlaceholderText(tr("theme_editor_name_placeholder", "Tema adı girin..."))
         if self._original_name:
             default_name = (
                 f"{self._original_name}_kopya" if is_builtin else self._original_name
@@ -264,15 +282,15 @@ class ThemeEditorDialog(QDialog):
         cnt_layout.setContentsMargins(0, 0, Spacing.SM, 0)
         cnt_layout.setSpacing(Spacing.SM)
 
-        for group_name, tokens in _TOKEN_GROUPS:
-            cnt_layout.addWidget(self._build_group(group_name, tokens))
+        for group_key, group_default, tokens in _TOKEN_GROUPS:
+            cnt_layout.addWidget(self._build_group(tr(group_key, group_default), tokens))
 
         cnt_layout.addStretch()
         scroll.setWidget(container)
         layout.addWidget(scroll, 1)
 
         # Önizleme
-        prev_lbl = QLabel("Önizleme", parent=self)
+        prev_lbl = QLabel(tr("theme_editor_preview_label", "Önizleme"), parent=self)
         prev_lbl.setProperty("cssClass", "text-secondary")
         layout.addWidget(prev_lbl)
 
@@ -284,14 +302,14 @@ class ThemeEditorDialog(QDialog):
         btn_row = QHBoxLayout()
         btn_row.setSpacing(Spacing.MD)
 
-        self._preview_btn = QPushButton("Geçici Uygula", parent=self)
+        self._preview_btn = QPushButton(tr("theme_editor_preview_apply_btn", "Geçici Uygula"), parent=self)
         self._preview_btn.setProperty("cssClass", "btn-secondary")
         self._preview_btn.clicked.connect(self._on_preview_toggle)
         btn_row.addWidget(self._preview_btn)
 
         btn_row.addStretch()
 
-        cancel_btn = QPushButton("İptal", parent=self)
+        cancel_btn = QPushButton(tr("action_cancel", "İptal"), parent=self)
         cancel_btn.setProperty("cssClass", "btn-secondary")
         cancel_btn.clicked.connect(self._on_cancel)
         btn_row.addWidget(cancel_btn)
@@ -337,7 +355,7 @@ class ThemeEditorDialog(QDialog):
             self._pickers[token] = picker
             cell.addWidget(picker)
 
-            token_lbl = QLabel(_TOKEN_LABELS.get(token, token), parent=frame)
+            token_lbl = QLabel(_token_label(token), parent=frame)
             token_lbl.setProperty("cssClass", "text-secondary")
             token_lbl.setSizePolicy(
                 QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
@@ -360,11 +378,11 @@ class ThemeEditorDialog(QDialog):
     def _on_preview_toggle(self) -> None:
         if self._preview_active:
             self._preview_active = False
-            self._preview_btn.setText("Geçici Uygula")
+            self._preview_btn.setText(tr("theme_editor_preview_apply_btn", "Geçici Uygula"))
             self._manager.restore_preview()
         else:
             self._preview_active = True
-            self._preview_btn.setText("Önizlemeyi Geri Al")
+            self._preview_btn.setText(tr("theme_editor_preview_revert_btn", "Önizlemeyi Geri Al"))
             self._apply_preview()
 
     def _apply_preview(self) -> None:
@@ -374,7 +392,7 @@ class ThemeEditorDialog(QDialog):
     def _on_save(self) -> None:
         name = self._name_edit.text().strip()
         if not name:
-            QMessageBox.warning(self, "Hata", "Tema adı boş olamaz.")
+            QMessageBox.warning(self, tr("error_title", "Hata"), tr("theme_editor_name_empty", "Tema adı boş olamaz."))
             return
 
         if self._preview_active:
@@ -390,14 +408,14 @@ class ThemeEditorDialog(QDialog):
 
         if self._is_new or is_builtin_src:
             if name in existing_names:
-                QMessageBox.warning(self, "Hata", "Bu isimde bir tema zaten mevcut.")
+                QMessageBox.warning(self, tr("error_title", "Hata"), tr("theme_editor_name_exists", "Bu isimde bir tema zaten mevcut."))
                 return
             self._manager.create_theme(name, full_palette)
         else:
             # Kullanıcı teması düzenleme
             if name != self._original_name:
                 if name in existing_names:
-                    QMessageBox.warning(self, "Hata", "Bu isimde bir tema zaten mevcut.")
+                    QMessageBox.warning(self, tr("error_title", "Hata"), tr("theme_editor_name_exists", "Bu isimde bir tema zaten mevcut."))
                     return
                 self._manager.create_theme(name, full_palette)
                 self._manager.delete_theme(self._original_name or "")

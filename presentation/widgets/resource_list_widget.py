@@ -26,15 +26,20 @@ from presentation.utils.i18n import tr
 from presentation.widgets.icon_action_button import IconActionButton
 
 _RESOURCE_TYPE_META: dict[str, tuple[str, str]] = {
-    "DOCUMENT": ("#42A5F5", "Doküman"),
+    "DOCUMENT": ("#42A5F5", "Doküman"),  # l10n: data — anahtar + varsayılan, tr() ile _resource_type_color_and_label'da tüketilir
     "ARTICLE":  ("#26A69A", "Makale"),
     "VIDEO":    ("#EF5350", "Video"),
     "GITHUB":   ("#78909C", "GitHub"),
-    "DESIGN":   ("#AB47BC", "Tasarım"),
+    "DESIGN":   ("#AB47BC", "Tasarım"),  # l10n: data
     "API":      ("#FF7043", "API"),
-    "TOOL":     ("#66BB6A", "Araç"),
-    "OTHER":    ("#9E9E9E", "Diğer"),
+    "TOOL":     ("#66BB6A", "Araç"),  # l10n: data
+    "OTHER":    ("#9E9E9E", "Diğer"),  # l10n: data
 }
+
+
+def _resource_type_color_and_label(resource_type: str) -> tuple[str, str]:
+    color, default_label = _RESOURCE_TYPE_META.get(resource_type, ("#9E9E9E", resource_type))
+    return color, tr(f"resource_type_{resource_type.lower()}", default_label)
 
 
 class _ResourceCard(QFrame):
@@ -63,7 +68,7 @@ class _ResourceCard(QFrame):
         top = QHBoxLayout()
         top.setSpacing(Spacing.SM)
 
-        color, label = _RESOURCE_TYPE_META.get(resource.resource_type, ("#9E9E9E", resource.resource_type))
+        color, label = _resource_type_color_and_label(resource.resource_type)
         badge = QLabel(label, parent=self)
         badge.setStyleSheet(
             f"QLabel {{ background-color: transparent; color: {color};"

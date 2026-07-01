@@ -33,10 +33,10 @@ from presentation.widgets.analytics_chart_widget import AnalyticsChartWidget
 logger = logging.getLogger(__name__)
 
 _PERIODS = [
-    ("daily", "Günlük"),
-    ("weekly", "Haftalık"),
-    ("monthly", "Aylık"),
-    ("yearly", "Yıllık"),
+    ("daily", "analytics_period_daily", "Günlük"),  # l10n: data — tr() ile _build_header'da tüketilir
+    ("weekly", "analytics_period_weekly", "Haftalık"),  # l10n: data
+    ("monthly", "analytics_period_monthly", "Aylık"),  # l10n: data
+    ("yearly", "analytics_period_yearly", "Yıllık"),  # l10n: data
 ]
 
 
@@ -92,8 +92,8 @@ class AnalyticsPage(QWidget):
         row = QHBoxLayout(header)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(Spacing.MD)
-        for key, label in _PERIODS:
-            btn = QPushButton(label, parent=header)
+        for key, label_key, label_default in _PERIODS:
+            btn = QPushButton(tr(label_key, label_default), parent=header)
             btn.setCheckable(True)
             btn.setProperty("cssClass", "btn-toggle")
             btn.setFixedHeight(32)
@@ -105,21 +105,22 @@ class AnalyticsPage(QWidget):
         self._project_combo = QComboBox(parent=header)
         self._project_combo.setFixedHeight(32)
         self._project_combo.setMinimumWidth(160)
-        self._project_combo.addItem("Tüm Projeler", userData=None)
+        self._project_combo.addItem(tr("analytics_all_projects", "Tüm Projeler"), userData=None)
         row.addWidget(self._project_combo)
         return header
 
     def _build_kpi_row(self) -> QHBoxLayout:
         row = QHBoxLayout()
         row.setSpacing(Spacing.XL)
+        # l10n: data — bu tuple'ların *_default alanları tr() ile satır 122'de tüketilir
         kpi_defs = [
-            ("total_completed", "Tamamlanan", "Dönemde biten görev"),
-            ("completion_rate", "Oran %", "Biten / (biten + açık)"),
-            ("streak_days", "Seri (gün)", "Arka arkaya aktif gün"),
-            ("on_time_rate", "Zamanında %", "Vadesi geçmeden biten"),
+            ("total_completed", "analytics_kpi_total_completed", "Tamamlanan", "analytics_kpi_total_completed_desc", "Dönemde biten görev"),  # l10n: data
+            ("completion_rate", "analytics_kpi_completion_rate", "Oran %", "analytics_kpi_completion_rate_desc", "Biten / (biten + açık)"),  # l10n: data
+            ("streak_days", "analytics_kpi_streak_days", "Seri (gün)", "analytics_kpi_streak_days_desc", "Arka arkaya aktif gün"),  # l10n: data
+            ("on_time_rate", "analytics_kpi_on_time_rate", "Zamanında %", "analytics_kpi_on_time_rate_desc", "Vadesi geçmeden biten"),  # l10n: data
         ]
-        for key, label, desc in kpi_defs:
-            val_label = self._make_kpi_card(row, label, desc)
+        for key, label_key, label_default, desc_key, desc_default in kpi_defs:
+            val_label = self._make_kpi_card(row, tr(label_key, label_default), tr(desc_key, desc_default))
             self._kpi_labels[key] = val_label
         return row
 
@@ -149,31 +150,31 @@ class AnalyticsPage(QWidget):
         vbox.setContentsMargins(0, 0, 0, 0)
         vbox.setSpacing(Spacing.XL)
 
-        self._time_chart = AnalyticsChartWidget("Tamamlanan Görev", parent=container)
+        self._time_chart = AnalyticsChartWidget(tr("analytics_chart_completed_title", "Tamamlanan Görev"), parent=container)
         self._time_chart.setMinimumHeight(220)
         vbox.addWidget(self._build_chart_panel(
             container,
-            "Zaman İçinde Tamamlanan Görevler",
-            "Seçilen dönemde her zaman biriminde biten görev adedi",
+            tr("analytics_panel_time_title", "Zaman İçinde Tamamlanan Görevler"),
+            tr("analytics_panel_time_desc", "Seçilen dönemde her zaman biriminde biten görev adedi"),
             self._time_chart,
         ))
 
         bottom = QHBoxLayout()
         bottom.setSpacing(Spacing.XL)
-        self._pie_chart = AnalyticsChartWidget("Öncelik Dağılımı", parent=container)
+        self._pie_chart = AnalyticsChartWidget(tr("analytics_panel_priority_title", "Öncelik Dağılımı"), parent=container)
         self._pie_chart.setMinimumHeight(200)
         bottom.addWidget(self._build_chart_panel(
             container,
-            "Öncelik Dağılımı",
-            "Tamamlanan görevlerin öncelik sınıflarına göre dağılımı",
+            tr("analytics_panel_priority_title", "Öncelik Dağılımı"),
+            tr("analytics_panel_priority_desc", "Tamamlanan görevlerin öncelik sınıflarına göre dağılımı"),
             self._pie_chart,
         ), 1)
-        self._project_chart = AnalyticsChartWidget("Proje Dağılımı", parent=container)
+        self._project_chart = AnalyticsChartWidget(tr("analytics_panel_project_title", "Proje Dağılımı"), parent=container)
         self._project_chart.setMinimumHeight(200)
         bottom.addWidget(self._build_chart_panel(
             container,
-            "Proje Dağılımı",
-            "Hangi projede kaç görev tamamlandığı",
+            tr("analytics_panel_project_title", "Proje Dağılımı"),
+            tr("analytics_panel_project_desc", "Hangi projede kaç görev tamamlandığı"),
             self._project_chart,
         ), 1)
         vbox.addLayout(bottom)
@@ -207,9 +208,9 @@ class AnalyticsPage(QWidget):
         row = QHBoxLayout(band)
         row.setContentsMargins(Spacing.XL, Spacing.MD, Spacing.XL, Spacing.MD)
         row.setSpacing(Spacing.XXXL)
-        self._kpi_labels["estimated"] = self._add_inline_kpi(row, band, "Tahmini Süre")
-        self._kpi_labels["spent"] = self._add_inline_kpi(row, band, "Harcanan Süre")
-        self._kpi_labels["best_period"] = self._add_inline_kpi(row, band, "En İyi Dönem")
+        self._kpi_labels["estimated"] = self._add_inline_kpi(row, band, tr("analytics_kpi_estimated", "Tahmini Süre"))
+        self._kpi_labels["spent"] = self._add_inline_kpi(row, band, tr("analytics_kpi_spent", "Harcanan Süre"))
+        self._kpi_labels["best_period"] = self._add_inline_kpi(row, band, tr("analytics_kpi_best_period", "En İyi Dönem"))
         row.addStretch()
         return band
 
@@ -258,7 +259,7 @@ class AnalyticsPage(QWidget):
         self._project_combo.blockSignals(True)
         current = self._project_combo.currentData()
         self._project_combo.clear()
-        self._project_combo.addItem("Tüm Projeler", userData=None)
+        self._project_combo.addItem(tr("analytics_all_projects", "Tüm Projeler"), userData=None)
         for p in projects:
             self._project_combo.addItem(p.title, userData=p.id)
         idx = self._project_combo.findData(current)
@@ -329,7 +330,7 @@ class AnalyticsPage(QWidget):
         self._apply_chart_theme()
 
     def _on_error(self, message: str) -> None:
-        logger.error("Analitik sayfası hatası: %s", message)
+        logger.error("Analitik sayfası hatası: %s", message)  # l10n: log
 
 
 def _fmt_minutes(minutes: int) -> str:

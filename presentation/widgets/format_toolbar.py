@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from presentation.utils.i18n import tr
+
 _BTN_SS = (
     "QToolButton { border: none; border-radius: 4px; background: transparent; padding: 0 3px; }"
     " QToolButton:hover { background: rgba(128,128,128,0.15); }"
@@ -33,14 +35,14 @@ class FormatToolbar(QWidget):
         layout.setContentsMargins(4, 2, 4, 2)
         layout.setSpacing(2)
 
-        self._bold_btn   = self._make_btn("B",  "Kalın (Ctrl+B)",   checkable=True)
-        self._italic_btn = self._make_btn("İ",  "İtalik (Ctrl+I)",  checkable=True)
-        self._under_btn  = self._make_btn("A̲", "Altçizgi (Ctrl+U)", checkable=True)
-        self._strike_btn = self._make_btn("S̶", "Üstü çizili",       checkable=True)
+        self._bold_btn   = self._make_btn("B",  tr("format_toolbar_bold_tooltip", "Kalın (Ctrl+B)"),   checkable=True)
+        self._italic_btn = self._make_btn("İ", tr("format_toolbar_italic_tooltip", "İtalik (Ctrl+I)"), checkable=True)  # l10n: data — buton glifi (italik "I"), çeviri değil
+        self._under_btn  = self._make_btn("A̲", tr("format_toolbar_underline_tooltip", "Altçizgi (Ctrl+U)"), checkable=True)
+        self._strike_btn = self._make_btn("S̶", tr("format_toolbar_strike_tooltip", "Üstü çizili"),       checkable=True)
         self._color_btn  = self._make_btn("A",  "Metin rengi")
         sep1 = self._sep()
         self._bullet_btn = self._make_btn("•≡", "Madde listesi",    checkable=True)
-        self._num_btn    = self._make_btn("1≡", "Numaralı liste",   checkable=True)
+        self._num_btn    = self._make_btn("1≡", tr("format_toolbar_numbered_list_tooltip", "Numaralı liste"),   checkable=True)
         sep2 = self._sep()
         self._size_combo = QComboBox(parent=self)
         self._size_combo.addItems(["10", "11", "12", "14", "16", "18", "20", "24", "28", "32"])
@@ -108,7 +110,7 @@ class FormatToolbar(QWidget):
         self._merge_format(fmt)
 
     def _pick_color(self) -> None:
-        color = QColorDialog.getColor(parent=self, title="Metin rengi seç")
+        color = QColorDialog.getColor(parent=self, title=tr("format_toolbar_text_color_dialog_title", "Metin rengi seç"))
         if color.isValid():
             fmt = QTextCharFormat()
             fmt.setForeground(QColor(color))

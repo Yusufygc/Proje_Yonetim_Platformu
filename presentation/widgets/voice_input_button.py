@@ -109,7 +109,7 @@ class VoiceInputButton(IconActionButton):
             self._publish_error(
                 tr("voice_error_service", "Sesli komut servisi başlatılamadı.")
             )
-            logger.error("Konuşma servisi alınamadı: %s", exc)
+            logger.error("Konuşma servisi alınamadı: %s", exc)  # l10n: log
             return None
 
     # ── Görsel durum ─────────────────────────────────────────────────────────
@@ -151,7 +151,7 @@ class VoiceInputButton(IconActionButton):
         self._target.setTextCursor(cursor)
 
     def _on_error(self, message: str) -> None:
-        logger.error("STT hatası: %s", message)
+        logger.error("STT hatası: %s", message)  # l10n: log
         self._publish_error(message)
         # Worker hata verdiğinde dinlemeyi otomatik durdur
         self._is_recording = False
@@ -170,7 +170,7 @@ class VoiceInputButton(IconActionButton):
             from core.events.event_bus import EventBus  # noqa: PLC0415
             EventBus.instance().publish("toast.show", message=message, type_="warning")
         except Exception:  # noqa: BLE001
-            logger.warning("Toast gönderilemedi: %s", message)
+            logger.warning("Toast gönderilemedi: %s", message)  # l10n: log
 
 
 def attach_voice_button(target: VoiceTarget, parent: QWidget) -> QWidget:

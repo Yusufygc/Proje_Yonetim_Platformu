@@ -11,7 +11,6 @@ from typing import Any, Callable
 
 from sqlalchemy import func, select
 
-from domain.enums.priority import Priority
 from domain.enums.task_status import TaskStatus
 from domain.models.project import Project
 from domain.models.task import Task
@@ -20,12 +19,6 @@ from infrastructure.database.db_manager import DatabaseManager
 logger = logging.getLogger(__name__)
 
 _MONTHS_TR = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]
-_PRIORITY_LABELS = {
-    Priority.LOW.value: "Düşük",
-    Priority.MEDIUM.value: "Orta",
-    Priority.HIGH.value: "Yüksek",
-    Priority.CRITICAL.value: "Kritik",
-}
 
 
 def _fmt_daily(key: str) -> str:
@@ -125,7 +118,9 @@ class AnalyticsService:
         )
         if project_id is not None:
             stmt = stmt.where(Task.project_id == project_id)
-        return {_PRIORITY_LABELS.get(row[0], row[0]): row[1] for row in sess.execute(stmt)}
+        # Öncelik enum değeri (LOW/MEDIUM/HIGH/CRITICAL) döner; ekranda gösterilecek
+        # Türkçe/İngilizce etiket UI katmanında tr() ile üretilir (RULES.md katman ayrımı).
+        return {row[0]: row[1] for row in sess.execute(stmt)}
 
     def _project_dist(
         self, sess: Any, start: datetime, end: datetime, project_id: int | None

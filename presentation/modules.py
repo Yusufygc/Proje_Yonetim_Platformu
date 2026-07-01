@@ -74,7 +74,7 @@ def setup_modules(di: DIContainer) -> None:
     registry.register(FeaturePlugin(
         page_key="memo",
         nav_label_key="nav_memo",
-        nav_label_default="Notlarım",
+        nav_label_default="Notlarım",  # l10n: data — nav_memo anahtarının fallback'i
         nav_icon="note-sticky",
         factory=lambda parent: MemoPage(
             parent=parent,
@@ -96,7 +96,7 @@ def setup_modules(di: DIContainer) -> None:
     registry.register(FeaturePlugin(
         page_key="archive",
         nav_label_key="nav_archive",
-        nav_label_default="Arşiv",
+        nav_label_default="Arşiv",  # l10n: data — nav_archive anahtarının fallback'i
         nav_icon="archive",
         factory=lambda parent: ArchivePage(
             parent=parent,

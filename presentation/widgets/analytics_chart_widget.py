@@ -8,11 +8,22 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QLabel, QSizePolicy, QVBoxLayout, QWidget
 
+from presentation.utils.i18n import tr
+
+# Renkler ve varsayılan etiketler öncelik enum değeriyle (LOW/MEDIUM/HIGH/CRITICAL)
+# eşleşir; analytics_service.py priority_distribution'ı bu değerlerle döndürür.
+# Anahtar önceden çevrilmiş bir metin olsaydı dil değişince renk eşleşmesi bozulurdu.
 _PRIORITY_COLORS = {
-    "Düşük": "#4CAF50",
-    "Orta": "#2196F3",
-    "Yüksek": "#FF9800",
-    "Kritik": "#F44336",
+    "LOW": "#4CAF50",
+    "MEDIUM": "#2196F3",
+    "HIGH": "#FF9800",
+    "CRITICAL": "#F44336",
+}
+_PRIORITY_LABEL_DEFAULTS = {
+    "LOW": "Düşük",  # l10n: data — tr() ile set_pie_chart'ta tüketilir
+    "MEDIUM": "Orta",
+    "HIGH": "Yüksek",  # l10n: data
+    "CRITICAL": "Kritik",  # l10n: data
 }
 
 _PIE_PALETTE = ["#5C6BC0", "#42A5F5", "#26C6DA", "#66BB6A", "#FFA726", "#EF5350"]
@@ -71,10 +82,11 @@ class AnalyticsChartWidget(QWidget):
         self._chart.setTitle(self._title)
         self._chart.removeAllSeries()
         series = QPieSeries()
-        for i, (label, value) in enumerate(data.items()):
+        for i, (key, value) in enumerate(data.items()):
             if value == 0:
                 continue
-            color = _PRIORITY_COLORS.get(label, _PIE_PALETTE[i % len(_PIE_PALETTE)])
+            color = _PRIORITY_COLORS.get(key, _PIE_PALETTE[i % len(_PIE_PALETTE)])
+            label = tr(f"analytics_priority_{key.lower()}", _PRIORITY_LABEL_DEFAULTS.get(key, key))
             slc = series.append(f"{label}\n({value})", value)
             slc.setColor(QColor(color))
         series.setHoleSize(0.35)

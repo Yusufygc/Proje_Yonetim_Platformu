@@ -4,6 +4,8 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QColorDialog, QFrame, QWidget
 
+from presentation.utils.i18n import tr
+
 
 class ColorPickerButton(QFrame):
     """Tıklanınca QColorDialog açan, seçilen rengi gösteren kare buton."""
@@ -32,7 +34,7 @@ class ColorPickerButton(QFrame):
         )
 
     def mousePressEvent(self, event: object) -> None:
-        color = QColorDialog.getColor(QColor(self._color), self, "Renk Seç")
+        color = QColorDialog.getColor(QColor(self._color), self, tr("color_picker_dialog_title", "Renk Seç"))
         if color.isValid():
             self.set_color(color.name())
             self.color_changed.emit(self._color)

@@ -24,11 +24,16 @@ from presentation.utils.i18n import tr
 from presentation.widgets.icon_action_button import IconActionButton
 
 _STATUS_META: dict[str, tuple[str, str]] = {
-    "DRAFT":      ("#78909C", "Taslak"),
-    "ACCEPTED":   ("#43A047", "Kabul Edildi"),
-    "SUPERSEDED": ("#FB8C00", "Güncellendi"),
-    "CANCELLED":  ("#E53935", "İptal Edildi"),
+    "DRAFT":      ("#78909C", "Taslak"),  # l10n: data — anahtar + varsayılan, tr() ile _status_color_and_label'da tüketilir
+    "ACCEPTED":   ("#43A047", "Kabul Edildi"),  # l10n: data
+    "SUPERSEDED": ("#FB8C00", "Güncellendi"),  # l10n: data
+    "CANCELLED":  ("#E53935", "İptal Edildi"),  # l10n: data
 }
+
+
+def _status_color_and_label(status: str) -> tuple[str, str]:
+    color, default_label = _STATUS_META.get(status, ("#888888", status))
+    return color, tr(f"decision_status_{status.lower()}", default_label)
 
 
 class _DecisionRow(QFrame):
@@ -48,7 +53,7 @@ class _DecisionRow(QFrame):
         top = QHBoxLayout()
         top.setSpacing(Spacing.SM)
 
-        color, label = _STATUS_META.get(decision.status, ("#888888", decision.status))
+        color, label = _status_color_and_label(decision.status)
         badge = QLabel(label, parent=self)
         badge.setStyleSheet(
             f"QLabel {{ background-color: transparent; color: {color};"
