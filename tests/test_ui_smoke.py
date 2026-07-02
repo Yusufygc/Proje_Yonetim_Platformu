@@ -173,3 +173,37 @@ def test_main_window_ctrl_n_opens_project_dialog(monkeypatch, qtbot):
     window._create_new_project()
 
     assert opened == [True]
+
+
+class FakeNoteController(QObject):
+    notes_loaded = Signal(list)
+    note_created = Signal(object)
+    note_updated = Signal(object)
+    note_deleted = Signal(int)
+    error_occurred = Signal(str)
+
+    def load_project_notes(self, project_id: int) -> None:
+        self.notes_loaded.emit([])
+
+
+def test_note_list_widget_shows_error_dialog_on_controller_failure(monkeypatch, qtbot):
+    """Regresyon: NoteController.error_occurred hiçbir yere bağlı değildi,
+    not kaydetme/güncelleme/silme hataları kullanıcıya hiç görünmüyordu."""
+    _init_managers()
+    from presentation.widgets import note_list_widget as note_list_widget_module
+    from presentation.widgets.note_list_widget import NoteListWidget
+
+    critical_calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        note_list_widget_module.QMessageBox,
+        "critical",
+        staticmethod(lambda parent, title, msg: critical_calls.append((title, msg))),
+    )
+
+    controller = FakeNoteController()
+    widget = NoteListWidget(controller, None)  # type: ignore[arg-type]
+    qtbot.addWidget(widget)
+
+    controller.error_occurred.emit("Not kaydedilemedi.")
+
+    assert critical_calls == [("Hata", "Not kaydedilemedi.")]

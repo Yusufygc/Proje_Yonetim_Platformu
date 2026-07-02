@@ -24,7 +24,7 @@ infrastructure/database/ (DatabaseManager)       ← engine, scoped_session, WAL
 - Modüller arası gevşek bağ: [[event-bus]] (`core/events/event_bus.py`).
 - UI kilitlenmesini önleme: [[worker-altyapisi]] (`core/workers/`).
 - Görsel katman: [[tema-sistemi]], [[ikon-yonetimi]], [[l10n-string-yonetimi]].
-- Sayfa kaydı: `presentation/modules.py` + `core/module_registry.py` — sayfalar factory lambda'larıyla lazily kurulur.
+- Sayfa kaydı: `presentation/modules.py` + `core/module_registry.py` — sayfalar factory lambda'larıyla kaydedilir. `MainWindow._navigate_to` sayfayı yalnızca İLK ziyarette inşa eder (2026-07-02 düzeltmesi — önceden `_setup_ui` tüm 9 sayfayı `window.show()`'dan önce eager kuruyordu, her biri kendi DB sorgusunu tetikliyordu; artık kullanıcı hangi sayfaya giderse sadece o inşa edilir).
 
 ## Boyut metrikleri (2026-06-12)
 ~142 .py dosyası, ~11.400 satır. RULES.md limitleri: dosya ≤400 satır, sınıf ≤15 metod ([[kurallar-ve-sozlesmeler]]). Bilinen istisna: `DIContainer` (factory yoğun, P3'te bölünecek — [[yol-haritasi]]).

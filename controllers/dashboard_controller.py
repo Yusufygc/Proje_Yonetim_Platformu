@@ -7,6 +7,7 @@ from typing import Any
 from PySide6.QtCore import QObject, Signal
 
 from core.events.event_bus import EventBus
+from core.workers.worker import Worker
 from services.dashboard_service import DashboardService
 
 logger = logging.getLogger(__name__)
@@ -39,9 +40,14 @@ class DashboardController(QObject):
         self.load_stats()
 
     def load_stats(self) -> None:
-        try:
-            stats = self._service.get_dashboard_stats()
-            self.stats_loaded.emit(stats)
-        except Exception as e:
-            logger.exception("Dashboard istatistikleri yüklenirken hata: %s", e)
-            self.error_occurred.emit(f"Dashboard yüklenemedi: {e}")
+        def _fetch() -> dict[str, Any]:
+            return self._service.get_dashboard_stats()
+
+        def _on_error(err: str) -> None:
+            logger.error("Dashboard istatistikleri yüklenirken hata: %s", err)
+            self.error_occurred.emit(f"Dashboard yüklenemedi: {err}")
+
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.stats_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        worker.start()

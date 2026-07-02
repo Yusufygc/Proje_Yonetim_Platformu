@@ -3,6 +3,8 @@ from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Signal
 
+from core.exceptions.base_exception import AppBaseException
+from core.workers.worker import Worker
 from domain.models.note import Note
 from services.note_service import NoteService
 
@@ -23,18 +25,23 @@ class NoteController(QObject):
         self._service = service
 
     def load_project_notes(self, project_id: int) -> None:
-        try:
-            notes = self._service.get_project_notes(project_id)
-            self.notes_loaded.emit(notes)
-        except Exception as exc:
-            logger.error("Notlar yüklenemedi: %s", exc)
-            self.error_occurred.emit(str(exc))
+        def _fetch() -> list[Note]:
+            return self._service.get_project_notes(project_id)
+
+        def _on_error(err: str) -> None:
+            logger.error("Notlar yüklenemedi: %s", err)
+            self.error_occurred.emit(str(err))
+
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.notes_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        worker.start()
 
     def create_note(self, project_id: int, title: str, body: str, **kwargs: Any) -> None:
         try:
             note = self._service.create_note(project_id, title, body, **kwargs)
             self.note_created.emit(note)
-        except ValueError as exc:
+        except (AppBaseException, ValueError) as exc:
             self.error_occurred.emit(str(exc))
         except Exception as exc:
             logger.error("Not oluşturulamadı: %s", exc)
@@ -44,7 +51,7 @@ class NoteController(QObject):
         try:
             note = self._service.update_note(note_id, **kwargs)
             self.note_updated.emit(note)
-        except ValueError as exc:
+        except (AppBaseException, ValueError) as exc:
             self.error_occurred.emit(str(exc))
         except Exception as exc:
             logger.error("Not güncellenemedi: %s", exc)

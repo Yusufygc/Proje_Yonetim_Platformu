@@ -93,24 +93,41 @@ class MainWindow(QMainWindow):
         self._sidebar.search_requested.connect(self._open_search_dialog)
         root_layout.addWidget(self._sidebar)
 
-        # Sağ panel: Sayfalar — ModuleRegistry'den dinamik yükleme
+        # Sağ panel: Sayfalar — ilk ziyarette lazy inşa edilir (bkz. _navigate_to).
+        # Kullanıcı aynı anda tek sayfa görür; 9 sayfanın tamamını burada eager
+        # kurmak her birinin __init__'indeki DB sorgusunu (load_*) boşuna
+        # tetikler ve açılışı yavaşlatır.
         self._stack = QStackedWidget(parent=central)
-        registry = ModuleRegistry.instance()
-        for i, plugin in enumerate(registry.plugins()):
-            page = plugin.factory(self._stack)
-            self._stack.addWidget(page)
-            self._page_index[plugin.page_key] = i
         root_layout.addWidget(self._stack)
         
         # Toast bildirimleri pencerenin üstünde yer alır
         self._toast = Toast(parent=central, event_bus=self._event_bus)
 
     def _navigate_to(self, page_name: str) -> None:
-        """Sidebar navigasyon sinyalini alarak ilgili sayfayı gösterir."""
+        """Sidebar navigasyon sinyalini alarak ilgili sayfayı gösterir.
+
+        Sayfa ilk kez ziyaret ediliyorsa burada (lazy) inşa edilir ve
+        QStackedWidget'a eklenir; sonraki ziyaretlerde doğrudan indeks
+        değiştirilir (widget yeniden oluşturulmaz).
+        """
+        if page_name not in self._page_index:
+            self._build_and_register_page(page_name)
         index = self._page_index.get(page_name, 0)
         self._stack.setCurrentIndex(index)
         self._sidebar.set_active_page(page_name)
         logger.debug("Sayfa değiştirildi: %s (index=%d)", page_name, index)  # l10n: log
+
+    def _build_and_register_page(self, page_name: str) -> None:
+        plugin = next(
+            (p for p in ModuleRegistry.instance().plugins() if p.page_key == page_name),
+            None,
+        )
+        if plugin is None:
+            logger.warning("Bilinmeyen sayfa anahtarı: %s", page_name)  # l10n: log
+            return
+        page = plugin.factory(self._stack)
+        index = self._stack.addWidget(page)
+        self._page_index[page_name] = index
 
     def _setup_shortcuts(self) -> None:
         shortcut_f = QShortcut(QKeySequence("Ctrl+F"), self)

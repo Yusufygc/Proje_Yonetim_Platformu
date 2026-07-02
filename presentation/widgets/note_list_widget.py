@@ -146,6 +146,10 @@ class NoteListWidget(QWidget):
         self._controller.note_created.connect(self._refresh)
         self._controller.note_updated.connect(self._refresh)
         self._controller.note_deleted.connect(self._refresh)
+        self._controller.error_occurred.connect(self._on_error)
+
+    def _on_error(self, msg: str) -> None:
+        QMessageBox.critical(self, tr("error_title", "Hata"), msg)
 
     def set_project(self, project_id: int) -> None:
         self._project_id = project_id

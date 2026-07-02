@@ -4,6 +4,8 @@ clicked(int) sinyali ile proje ID'sini üst bileşene iletir.
 """
 from __future__ import annotations
 
+import logging
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QMouseEvent
 from PySide6.QtWidgets import (
@@ -19,6 +21,8 @@ from PySide6.QtWidgets import (
 from domain.models.project import Project
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+
+logger = logging.getLogger(__name__)
 
 
 def _status_labels() -> dict[str, str]:
@@ -124,14 +128,16 @@ class ProjectListItem(QFrame):
             open_tasks = len([t for t in project.tasks if t.status not in {"DONE", "CANCELLED"}])
             meta_parts.append(tr("card_meta_open_tasks", "Açık görev: {count}").format(count=open_tasks))
         except Exception:
-            pass
+            # project.tasks may fail to lazy-load (e.g. detached instance) —
+            # the card still renders, but this must not fail silently.
+            logger.debug("Could not compute open-task count for project card (id=%s).", project.id)
         meta_parts.append(tr("card_meta_updated", "Güncellendi: {date}").format(date=project.updated_at.date()))
         try:
             tags = [tag.tag_name for tag in project.tags[:3]]
             if tags:
                 meta_parts.append(tr("card_meta_tags", "Etiket: {tags}").format(tags=", ".join(tags)))
         except Exception:
-            pass
+            logger.debug("Could not read tags for project card (id=%s).", project.id)
         return "   ·   ".join(meta_parts)
 
     def _apply_style(self, selected: bool) -> None:

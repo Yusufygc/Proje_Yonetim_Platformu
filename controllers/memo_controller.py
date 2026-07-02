@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Signal
 
+from core.workers.worker import Worker
 from domain.models.memo import Memo
 from services.memo_service import MemoService
 
@@ -24,12 +25,17 @@ class MemoController(QObject):
         self._service = service
 
     def load_all(self) -> None:
-        try:
-            memos = self._service.get_all()
-            self.memos_loaded.emit(memos)
-        except Exception as exc:
-            logger.error("Memolar yüklenemedi: %s", exc)
-            self.error_occurred.emit(str(exc))
+        def _fetch() -> list[Memo]:
+            return self._service.get_all()
+
+        def _on_error(err: str) -> None:
+            logger.error("Memolar yüklenemedi: %s", err)
+            self.error_occurred.emit(str(err))
+
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.memos_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        worker.start()
 
     def create(self, title: str, body: str = "", drawing_data: str | None = None) -> None:
         try:

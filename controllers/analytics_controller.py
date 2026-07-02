@@ -9,6 +9,7 @@ from typing import Any
 from PySide6.QtCore import QObject, Signal
 
 from core.events.event_bus import EventBus
+from core.workers.worker import Worker
 from services.analytics_service import AnalyticsService
 
 logger = logging.getLogger(__name__)
@@ -40,9 +41,15 @@ class AnalyticsController(QObject):
     def load_analytics(self, period: str, project_id: int | None = None) -> None:
         self._last_period = period
         self._last_project_id = project_id
-        try:
-            data = self._service.get_analytics(period, project_id)
-            self.analytics_loaded.emit(data)
-        except Exception as exc:
-            logger.exception("Analitik verisi yüklenirken hata: %s", exc)
-            self.error_occurred.emit(f"Analitik yüklenemedi: {exc}")
+
+        def _fetch() -> dict[str, Any]:
+            return self._service.get_analytics(period, project_id)
+
+        def _on_error(err: str) -> None:
+            logger.error("Analitik verisi yüklenirken hata: %s", err)
+            self.error_occurred.emit(f"Analitik yüklenemedi: {err}")
+
+        worker = Worker(_fetch)
+        worker.signals.result.connect(self.analytics_loaded.emit)
+        worker.signals.error.connect(_on_error)
+        worker.start()

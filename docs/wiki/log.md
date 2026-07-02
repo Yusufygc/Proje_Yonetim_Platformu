@@ -1,5 +1,32 @@
 # Wiki Kayıt Defteri
 
+## [2026-07-02] PERF+FIX | Üretim öncesi denetim: lazy sayfa inşası, sessiz not hatası, Worker tutarlılığı
+EXE paketlemeden önce başlangıç performansı + mimari/kod kalitesi denetimi yapıldı (3 paralel
+keşif ajanı: başlangıç, mimari/kod kalitesi, algoritma/sorgu — algoritma tarafında gerçek sorun
+bulunmadı, dokunulmadı). Bulunan ve düzeltilen gerçek sorunlar:
+- **[EN BÜYÜK ETKİ] `MainWindow._setup_ui`** artık kayıtlı 9 sayfanın (Dashboard/Projeler/
+  Fikirler/Görevler/Notlarım/Analitik/Arşiv/Bilgi/Ayarlar) TAMAMINI `window.show()`'dan önce
+  inşa etmiyor — her biri kendi DB sorgusunu (`load_*`) tetikliyordu, kullanıcı aynı anda sadece
+  1 sayfa görüyor. `_navigate_to` artık sayfayı yalnızca ilk ziyarette (`_build_and_register_page`)
+  kuruyor, `ModuleRegistry.instance().plugins()` üzerinden `page_key` eşleşmesiyle buluyor.
+- **[BLOCKER] `NoteController.error_occurred`** hiçbir yere bağlı değildi — not kaydetme/
+  güncelleme/silme hatası kullanıcıya tamamen sessizce kayboluyordu. `NoteListWidget`'a
+  `ideas_page.py`'deki mevcut desenle (`QMessageBox.critical`) bağlandı; regresyon testi eklendi.
+- `project_list_item.py`'deki 2 `except Exception: pass` (sessiz hata yutma, CLAUDE.md ihlali)
+  `logger.debug` ile görünür yapıldı.
+- `alembic_runner.py::HEAD_REVISION` sabiti eskiydi (`0004`), gerçek head `0007_add_memo_sort_order`
+  olarak düzeltildi (migration zinciri: 0001→...→0007).
+- `note_service.py` artık plain `ValueError` yerine yeni `core/exceptions/note_exceptions.py`
+  (`NoteValidationError`, `NoteNotFoundError`) fırlatıyor — Proje/Görev servisleriyle tutarlı.
+- Not/Memo/Dashboard/Analitik controller'larının `load_*` metodları Worker'a taşındı
+  ([[worker-altyapisi]]) — artık projenin kendi standardıyla tam tutarlı.
+
+**Bilinçli olarak dokunulmayanlar:** `project_detail_panel.py`(441)/`settings_page.py`(433)/
+`info_page.py`(413) satır sınırını hafif aşıyor, `PreferenceManager` 19 public metod (limit 15) —
+çalışıyor/test edilmiş, bölünmesi gerçek fayda sağlamadan risk/süre maliyeti taşıyor, kullanıcı
+kararıyla sadece not düşüldü. DEBUG log seviyesi, font/tema yükleme maliyeti, `OnboardingService`
+tam tablo okuması — negligible.
+
 ## [2026-07-02] FEATURE | Yeni görev artık kardeş grubunun başına ekleniyor
 `TaskService.create_task`, `order_index` belirtilmediğinde artık
 `TaskRepository.first_order_index()` (yeni metod: en küçük `order_index - 1`, grup

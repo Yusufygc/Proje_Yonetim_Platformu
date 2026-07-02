@@ -1,5 +1,6 @@
 from typing import Any, Optional
 
+from core.exceptions.note_exceptions import NoteNotFoundError, NoteValidationError
 from domain.models.note import Note
 from infrastructure.repositories.note_repository import NoteRepository
 
@@ -12,9 +13,9 @@ class NoteService:
 
     def create_note(self, project_id: int, title: str, body: str, **kwargs: Any) -> Note:
         if not title or not title.strip():
-            raise ValueError("Not başlığı boş olamaz.")
+            raise NoteValidationError("Not başlığı boş olamaz.")
         if not body or not body.strip():
-            raise ValueError("Not içeriği boş olamaz.")
+            raise NoteValidationError("Not içeriği boş olamaz.")
             
         note = Note(
             project_id=project_id,
@@ -31,12 +32,12 @@ class NoteService:
     def update_note(self, note_id: int, **kwargs: Any) -> Note:
         note = self.get_note(note_id)
         if not note:
-            raise ValueError("Not bulunamadı.")
-            
+            raise NoteNotFoundError(note_id)
+
         if "title" in kwargs and not str(kwargs["title"]).strip():
-            raise ValueError("Not başlığı boş olamaz.")
+            raise NoteValidationError("Not başlığı boş olamaz.")
         if "body" in kwargs and not str(kwargs["body"]).strip():
-            raise ValueError("Not içeriği boş olamaz.")
+            raise NoteValidationError("Not içeriği boş olamaz.")
             
         for key, value in kwargs.items():
             if hasattr(note, key):

@@ -17,6 +17,13 @@ worker.start()
 - `load_*` çağrıları Worker ile arka planda → UI kilitlenmez.
 - `create/update/delete/toggle` UI thread'inde senkron: SQLite WAL'de ms seviyesinde; async geçişin sinyal sıralaması riski kazancı aşıyor. Büyük toplu işlem (WBS alt ağaç silme) yavaşlarsa yeniden değerlendirilecek ([[log]]).
 
+**Tutarlılık düzeltmesi (2026-07-02):** `NoteController.load_project_notes`, `MemoController.load_all`,
+`DashboardController.load_stats`, `AnalyticsController.load_analytics` üretime hazırlık denetiminde
+senkron kaldıkları tespit edildi (standart o zamana kadar sadece Proje/Görev/Fikir controller'larında
+uygulanmıştı) — dördü de aynı closure deseniyle Worker'a taşındı. Özellikle `DashboardController`
+10 farklı domain olayında (`project.*`/`task.*`/`idea.*`) tetiklendiğinden, art arda gelen olaylarda
+UI thread'in kilitlenmemesi en çok burada fayda sağlıyor.
+
 ## Thread + DB uyumu
 `check_same_thread=False` + `scoped_session` + `finally: remove()` → havuz thread'lerinde session sızıntısı yok ([[veritabani-katmani]]).
 

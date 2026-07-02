@@ -13,7 +13,7 @@ from infrastructure.database.migration_runner import run_migrations as run_legac
 
 logger = logging.getLogger(__name__)
 
-HEAD_REVISION = "0004_create_memos_table"
+HEAD_REVISION = "0007_add_memo_sort_order"
 
 if TYPE_CHECKING:
     from alembic.config import Config
