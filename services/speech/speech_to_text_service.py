@@ -58,10 +58,34 @@ class SpeechToTextService:
                 "Vosk kütüphanesi kurulu değil. Çalıştırın: pip install vosk"
             ) from exc
 
-        logger.info("Vosk Türkçe modeli yükleniyor: %s", self._model_dir)
+        import sys  # noqa: PLC0415
+        model_path_str = str(self._model_dir)
+        if sys.platform == "win32":
+            try:
+                import ctypes  # noqa: PLC0415
+                from ctypes import wintypes  # noqa: PLC0415
+                _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+                _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+                _GetShortPathNameW.restype = wintypes.DWORD
+
+                buf_size = 256
+                while True:
+                    buf = ctypes.create_unicode_buffer(buf_size)
+                    needed = _GetShortPathNameW(model_path_str, buf, buf_size)
+                    if needed == 0:
+                        break
+                    if needed < buf_size:
+                        model_path_str = buf.value
+                        break
+                    buf_size = needed
+            except Exception as exc:
+                logger.warning("Kısa dosya yolu alınamadı: %s", exc)
+
+        logger.info("Vosk Türkçe modeli yükleniyor: %s (Kısa Yol: %s)", self._model_dir, model_path_str)
         vosk.SetLogLevel(-1)  # Vosk'un kendi dahili log çıktısını kapat
-        self._model = vosk.Model(str(self._model_dir))
+        self._model = vosk.Model(model_path_str)
         logger.info("Vosk modeli yüklendi.")
+
 
     def create_recognizer(self, sample_rate: int = 16000) -> Any:
         """
