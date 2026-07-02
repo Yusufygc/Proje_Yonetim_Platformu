@@ -39,6 +39,8 @@ _THEME_PACKAGES: list[tuple[str, str, str, str, str, str]] = [
     ("indigo",  "settings_theme_pkg_indigo",  "Indigo",  "indigo_dark",  "indigo_light",  "#6366F1"),  # l10n: data
     ("emerald", "settings_theme_pkg_emerald", "Emerald", "emerald_dark", "emerald_light", "#10B981"),  # l10n: data
     ("ocean",   "settings_theme_pkg_ocean",   "Ocean",   "ocean_dark",   "ocean_light",   "#2563EB"),  # l10n: data
+    ("rose",    "settings_theme_pkg_rose",    "Rose",    "rose_dark",    "rose_light",    "#F43F5E"),  # l10n: data
+    ("violet",  "settings_theme_pkg_violet",  "Violet",  "violet_dark",  "violet_light",  "#8B5CF6"),  # l10n: data
 ]
 
 # Böyle bir üretkenlik aracı için okunabilir, tanıdık, zaten paketlenmiş
@@ -217,12 +219,15 @@ class SettingsPage(QWidget):
         ctrl_row.addStretch()
         layout.addLayout(ctrl_row)
 
-        # Önizleme
+        # Önizleme + Uygula — sıkı gruplu tek blok (aile seçiminden görsel olarak ayrışır)
+        preview_group = QVBoxLayout()
+        preview_group.setSpacing(Spacing.SM)
+
         prev_lbl = QLabel(
             tr("settings_font_preview", "Önizleme:"), parent=section
         )
         prev_lbl.setProperty("cssClass", "text-secondary")
-        layout.addWidget(prev_lbl)
+        preview_group.addWidget(prev_lbl)
 
         self._font_preview = QLabel(
             tr("settings_font_preview_text", "Hızlı kahverengi tilki — The quick brown fox 0123456789"),
@@ -231,10 +236,9 @@ class SettingsPage(QWidget):
         self._font_preview.setProperty("cssClass", "text-primary")
         self._font_preview.setStyleSheet("padding: 10px; border-radius: 4px;")
         self._font_preview.setWordWrap(True)
-        layout.addWidget(self._font_preview)
+        preview_group.addWidget(self._font_preview)
 
         apply_row = QHBoxLayout()
-        apply_row.addStretch()
         self._font_apply_btn = QPushButton(
             tr("settings_font_apply", "Uygula"), parent=section
         )
@@ -242,7 +246,10 @@ class SettingsPage(QWidget):
         self._font_apply_btn.setFixedHeight(Size.BTN_SM_H)
         self._font_apply_btn.clicked.connect(self._on_apply_font)
         apply_row.addWidget(self._font_apply_btn)
-        layout.addLayout(apply_row)
+        apply_row.addStretch()
+        preview_group.addLayout(apply_row)
+
+        layout.addLayout(preview_group)
 
         self._update_font_preview()
 

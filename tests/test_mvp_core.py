@@ -251,14 +251,16 @@ def test_performance_index_migration_is_idempotent(service_stack):
     assert "idx_ideas_status" in index_names
 
 
-def test_create_task_appends_to_end_of_sibling_group_when_order_index_omitted(service_stack):
+def test_create_task_prepends_to_start_of_sibling_group_when_order_index_omitted(service_stack):
     project = service_stack["project_service"].create_project("Sıra Testi")
 
     first = service_stack["task_service"].create_task(project.id, "Birinci")
     second = service_stack["task_service"].create_task(project.id, "İkinci")
     third = service_stack["task_service"].create_task(project.id, "Üçüncü")
 
-    assert (first.order_index, second.order_index, third.order_index) == (0, 1, 2)
+    # Yeni görev her zaman kardeş grubunun BAŞINA eklenir (WBS'te en üste çıkar);
+    # artan order_index sıralamasında bu yüzden en son oluşturulan en küçük değeri taşır.
+    assert (first.order_index, second.order_index, third.order_index) == (0, -1, -2)
 
 
 def test_create_task_order_index_scoped_to_own_parent_group(service_stack):
@@ -276,7 +278,7 @@ def test_create_task_order_index_scoped_to_own_parent_group(service_stack):
     )
 
     assert first_child.order_index == 0
-    assert second_child.order_index == 1
+    assert second_child.order_index == -1
 
 
 def test_idea_reorder_persists_new_sort_order(service_stack):

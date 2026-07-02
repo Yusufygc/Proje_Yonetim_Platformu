@@ -15,6 +15,10 @@ from app.di_container import DIContainer, OnboardingService  # noqa: E402
 
 def main() -> None:
     """Uygulamayı başlatan ana fonksiyon."""
+    # Loglama dosyası açılınca yolu kalıcı olarak sabitlenir; bu yüzden veri
+    # dizini taşıma her türlü loglama kurulumundan ÖNCE denenmelidir.
+    config.migrate_legacy_data_dir()
+
     # 1. Loglama ve Hata Yönetimini Kur
     setup_logging()
     setup_global_exception_handler()

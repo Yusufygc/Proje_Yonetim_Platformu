@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import logging
+import re
 from collections.abc import Callable
 
-from sqlalchemy import inspect, text
+from sqlalchemy import MetaData, Table, inspect, select, text, update
 from sqlalchemy.engine import Engine
 
 from infrastructure.database.base_model import Base
@@ -12,6 +13,20 @@ from infrastructure.database.base_model import Base
 logger = logging.getLogger(__name__)
 
 Migration = Callable[[Engine], None]
+
+_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _safe_identifier(name: str) -> str:
+    """Tablo/kolon adının alfanümerik+alt çizgi kalıbına uyduğunu doğrular.
+
+    SQLAlchemy DDL tanımlayıcılarını (tablo/kolon adı) parametre olarak
+    bağlayamaz — yalnızca değerler bağlanabilir. Bu fonksiyonlar text()
+    içine ad gömmeden önce sıkı bir allowlist ile korunur.
+    """
+    if not _IDENTIFIER_RE.match(name):
+        raise ValueError(f"Geçersiz SQL tanımlayıcısı: {name!r}")
+    return name
 
 DEFAULT_WORKFLOW_STAGES = [
     ("Fikir", "Fikir ve ihtiyaç netleştirme", 0),
@@ -146,15 +161,13 @@ def _backfill_list_sort_order(
     """
     if not inspect(engine).has_table(table_name):
         return
+    table = Table(table_name, MetaData(), autoload_with=engine)
+    id_col = table.c["id"]
+    order_col = table.c[order_column]
     with engine.begin() as conn:
-        rows = conn.execute(
-            text(f"SELECT id FROM {table_name} ORDER BY {order_column} DESC, id DESC")
-        ).fetchall()
+        rows = conn.execute(select(id_col).order_by(order_col.desc(), id_col.desc())).fetchall()
         for index, row in enumerate(rows):
-            conn.execute(
-                text(f"UPDATE {table_name} SET {column_name} = :idx WHERE id = :row_id"),
-                {"idx": index, "row_id": row[0]},
-            )
+            conn.execute(update(table).where(id_col == row[0]).values(**{column_name: index}))
 
 
 def _add_memo_sort_order(engine: Engine) -> None:
@@ -168,6 +181,8 @@ def _add_column(engine: Engine, table_name: str, column_name: str, column_sql: s
     columns = {col["name"] for col in inspect(engine).get_columns(table_name)}
     if column_name in columns:
         return
+    table_name = _safe_identifier(table_name)
+    column_name = _safe_identifier(column_name)
     with engine.begin() as conn:
         conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_sql}"))
 
@@ -178,6 +193,9 @@ def _create_index(engine: Engine, index_name: str, table_name: str, column_name:
     columns = {col["name"] for col in inspect(engine).get_columns(table_name)}
     if column_name not in columns:
         return
+    index_name = _safe_identifier(index_name)
+    table_name = _safe_identifier(table_name)
+    column_name = _safe_identifier(column_name)
     with engine.begin() as conn:
         conn.execute(text(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table_name}({column_name})"))
 
@@ -185,6 +203,8 @@ def _create_index(engine: Engine, index_name: str, table_name: str, column_name:
 def _update_value(engine: Engine, table_name: str, column_name: str, old: str, new: str) -> None:
     if not inspect(engine).has_table(table_name):
         return
+    table_name = _safe_identifier(table_name)
+    column_name = _safe_identifier(column_name)
     with engine.begin() as conn:
         conn.execute(
             text(f"UPDATE {table_name} SET {column_name} = :new WHERE {column_name} = :old"),

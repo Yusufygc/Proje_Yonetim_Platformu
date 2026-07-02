@@ -10,9 +10,12 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Optional
 
-from PySide6.QtCore import QEvent, QMimeData, QObject, QPoint, Qt
+import shiboken6
+from PySide6.QtCore import QEvent, QMimeData, QObject, QPoint, QPropertyAnimation, Qt
 from PySide6.QtGui import QDrag, QMouseEvent, QPainter, QPixmap
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+
+from presentation.utils.ui_utils import animate_move
 
 _MIME_ROW_ID = "application/x-ptp-row-id"
 _GHOST_OPACITY = 0.7
@@ -38,6 +41,7 @@ class DragReorderController(QObject):
         self._on_reorder = on_reorder
         self._press_pos: QPoint | None = None
         self._press_row: QWidget | None = None
+        self._row_anims: dict[QWidget, QPropertyAnimation] = {}
 
     def install(self, row: QWidget) -> None:
         """Satırı sürüklenebilir + bırakma hedefi yapar."""
@@ -137,10 +141,37 @@ class DragReorderController(QObject):
         return None
 
     def _move_row(self, dragged_row: QWidget, target_row: QWidget, insert_after: bool) -> None:
+        old_positions = self._capture_positions()
         self._layout.removeWidget(dragged_row)
         target_index = self._layout.indexOf(target_row)
         insert_index = target_index + 1 if insert_after else target_index
         self._layout.insertWidget(insert_index, dragged_row)
+        self._layout.activate()
+        self._animate_shifted_rows(old_positions)
+
+    def _capture_positions(self) -> dict[QWidget, QPoint]:
+        positions: dict[QWidget, QPoint] = {}
+        for index in range(self._layout.count()):
+            widget = self._layout.itemAt(index).widget()
+            if widget is not None:
+                positions[widget] = widget.pos()
+        return positions
+
+    def _animate_shifted_rows(self, old_positions: dict[QWidget, QPoint]) -> None:
+        for row, old_pos in old_positions.items():
+            new_pos = row.pos()
+            if new_pos == old_pos:
+                continue
+            self._stop_existing_anim(row)
+            row.move(old_pos)
+            anim = animate_move(row, old_pos, new_pos)
+            anim.finished.connect(lambda r=row: self._row_anims.pop(r, None))
+            self._row_anims[row] = anim
+
+    def _stop_existing_anim(self, row: QWidget) -> None:
+        existing = self._row_anims.pop(row, None)
+        if existing is not None and shiboken6.isValid(existing):
+            existing.stop()
 
     def _current_row_ids(self) -> list[int]:
         ids: list[int] = []

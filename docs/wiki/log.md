@@ -1,5 +1,41 @@
 # Wiki Kayıt Defteri
 
+## [2026-07-02] FEATURE | Yeni görev artık kardeş grubunun başına ekleniyor
+`TaskService.create_task`, `order_index` belirtilmediğinde artık
+`TaskRepository.first_order_index()` (yeni metod: en küçük `order_index - 1`, grup
+boşsa `0`) çağırıyor — önceden `next_order_index()` (en büyük `order_index + 1`,
+sona ekler) kullanılıyordu. WBS ağacında yeni görev artık en üstte görünüyor.
+DONE'a geçen görevi kardeş grubunun sonuna alan `_apply_status_side_effects`
+davranışı (aynı `next_order_index` metodunu kullanır) kasıtlı olarak
+DEĞİŞTİRİLMEDİ — iki farklı semantik ("başa ekle" / "sona ekle") artık iki ayrı
+repository metoduna ayrıldı, tek bir metodu iki amaç için paylaştırmak yerine.
+`tests/test_mvp_core.py`'deki sıra testleri yeni beklenen değerlere (azalan/negatif
+`order_index`) güncellendi.
+
+## [2026-07-02] FEATURE | Rose+Violet tema paketleri, liste sıralama animasyonu, font buton grubu
+`_THEME_PACKAGES`'e Rose (`#F43F5E`/`#E11D48`) ve Violet (`#8B5CF6`/`#7C3AED`)
+eklendi (toplam 6 paket) — `resources/themes/{rose,violet}_{dark,light}.json`
+`indigo_*` şablonunun kopyası, sadece accent+sidebar alanları farklı.
+Notlar/Fikirler/Projeler/Notlarım listelerindeki sürükle-bırak sıralamaya
+yumuşak geçiş eklendi: `DragReorderController._move_row` artık FLIP tekniğiyle
+(`_capture_positions`/`_animate_shifted_rows`) konum değiştiren satırları
+`QPropertyAnimation(b"pos")` ile 200ms'de kaydırıyor (önceden anlık zıplama
+vardı). Native `QListWidget` kullanan Fikirler/Notlarım için önce `setAnimated(True)`
+denendi, ama bu özellik PySide6 6.11'de `QListView`'da mevcut değilmiş
+(`AttributeError`, üretimde yakalandı) — kaldırılıp yerine bırakma sonrası
+taşınan satıra `fade_in_current_item()` ile opacity fade-in (0.4→1.0, 150ms)
+eklendi. `DragReorderController._stop_existing_anim` içinde `shiboken6.isValid()`
+kontrolü eklendi — `DeleteWhenStopped` politikasıyla doğal biten bir animasyona
+tekrar `.stop()` çağrısı `RuntimeError` ile çöküyordu (üretimde yakalandı,
+düzeltildi). Yeni `presentation/dimensions.py::Duration` sabiti
+(`FAST/REFLOW/SLOW`) sadece yeni kodda kullanılıyor, mevcut animasyon kodu
+(sidebar/toast/wbs_tree) dokunulmadı. Ayrıca: Roboto/Open Sans font kaynağı
+jsDelivr `@fontsource` woff2'den google/fonts değişken (variable) TTF'lerine
+çevrildi — woff2 dosyaları Qt'nin Windows DirectWrite arka ucunda yükleme
+hatası veriyordu (`Failed to create DirectWrite face`, üretimde yakalandı).
+Ayarlar sayfasında font "Uygula" butonu önizleme kutusuyla sıkı gruplandı
+(`preview_group`, `Spacing.SM`).
+
 ## [2026-07-02] REFACTOR | Ayarlar sayfası: küratörlü tema paketleri + font boyutu kaldırma
 "Ayarlar sayfasının esnekliği kullanışlı mı" tartışması sonucu tema/font sistemi
 sadeleştirildi. 24 alanlı manuel `ThemeEditorDialog` + `ColorPickerButton` tamamen

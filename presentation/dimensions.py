@@ -136,3 +136,11 @@ class FontFamily:
     # Kullanıcı yalnızca aile seçer; boyut sabittir (QSS'teki 56+ sabit
     # font-size px kuralı zaten QApplication.setFont() boyutunu eziyordu).
     DEFAULT_SIZE = 10
+
+
+class Duration:
+    """QPropertyAnimation süreleri (ms) — proje genelinde 150-300ms aralığı kullanılır."""
+
+    FAST = 150      # Mikro fade (wbs_tree.py ile aynı konvansiyon)
+    REFLOW = 200    # Sürükle-bırak satır/kart kayması
+    SLOW = 300      # Geniş geçişler (sidebar/toast ile aynı konvansiyon)

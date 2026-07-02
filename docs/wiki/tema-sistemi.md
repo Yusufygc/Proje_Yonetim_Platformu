@@ -133,9 +133,52 @@ Kullanıcı artık sadece font AİLESİ seçiyor — liste de `QFontDatabase.fam
 Jakarta Sans, Inter, Roboto, Open Sans, Segoe UI. `core/managers/font_manager.py`
 artık kendi özel `_UI_FAMILY`/`_MONO_FAMILY` sabitlerini değil
 `presentation.dimensions.FontFamily`'yi kullanıyor (önceden iki ayrı yerde
-duplicate tanımlıydı). Roboto/Open Sans `scripts/download_fonts.py`'ye jsDelivr
-`@fontsource` CDN üzerinden (woff2, versiyonlu/stabil) eklendi;
-`FontManager.load_all()` artık `*.woff2` da glob'luyor.
+duplicate tanımlıydı). Roboto/Open Sans `scripts/download_fonts.py`'ye ilk etapta
+jsDelivr `@fontsource` CDN'inin woff2 dosyalarıyla eklenmişti, ama bu dosyalar
+Qt'nin Windows DirectWrite arka ucunda "Failed to create DirectWrite face"
+hatasıyla reddedildi (uygulama çökmüyor, sadece fallback fontla devam ediyordu —
+bkz. aşağıdaki "Rose+Violet" bölümündeki düzeltme). Kaynak, google/fonts
+deposundaki tek dosyalık **değişken (variable) TTF**'lere çevrildi
+(`ofl/roboto/Roboto[wdth,wght].ttf`, `ofl/opensans/OpenSans[wdth,wght].ttf`) —
+bu dosyalar sorunsuz yükleniyor, `QFontDatabase.addApplicationFont()` ile
+doğrulandı. `FontManager.load_all()`'daki `*.woff2` glob deseni ileride başka
+bir woff2 font eklenirse diye kalıyor, şu an hiçbir dosya bu desene uymuyor.
+
+## Rose + Violet paketleri eklendi, liste sıralama animasyonu (2026-07-02)
+`_THEME_PACKAGES`'e 2 yeni paket eklendi: **Rose** (`#F43F5E`/`#E11D48`) ve **Violet**
+(`#8B5CF6`/`#7C3AED`) — toplam 6 paket (Slate/Indigo/Emerald/Ocean/Rose/Violet).
+Renkler bilinçli seçildi: mevcut `success/warning/danger/stage_active/stage_done`
+token'larıyla (yeşil/amber/kırmızı/mavi) çakışmıyor. Dosyalar `indigo_*` şablonunun
+birebir kopyası, sadece accent+sidebar alanları değişiyor (bkz. yukarıdaki "bilinçli
+tercih" notu — inheritance yok, flat JSON).
+
+Ayrıca Notlar/Fikirler/Projeler/Notlarım listelerindeki sürükle-bırak sıralamaya
+(commit `a778486`) yumuşak geçiş eklendi:
+- `DragReorderController` (Notlar, Projeler — manuel `QVBoxLayout` satırları):
+  bırakma anında `_move_row` artık `_capture_positions`/`_animate_shifted_rows` ile
+  konum değiştiren tüm satırları (FLIP tekniği: yeni layout konumuna anında taşı,
+  eski konuma geri al, sonra `QPropertyAnimation(b"pos")` ile 200ms'de kaydır)
+  yumuşak kaydırıyor — önceden anlık "zıplama" vardı. Yardımcı fonksiyon
+  `presentation/utils/ui_utils.py::animate_move()`. Devam eden bir animasyon
+  tekrar tetiklenirse (`_stop_existing_anim`) `shiboken6.isValid()` ile kontrol
+  edilip öyle durduruluyor — `DeleteWhenStopped` politikası doğal olarak biten
+  animasyonun C++ nesnesini siliyor, bu kontrol olmadan ikinci `.stop()` çağrısı
+  `RuntimeError: already deleted` ile çöküyordu (üretimde yakalandı, düzeltildi).
+- Fikirler (`ideas_page.py`) ve Notlarım (`memo_page.py`) — native
+  `QListWidget`+`InternalMove` kullanıyorlar. İlk denemede Qt'nin `setAnimated(True)`
+  özelliği açılmaya çalışıldı, ama bu PySide6 6.11 sürümünde `QListView`'da
+  gerçekte YOK (`AttributeError`, metaObject property listesiyle doğrulandı) —
+  kaldırıldı. Yerine bırakma sonrası taşınan (hâlâ seçili) satıra
+  `ui_utils.py::fade_in_current_item()` ile hafif bir opacity fade-in (0.4→1.0,
+  150ms) uygulanıyor — `wbs_tree.py`'deki mevcut `QGraphicsOpacityEffect` deseniyle
+  aynı yaklaşım.
+- Yeni `presentation/dimensions.py::Duration` sınıfı (`FAST=150, REFLOW=200, SLOW=300`)
+  — sadece yeni kod bunu kullanıyor, mevcut `sidebar.py`/`toast.py`/`wbs_tree.py`
+  içindeki sabit sayılar bilinçli olarak dokunulmadan bırakıldı (gereksiz refactor
+  riskinden kaçınmak için).
+
+Ayarlar sayfasında font "Uygula" butonu artık önizleme kutusuyla aynı sıkı grup
+(`preview_group`, `Spacing.SM`) içinde — aile seçim satırından görsel olarak ayrışıyor.
 
 ## Bilinen sınırlar
 - `services/stage_service.py` DEFAULT_STAGES renkleri DB'ye yazılan seed verisi — tema dışı, bilinçli ([[veritabani-katmani]]).

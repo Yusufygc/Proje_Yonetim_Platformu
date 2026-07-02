@@ -13,7 +13,7 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[veritabani-katmani]] — DatabaseManager, scoped_session, WAL modu ve `BaseRepository[T]` / `ProjectScopedRepository[T]` desenleri.
 
 ## Sunum Katmanı
-- [[tema-sistemi]] — JSON palet + token'lı modüler QSS yapısı; 4 küratörlü tema paketi (Slate/Indigo/Emerald/Ocean) × 2 mod. Font boyutu sabit (`FontFamily.DEFAULT_SIZE`) — QSS'teki 56+ sabit `font-size` kuralı zaten `QApplication.setFont()` boyutunu eziyordu, kullanıcı sadece aile seçer.
+- [[tema-sistemi]] — JSON palet + token'lı modüler QSS yapısı; 6 küratörlü tema paketi (Slate/Indigo/Emerald/Ocean/Rose/Violet) × 2 mod. Font boyutu sabit (`FontFamily.DEFAULT_SIZE`) — QSS'teki 56+ sabit `font-size` kuralı zaten `QApplication.setFont()` boyutunu eziyordu, kullanıcı sadece aile seçer.
 - [[l10n-string-yonetimi]] — StringManager, `tr()` yardımcısı, `language_changed` → MainWindow UI yeniden kurulum, ratchet testi.
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve planlanan iyileştirmeler.
 - [[gorevler-modulu]] — WBS görev sayfası paketi (`pages/tasks/`): filter bar + ağaç + sayfa kompozisyonu.

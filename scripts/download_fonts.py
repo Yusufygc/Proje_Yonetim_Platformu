@@ -23,10 +23,12 @@ _PJS_BASE = (
 _JBM_BASE = (
     "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/"
 )
-# jsDelivr @fontsource CDN — resmi font repolarının aksine sürümlü/stabil
-# static per-weight dosya sunar (Roboto/Open Sans'ın kendi repoları değişken
-# font formatına geçtiği için ham GitHub yolu güvenilir değil).
-_FONTSOURCE_BASE = "https://cdn.jsdelivr.net/npm/@fontsource"
+# google/fonts resmi deposu — Roboto/Open Sans artık tek değişken (variable)
+# TTF olarak yayınlanıyor (static/ klasörü kaldırıldı). jsDelivr @fontsource'un
+# sunduğu woff2 dosyaları Qt'nin Windows DirectWrite arka ucunda
+# "Failed to create DirectWrite face" hatasıyla reddediliyor; ham değişken
+# TTF ise sorunsuz yükleniyor (doğrulandı: QFontDatabase.addApplicationFont).
+_GFONTS_BASE = "https://raw.githubusercontent.com/google/fonts/main/ofl"
 
 # filename → download URL
 FONT_MANIFEST: dict[str, str] = {
@@ -38,12 +40,8 @@ FONT_MANIFEST: dict[str, str] = {
     "PlusJakartaSans-ExtraBold.ttf": _PJS_BASE + "PlusJakartaSans-ExtraBold.ttf",
     "JetBrainsMono-Regular.ttf":     _JBM_BASE + "JetBrainsMono-Regular.ttf",
     "JetBrainsMono-Medium.ttf":      _JBM_BASE + "JetBrainsMono-Medium.ttf",
-    "roboto-latin-400-normal.woff2":    f"{_FONTSOURCE_BASE}/roboto@latest/files/roboto-latin-400-normal.woff2",
-    "roboto-latin-500-normal.woff2":    f"{_FONTSOURCE_BASE}/roboto@latest/files/roboto-latin-500-normal.woff2",
-    "roboto-latin-700-normal.woff2":    f"{_FONTSOURCE_BASE}/roboto@latest/files/roboto-latin-700-normal.woff2",
-    "open-sans-latin-400-normal.woff2": f"{_FONTSOURCE_BASE}/open-sans@latest/files/open-sans-latin-400-normal.woff2",
-    "open-sans-latin-600-normal.woff2": f"{_FONTSOURCE_BASE}/open-sans@latest/files/open-sans-latin-600-normal.woff2",
-    "open-sans-latin-700-normal.woff2": f"{_FONTSOURCE_BASE}/open-sans@latest/files/open-sans-latin-700-normal.woff2",
+    "Roboto-Variable.ttf":    f"{_GFONTS_BASE}/roboto/Roboto%5Bwdth,wght%5D.ttf",
+    "OpenSans-Variable.ttf":  f"{_GFONTS_BASE}/opensans/OpenSans%5Bwdth,wght%5D.ttf",
 }
 
 

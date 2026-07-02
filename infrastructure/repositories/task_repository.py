@@ -27,11 +27,28 @@ class TaskRepository(ProjectScopedRepository[Task]):
     def next_order_index(self, project_id: int, parent_task_id: Optional[int]) -> int:
         """Aynı proje + aynı üst görev (kardeş grubu) içindeki bir sonraki sıra değeri.
 
-        Yeni görev her zaman kardeş grubunun sonuna eklensin diye kullanılır;
-        aksi halde model varsayılanı (0) ile başa/ortaya düşer.
+        Tamamlanan görev kardeş grubunun sonuna (WBS'te en alta) alınırken
+        kullanılır (bkz. TaskService._apply_status_side_effects).
         """
         with self._db.session() as sess:
             stmt = select(func.coalesce(func.max(Task.order_index), -1) + 1).where(
+                Task.project_id == project_id
+            )
+            stmt = (
+                stmt.where(Task.parent_task_id.is_(None))
+                if parent_task_id is None
+                else stmt.where(Task.parent_task_id == parent_task_id)
+            )
+            return int(sess.scalar(stmt) or 0)
+
+    def first_order_index(self, project_id: int, parent_task_id: Optional[int]) -> int:
+        """Aynı proje + aynı üst görev (kardeş grubu) içindeki bir önceki sıra değeri.
+
+        Yeni görev kardeş grubunun BAŞINA eklensin diye kullanılır
+        (bkz. TaskService.create_task) — WBS ağacında en üste çıkar.
+        """
+        with self._db.session() as sess:
+            stmt = select(func.coalesce(func.min(Task.order_index), 1) - 1).where(
                 Task.project_id == project_id
             )
             stmt = (

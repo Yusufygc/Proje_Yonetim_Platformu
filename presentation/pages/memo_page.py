@@ -26,6 +26,7 @@ from controllers.memo_controller import MemoController
 from domain.models.memo import Memo
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.utils.ui_utils import fade_in_current_item
 from presentation.widgets.delete_icon_button import DeleteIconButton
 from presentation.widgets.drawing_canvas import DrawingCanvas, DrawingToolbar
 from presentation.widgets.format_toolbar import FormatToolbar
@@ -267,6 +268,7 @@ class MemoPage(QWidget):
             for i in range(self._list_widget.count())
         ]
         self._controller.reorder(ordered_ids)
+        fade_in_current_item(self._list_widget)
 
     def _on_selection_changed(self) -> None:
         self._autosave_timer.stop()

@@ -7,11 +7,15 @@
 - **`wbs_tree.py` — WBSTreeWidget**: render + sürükle-bırak + fade animasyonu. `task_moved = Signal(int, object, int)` (id, yeni parent|None, yeni sıra). `render_tasks()` renkleri döngü dışında bir kez çözer, `setUpdatesEnabled(False/True)` sarmalı kullanır; tema sözleşmesi gereği sayfa `theme_changed`'de yeniden render eder ([[tema-sistemi]]).
 
 ## Sıralama davranışı
-`TaskService`: yeni görev (`create_task`) ve DONE'a geçen görev (`_apply_status_side_effects`,
-`update_task`/`toggle_status` üzerinden çağrılır — 2026-07-02) `order_index`'i her zaman
-`TaskRepository.next_order_index()` ile kardeş grubunun sonuna alır — WBS ağacında yeni/biten
-görevler listenin en altına iner, elle hesaplanmayan `order_index` varsayılan `0`'da kalıp
-başa/ortaya düşmez.
+`TaskService.create_task` yeni görevi `TaskRepository.first_order_index()` ile kardeş
+grubunun BAŞINA alır (kardeş grubundaki en küçük `order_index - 1`; grup boşsa `0`) —
+WBS ağacında yeni görev en üste çıkar (2026-07-02, önceden sona ekleniyordu). DONE'a
+geçen görev (`_apply_status_side_effects`, `update_task`/`toggle_status` üzerinden
+çağrılır) ise ayrı ve DEĞİŞMEYEN bir mekanizmayla, `TaskRepository.next_order_index()`
+(kardeş grubunun en büyük `order_index + 1`) ile kardeş grubunun SONUNA alınır —
+tamamlanan görevler listenin en altına inmeye devam eder. İki metod kasıtlı olarak
+ayrı tutulur: aynı `order_index` hesaplayıcısı hem "başa ekle" hem "sona ekle" için
+kullanılamaz.
 
 ## Veri akışı
 `TaskController.load_tasks` (Worker, async — [[worker-altyapisi]]) → `tasks_loaded` → sayfa `_on_tasks_loaded` → filtre + render. Görev değişiminde controller `task.*` olayını [[event-bus]]'a yayınlar; sayfa kendi sinyal bağlantısıyla listeyi yeniler.

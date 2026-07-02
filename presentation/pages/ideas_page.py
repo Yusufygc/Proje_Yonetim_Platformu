@@ -28,6 +28,7 @@ from presentation.dialogs.idea_dialog import IdeaDialog, _idea_status_labels
 from presentation.dialogs.project_dialog import ProjectDialog
 from presentation.dimensions import Size, Spacing
 from presentation.utils.i18n import tr
+from presentation.utils.ui_utils import fade_in_current_item
 from presentation.widgets.delete_icon_button import DeleteIconButton
 
 _STATUS_THEME_KEYS = {
@@ -228,6 +229,7 @@ class IdeasPage(QWidget):
     def _on_ideas_row_moved(self, *_args: object) -> None:
         ordered_ids = [self._list_widget.item(i).idea.id for i in range(self._list_widget.count())]
         self._controller.reorder(ordered_ids)
+        fade_in_current_item(self._list_widget)
 
     def _on_selection_changed(self) -> None:
         selected = self._list_widget.selectedItems()

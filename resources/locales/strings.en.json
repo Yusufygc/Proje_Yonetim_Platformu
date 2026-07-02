@@ -283,6 +283,8 @@
   "settings_theme_pkg_indigo": "Indigo",
   "settings_theme_pkg_emerald": "Emerald",
   "settings_theme_pkg_ocean": "Ocean",
+  "settings_theme_pkg_rose": "Rose",
+  "settings_theme_pkg_violet": "Violet",
   "settings_font_section": "Font",
   "settings_font_family": "Font Family:",
   "settings_font_preview_text": "The quick brown fox jumps over the lazy dog 0123456789",

@@ -87,6 +87,9 @@ class DIContainer:
         """
         Yalnızca infrastructure katmanını başlatır.
         Çağrı sırası önemlidir: log → veri dizinleri → DB → tercihler → tema → fontlar.
+        Veri dizini taşıma (`config.migrate_legacy_data_dir()`) `main.py` içinde,
+        herhangi bir loglama kurulumundan ÖNCE çalışır — aksi halde erken açılan
+        log dosyası taşıma öncesi (yanlış) yolu kalıcı olarak kilitler.
         """
         if self._initialized:
             return

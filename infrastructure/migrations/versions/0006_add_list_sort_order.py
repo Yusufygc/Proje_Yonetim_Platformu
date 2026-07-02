@@ -21,8 +21,6 @@ depends_on = None
 
 
 def upgrade() -> None:
-    from sqlalchemy import inspect, text
-
     conn = op.get_bind()
     _add_column_if_missing(conn, "notes", "sort_order")
     _add_column_if_missing(conn, "ideas", "sort_order")
@@ -44,16 +42,12 @@ def _add_column_if_missing(conn, table_name: str, column_name: str) -> None:
 
 
 def _backfill(conn, table_name: str, column_name: str) -> None:
-    from sqlalchemy import text
-
-    rows = conn.execute(
-        text(f"SELECT id FROM {table_name} ORDER BY created_at DESC, id DESC")
-    ).fetchall()
+    table = sa.Table(table_name, sa.MetaData(), autoload_with=conn)
+    id_col = table.c["id"]
+    order_col = table.c["created_at"]
+    rows = conn.execute(sa.select(id_col).order_by(order_col.desc(), id_col.desc())).fetchall()
     for index, row in enumerate(rows):
-        conn.execute(
-            text(f"UPDATE {table_name} SET {column_name} = :idx WHERE id = :row_id"),
-            {"idx": index, "row_id": row[0]},
-        )
+        conn.execute(sa.update(table).where(id_col == row[0]).values(**{column_name: index}))
 
 
 def downgrade() -> None:
