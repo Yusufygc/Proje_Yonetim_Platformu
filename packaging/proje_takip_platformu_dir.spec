@@ -9,6 +9,10 @@ ROOT = Path(SPECPATH).parent
 # EXE'ye elle eklenerek conda bağımlılığı ortadan kaldırılır.
 CONDA_BIN = r"C:\Users\ysfygc\anaconda3\envs\projeTakip\Library\bin"
 
+# Vosk CFFI native kütüphaneleri — PyInstaller cffi.dlopen() ile yüklenen
+# DLL'leri statik analizle bulamaz; elle eklenmesi zorunludur.
+VOSK_DIR = str(ROOT / ".venv" / "Lib" / "site-packages" / "vosk")
+
 a = Analysis(
     [str(ROOT / "main.py")],
     pathex=[str(ROOT)],
@@ -23,6 +27,11 @@ a = Analysis(
         (f"{CONDA_BIN}\\ffi-8.dll",           "."),
         (f"{CONDA_BIN}\\libcrypto-3-x64.dll", "."),
         (f"{CONDA_BIN}\\libssl-3-x64.dll",    "."),
+        # Vosk ses tanıma C++ motoru ve bağımlılıkları
+        (f"{VOSK_DIR}\\libvosk.dll",          "vosk"),
+        (f"{VOSK_DIR}\\libgcc_s_seh-1.dll",   "vosk"),
+        (f"{VOSK_DIR}\\libstdc++-6.dll",      "vosk"),
+        (f"{VOSK_DIR}\\libwinpthread-1.dll",  "vosk"),
     ],
     datas=[
         (str(ROOT / "resources"), "resources"),

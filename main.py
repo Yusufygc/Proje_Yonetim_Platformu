@@ -8,43 +8,22 @@ from pathlib import Path
 # Proje kökünü import path'e ekle
 sys.path.insert(0, str(Path(__file__).parent))
 
-# --- Windows DLL / PortAudio PATH Fix ---
+# --- Windows DLL Arama Yolu Düzeltmesi (Python 3.8+) ---
+# Python 3.8'den itibaren os.environ['PATH'] DLL aramada kullanılmıyor.
+# Bunun yerine os.add_dll_directory() API'si ile dizinler kaydedilmelidir.
 import os  # noqa: E402
-if getattr(sys, "frozen", False) or hasattr(sys, "_MEIPASS"):
-    def _get_short_path(long_path_str: str) -> str:
-        if sys.platform != "win32":
-            return long_path_str
-        try:
-            import ctypes  # noqa: PLC0415
-            from ctypes import wintypes  # noqa: PLC0415
-            _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
-            _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
-            _GetShortPathNameW.restype = wintypes.DWORD
+if getattr(sys, "frozen", False) and sys.platform == "win32":
+    _base = Path(sys._MEIPASS) if hasattr(sys, "_MEIPASS") else Path(__file__).parent
 
-            buf_size = 256
-            while True:
-                buf = ctypes.create_unicode_buffer(buf_size)
-                needed = _GetShortPathNameW(long_path_str, buf, buf_size)
-                if needed == 0:
-                    return long_path_str
-                if needed < buf_size:
-                    return buf.value
-                buf_size = needed
-        except Exception:  # noqa: BLE001
-            return long_path_str
+    _dll_dirs = [
+        _base,                                                # _internal kökü
+        _base / "vosk",                                       # libvosk.dll ve bağımlılıkları
+        _base / "_sounddevice_data" / "portaudio-binaries",   # PortAudio DLL
+    ]
+    for _d in _dll_dirs:
+        if _d.exists():
+            os.add_dll_directory(str(_d))
 
-    _internal_dir = Path(__file__).parent
-    _portaudio_dir = _internal_dir / "_sounddevice_data" / "portaudio-binaries"
-    
-    _short_internal = _get_short_path(str(_internal_dir))
-    _short_portaudio = _get_short_path(str(_portaudio_dir))
-    
-    _env_paths = os.environ.get("PATH", "").split(os.pathsep)
-    if _short_portaudio not in _env_paths:
-        _env_paths.insert(0, _short_portaudio)
-    if _short_internal not in _env_paths:
-        _env_paths.insert(0, _short_internal)
-    os.environ["PATH"] = os.pathsep.join(_env_paths)
 
 
 from app import config  # noqa: E402
