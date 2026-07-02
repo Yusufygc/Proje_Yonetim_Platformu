@@ -133,3 +133,6 @@ class FontFamily:
     MONO = "JetBrains Mono"
     FALLBACK_UI = "Segoe UI"
     FALLBACK_MONO = "Consolas"
+    # Kullanıcı yalnızca aile seçer; boyut sabittir (QSS'teki 56+ sabit
+    # font-size px kuralı zaten QApplication.setFont() boyutunu eziyordu).
+    DEFAULT_SIZE = 10

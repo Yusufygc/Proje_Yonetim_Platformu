@@ -50,12 +50,12 @@ def main() -> None:
 
     # Fontları yükle ve uygula (kullanıcı tercihi varsa önceliği alır)
     from PySide6.QtGui import QFont
+    from presentation.dimensions import FontFamily
     font_mgr = container.fonts
     font_mgr.load_all()
     saved_family = container.prefs.load_font_family()
-    saved_size = container.prefs.load_font_size()
     effective_family = saved_family if saved_family else font_mgr.ui_font
-    app.setFont(QFont(effective_family, saved_size))
+    app.setFont(QFont(effective_family, FontFamily.DEFAULT_SIZE))
 
     # Global Scroll Event Filter'ı yükle
     from presentation.utils.scroll_filter import WheelEventFilter

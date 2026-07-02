@@ -4,19 +4,17 @@ Ayarlar sayfası — tema, yazı tipi, dil, yedekleme ve dışa aktarma.
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QFontDatabase
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
     QFileDialog,
     QFrame,
     QHBoxLayout,
-    QInputDialog,
     QLabel,
     QMessageBox,
     QPushButton,
     QScrollArea,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -26,8 +24,7 @@ from controllers.settings_controller import SettingsController
 from core.managers.preference_manager import PreferenceManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
-from presentation.dialogs.theme_editor_dialog import ThemeEditorDialog
-from presentation.dimensions import Size, Spacing
+from presentation.dimensions import FontFamily, Size, Spacing
 from presentation.utils.i18n import tr
 
 _LANGUAGES: list[tuple[str, str]] = [
@@ -35,15 +32,20 @@ _LANGUAGES: list[tuple[str, str]] = [
     ("English", "en"),
 ]
 
-# (hex, i18n_key, default_label) — tr() ile chip tooltip'inde tüketilir
-_ACCENT_PRESETS: list[tuple[str, str, str]] = [
-    ("#6366F1", "settings_accent_indigo", "İndigo"),  # l10n: data — tr() ile chip tooltip'inde tüketilir
-    ("#0EA5E9", "settings_accent_blue", "Mavi"),
-    ("#10B981", "settings_accent_green", "Yeşil"),  # l10n: data
-    ("#F59E0B", "settings_accent_amber", "Amber"),
-    ("#EC4899", "settings_accent_pink", "Pembe"),
-    ("#678180", "settings_accent_teal", "Deniz"),
+# (id, i18n_key, default_label, koyu-mod dosyası, açık-mod dosyası, önizleme rengi)
+# tr() ile paket kartı etiketinde tüketilir.
+_THEME_PACKAGES: list[tuple[str, str, str, str, str, str]] = [
+    ("slate",   "settings_theme_pkg_slate",   "Slate",   "dark",         "light",         "#678180"),  # l10n: data
+    ("indigo",  "settings_theme_pkg_indigo",  "Indigo",  "indigo_dark",  "indigo_light",  "#6366F1"),  # l10n: data
+    ("emerald", "settings_theme_pkg_emerald", "Emerald", "emerald_dark", "emerald_light", "#10B981"),  # l10n: data
+    ("ocean",   "settings_theme_pkg_ocean",   "Ocean",   "ocean_dark",   "ocean_light",   "#2563EB"),  # l10n: data
 ]
+
+# Böyle bir üretkenlik aracı için okunabilir, tanıdık, zaten paketlenmiş
+# (resources/fonts/) veya sistemde her yerde bulunan ailelerle sınırlı tutulur;
+# QFontDatabase.families() ile tüm sistem fontlarını (Wingdings dahil) listelemek
+# gereksiz kalabalık yaratıyordu.
+_FONT_CHOICES: list[str] = ["Plus Jakarta Sans", "Inter", "Roboto", "Open Sans", "Segoe UI"]
 
 
 class SettingsPage(QWidget):
@@ -139,141 +141,48 @@ class SettingsPage(QWidget):
         mode_row.addStretch()
         layout.addLayout(mode_row)
 
-        # Slot satırları
-        layout.addWidget(self._build_slot_row(
-            section,
-            tr("settings_theme_dark_slot", "Koyu Mod Teması:"),
-            "dark",
-        ))
-        layout.addWidget(self._build_slot_row(
-            section,
-            tr("settings_theme_light_slot", "Açık Mod Teması:"),
-            "light",
-        ))
-
-        # Hızlı Vurgu rengi
-        accent_row = QHBoxLayout()
-        accent_row.setSpacing(Spacing.SM)
-        accent_lbl = QLabel(
-            tr("settings_theme_quick_accent", "Hızlı Vurgu:"), parent=section
+        # Tema paketi satırı — aktif moda göre (Koyu/Açık) dosya seçilir.
+        pkg_lbl = QLabel(
+            tr("settings_theme_package_label", "Tema Paketi:"), parent=section
         )
-        accent_lbl.setProperty("cssClass", "text-secondary")
-        accent_lbl.setFixedWidth(130)
-        accent_row.addWidget(accent_lbl)
-
-        for hex_color, label_key, default_label in _ACCENT_PRESETS:
-            chip = QPushButton(parent=section)
-            chip.setFixedSize(28, 28)
-            chip.setToolTip(tr(label_key, default_label))
-            chip.setStyleSheet(
-                f"QPushButton {{ background: {hex_color}; border-radius: 14px;"
-                f" border: 2px solid transparent; }}"
-                f"QPushButton:hover {{ border: 2px solid rgba(255,255,255,0.6); }}"
-            )
-            chip.clicked.connect(
-                lambda checked, hx=hex_color: self._on_accent_quick_change(hx)
-            )
-            accent_row.addWidget(chip)
-        accent_row.addStretch()
-        layout.addLayout(accent_row)
-
-        # Yeni / İçe Aktar satırı
-        action_row = QHBoxLayout()
-        action_row.setSpacing(Spacing.SM)
-
-        new_btn = QPushButton(
-            tr("settings_theme_new_btn", "+ Yeni Tema"), parent=section
-        )
-        new_btn.setProperty("cssClass", "btn-primary")
-        new_btn.clicked.connect(self._on_new_theme)
-        action_row.addWidget(new_btn)
-
-        import_btn = QPushButton(
-            tr("settings_theme_import_btn", "İçe Aktar .json"), parent=section
-        )
-        import_btn.setProperty("cssClass", "btn-secondary")
-        import_btn.clicked.connect(self._on_import_theme)
-        action_row.addWidget(import_btn)
-
-        action_row.addStretch()
-        layout.addLayout(action_row)
+        pkg_lbl.setProperty("cssClass", "text-secondary")
+        layout.addWidget(pkg_lbl)
+        layout.addWidget(self._build_package_row(section))
 
         self._refresh_mode_buttons()
         return section
 
-    def _build_slot_row(
-        self, parent: QWidget, label_text: str, slot_key: str
-    ) -> QWidget:
+    def _build_package_row(self, parent: QWidget) -> QWidget:
         row_widget = QWidget(parent=parent)
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(Spacing.SM)
 
-        lbl = QLabel(label_text, parent=row_widget)
-        lbl.setProperty("cssClass", "text-secondary")
-        lbl.setFixedWidth(130)
-        row.addWidget(lbl)
+        self._package_buttons: dict[str, QPushButton] = {}
+        for pkg_id, label_key, default_label, dark_stem, light_stem, swatch_hex in _THEME_PACKAGES:
+            card = QWidget(parent=row_widget)
+            card_layout = QHBoxLayout(card)
+            card_layout.setContentsMargins(0, 0, 0, 0)
+            card_layout.setSpacing(Spacing.XS)
 
-        combo = QComboBox(parent=row_widget)
-        combo.setMinimumWidth(150)
-        combo.setMinimumHeight(Size.BTN_SM_H)
-        self._populate_theme_combo(combo, slot_key)
-        row.addWidget(combo)
+            swatch = QFrame(parent=card)
+            swatch.setFixedSize(14, 14)
+            swatch.setStyleSheet(f"background-color: {swatch_hex}; border-radius: 7px;")
+            card_layout.addWidget(swatch)
 
-        edit_btn = QPushButton(tr("settings_theme_edit_btn", "Düzenle"), parent=row_widget)
-        edit_btn.setProperty("cssClass", "btn-secondary")
-        edit_btn.setFixedHeight(Size.BTN_SM_H)
-        row.addWidget(edit_btn)
+            btn = QPushButton(tr(label_key, default_label), parent=card)
+            btn.setCheckable(True)
+            btn.setProperty("cssClass", "btn-toggle")
+            btn.setFixedHeight(Size.BTN_SM_H)
+            btn.clicked.connect(
+                lambda checked=False, pid=pkg_id, ds=dark_stem, ls=light_stem: self._on_package_clicked(pid, ds, ls)
+            )
+            card_layout.addWidget(btn)
+            self._package_buttons[pkg_id] = btn
 
-        copy_btn = QPushButton(tr("settings_theme_copy_btn", "Kopyala"), parent=row_widget)
-        copy_btn.setProperty("cssClass", "btn-secondary")
-        copy_btn.setFixedHeight(Size.BTN_SM_H)
-        row.addWidget(copy_btn)
-
-        export_btn = QPushButton("↑", parent=row_widget)
-        export_btn.setProperty("cssClass", "btn-secondary")
-        export_btn.setFixedSize(Size.BTN_SM_H, Size.BTN_SM_H)
-        export_btn.setToolTip(tr("settings_theme_export_btn", "Dışa Aktar"))
-        row.addWidget(export_btn)
-
-        del_btn = QPushButton(tr("settings_theme_delete_btn", "Sil"), parent=row_widget)
-        del_btn.setProperty("cssClass", "btn-secondary")
-        del_btn.setFixedHeight(Size.BTN_SM_H)
-        row.addWidget(del_btn)
+            row.addWidget(card)
 
         row.addStretch()
-
-        # Bağlantılar
-        combo.currentIndexChanged.connect(
-            lambda _idx, s=slot_key, cb=combo: self._on_slot_changed(s, cb)
-        )
-        edit_btn.clicked.connect(
-            lambda checked, s=slot_key, cb=combo: self._on_edit_theme(cb.currentData())
-        )
-        copy_btn.clicked.connect(
-            lambda checked, s=slot_key, cb=combo: self._on_copy_theme(cb.currentData(), cb)
-        )
-        export_btn.clicked.connect(
-            lambda checked, cb=combo: self._on_export_theme(cb.currentData())
-        )
-        del_btn.clicked.connect(
-            lambda checked, s=slot_key, cb=combo: self._on_delete_theme(cb.currentData(), s, cb)
-        )
-
-        # Combo referanslarını sakla
-        if slot_key == "dark":
-            self._dark_combo = combo
-            self._dark_del_btn = del_btn
-        else:
-            self._light_combo = combo
-            self._light_del_btn = del_btn
-
-        self._update_del_btn_state(del_btn, combo.currentData() or "")
-
-        combo.currentIndexChanged.connect(
-            lambda _idx, b=del_btn, cb=combo: self._update_del_btn_state(b, cb.currentData() or "")
-        )
-
         return row_widget
 
     # ── Font Bölümü ──────────────────────────────────────────────────────────
@@ -288,7 +197,7 @@ class SettingsPage(QWidget):
         lbl.setProperty("cssClass", "title-small")
         layout.addWidget(lbl)
 
-        # Aile + boyut satırı
+        # Aile satırı
         ctrl_row = QHBoxLayout()
         ctrl_row.setSpacing(Spacing.LG)
 
@@ -304,20 +213,6 @@ class SettingsPage(QWidget):
         self._font_combo.setMinimumHeight(Size.BTN_SM_H)
         self._populate_font_combo()
         ctrl_row.addWidget(self._font_combo)
-
-        size_lbl = QLabel(
-            tr("settings_font_size", "Boyut:"), parent=section
-        )
-        size_lbl.setProperty("cssClass", "text-secondary")
-        ctrl_row.addWidget(size_lbl)
-
-        self._font_size_spin = QSpinBox(parent=section)
-        self._font_size_spin.setRange(7, 20)
-        self._font_size_spin.setSuffix(" pt")
-        self._font_size_spin.setFixedHeight(Size.BTN_SM_H)
-        self._font_size_spin.setFixedWidth(72)
-        self._font_size_spin.setValue(self._prefs.load_font_size())
-        ctrl_row.addWidget(self._font_size_spin)
 
         ctrl_row.addStretch()
         layout.addLayout(ctrl_row)
@@ -352,7 +247,6 @@ class SettingsPage(QWidget):
         self._update_font_preview()
 
         self._font_combo.currentIndexChanged.connect(self._on_font_changed)
-        self._font_size_spin.valueChanged.connect(self._on_font_size_changed)
 
         return section
 
@@ -419,30 +313,11 @@ class SettingsPage(QWidget):
 
     # ── Yardımcı Metodlar ────────────────────────────────────────────────────
 
-    def _populate_theme_combo(self, combo: QComboBox, slot_key: str) -> None:
-        combo.blockSignals(True)
-        combo.clear()
-        themes = self._theme.list_themes()
-        saved_slot = (
-            self._prefs.load_dark_slot()
-            if slot_key == "dark"
-            else self._prefs.load_light_slot()
-        )
-        select_idx = 0
-        for i, t in enumerate(themes):
-            suffix = " ★" if t["builtin"] else ""
-            combo.addItem(t["name"] + suffix, t["name"])
-            if t["name"] == saved_slot:
-                select_idx = i
-        combo.setCurrentIndex(select_idx)
-        combo.blockSignals(False)
-
     def _populate_font_combo(self) -> None:
         self._font_combo.blockSignals(True)
-        families = sorted(set(QFontDatabase.families()))
         saved = self._prefs.load_font_family()
         select_idx = 0
-        for i, fam in enumerate(families):
+        for i, fam in enumerate(_FONT_CHOICES):
             self._font_combo.addItem(fam)
             if fam == saved:
                 select_idx = i
@@ -461,23 +336,19 @@ class SettingsPage(QWidget):
             tr("settings_theme_mode_light", "● Açık") if is_light
             else tr("settings_theme_mode_light_off", "○ Açık")
         )
+        self._refresh_package_buttons()
 
-    def _update_del_btn_state(self, btn: QPushButton, name: str) -> None:
-        is_builtin = self._theme.is_builtin(name)
-        btn.setEnabled(not is_builtin)
-        btn.setToolTip(tr("settings_theme_builtin_delete_disabled", "Yerleşik tema silinemez.") if is_builtin else "")
+    def _refresh_package_buttons(self) -> None:
+        """Aktif moda göre hangi paketin uygulandığını kart işaretiyle gösterir."""
+        is_light = self._prefs.load_active_mode() == "light"
+        active_stem = self._prefs.load_light_slot() if is_light else self._prefs.load_dark_slot()
+        for pkg_id, _label_key, _default, dark_stem, light_stem, _swatch in _THEME_PACKAGES:
+            stem = light_stem if is_light else dark_stem
+            self._package_buttons[pkg_id].setChecked(stem == active_stem)
 
     def _update_font_preview(self) -> None:
         family = self._font_combo.currentText()
-        size = self._font_size_spin.value()
-        font = QFont(family, size)
-        self._font_preview.setFont(font)
-
-    def _refresh_all_theme_combos(self) -> None:
-        if hasattr(self, "_dark_combo"):
-            self._populate_theme_combo(self._dark_combo, "dark")
-        if hasattr(self, "_light_combo"):
-            self._populate_theme_combo(self._light_combo, "light")
+        self._font_preview.setFont(QFont(family, FontFamily.DEFAULT_SIZE))
 
     # ── Tema İşleyicileri ────────────────────────────────────────────────────
 
@@ -495,198 +366,26 @@ class SettingsPage(QWidget):
         self._theme.switch_theme(slot_theme)
         self._refresh_mode_buttons()
 
-    def _on_slot_changed(self, slot_key: str, combo: QComboBox) -> None:
-        name = combo.currentData()
-        if not name:
-            return
-        if slot_key == "dark":
-            self._prefs.save_dark_slot(name)
-            # Eğer koyu mod aktifse temayı hemen uygula
-            if self._prefs.load_active_mode() == "dark":
-                self._prefs.save_theme(name)
-                self._theme.switch_theme(name)
+    def _on_package_clicked(self, _pkg_id: str, dark_stem: str, light_stem: str) -> None:
+        is_light = self._prefs.load_active_mode() == "light"
+        stem = light_stem if is_light else dark_stem
+        if is_light:
+            self._prefs.save_light_slot(stem)
         else:
-            self._prefs.save_light_slot(name)
-            if self._prefs.load_active_mode() == "light":
-                self._prefs.save_theme(name)
-                self._theme.switch_theme(name)
-
-    def _on_new_theme(self) -> None:
-        dlg = ThemeEditorDialog(self._theme, theme_name=None, parent=self)
-        dlg.theme_saved.connect(self._on_theme_editor_saved)
-        dlg.exec()
-
-    def _on_edit_theme(self, name: str | None) -> None:
-        if not name:
-            return
-        dlg = ThemeEditorDialog(self._theme, theme_name=name, parent=self)
-        dlg.theme_saved.connect(self._on_theme_editor_saved)
-        dlg.exec()
-
-    def _on_copy_theme(self, name: str | None, combo: QComboBox) -> None:
-        if not name:
-            return
-        dest, ok = QInputDialog.getText(
-            self,
-            tr("settings_theme_copy_btn", "Kopyala"),
-            tr("settings_theme_new_name_label", "Yeni tema adı:"),
-            text=f"{name}_kopya",
-        )
-        if ok and dest.strip():
-            dest = dest.strip()
-            existing = [t["name"] for t in self._theme.list_themes()]
-            if dest in existing:
-                QMessageBox.warning(self, "Hata", "Bu isimde bir tema zaten mevcut.")
-                return
-            if self._theme.duplicate_theme(name, dest):
-                self._refresh_all_theme_combos()
-
-    def _on_export_theme(self, name: str | None) -> None:
-        if not name:
-            return
-        content = self._theme.export_theme(name)
-        if not content:
-            QMessageBox.warning(self, tr("error_title", "Hata"), tr("settings_theme_file_not_found", "Tema dosyası bulunamadı."))
-            return
-        path, _ = QFileDialog.getSaveFileName(
-            self,
-            tr("settings_theme_export_dialog", "Temayı Dışa Aktar"),
-            f"{name}.json",
-            tr("settings_theme_filter", "Tema Dosyası (*.json)"),
-        )
-        if path:
-            try:
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                QMessageBox.information(
-                    self,
-                    tr("success_title", "Başarılı"),
-                    tr("settings_theme_exported_msg", "Tema dışa aktarıldı:\n{path}").format(path=path),
-                )
-            except OSError as e:
-                QMessageBox.warning(self, tr("error_title", "Hata"), str(e))
-
-    def _on_delete_theme(
-        self, name: str | None, slot_key: str, combo: QComboBox
-    ) -> None:
-        if not name or self._theme.is_builtin(name):
-            return
-        reply = QMessageBox.question(
-            self,
-            tr("settings_theme_delete_btn", "Sil"),
-            tr(
-                "settings_theme_delete_confirm",
-                "Bu temayı silmek istediğinizden emin misiniz?",
-            ),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply != QMessageBox.StandardButton.Yes:
-            return
-        # Slot resetle (silinecek tema slotta atanmışsa built-in'e döndür)
-        if self._prefs.load_dark_slot() == name:
-            self._prefs.save_dark_slot("dark")
-        if self._prefs.load_light_slot() == name:
-            self._prefs.save_light_slot("light")
-        # Aktif tema siliniyorsa fallback
-        active_mode = self._prefs.load_active_mode()
-        current_slot = (
-            self._prefs.load_dark_slot()
-            if active_mode == "dark"
-            else self._prefs.load_light_slot()
-        )
-        self._theme.delete_theme(name)
-        self._refresh_all_theme_combos()
-        # Eğer silinen tema aktifti, yeni slotu yükle
-        if self._theme.current_theme == name:
-            self._theme.switch_theme(current_slot)
-
-    def _on_theme_editor_saved(self, name: str) -> None:
-        self._refresh_all_theme_combos()
-
-    def _on_import_theme(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            tr("settings_theme_import_dialog", "Tema İçe Aktar"),
-            "",
-            tr("settings_theme_filter", "Tema Dosyası (*.json)"),
-        )
-        if not path:
-            return
-        try:
-            content = open(path, encoding="utf-8").read()
-        except OSError as e:
-            QMessageBox.warning(self, tr("error_title", "Hata"), str(e))
-            return
-        # İsim öner: dosya adı
-        from pathlib import Path as _P
-        suggested = _P(path).stem
-        name, ok = QInputDialog.getText(
-            self,
-            tr("settings_theme_import_btn", "İçe Aktar"),
-            tr("settings_theme_name_label", "Tema adı:"),
-            text=suggested,
-        )
-        if not ok or not name.strip():
-            return
-        name = name.strip()
-        existing = [t["name"] for t in self._theme.list_themes()]
-        if name in existing:
-            QMessageBox.warning(self, "Hata", "Bu isimde bir tema zaten mevcut.")
-            return
-        if self._theme.import_theme(content, name):
-            self._refresh_all_theme_combos()
-            QMessageBox.information(
-                self,
-                tr("success_title", "Başarılı"),
-                tr("settings_theme_imported_msg", '"{name}" teması içe aktarıldı.').format(name=name),
-            )
-        else:
-            QMessageBox.warning(self, tr("error_title", "Hata"), tr("settings_theme_invalid_file", "Geçersiz tema dosyası."))
-
-    def _on_accent_quick_change(self, hex_color: str) -> None:
-        palette = dict(self._theme._palette)
-        palette["accent_start"] = hex_color
-        palette["accent_end"] = hex_color
-        full = ThemeManager.derive_alpha_tokens(palette)
-        self._theme.preview_palette(full)
-        # Aktif temayı güncelle (kalıcı değil; sadece anlık uygulama)
-        name = self._theme.current_theme
-        if not self._theme.is_builtin(name):
-            self._theme.update_theme(name, full)
-            self._theme.restore_preview()
-            self._theme.switch_theme(name)
-        else:
-            # Geçici uygula, kalıcı kaydetmeden çık
-            self._theme.restore_preview()
-            temp_name = f"{name}_vurgu_kopya"
-            existing = [t["name"] for t in self._theme.list_themes()]
-            if temp_name not in existing:
-                self._theme.create_theme(temp_name, full)
-            else:
-                self._theme.update_theme(temp_name, full)
-            self._theme.switch_theme(temp_name)
-            active_mode = self._prefs.load_active_mode()
-            if active_mode == "dark":
-                self._prefs.save_dark_slot(temp_name)
-            else:
-                self._prefs.save_light_slot(temp_name)
-            self._prefs.save_theme(temp_name)
-            self._refresh_all_theme_combos()
+            self._prefs.save_dark_slot(stem)
+        self._prefs.save_theme(stem)
+        self._theme.switch_theme(stem)
+        self._refresh_package_buttons()
 
     # ── Font İşleyicileri ────────────────────────────────────────────────────
 
     def _on_font_changed(self, _idx: int) -> None:
         self._update_font_preview()
 
-    def _on_font_size_changed(self, _size: int) -> None:
-        self._update_font_preview()
-
     def _on_apply_font(self) -> None:
         family = self._font_combo.currentText()
-        size = self._font_size_spin.value()
         self._prefs.save_font_family(family)
-        self._prefs.save_font_size(size)
-        QApplication.instance().setFont(QFont(family, size))  # type: ignore[union-attr]
+        QApplication.instance().setFont(QFont(family, FontFamily.DEFAULT_SIZE))  # type: ignore[union-attr]
 
     # ── Dil İşleyicisi ───────────────────────────────────────────────────────
 

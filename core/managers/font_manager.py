@@ -7,12 +7,9 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from presentation.dimensions import FontFamily
 
-_UI_FAMILY = "Plus Jakarta Sans"
-_MONO_FAMILY = "JetBrains Mono"
-_FALLBACK_UI = "Segoe UI"
-_FALLBACK_MONO = "Consolas"
+logger = logging.getLogger(__name__)
 
 
 class FontManager:
@@ -35,15 +32,14 @@ class FontManager:
         return cls._instance
 
     def load_all(self) -> None:
-        """Fonts dizinindeki tüm TTF ve OTF dosyalarını yükler."""
+        """Fonts dizinindeki tüm TTF, OTF ve WOFF2 dosyalarını yükler."""
         if not self._fonts_dir.exists():
             logger.warning("Font dizini bulunamadı: %s", self._fonts_dir)
             return
 
-        for font_file in self._fonts_dir.glob("*.ttf"):
-            self._register(font_file)
-        for font_file in self._fonts_dir.glob("*.otf"):
-            self._register(font_file)
+        for pattern in ("*.ttf", "*.otf", "*.woff2"):
+            for font_file in self._fonts_dir.glob(pattern):
+                self._register(font_file)
 
     def _register(self, font_file: Path) -> None:
         # QApplication oluşturulduktan sonra çağrılır; geç import zorunludur
@@ -64,17 +60,17 @@ class FontManager:
     def ui_font(self) -> str:
         """Birincil UI font ailesi; yüklü değilse Inter ardından sistem fontuna döner."""
         for fam in self._loaded_families:
-            if _UI_FAMILY in fam:
-                return _UI_FAMILY
+            if FontFamily.UI in fam:
+                return FontFamily.UI
         for fam in self._loaded_families:
             if "Inter" in fam:
                 return "Inter"
-        return _FALLBACK_UI
+        return FontFamily.FALLBACK_UI
 
     @property
     def mono_font(self) -> str:
         """Monospace font ailesi; yüklü değilse sistem monospace fontuna döner."""
         for fam in self._loaded_families:
-            if _MONO_FAMILY in fam:
-                return _MONO_FAMILY
-        return _FALLBACK_MONO
+            if FontFamily.MONO in fam:
+                return FontFamily.MONO
+        return FontFamily.FALLBACK_MONO

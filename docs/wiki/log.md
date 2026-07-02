@@ -1,5 +1,70 @@
 # Wiki Kayıt Defteri
 
+## [2026-07-02] REFACTOR | Ayarlar sayfası: küratörlü tema paketleri + font boyutu kaldırma
+"Ayarlar sayfasının esnekliği kullanışlı mı" tartışması sonucu tema/font sistemi
+sadeleştirildi. 24 alanlı manuel `ThemeEditorDialog` + `ColorPickerButton` tamamen
+silindi; `ThemeManager`'daki karşılıksız kalan CRUD metodları
+(`is_builtin/list_themes/create_theme/update_theme/delete_theme/duplicate_theme/
+export_theme/import_theme/get_palette_copy/preview_palette/restore_preview`)
+kaldırıldı. "Hızlı Vurgu" gizli kopya mekanizması (`{isim}_vurgu_kopya` üreten
+`_on_accent_quick_change`) kaldırıldı — bu, `light_vurgu_kopya`/`dark_vurgu_kopya`
+karmaşasının kök nedeniydi. Yerine 4 küratörlü paket geldi: Slate/Indigo/Emerald/
+Ocean × Koyu/Açık = 8 sabit builtin tema dosyası
+(`resources/themes/{indigo,emerald,ocean}_{dark,light}.json`, yeni). Ölü/parçalı
+dosyalar (`old_dark.json`, `old_light.json`, `yedek_light.json`,
+`user/dark_vurgu_kopya.json`, `user/light_vurgu_kopya.json`) silindi;
+`app/di_container.py`'deki tek seferlik `_migrate_legacy_theme_slots()` mevcut
+kullanıcıların tercihlerini yeni paketlere sessizce taşıyor. Font boyutu ayarı
+(fiilen ölüydü — 56+ QSS dosyasında sabit `font-size` px kuralı zaten
+`QApplication.setFont()` boyutunu eziyordu) tamamen kaldırıldı; kullanıcı sadece
+5 küratörlü aileden (Plus Jakarta Sans, Inter, Roboto, Open Sans, Segoe UI) seçim
+yapıyor. Detay: [[tema-sistemi]].
+
+## [2026-07-02] REFACTOR | Analitik KPI sadeleştirme ve görev tamamlanınca sıralama düzeltmesi
+`AnalyticsService`'teki kullanılmayan tahmini/harcanan süre toplamları (`_time_total`,
+`estimated_minutes_total`/`spent_minutes_total`) ve `analytics_page.py`'deki karşılık gelen
+bant + `_fmt_minutes` yardımcı fonksiyonu kaldırıldı. `TaskService`: bir görev DONE
+durumuna geçtiğinde `order_index`'i kardeş grubunun sonuna taşınıyor (WBS listesinde en
+alta iner) — 2026-07-01'deki "Hızlı Görev Ekle" düzeltmesinin tamamlama akışına
+genişletilmiş hali. `CLAUDE.md`'ye değişiklik sonrası `pytest` çalıştırma zorunluluğu
+kural olarak eklendi.
+
+## [2026-07-02] FIX + UX | Aşama tamamlama titremesi, rozet sadeleştirme, analitik tema senkronu
+`ProjectsPage._on_stage_updated` bir aşama tamamlandığında tüm proje listesini ve detay
+panelinin dört alt sekmesini (Görevler/Kararlar/Notlar/Kaynaklar) gereksiz yere yeniden
+yüklüyordu — tıklamada tüm sayfa yenileniyormuş gibi titremeye yol açıyordu. Artık sadece
+ilgili proje çekilip `ProjectListItem.update_project()` / `ProjectDetailPanel.refresh_header()`
+ile yerinde güncelleniyor. Süreç aşamaları listesindeki ayrı durum rozeti (Tamamlandı/
+Aktif/Bekliyor metni) kaldırıldı; tik ikonu + renkli nokta + glow zaten yeterli sinyal
+veriyordu. Proje durum/öncelik rozetlerindeki dolgulu arka planlar kaldırıldı: durum artık
+tek renkli nokta (`#status_dot`), öncelik kart çerçevesi rengiyle taşınıyor
+(`card-priority`); erişilebilirlik için ikisi de tooltip'te metin olarak kalıyor. Proje
+detay sekme çubuğunun seçili rengi "+ Ana Görev Ekle" ile aynı accent gradyana çekildi,
+süreç aşamaları ile sekme çubuğu arasına ayraç çizgi eklendi. Analitik grafiklerinin arka
+planı artık Qt'nin sabit koyu/açık temasına değil uygulamanın gerçek tema paletine bağlı
+(dark modda beyaz kalma sorunu giderildi); grafik yükseklikleri ve panel boşlukları
+daraltılarak sayfa scrollbar ihtiyacı azaltıldı; dönem butonlarının tanımsız `btn-toggle`
+sınıfına stil eklendi. Detay: [[tema-sistemi]].
+
+## [2026-07-02] FEATURE | Süreç aşamalarında tamamlanan aşamaya tik ikonu, aktif aşamaya glow
+`StageTimelineWidget`: DONE durumundaki aşamalar artık daire yerine tik (checkmark) ikonu
+gösteriyor (`IconManager.get_icon`, `try_instance()` ile headless/test ortamında güvenli
+daireye düşüş); ACTIVE aşama kartına `stage_active` renginde accent glow
+(`QGraphicsDropShadowEffect`) eklendi. `presentation/utils/ui_utils.apply_shadow`'a
+opsiyonel `color` parametresi eklendi (varsayılan siyah gölge davranışı korunur).
+
+## [2026-07-02] STYLE | Flat tasarım geçişi: renk paleti, rozetler, sidebar, buton/combobox durumları
+Light temadaki bej/krem tonlar (`background`, `border`, `scrollbar_bg`, `sidebar_active`,
+`h-sidebar_bg`) nötr gri palete çevrildi (kullanıcının aktif özel teması
+`light_vurgu_kopya.json`'a da aynı düzeltme uygulandı). Kritik rozetler (Yüksek/Kritik
+öncelik, Engellendi/İptal/Reddedildi durum) soluk alfa zeminden solid renk + beyaz metne
+geçti. Sidebar aktif sekme sert çok duraklı gradyandan düz zemin + sol vurgu çubuğuna
+geçti. `QComboBox`'a açık/kapalı/disabled/dropdown-item hover durumları, butonlara
+`:pressed` durumu eklendi. Proje sekme çubuğundaki kutu modeli asimetrisi (checked/
+unchecked arası border kalınlık farkı, dikey hizalama hatasına yol açıyordu) giderildi.
+`section-header` tipografisi büyütüldü/koyulaştırıldı. WBS tablo başlığı font boyutu
+artırıldı. Detay: [[tema-sistemi]].
+
 ## [2026-07-01] FIX | Notlarım (memo) sayfasında sürükle-sırala eksikti
 Kullanıcı "Notlarım sayfasında sıralama çalışmıyor" diye bildirdi; incelemede
 `MemoPage`'in hiç sıralama mekanizması olmadığı görüldü (önceki liste-sıralama

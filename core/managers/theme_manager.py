@@ -31,10 +31,6 @@ class ThemeManager(QObject):
 
     _instance: ThemeManager | None = None
 
-    # Önizleme sonrası geri yüklenecek durum
-    _preview_saved_theme: str | None = None
-    _preview_saved_palette: dict | None = None
-
     def __init__(self, themes_dir: Path, styles_dir: Path) -> None:
         super().__init__()
         self._themes_dir = themes_dir
@@ -43,8 +39,6 @@ class ThemeManager(QObject):
         self._icons_cache_dir.mkdir(parents=True, exist_ok=True)
         self._palette: dict[str, Any] = {}
         self._current_theme = "dark"
-        self._preview_saved_theme: str | None = None
-        self._preview_saved_palette: dict | None = None
         # QSS önbelleği — tema değişene kadar disk I/O tekrarlanmaz
         self._qss_cache: str | None = None
         self._compiled_patterns: dict[str, re.Pattern] = {}
@@ -186,102 +180,6 @@ class ThemeManager(QObject):
         self._qss_cache = self._load_styles()
         return self._qss_cache
 
-    # ── Kullanıcı Tema Yönetimi ──────────────────────────────────────────────
-
-    def is_builtin(self, name: str) -> bool:
-        """Yerleşik (değiştirilemez) tema mı kontrol eder."""
-        return (self._themes_dir / f"{name}.json").exists() and not name.startswith("old_")
-
-    def list_themes(self) -> list[dict]:
-        """Yerleşik ve kullanıcı tanımlı tüm temaları döndürür."""
-        themes: list[dict] = []
-        for f in sorted(self._themes_dir.glob("*.json")):
-            if not f.stem.startswith("old_"):
-                themes.append({"name": f.stem, "builtin": True})
-        user_dir = self._themes_dir / "user"
-        if user_dir.exists():
-            for f in sorted(user_dir.glob("*.json")):
-                themes.append({"name": f.stem, "builtin": False})
-        return themes
-
-    def create_theme(self, name: str, palette: dict) -> None:
-        """Yeni kullanıcı teması oluşturur; user/ altına kaydeder."""
-        user_dir = self._themes_dir / "user"
-        user_dir.mkdir(parents=True, exist_ok=True)
-        path = user_dir / f"{name}.json"
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(palette, f, indent=2, ensure_ascii=False)
-        logger.info("Kullanıcı teması oluşturuldu: %s", name)
-
-    def update_theme(self, name: str, palette: dict) -> bool:
-        """Kullanıcı temasını günceller; yerleşik temada False döner."""
-        if self.is_builtin(name):
-            logger.warning("Yerleşik tema değiştirilemez: %s", name)
-            return False
-        user_path = self._themes_dir / "user" / f"{name}.json"
-        if not user_path.exists():
-            return False
-        with open(user_path, "w", encoding="utf-8") as f:
-            json.dump(palette, f, indent=2, ensure_ascii=False)
-        return True
-
-    def delete_theme(self, name: str) -> bool:
-        """Kullanıcı temasını siler; yerleşik veya bulunamayan temada False döner."""
-        if self.is_builtin(name):
-            return False
-        user_path = self._themes_dir / "user" / f"{name}.json"
-        if not user_path.exists():
-            return False
-        user_path.unlink()
-        logger.info("Kullanıcı teması silindi: %s", name)
-        return True
-
-    def duplicate_theme(self, src_name: str, dest_name: str) -> bool:
-        """Temayı kopyalar; kopya her zaman user/ klasörüne yazılır."""
-        src = self._themes_dir / f"{src_name}.json"
-        if not src.exists():
-            src = self._themes_dir / "user" / f"{src_name}.json"
-        if not src.exists():
-            return False
-        with open(src, encoding="utf-8") as f:
-            palette = json.load(f)
-        self.create_theme(dest_name, palette)
-        return True
-
-    def export_theme(self, name: str) -> str | None:
-        """Tema JSON içeriğini string olarak döndürür."""
-        path = self._themes_dir / f"{name}.json"
-        if not path.exists():
-            path = self._themes_dir / "user" / f"{name}.json"
-        if not path.exists():
-            return None
-        return path.read_text(encoding="utf-8")
-
-    def import_theme(self, json_str: str, name: str) -> bool:
-        """JSON string'den kullanıcı teması oluşturur."""
-        try:
-            palette = json.loads(json_str)
-            if not isinstance(palette, dict):
-                return False
-            self.create_theme(name, palette)
-            return True
-        except (json.JSONDecodeError, OSError):
-            return False
-
-    def get_palette_copy(self) -> dict[str, str]:
-        """Düzenlenebilir token'ların aktif palet kopyasını döndürür (alpha hariç)."""
-        editable = [
-            "background", "surface", "surface_raised", "border",
-            "text_primary", "text_secondary", "text_muted",
-            "accent_start", "accent_end", "icon_on_accent",
-            "success", "warning", "danger",
-            "sidebar_bg", "sidebar_active", "sidebar_text", "sidebar_text_active",
-            "sidebar_hover_bg", "sidebar_active_bg", "h-sidebar_bg",
-            "stage_active", "stage_done",
-            "scrollbar_bg", "scrollbar_handle",
-        ]
-        return {k: str(self._palette.get(k, "#888888")) for k in editable}
-
     @staticmethod
     def derive_alpha_tokens(palette: dict[str, str]) -> dict[str, str]:
         """8 alpha token'ını ana renklerden otomatik türetir (#RRGGBB22 formatı)."""
@@ -300,22 +198,6 @@ class ThemeManager(QObject):
             src_color = result.get(src_key, "#888888")
             result[alpha_key] = src_color[:7] + "22"
         return result
-
-    def preview_palette(self, palette: dict[str, str]) -> None:
-        """Geçici önizleme: paleti uygular, orijinali saklar."""
-        if self._preview_saved_theme is None:
-            self._preview_saved_theme = self._current_theme
-            self._preview_saved_palette = dict(self._palette)
-        self._palette = dict(palette)
-        self.theme_changed.emit(self._current_theme)
-
-    def restore_preview(self) -> None:
-        """Geçici önizlemeyi geri alır; orijinal paleti yükler."""
-        if self._preview_saved_theme is not None:
-            self._palette = dict(self._preview_saved_palette or {})
-            self.theme_changed.emit(self._preview_saved_theme)
-            self._preview_saved_theme = None
-            self._preview_saved_palette = None
 
     # ── Varsayılan palet ─────────────────────────────────────────────────────
 

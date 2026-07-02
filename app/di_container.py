@@ -31,6 +31,29 @@ from infrastructure.database.db_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
+# Kaldırılan/eskimiş tema dosyalarına işaret eden tercihleri küratörlü pakete
+# sessizce taşır (2026-07-02, "Hızlı Vurgu" gizli kopya mekanizması kaldırıldı).
+_LEGACY_THEME_MAP: dict[str, str] = {
+    "dark_vurgu_kopya": "emerald_dark",
+    "light_vurgu_kopya": "light",
+    "old_dark": "indigo_dark",
+    "old_light": "ocean_light",
+    "yedek_light": "light",
+}
+
+
+def _migrate_legacy_theme_slots(prefs: PreferenceManager) -> None:
+    """Eski/silinen tema adlarını yeni paket karşılıklarına kalıcı olarak çevirir."""
+    dark_slot = prefs.load_dark_slot()
+    if dark_slot in _LEGACY_THEME_MAP:
+        prefs.save_dark_slot(_LEGACY_THEME_MAP[dark_slot])
+    light_slot = prefs.load_light_slot()
+    if light_slot in _LEGACY_THEME_MAP:
+        prefs.save_light_slot(_LEGACY_THEME_MAP[light_slot])
+    active_theme = prefs.load_theme()
+    if active_theme in _LEGACY_THEME_MAP:
+        prefs.save_theme(_LEGACY_THEME_MAP[active_theme])
+
 
 class DIContainer:
     """
@@ -78,6 +101,7 @@ class DIContainer:
         self._db.run_migrations()
 
         self._prefs = PreferenceManager.instance()
+        _migrate_legacy_theme_slots(self._prefs)
         self._secrets = SecretManager.instance()
         self._theme = ThemeManager.instance(config.THEMES_DIR, config.STYLES_DIR)
         saved_theme = self._prefs.load_theme()

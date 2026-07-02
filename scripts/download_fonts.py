@@ -23,6 +23,10 @@ _PJS_BASE = (
 _JBM_BASE = (
     "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/ttf/"
 )
+# jsDelivr @fontsource CDN — resmi font repolarının aksine sürümlü/stabil
+# static per-weight dosya sunar (Roboto/Open Sans'ın kendi repoları değişken
+# font formatına geçtiği için ham GitHub yolu güvenilir değil).
+_FONTSOURCE_BASE = "https://cdn.jsdelivr.net/npm/@fontsource"
 
 # filename → download URL
 FONT_MANIFEST: dict[str, str] = {
@@ -34,6 +38,12 @@ FONT_MANIFEST: dict[str, str] = {
     "PlusJakartaSans-ExtraBold.ttf": _PJS_BASE + "PlusJakartaSans-ExtraBold.ttf",
     "JetBrainsMono-Regular.ttf":     _JBM_BASE + "JetBrainsMono-Regular.ttf",
     "JetBrainsMono-Medium.ttf":      _JBM_BASE + "JetBrainsMono-Medium.ttf",
+    "roboto-latin-400-normal.woff2":    f"{_FONTSOURCE_BASE}/roboto@latest/files/roboto-latin-400-normal.woff2",
+    "roboto-latin-500-normal.woff2":    f"{_FONTSOURCE_BASE}/roboto@latest/files/roboto-latin-500-normal.woff2",
+    "roboto-latin-700-normal.woff2":    f"{_FONTSOURCE_BASE}/roboto@latest/files/roboto-latin-700-normal.woff2",
+    "open-sans-latin-400-normal.woff2": f"{_FONTSOURCE_BASE}/open-sans@latest/files/open-sans-latin-400-normal.woff2",
+    "open-sans-latin-600-normal.woff2": f"{_FONTSOURCE_BASE}/open-sans@latest/files/open-sans-latin-600-normal.woff2",
+    "open-sans-latin-700-normal.woff2": f"{_FONTSOURCE_BASE}/open-sans@latest/files/open-sans-latin-700-normal.woff2",
 }
 
 
@@ -69,11 +79,12 @@ def download_all(force: bool = False) -> dict[str, bool]:
 
 
 def _premium_fonts_present() -> bool:
-    """İki temel font dosyası mevcutsa True döner (ilk yükleme kontrolü için)."""
-    return (
-        (FONTS_DIR / "PlusJakartaSans-Regular.ttf").exists()
-        and (FONTS_DIR / "JetBrainsMono-Regular.ttf").exists()
-    )
+    """Manifest'teki her dosya diskte mevcutsa True döner (ilk yükleme kontrolü için).
+
+    Sadece PJS+JBM kontrol edilseydi, bunlar zaten kurulu olan mevcut bir
+    kurulumda yeni eklenen fontlar (örn. Roboto/Open Sans) hiç indirilmezdi.
+    """
+    return all((FONTS_DIR / filename).exists() for filename in FONT_MANIFEST)
 
 
 def ensure_fonts() -> None:
