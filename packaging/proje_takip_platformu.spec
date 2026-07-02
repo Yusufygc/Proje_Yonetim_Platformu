@@ -40,6 +40,7 @@ a = Analysis(
         "sqlalchemy.sql.default_comparator",
         "logging.config",
         "logging.handlers",
+        "core.exceptions.note_exceptions",
     ],
     hookspath=[],
     hooksconfig={},
@@ -68,6 +69,15 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(ROOT / "icons" / "icon.ico"),
+    icon=[
+        str(ROOT / "icons" / "16.ico"),
+        str(ROOT / "icons" / "24.ico"),
+        str(ROOT / "icons" / "32.ico"),
+        str(ROOT / "icons" / "64.ico"),
+        str(ROOT / "icons" / "128.ico"),
+        str(ROOT / "icons" / "256.ico"),
+        str(ROOT / "icons" / "512.ico"),
+    ],
     version=str(ROOT / "packaging" / "version_info.txt"),
 )
+
