@@ -48,9 +48,10 @@ def main() -> None:
 
     # Uygulama ve görev çubuğu ikonu — hem kaynak hem EXE modunda çalışır
     from PySide6.QtGui import QIcon  # noqa: PLC0415
-    _icon_path = Path(__file__).parent / "icons" / "icon.ico"
+    _icon_path = Path(__file__).parent / "icons" / "app_icon.ico"
     if _icon_path.exists():
         app.setWindowIcon(QIcon(str(_icon_path)))
+
 
     # Fontları yükle ve uygula (kullanıcı tercihi varsa önceliği alır)
     from PySide6.QtGui import QFont
