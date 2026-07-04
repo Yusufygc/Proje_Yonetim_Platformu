@@ -47,7 +47,11 @@ class FormatToolbar(QWidget):
         self._size_combo = QComboBox(parent=self)
         self._size_combo.addItems(["10", "11", "12", "14", "16", "18", "20", "24", "28", "32"])
         self._size_combo.setCurrentText("12")
-        self._size_combo.setFixedSize(52, 26)
+        self._size_combo.setFixedSize(65, 26)
+        self._size_combo.setStyleSheet(
+            "QComboBox { padding: 1px 18px 1px 6px; border-radius: 4px; font-size: 11px; }"
+            "QComboBox::drop-down { width: 16px; }"
+        )
 
         for w in [
             self._bold_btn, self._italic_btn, self._under_btn,
@@ -137,6 +141,8 @@ class FormatToolbar(QWidget):
             size = int(size_str)
         except ValueError:
             return
+        if size <= 0:
+            return
         fmt = QTextCharFormat()
         fmt.setFontPointSize(float(size))
         self._merge_format(fmt)
@@ -163,6 +169,8 @@ class FormatToolbar(QWidget):
         self._strike_btn.setChecked(fmt.fontStrikeOut())
         size = fmt.fontPointSize()
         if size > 0:
-            self._size_combo.blockSignals(True)
-            self._size_combo.setCurrentText(str(int(size)))
-            self._size_combo.blockSignals(False)
+            val = int(size)
+            if val > 0:
+                self._size_combo.blockSignals(True)
+                self._size_combo.setCurrentText(str(val))
+                self._size_combo.blockSignals(False)
