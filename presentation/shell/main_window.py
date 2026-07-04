@@ -128,6 +128,10 @@ class MainWindow(QMainWindow):
         page = plugin.factory(self._stack)
         index = self._stack.addWidget(page)
         self._page_index[page_name] = index
+        # Yeniden stil uygulaması — Lazy-load ile eklenen sayfaların ve alt elemanlarının
+        # (özellikle cssClass gibi dinamik property'lerin) QSS kurallarını doğru alabilmesi için
+        # ana pencere stilini yeniler. Koyu modda beyaz kalma sorununu çözer.
+        self.setStyleSheet(self._theme.build_global_qss())
 
     def _setup_shortcuts(self) -> None:
         shortcut_f = QShortcut(QKeySequence("Ctrl+F"), self)
