@@ -1,16 +1,20 @@
 /* ================================================================
-   BASE/SCROLLBAR — Dikey ve yatay kaydirma cubuklari
+   BASE/SCROLLBAR — Dikey ve yatay kaydirma cubuklari (Floating, premium stil)
    ================================================================ */
 
 QScrollBar:vertical {
+    background-color: transparent;
+    width: 10px;
+    margin: 0px;
+}
+QScrollBar:vertical:hover {
     background-color: @scrollbar_bg;
-    width: 8px;
-    border-radius: 4px;
 }
 QScrollBar::handle:vertical {
     background-color: @scrollbar_handle;
     border-radius: 4px;
     min-height: 30px;
+    margin: 2px;
 }
 QScrollBar::handle:vertical:hover {
     background-color: @accent_start;
@@ -18,13 +22,30 @@ QScrollBar::handle:vertical:hover {
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     height: 0px;
 }
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
 QScrollBar:horizontal {
+    background-color: transparent;
+    height: 10px;
+    margin: 0px;
+}
+QScrollBar:horizontal:hover {
     background-color: @scrollbar_bg;
-    height: 8px;
-    border-radius: 4px;
 }
 QScrollBar::handle:horizontal {
     background-color: @scrollbar_handle;
     border-radius: 4px;
     min-width: 30px;
+    margin: 2px;
+}
+QScrollBar::handle:horizontal:hover {
+    background-color: @accent_start;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: transparent;
 }

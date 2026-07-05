@@ -40,6 +40,11 @@ QAbstractItemView {
 QAbstractItemView:focus {
     outline: 0;
 }
+QHeaderView {
+    background-color: transparent;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
 QHeaderView::section {
     background-color: @surface_raised;
     color: @text_primary;
@@ -49,6 +54,12 @@ QHeaderView::section {
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
+}
+QHeaderView::section:horizontal:first {
+    border-top-left-radius: 7px;
+}
+QHeaderView::section:horizontal:last {
+    border-top-right-radius: 7px;
 }
 QProgressBar {
     background-color: @border;
