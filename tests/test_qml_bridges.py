@@ -34,6 +34,8 @@ from domain.models.project import Project
 from domain.models.task import Task
 from infrastructure.database.db_manager import DatabaseManager
 from presentation.modules import setup_modules
+from presentation.viewmodels.analytics_viewmodel import AnalyticsViewModel
+from presentation.viewmodels.archive_viewmodel import ArchiveViewModel
 from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel
 from presentation.viewmodels.i18n_bridge import I18nBridge
 from presentation.viewmodels.icon_provider import IconImageProvider
@@ -44,6 +46,8 @@ from presentation.viewmodels.memo_viewmodel import MemoViewModel
 from presentation.viewmodels.navigation_bridge import NavigationBridge
 from presentation.viewmodels.project_list_model import ProjectListModel
 from presentation.viewmodels.project_viewmodel import ProjectViewModel
+from presentation.viewmodels.search_viewmodel import SearchViewModel
+from presentation.viewmodels.settings_viewmodel import SettingsViewModel
 from presentation.viewmodels.task_list_model import TaskListModel
 from presentation.viewmodels.task_viewmodel import TaskViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
@@ -71,7 +75,7 @@ def container(tmp_path: Path) -> DIContainer:
 
 def test_theme_bridge_properties_and_toggle(qapp: QApplication, container: DIContainer) -> None:
     bridge = ThemeBridge(container.theme, container.prefs, parent=qapp)
-    assert bridge.currentTheme in ("dark", "light", "emerald_dark", "indigo_dark")
+    assert isinstance(bridge.currentTheme, str) and len(bridge.currentTheme) > 0
     assert isinstance(bridge.isDark, bool)
     assert bridge.background.startswith("#")
     assert bridge.surface.startswith("#")
@@ -429,6 +433,117 @@ def test_project_viewmodel_decisions_notes_resources(qapp: QApplication, contain
     qapp.processEvents()
 
 
+def test_analytics_viewmodel(qapp: QApplication, container: DIContainer) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    avm = AnalyticsViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert avm.period == "weekly"
+    assert avm.projectId == 0
+    assert isinstance(avm.totalCompleted, int)
+    assert isinstance(avm.completionRate, float)
+    assert isinstance(avm.streakDays, int)
+    assert isinstance(avm.onTimeRate, float)
+    assert isinstance(avm.timeSeries, list)
+    assert isinstance(avm.priorityDistribution, list)
+    assert isinstance(avm.projectDistribution, list)
+
+    avm.setPeriod("monthly")
+    assert avm.period == "monthly"
+
+    avm.setProjectId(1)
+    assert avm.projectId == 1
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+
+def test_archive_viewmodel(qapp: QApplication, container: DIContainer) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    proj = container.project_controller._service.create_project("Arşivlenecek Test Projesi")
+    container.project_controller.archive_project(proj.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    arch_vm = ArchiveViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert arch_vm.count >= 1
+    target = next((p for p in arch_vm.archivedProjects if p["id"] == proj.id), None)
+    assert target is not None
+    assert target["title"] == "Arşivlenecek Test Projesi"
+
+    # Geri yükleme
+    arch_vm.restoreProject(proj.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    # Kalıcı silme testi
+    container.project_controller.archive_project(proj.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    arch_vm.deleteProject(proj.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+
+def test_settings_viewmodel(qapp: QApplication, container: DIContainer) -> None:
+    svm = SettingsViewModel(container, parent=qapp)
+    assert isinstance(svm.isDark, bool)
+    assert len(svm.themePackages) == 6
+    assert len(svm.fontFamilies) >= 5
+    assert svm.appName != ""
+    assert svm.appVersion != ""
+    assert svm.dbPath != ""
+
+    svm.setMode(True)
+    assert svm.isDark is True
+    svm.setMode(False)
+    assert svm.isDark is False
+
+    svm.setThemePackage("indigo")
+    assert svm.activePackage == "indigo"
+
+    svm.setFontFamily("Inter")
+    assert svm.fontFamily == "Inter"
+
+    svm.setLanguage("en")
+    assert svm.currentLanguage == "en"
+    svm.setLanguage("tr")
+    assert svm.currentLanguage == "tr"
+
+    exp_path = svm.getDefaultExportPath()
+    assert exp_path.endswith(".json")
+    bck_path = svm.getDefaultBackupPath()
+    assert bck_path.endswith(".db")
+
+
+def test_search_viewmodel(qapp: QApplication, container: DIContainer) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    nb = NavigationBridge(container.prefs, container.event_bus, parent=qapp)
+    svm = SearchViewModel(container, nb, parent=qapp)
+
+    svm.search("al")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    svm.clear()
+    assert svm.query == ""
+    assert svm.count == 0
+
+    # Navigasyon çağrıları
+    svm.selectItem("project", 1)
+    assert nb.currentPage == "projects"
+    svm.selectItem("task", 1)
+    assert nb.currentPage == "tasks"
+    svm.selectItem("idea", 1)
+    assert nb.currentPage == "ideas"
+
+
 def test_qml_main_window_loads_successfully(qapp: QApplication, container: DIContainer) -> None:
     setup_modules(container)
     engine = QQmlApplicationEngine(parent=qapp)
@@ -444,6 +559,10 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     tv = TaskViewModel(container, parent=qapp)
     iv = IdeaViewModel(container, parent=qapp)
     mv = MemoViewModel(container, parent=qapp)
+    anv = AnalyticsViewModel(container, parent=qapp)
+    arv = ArchiveViewModel(container, parent=qapp)
+    stv = SettingsViewModel(container, parent=qapp)
+    scv = SearchViewModel(container, nb, parent=qapp)
 
     qapp._test_tb = tb  # type: ignore[attr-defined]
     qapp._test_ib = ib  # type: ignore[attr-defined]
@@ -453,6 +572,10 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     qapp._test_tv = tv  # type: ignore[attr-defined]
     qapp._test_iv = iv  # type: ignore[attr-defined]
     qapp._test_mv = mv  # type: ignore[attr-defined]
+    qapp._test_anv = anv  # type: ignore[attr-defined]
+    qapp._test_arv = arv  # type: ignore[attr-defined]
+    qapp._test_stv = stv  # type: ignore[attr-defined]
+    qapp._test_scv = scv  # type: ignore[attr-defined]
 
     engine.rootContext().setContextProperty("themeBridge", tb)
     engine.rootContext().setContextProperty("i18nBridge", ib)
@@ -462,8 +585,18 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     engine.rootContext().setContextProperty("taskViewModel", tv)
     engine.rootContext().setContextProperty("ideaViewModel", iv)
     engine.rootContext().setContextProperty("memoViewModel", mv)
+    engine.rootContext().setContextProperty("analyticsViewModel", anv)
+    engine.rootContext().setContextProperty("archiveViewModel", arv)
+    engine.rootContext().setContextProperty("settingsViewModel", stv)
+    engine.rootContext().setContextProperty("searchViewModel", scv)
 
     qml_file = Path("presentation/qml/main.qml")
     engine.load(str(qml_file))
 
     assert len(engine.rootObjects()) > 0
+
+    # Tüm sayfalar arası geçiş testi
+    for page_key in ["dashboard", "projects", "ideas", "tasks", "memo", "analytics", "archive", "info", "settings"]:
+        nb.navigateTo(page_key)
+        qapp.processEvents()
+

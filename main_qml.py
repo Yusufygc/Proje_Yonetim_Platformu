@@ -100,10 +100,14 @@ def run_qml_app() -> int:
     icon_provider = IconImageProvider(container.icons)
     engine.addImageProvider("icons", icon_provider)
 
+    from presentation.viewmodels.analytics_viewmodel import AnalyticsViewModel  # noqa: PLC0415
+    from presentation.viewmodels.archive_viewmodel import ArchiveViewModel  # noqa: PLC0415
     from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel  # noqa: PLC0415
     from presentation.viewmodels.idea_viewmodel import IdeaViewModel  # noqa: PLC0415
     from presentation.viewmodels.memo_viewmodel import MemoViewModel  # noqa: PLC0415
     from presentation.viewmodels.project_viewmodel import ProjectViewModel  # noqa: PLC0415
+    from presentation.viewmodels.search_viewmodel import SearchViewModel  # noqa: PLC0415
+    from presentation.viewmodels.settings_viewmodel import SettingsViewModel  # noqa: PLC0415
     from presentation.viewmodels.task_viewmodel import TaskViewModel  # noqa: PLC0415
 
     theme_bridge = ThemeBridge(container.theme, container.prefs, parent=app)
@@ -114,6 +118,10 @@ def run_qml_app() -> int:
     task_viewmodel = TaskViewModel(container, parent=app)
     idea_viewmodel = IdeaViewModel(container, parent=app)
     memo_viewmodel = MemoViewModel(container, parent=app)
+    analytics_viewmodel = AnalyticsViewModel(container, parent=app)
+    archive_viewmodel = ArchiveViewModel(container, parent=app)
+    settings_viewmodel = SettingsViewModel(container, parent=app)
+    search_viewmodel = SearchViewModel(container, nav_bridge, parent=app)
 
     # Python GC koruması için referansları sakla
     app._icon_provider = icon_provider  # type: ignore[attr-defined]
@@ -125,6 +133,10 @@ def run_qml_app() -> int:
     app._task_viewmodel = task_viewmodel  # type: ignore[attr-defined]
     app._idea_viewmodel = idea_viewmodel  # type: ignore[attr-defined]
     app._memo_viewmodel = memo_viewmodel  # type: ignore[attr-defined]
+    app._analytics_viewmodel = analytics_viewmodel  # type: ignore[attr-defined]
+    app._archive_viewmodel = archive_viewmodel  # type: ignore[attr-defined]
+    app._settings_viewmodel = settings_viewmodel  # type: ignore[attr-defined]
+    app._search_viewmodel = search_viewmodel  # type: ignore[attr-defined]
 
     # QML global context erişimleri
     context = engine.rootContext()
@@ -136,6 +148,10 @@ def run_qml_app() -> int:
     context.setContextProperty("taskViewModel", task_viewmodel)
     context.setContextProperty("ideaViewModel", idea_viewmodel)
     context.setContextProperty("memoViewModel", memo_viewmodel)
+    context.setContextProperty("analyticsViewModel", analytics_viewmodel)
+    context.setContextProperty("archiveViewModel", archive_viewmodel)
+    context.setContextProperty("settingsViewModel", settings_viewmodel)
+    context.setContextProperty("searchViewModel", search_viewmodel)
 
     qml_file = Path(__file__).parent / "presentation" / "qml" / "main.qml"
     engine.load(str(qml_file))
