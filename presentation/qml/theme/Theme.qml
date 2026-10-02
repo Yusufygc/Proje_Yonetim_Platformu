@@ -1,7 +1,54 @@
+pragma Singleton
 import QtQuick 2.15
 
 QtObject {
     id: themeRoot
+
+    function accent(themeName) {
+        return themeBridge.accentStart;
+    }
+
+    function accentAlpha(themeName, alpha) {
+        var c = Qt.color(themeBridge.accentStart);
+        return Qt.rgba(c.r, c.g, c.b, alpha !== undefined ? alpha : 0.2);
+    }
+
+    readonly property var spacing: ({
+        xs: 4,
+        sm: 8,
+        md: 12,
+        lg: 16,
+        xl: 20,
+        xxl: 24,
+        xxxl: 32
+    })
+
+    readonly property var radius: ({
+        small: 4,
+        medium: 8,
+        large: 12,
+        xl: 16,
+        full: 999
+    })
+
+    readonly property var typography: ({
+        sizeSmall: 11,
+        sizeBody: 13,
+        sizeH3: 15,
+        sizeH2: 18,
+        sizeH1: 22,
+        weightNormal: Font.Normal,
+        weightMedium: Font.Medium,
+        weightSemiBold: Font.DemiBold,
+        weightBold: Font.Bold,
+        fontFamily: "Segoe UI, -apple-system, sans-serif"
+    })
+
+    readonly property var animation: ({
+        fast: 120,
+        normal: 200,
+        slow: 350
+    })
 
     // Renkler — themeBridge üzerinden reaktif
     readonly property color background: themeBridge.background
@@ -24,34 +71,4 @@ QtObject {
     readonly property color danger: themeBridge.danger
     readonly property color iconOnAccent: themeBridge.iconOnAccent
     readonly property bool isDark: themeBridge.isDark
-
-    // Spacing
-    readonly property int spacingXS: 4
-    readonly property int spacingSM: 6
-    readonly property int spacingMD: 8
-    readonly property int spacingLG: 12
-    readonly property int spacingXL: 16
-    readonly property int spacingXXL: 20
-    readonly property int spacingXXXL: 24
-    readonly property int spacingPage: 32
-
-    // Radius
-    readonly property int radiusSM: 4
-    readonly property int radiusMD: 8
-    readonly property int radiusLG: 12
-    readonly property int radiusXL: 16
-    readonly property int radiusPill: 999
-
-    // Font Sizes
-    readonly property int fontSizeCaption: 11
-    readonly property int fontSizeBodySmall: 12
-    readonly property int fontSizeBody: 13
-    readonly property int fontSizeSubtitle: 15
-    readonly property int fontSizeTitleSmall: 18
-    readonly property int fontSizeTitleLarge: 24
-
-    // Animasyon Süreleri
-    readonly property int animFast: 150
-    readonly property int animNormal: 250
-    readonly property int animSlow: 350
 }

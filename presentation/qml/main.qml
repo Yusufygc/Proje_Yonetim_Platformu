@@ -40,48 +40,54 @@ ApplicationWindow {
         onActivated: navBridge.createNewProject()
     }
 
-    // Ana Ekran Düzeni: Sol Sidebar + Sağ İçerik
-    Row {
-        anchors.fill: parent
+    // Sol Sidebar
+    Sidebar {
+        id: mainSidebar
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        z: 10
+    }
 
-        // Sol Sidebar
-        Sidebar {
-            id: mainSidebar
-            height: parent.height
+    // Sağ İçerik Bölümü (Header + Dinamik Sayfa)
+    Item {
+        anchors.left: mainSidebar.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+
+        TopHeader {
+            id: topHeader
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: 56
         }
 
-        // Sağ İçerik Bölümü (Header + Dinamik Sayfa)
-        Column {
-            width: parent.width - mainSidebar.width
-            height: parent.height
+        // Sayfa Yükleyici (Loader)
+        Item {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: topHeader.bottom
+            anchors.bottom: parent.bottom
+            clip: true
 
-            TopHeader {
-                width: parent.width
-            }
-
-            // Sayfa Yükleyici (Loader)
-            Item {
-                width: parent.width
-                height: parent.height - 56
-                clip: true
-
-                Loader {
-                    id: pageLoader
-                    anchors.fill: parent
-                    asynchronous: true
-                    source: {
-                        switch (navBridge.currentPage) {
-                            case "dashboard": return "views/DashboardView.qml";
-                            case "projects": return "views/ProjectsView.qml";
-                            case "ideas": return "views/IdeasView.qml";
-                            case "tasks": return "views/TasksView.qml";
-                            case "memo": return "views/MemoView.qml";
-                            case "analytics": return "views/AnalyticsView.qml";
-                            case "archive": return "views/ArchiveView.qml";
-                            case "info": return "views/InfoView.qml";
-                            case "settings": return "views/SettingsView.qml";
-                            default: return "views/DashboardView.qml";
-                        }
+            Loader {
+                id: pageLoader
+                anchors.fill: parent
+                asynchronous: false
+                source: {
+                    switch (navBridge.currentPage) {
+                        case "dashboard": return "views/DashboardView.qml";
+                        case "projects": return "views/ProjectsView.qml";
+                        case "ideas": return "views/IdeasView.qml";
+                        case "tasks": return "views/TasksView.qml";
+                        case "memo": return "views/MemoView.qml";
+                        case "analytics": return "views/AnalyticsView.qml";
+                        case "archive": return "views/ArchiveView.qml";
+                        case "info": return "views/InfoView.qml";
+                        case "settings": return "views/SettingsView.qml";
+                        default: return "views/DashboardView.qml";
                     }
                 }
             }

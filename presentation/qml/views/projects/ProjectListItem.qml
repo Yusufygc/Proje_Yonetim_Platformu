@@ -20,12 +20,12 @@ Rectangle {
     radius: 10
 
     color: {
-        if (root.isSelected) return themeBridge.sidebarActiveBg;
+        if (root.isSelected) return themeBridge.isDark ? Qt.rgba(0.38, 0.42, 0.95, 0.22) : "#EEF2FF";
         if (mouseArea.containsMouse) return themeBridge.surfaceRaised;
         return themeBridge.surface;
     }
 
-    border.width: root.isSelected ? 1 : 1
+    border.width: root.isSelected ? 2 : 1
     border.color: root.isSelected ? themeBridge.accentStart : themeBridge.border
 
     Behavior on color { ColorAnimation { duration: 120 } }
@@ -54,7 +54,7 @@ Rectangle {
                 text: root.title
                 font.pixelSize: 13
                 font.weight: Font.DemiBold
-                color: root.isSelected ? themeBridge.textPrimary : themeBridge.textPrimary
+                color: root.isSelected ? themeBridge.accentStart : themeBridge.textPrimary
                 elide: Text.ElideRight
                 anchors.verticalCenter: parent.verticalCenter
             }

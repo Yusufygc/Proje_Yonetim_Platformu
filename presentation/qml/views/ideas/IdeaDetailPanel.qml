@@ -257,7 +257,7 @@ AppCard {
 
                 AppButton {
                     text: i18nBridge.tr("action_edit", "Düzenle")
-                    iconName: "settings"
+                    iconName: "pencil"
                     btnVariant: "secondary"
                     onClicked: {
                         if (ideaViewModel && root.hasIdea) {

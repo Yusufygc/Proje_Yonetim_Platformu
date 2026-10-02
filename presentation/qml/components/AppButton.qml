@@ -10,7 +10,11 @@ AbstractButton {
     property int iconSize: 16
     property int radius: 8
 
-    implicitWidth: Math.max(80, contentLayout.implicitWidth + 24)
+    implicitWidth: {
+        if (control.text === "" && control.iconName !== "") return control.iconSize + 16;
+        if (control.text.length <= 2 && control.iconName === "") return 36;
+        return contentLayout.implicitWidth + 24;
+    }
     implicitHeight: 36
 
     hoverEnabled: true
@@ -28,22 +32,26 @@ AbstractButton {
         border.color: {
             if (control.variant === "primary") return "transparent";
             if (control.variant === "danger") return themeBridge.danger;
+            if (control.variant === "warning") return themeBridge.warning;
             return control.hovered ? themeBridge.accentStart : themeBridge.border;
         }
 
         color: {
             if (!control.enabled) return themeBridge.isDark ? "#223333" : "#E2E8F0";
             if (control.variant === "primary") {
-                return control.pressed ? themeBridge.accentEnd : (control.hovered ? themeBridge.accentStart : themeBridge.accentEnd);
+                return control.pressed ? themeBridge.accentEnd : (control.hovered ? themeBridge.accentEnd : themeBridge.accentStart);
             }
             if (control.variant === "danger") {
                 return control.hovered ? (themeBridge.isDark ? "#4A1818" : "#FEE2E2") : "transparent";
+            }
+            if (control.variant === "warning") {
+                return control.hovered ? (themeBridge.isDark ? "#4D3800" : "#FEF3C7") : "transparent";
             }
             if (control.variant === "ghost") {
                 return control.hovered ? themeBridge.sidebarHoverBg : "transparent";
             }
             // secondary
-            return control.hovered ? themeBridge.sidebarHoverBg : themeBridge.surface;
+            return control.hovered ? themeBridge.surfaceRaised : themeBridge.surface;
         }
 
         Behavior on color { ColorAnimation { duration: 150 } }
@@ -60,11 +68,12 @@ AbstractButton {
             visible: control.iconName !== ""
             name: control.iconName
             size: control.iconSize
-            color: control.variant === "primary" ? themeBridge.iconOnAccent : (
-                control.variant === "danger" ? themeBridge.danger : (
-                    control.hovered ? themeBridge.textPrimary : themeBridge.textSecondary
-                )
-            )
+            color: {
+                if (control.variant === "primary") return themeBridge.iconOnAccent;
+                if (control.variant === "danger") return themeBridge.danger;
+                if (control.variant === "warning") return themeBridge.warning;
+                return control.hovered ? themeBridge.accentStart : themeBridge.textPrimary;
+            }
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -78,7 +87,8 @@ AbstractButton {
                 if (!control.enabled) return themeBridge.textMuted;
                 if (control.variant === "primary") return themeBridge.iconOnAccent;
                 if (control.variant === "danger") return themeBridge.danger;
-                return control.hovered ? themeBridge.textPrimary : themeBridge.textSecondary;
+                if (control.variant === "warning") return themeBridge.warning;
+                return control.hovered ? themeBridge.accentStart : themeBridge.textPrimary;
             }
             anchors.verticalCenter: parent.verticalCenter
             Behavior on color { ColorAnimation { duration: 150 } }

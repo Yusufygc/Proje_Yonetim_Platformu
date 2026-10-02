@@ -83,6 +83,7 @@ def run_qml_app() -> int:
     engine = QQmlApplicationEngine()
     icon_provider = IconImageProvider(container.icons)
     engine.addImageProvider("icons", icon_provider)
+    engine.addImageProvider("icon", icon_provider)
 
     from presentation.viewmodels.analytics_viewmodel import AnalyticsViewModel  # noqa: PLC0415
     from presentation.viewmodels.archive_viewmodel import ArchiveViewModel  # noqa: PLC0415

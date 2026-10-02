@@ -117,6 +117,7 @@ Column {
             id: menuPopup
             y: selectorBox.height + 4
             width: selectorBox.width
+            padding: 4
 
             background: Rectangle {
                 radius: 8
@@ -128,7 +129,19 @@ Column {
             Repeater {
                 model: root.model
                 MenuItem {
-                    text: root._getItemText(modelData)
+                    id: mItem
+                    height: 34
+                    contentItem: Text {
+                        text: root._getItemText(modelData)
+                        font.pixelSize: 13
+                        color: mItem.hovered ? themeBridge.accentStart : themeBridge.textPrimary
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
+                    background: Rectangle {
+                        color: mItem.hovered ? (themeBridge.isDark ? themeBridge.surfaceRaised : "#F1F5F9") : "transparent"
+                        radius: 6
+                    }
                     onTriggered: {
                         root.currentIndex = index;
                         root.selectedValue = root._getItemValue(modelData);

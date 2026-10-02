@@ -14,6 +14,49 @@ from core.managers.icon_manager import IconManager
 logger = logging.getLogger(__name__)
 _DEFAULT_SIZE = 64
 
+_ICON_ALIASES: dict[str, str] = {
+    "ideas": "lightbulb",
+    "idea": "lightbulb",
+    "mic": "microphone",
+    "tasks": "check_square",
+    "task": "check_square",
+    "check": "check_square",
+    "check-square": "check_square",
+    "edit": "pencil",
+    "pen-tool": "pencil",
+    "trash-2": "trash",
+    "delete": "trash",
+    "info": "circle-info",
+    "home": "house",
+    "dashboard": "house",
+    "analytics": "chart-bar",
+    "memo": "note-sticky",
+    "notes": "note-sticky",
+    "note": "note-sticky",
+    "align-left": "note-sticky",
+}
+
+_BUILTIN_SVGS: dict[str, str] = {
+    "plus": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="{color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'
+        '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>'
+        "</svg>"
+    ),
+    "x": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="{color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'
+        '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>'
+        "</svg>"
+    ),
+    "close": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="{color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'
+        '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>'
+        "</svg>"
+    ),
+}
+
 
 class IconImageProvider(QQuickImageProvider):
     """QML Image bileşenlerine 'image://icons/<ad>?color=<hex>' formatında ikon sağlar."""
@@ -30,10 +73,18 @@ class IconImageProvider(QQuickImageProvider):
 
         icon_name, color = self._parse_request(path_id)
         width, height = self._calculate_dimensions(requested_size)
+        fill_color = color or "#FFFFFF"
 
-        svg = self._icon_mgr.get_svg_content(icon_name, color or "#FFFFFF")
+        resolved_name = _ICON_ALIASES.get(icon_name, icon_name)
+        if resolved_name in _BUILTIN_SVGS:
+            svg = _BUILTIN_SVGS[resolved_name].format(color=fill_color)
+        else:
+            svg = self._icon_mgr.get_svg_content(resolved_name, fill_color)
+
         if not svg:
-            return QPixmap(width, height)
+            empty = QPixmap(width, height)
+            empty.fill(Qt.GlobalColor.transparent)
+            return empty
 
         pixmap = self._render_svg(svg, width, height)
         self._cache[path_id] = pixmap

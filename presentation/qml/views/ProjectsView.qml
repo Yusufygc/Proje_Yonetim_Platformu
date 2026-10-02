@@ -10,17 +10,16 @@ Item {
 
     property string activeStatusFilter: "ALL"
 
-    Row {
-        anchors.fill: parent
-
-        // Sol Liste Paneli (320px)
-        Rectangle {
-            id: leftPanel
-            width: 320
-            height: parent.height
-            color: themeBridge.surface
-            border.width: 1
-            border.color: themeBridge.border
+    // Sol Liste Paneli (320px)
+    Rectangle {
+        id: leftPanel
+        width: 320
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        color: themeBridge.surface
+        border.width: 1
+        border.color: themeBridge.border
 
             Column {
                 anchors.fill: parent
@@ -179,10 +178,11 @@ Item {
 
         // Sağ Detay Paneli
         ProjectDetailPanel {
-            width: parent.width - leftPanel.width
-            height: parent.height
+            anchors.left: leftPanel.right
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
         }
-    }
 
     // Proje Ekle/Düzenle Dialogu
     ProjectDialog {

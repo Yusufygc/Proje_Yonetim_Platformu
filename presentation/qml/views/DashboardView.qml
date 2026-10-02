@@ -200,7 +200,7 @@ ScrollView {
                     Row {
                         width: parent.width
                         Text {
-                            text: "Yüksek Öncelikli Görevler"
+                            text: i18nBridge.tr("dashboard_high_priority_title", "Yüksek Öncelikli Açık Görevler")
                             font.pixelSize: 14
                             font.weight: Font.DemiBold
                             color: themeBridge.textPrimary
@@ -242,10 +242,11 @@ ScrollView {
 
                     Text {
                         visible: dashboardViewModel.highPriorityTasks.length === 0
-                        text: "Kritik veya yüksek öncelikli görev bulunmuyor."
+                        text: i18nBridge.tr("dashboard_no_high_priority", "Kritik veya yüksek öncelikli görev bulunmuyor.")
                         font.pixelSize: 12
                         color: themeBridge.textMuted
-                        anchors.centerIn: parent
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        topPadding: 32
                     }
                 }
             }
@@ -261,7 +262,7 @@ ScrollView {
                     Row {
                         width: parent.width
                         Text {
-                            text: "Son Eklenen Fikirler"
+                            text: i18nBridge.tr("dashboard_recent_ideas_title", "Son Eklenen Fikirler")
                             font.pixelSize: 14
                             font.weight: Font.DemiBold
                             color: themeBridge.textPrimary
@@ -303,10 +304,11 @@ ScrollView {
 
                     Text {
                         visible: dashboardViewModel.recentIdeas.length === 0
-                        text: "Henüz fikir eklenmedi."
+                        text: i18nBridge.tr("dashboard_no_recent_ideas", "Henüz fikir eklenmedi.")
                         font.pixelSize: 12
                         color: themeBridge.textMuted
-                        anchors.centerIn: parent
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        topPadding: 32
                     }
                 }
             }

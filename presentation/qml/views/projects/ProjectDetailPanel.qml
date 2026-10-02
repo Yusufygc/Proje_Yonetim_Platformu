@@ -244,7 +244,7 @@ Item {
 
                             AppButton {
                                 visible: modelData.status !== "COMPLETED"
-                                variant: "ghost"
+                                variant: "secondary"
                                 text: i18nBridge.tr("btn_complete_stage", "Tamamla")
                                 implicitHeight: 26
                                 onClicked: projectViewModel.completeStage(modelData.id)
@@ -253,7 +253,7 @@ Item {
 
                             AppButton {
                                 visible: modelData.status === "NOT_STARTED"
-                                variant: "ghost"
+                                variant: "primary"
                                 text: i18nBridge.tr("btn_activate_stage", "Aktif Et")
                                 implicitHeight: 26
                                 onClicked: projectViewModel.activateStage(modelData.id)
@@ -280,10 +280,13 @@ Item {
                     ]
 
                     Rectangle {
+                        id: tabBtn
                         width: Math.max(70, tabText.implicitWidth + 20)
                         height: 32
                         radius: 6
-                        color: detailRoot.currentTab === index ? themeBridge.surfaceRaised : "transparent"
+                        color: detailRoot.currentTab === index ?
+                            (themeBridge.isDark ? themeBridge.surfaceRaised : "#EEF2FF") :
+                            (tabMouse.containsMouse ? themeBridge.surfaceRaised : "transparent")
                         border.width: detailRoot.currentTab === index ? 1 : 0
                         border.color: themeBridge.accentStart
 
@@ -293,11 +296,13 @@ Item {
                             text: modelData
                             font.pixelSize: 12
                             font.weight: detailRoot.currentTab === index ? Font.DemiBold : Font.Normal
-                            color: detailRoot.currentTab === index ? themeBridge.textPrimary : themeBridge.textSecondary
+                            color: detailRoot.currentTab === index ? themeBridge.accentStart : themeBridge.textSecondary
                         }
 
                         MouseArea {
+                            id: tabMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: detailRoot.currentTab = index
                         }
