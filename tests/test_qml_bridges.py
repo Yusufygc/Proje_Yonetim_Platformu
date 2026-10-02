@@ -51,6 +51,7 @@ from presentation.viewmodels.settings_viewmodel import SettingsViewModel
 from presentation.viewmodels.task_list_model import TaskListModel
 from presentation.viewmodels.task_viewmodel import TaskViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
+from presentation.viewmodels.voice_bridge import VoiceBridge
 
 
 @pytest.fixture(scope="module")
@@ -544,6 +545,19 @@ def test_search_viewmodel(qapp: QApplication, container: DIContainer) -> None:
     assert nb.currentPage == "ideas"
 
 
+def test_voice_bridge(qapp: QApplication, container: DIContainer) -> None:
+    vb = VoiceBridge(container, parent=qapp)
+    assert vb.isListening is False
+    assert vb.partialText == ""
+
+    # Sinyal tetikleme testi
+    transcripts: list[str] = []
+    vb.textTranscribed.connect(transcripts.append)
+    vb._on_final("merhaba dünya")
+    assert len(transcripts) == 1
+    assert transcripts[0] == "merhaba dünya"
+
+
 def test_qml_main_window_loads_successfully(qapp: QApplication, container: DIContainer) -> None:
     setup_modules(container)
     engine = QQmlApplicationEngine(parent=qapp)
@@ -563,6 +577,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     arv = ArchiveViewModel(container, parent=qapp)
     stv = SettingsViewModel(container, parent=qapp)
     scv = SearchViewModel(container, nb, parent=qapp)
+    vb = VoiceBridge(container, parent=qapp)
 
     qapp._test_tb = tb  # type: ignore[attr-defined]
     qapp._test_ib = ib  # type: ignore[attr-defined]
@@ -576,6 +591,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     qapp._test_arv = arv  # type: ignore[attr-defined]
     qapp._test_stv = stv  # type: ignore[attr-defined]
     qapp._test_scv = scv  # type: ignore[attr-defined]
+    qapp._test_vb = vb  # type: ignore[attr-defined]
 
     engine.rootContext().setContextProperty("themeBridge", tb)
     engine.rootContext().setContextProperty("i18nBridge", ib)
@@ -589,6 +605,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     engine.rootContext().setContextProperty("archiveViewModel", arv)
     engine.rootContext().setContextProperty("settingsViewModel", stv)
     engine.rootContext().setContextProperty("searchViewModel", scv)
+    engine.rootContext().setContextProperty("voiceBridge", vb)
 
     qml_file = Path("presentation/qml/main.qml")
     engine.load(str(qml_file))

@@ -12,6 +12,7 @@ from presentation.viewmodels.search_viewmodel import SearchViewModel
 from presentation.viewmodels.settings_viewmodel import SettingsViewModel
 from presentation.viewmodels.task_viewmodel import TaskViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
+from presentation.viewmodels.voice_bridge import VoiceBridge
 
 __all__ = [
     "AnalyticsViewModel",
@@ -27,4 +28,5 @@ __all__ = [
     "SettingsViewModel",
     "TaskViewModel",
     "ThemeBridge",
+    "VoiceBridge",
 ]

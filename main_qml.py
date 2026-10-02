@@ -109,6 +109,7 @@ def run_qml_app() -> int:
     from presentation.viewmodels.search_viewmodel import SearchViewModel  # noqa: PLC0415
     from presentation.viewmodels.settings_viewmodel import SettingsViewModel  # noqa: PLC0415
     from presentation.viewmodels.task_viewmodel import TaskViewModel  # noqa: PLC0415
+    from presentation.viewmodels.voice_bridge import VoiceBridge  # noqa: PLC0415
 
     theme_bridge = ThemeBridge(container.theme, container.prefs, parent=app)
     i18n_bridge = I18nBridge(container.strings, parent=app)
@@ -122,6 +123,7 @@ def run_qml_app() -> int:
     archive_viewmodel = ArchiveViewModel(container, parent=app)
     settings_viewmodel = SettingsViewModel(container, parent=app)
     search_viewmodel = SearchViewModel(container, nav_bridge, parent=app)
+    voice_bridge = VoiceBridge(container, parent=app)
 
     # Python GC koruması için referansları sakla
     app._icon_provider = icon_provider  # type: ignore[attr-defined]
@@ -137,6 +139,7 @@ def run_qml_app() -> int:
     app._archive_viewmodel = archive_viewmodel  # type: ignore[attr-defined]
     app._settings_viewmodel = settings_viewmodel  # type: ignore[attr-defined]
     app._search_viewmodel = search_viewmodel  # type: ignore[attr-defined]
+    app._voice_bridge = voice_bridge  # type: ignore[attr-defined]
 
     # QML global context erişimleri
     context = engine.rootContext()
@@ -152,6 +155,7 @@ def run_qml_app() -> int:
     context.setContextProperty("archiveViewModel", archive_viewmodel)
     context.setContextProperty("settingsViewModel", settings_viewmodel)
     context.setContextProperty("searchViewModel", search_viewmodel)
+    context.setContextProperty("voiceBridge", voice_bridge)
 
     qml_file = Path(__file__).parent / "presentation" / "qml" / "main.qml"
     engine.load(str(qml_file))
