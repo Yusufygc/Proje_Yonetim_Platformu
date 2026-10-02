@@ -23,6 +23,9 @@ dependencies = [
 [project.scripts]
 proje-takip-quality = "scripts.quality:main"
 
+[tool.setuptools.packages.find]
+include = ["app*", "core*", "domain*", "services*", "controllers*", "presentation*", "infrastructure*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

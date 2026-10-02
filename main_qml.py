@@ -13,23 +13,7 @@ from pathlib import Path
 # Proje kökünü import yoluna ekle
 sys.path.insert(0, str(Path(__file__).parent))
 
-# Windows DLL ve Qt Plugin arama yolu
-if sys.platform == "win32":
-    _python_base = Path(sys.executable).parent
-    _qt_dll_dirs = [
-        _python_base / "Library" / "bin",
-        _python_base / "Library" / "lib" / "qt6" / "bin",
-        _python_base / "Library" / "plugins",
-    ]
-    for _d in _qt_dll_dirs:
-        if _d.exists():
-            os.environ["PATH"] = str(_d) + os.pathsep + os.environ.get("PATH", "")
-            if hasattr(os, "add_dll_directory"):
-                try:
-                    os.add_dll_directory(str(_d))
-                except OSError:
-                    pass
-
+# --- Windows DLL Arama Yolu Düzeltmesi (Python 3.8+) ---
 if getattr(sys, "frozen", False) and sys.platform == "win32":
     _base = Path(sys._MEIPASS) if hasattr(sys, "_MEIPASS") else Path(__file__).parent
     _dll_dirs = [
