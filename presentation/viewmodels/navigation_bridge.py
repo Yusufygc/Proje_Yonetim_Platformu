@@ -37,17 +37,11 @@ class NavigationBridge(QObject):
 
         self._event_bus.subscribe("toast.show", self._on_bus_toast)
 
-    def _on_bus_toast(self, data: Any) -> None:
+    def _on_bus_toast(self, message: str = "", type_: str = "info", **kwargs: Any) -> None:
         """EventBus üzerinden gelen toast bildirimini QML sinyaline dönüştürür."""
-        if isinstance(data, dict):
-            msg = str(data.get("message", ""))
-            toast_type = str(data.get("type", "info"))
-            duration = int(data.get("duration", 3000))
-        else:
-            msg = str(data)
-            toast_type = "info"
-            duration = 3000
-        self.toastRequested.emit(msg, toast_type, duration)
+        toast_type = str(kwargs.get("type", type_))
+        duration = int(kwargs.get("duration", 3000))
+        self.toastRequested.emit(str(message), toast_type, duration)
 
     @Property(str, notify=currentPageChanged)
     def currentPage(self) -> str:

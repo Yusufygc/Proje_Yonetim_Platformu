@@ -1,4 +1,4 @@
-"""QML Köprüleri (ThemeBridge, I18nBridge, NavigationBridge) Birim Testleri."""
+"""QML Köprüleri (Theme, I18n, Navigation, Project, Dashboard) Birim Testleri."""
 from __future__ import annotations
 
 import os
@@ -28,10 +28,15 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtWidgets import QApplication
 
 from app.di_container import DIContainer
+from domain.models.project import Project
+from infrastructure.database.db_manager import DatabaseManager
 from presentation.modules import setup_modules
+from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel
 from presentation.viewmodels.i18n_bridge import I18nBridge
 from presentation.viewmodels.icon_provider import IconImageProvider
 from presentation.viewmodels.navigation_bridge import NavigationBridge
+from presentation.viewmodels.project_list_model import ProjectListModel
+from presentation.viewmodels.project_viewmodel import ProjectViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
 
 
@@ -44,7 +49,12 @@ def qapp() -> QApplication:
 
 
 @pytest.fixture
-def container() -> DIContainer:
+def container(tmp_path: Path) -> DIContainer:
+    DatabaseManager._instance = None
+    DIContainer._instance = None
+    db_file = tmp_path / "test_qml.db"
+    db = DatabaseManager.instance(f"sqlite:///{db_file}")
+    db.create_all_tables()
     c = DIContainer.instance()
     c.bootstrap()
     return c
@@ -60,7 +70,6 @@ def test_theme_bridge_properties_and_toggle(qapp: QApplication, container: DICon
     initial_dark = bridge.isDark
     bridge.toggleTheme()
     assert bridge.isDark != initial_dark
-    # Geri al
     bridge.toggleTheme()
     assert bridge.isDark == initial_dark
 
@@ -114,6 +123,65 @@ def test_navigation_bridge_toast_event_handling(qapp: QApplication, container: D
     assert received_toast[0][2] == 2000
 
 
+def test_project_list_model_and_filters(qapp: QApplication) -> None:
+    model = ProjectListModel(parent=qapp)
+    p1 = Project(id=1, title="Alpha Projesi", short_description="Test aciklama", project_type="Yazilim")
+    p2 = Project(id=2, title="Beta Projesi", short_description="Diger proje", project_type="Egitim")
+    model.set_projects([p1, p2])
+
+    assert model.rowCount() == 2
+    model.setSearchQuery("Alpha")
+    assert model.rowCount() == 1
+    model.setSearchQuery("")
+    assert model.rowCount() == 2
+
+    model.setStatusFilter("COMPLETED")
+    assert model.rowCount() == 0
+    model.setStatusFilter("ALL")
+    assert model.rowCount() == 2
+
+
+def test_project_viewmodel_crud_and_dialog_state(qapp: QApplication, container: DIContainer) -> None:
+    pvm = ProjectViewModel(container, parent=qapp)
+    assert not pvm.isDialogOpen
+
+    pvm.openCreateDialog()
+    assert pvm.isDialogOpen
+    assert pvm.dialogMode == "create"
+    pvm.closeDialog()
+    assert not pvm.isDialogOpen
+
+    # Proje Kaydetme testi
+    test_title = f"Test QML Projesi {os.getpid()}"
+    pvm.openCreateDialog()
+    pvm.saveProject({
+        "title": test_title,
+        "description": "Otomatik birim testi aciklamasi",
+        "status": "ACTIVE",
+        "priority": "HIGH",
+    })
+    from PySide6.QtCore import QThreadPool
+    QThreadPool.globalInstance().waitForDone(2000)
+
+    # Listede mevcut mu kontrol et
+    proj = next((p for p in container.project_controller._service.get_all_projects() if p.title == test_title), None)
+    assert proj is not None
+    pvm.selectProject(proj.id)
+    assert pvm.selectedProjectId == proj.id
+    assert pvm.selectedProject.get("title") == test_title
+    pvm.deleteProject(proj.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+
+
+def test_dashboard_viewmodel_stats(qapp: QApplication, container: DIContainer) -> None:
+    dvm = DashboardViewModel(container.dashboard_controller, parent=qapp)
+    assert isinstance(dvm.totalProjects, int)
+    assert isinstance(dvm.activeProjects, int)
+    assert isinstance(dvm.totalTasks, int)
+    assert isinstance(dvm.openTasks, int)
+    assert isinstance(dvm.recentTasks, list)
+
+
 def test_qml_main_window_loads_successfully(qapp: QApplication, container: DIContainer) -> None:
     setup_modules(container)
     engine = QQmlApplicationEngine(parent=qapp)
@@ -124,14 +192,20 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     tb = ThemeBridge(container.theme, container.prefs, parent=qapp)
     ib = I18nBridge(container.strings, parent=qapp)
     nb = NavigationBridge(container.prefs, container.event_bus, parent=qapp)
+    pv = ProjectViewModel(container, parent=qapp)
+    dv = DashboardViewModel(container.dashboard_controller, parent=qapp)
 
     qapp._test_tb = tb  # type: ignore[attr-defined]
     qapp._test_ib = ib  # type: ignore[attr-defined]
     qapp._test_nb = nb  # type: ignore[attr-defined]
+    qapp._test_pv = pv  # type: ignore[attr-defined]
+    qapp._test_dv = dv  # type: ignore[attr-defined]
 
     engine.rootContext().setContextProperty("themeBridge", tb)
     engine.rootContext().setContextProperty("i18nBridge", ib)
     engine.rootContext().setContextProperty("navBridge", nb)
+    engine.rootContext().setContextProperty("projectViewModel", pv)
+    engine.rootContext().setContextProperty("dashboardViewModel", dv)
 
     qml_file = Path("presentation/qml/main.qml")
     engine.load(str(qml_file))

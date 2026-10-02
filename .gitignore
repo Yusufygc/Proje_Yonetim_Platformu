@@ -99,10 +99,11 @@ pyinstaller/
 # PyCharm
 .idea/
 *.iml
-# VS Code
+# VS Code / Claude
 .vscode/
 .history/
 *.code-workspace
+.claude/
 # Temiz çalışma alanı için yerel araç ayarları
 .env
 .venv

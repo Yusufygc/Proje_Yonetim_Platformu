@@ -40,8 +40,8 @@ ScrollView {
                     }
 
                     Text {
-                        text: "--"
-                        font.pixelSize: 26
+                        text: dashboardViewModel.activeProjects.toString()
+                        font.pixelSize: 28
                         font.bold: true
                         color: themeBridge.textPrimary
                     }
@@ -60,7 +60,7 @@ ScrollView {
                     Row {
                         width: parent.width
                         Text {
-                            text: i18nBridge.tr("dash_pending_tasks", "Bekleyen Görevler")
+                            text: i18nBridge.tr("dash_pending_tasks", "Açık Görevler")
                             font.pixelSize: 13
                             color: themeBridge.textSecondary
                             width: parent.width - 24
@@ -69,8 +69,8 @@ ScrollView {
                     }
 
                     Text {
-                        text: "--"
-                        font.pixelSize: 26
+                        text: dashboardViewModel.openTasks.toString()
+                        font.pixelSize: 28
                         font.bold: true
                         color: themeBridge.textPrimary
                     }
@@ -89,7 +89,7 @@ ScrollView {
                     Row {
                         width: parent.width
                         Text {
-                            text: i18nBridge.tr("dash_completed_tasks", "Tamamlanan")
+                            text: i18nBridge.tr("dash_completed_tasks", "Tamamlanan Görevler")
                             font.pixelSize: 13
                             color: themeBridge.textSecondary
                             width: parent.width - 24
@@ -98,8 +98,8 @@ ScrollView {
                     }
 
                     Text {
-                        text: "--"
-                        font.pixelSize: 26
+                        text: dashboardViewModel.completedTasks.toString()
+                        font.pixelSize: 28
                         font.bold: true
                         color: themeBridge.textPrimary
                     }
@@ -127,8 +127,8 @@ ScrollView {
                     }
 
                     Text {
-                        text: "--"
-                        font.pixelSize: 26
+                        text: dashboardViewModel.totalIdeas.toString()
+                        font.pixelSize: 28
                         font.bold: true
                         color: themeBridge.textPrimary
                     }
@@ -136,17 +136,17 @@ ScrollView {
             }
         }
 
-        // Hızlı Başlangıç Paneli
+        // Hızlı Başlangıç & Aksiyonlar Paneli
         AppCard {
             width: parent.width - 48
-            height: 180
+            height: 140
 
             Column {
                 anchors.fill: parent
                 spacing: 12
 
                 Text {
-                    text: i18nBridge.tr("dash_welcome_title", "Hoş Geldiniz!")
+                    text: i18nBridge.tr("dash_welcome_title", "Proje Takip Merkezi")
                     font.pixelSize: 16
                     font.weight: Font.DemiBold
                     color: themeBridge.textPrimary
@@ -179,6 +179,134 @@ ScrollView {
                         text: i18nBridge.tr("nav_tasks", "Görevler")
                         iconName: "square-check"
                         onClicked: navBridge.navigateTo("tasks")
+                    }
+                }
+            }
+        }
+
+        // Öncelikli Görevler ve Son Aktiviteler
+        Row {
+            width: parent.width - 48
+            spacing: 16
+
+            AppCard {
+                width: (parent.width - 16) / 2
+                height: 240
+
+                Column {
+                    anchors.fill: parent
+                    spacing: 12
+
+                    Row {
+                        width: parent.width
+                        Text {
+                            text: "Yüksek Öncelikli Görevler"
+                            font.pixelSize: 14
+                            font.weight: Font.DemiBold
+                            color: themeBridge.textPrimary
+                            width: parent.width - 24
+                        }
+                        AppIcon { name: "square-check"; size: 16; color: themeBridge.danger }
+                    }
+
+                    Repeater {
+                        model: dashboardViewModel.highPriorityTasks.slice(0, 4)
+                        delegate: Row {
+                            width: parent.width
+                            height: 28
+                            spacing: 8
+
+                            StatusIndicator {
+                                status: modelData.status || "PLANNED"
+                                showLabel: false
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: modelData.title || ""
+                                font.pixelSize: 12
+                                color: themeBridge.textPrimary
+                                width: parent.width - 90
+                                elide: Text.ElideRight
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            AppProgressBar {
+                                value: modelData.progress || 0
+                                barHeight: 4
+                                implicitWidth: 60
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+
+                    Text {
+                        visible: dashboardViewModel.highPriorityTasks.length === 0
+                        text: "Kritik veya yüksek öncelikli görev bulunmuyor."
+                        font.pixelSize: 12
+                        color: themeBridge.textMuted
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+
+            AppCard {
+                width: (parent.width - 16) / 2
+                height: 240
+
+                Column {
+                    anchors.fill: parent
+                    spacing: 12
+
+                    Row {
+                        width: parent.width
+                        Text {
+                            text: "Son Eklenen Fikirler"
+                            font.pixelSize: 14
+                            font.weight: Font.DemiBold
+                            color: themeBridge.textPrimary
+                            width: parent.width - 24
+                        }
+                        AppIcon { name: "lightbulb"; size: 16; color: themeBridge.accentStart }
+                    }
+
+                    Repeater {
+                        model: dashboardViewModel.recentIdeas.slice(0, 4)
+                        delegate: Row {
+                            width: parent.width
+                            height: 28
+                            spacing: 8
+
+                            Text {
+                                text: "💡"
+                                font.pixelSize: 12
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: modelData.title || ""
+                                font.pixelSize: 12
+                                color: themeBridge.textPrimary
+                                width: parent.width - 90
+                                elide: Text.ElideRight
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: modelData.created_at || ""
+                                font.pixelSize: 11
+                                color: themeBridge.textMuted
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+
+                    Text {
+                        visible: dashboardViewModel.recentIdeas.length === 0
+                        text: "Henüz fikir eklenmedi."
+                        font.pixelSize: 12
+                        color: themeBridge.textMuted
+                        anchors.centerIn: parent
                     }
                 }
             }
