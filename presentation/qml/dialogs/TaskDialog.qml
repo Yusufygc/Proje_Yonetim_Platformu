@@ -17,6 +17,12 @@ Rectangle {
         onClicked: { /* modal arka plan tıklaması diyalog dışını engeller */ }
     }
 
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.visible
+        onActivated: taskViewModel.closeDialog()
+    }
+
     property var checklistItems: []
 
     Connections {
@@ -108,6 +114,7 @@ Rectangle {
                         label: i18nBridge.tr("task_dialog_title_label", "Görev Başlığı *")
                         placeholder: i18nBridge.tr("task_dialog_title_placeholder", "Görevin adını girin...")
                         Layout.fillWidth: true
+                        showVoiceInput: true
                     }
 
                     // Açıklama
@@ -117,6 +124,7 @@ Rectangle {
                         placeholder: i18nBridge.tr("task_dialog_desc_placeholder", "Görevi açıklayın (isteğe bağlı)...")
                         isTextArea: true
                         Layout.fillWidth: true
+                        showVoiceInput: true
                     }
 
                     // Seçimler Satırı (Durum, Öncelik, Tip)

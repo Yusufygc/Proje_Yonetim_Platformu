@@ -17,6 +17,15 @@ Rectangle {
         }
     }
 
+    Shortcut {
+        sequence: "Escape"
+        enabled: searchModalRoot.visible
+        onActivated: {
+            searchViewModel.clear();
+            navBridge.closeSearch();
+        }
+    }
+
     Rectangle {
         id: dialogCard
         width: Math.min(640, parent.width - 48)

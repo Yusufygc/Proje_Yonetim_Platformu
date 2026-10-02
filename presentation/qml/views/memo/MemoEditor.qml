@@ -79,6 +79,7 @@ AppCard {
                     id: titleInput
                     placeholder: i18nBridge.tr("memo_title_placeholder", "Not Başlığı...")
                     Layout.fillWidth: true
+                    showVoiceInput: true
                 }
 
                 // Sekme Butonları (Metin / Çizim)
@@ -163,6 +164,12 @@ AppCard {
                         implicitWidth: 28
                         implicitHeight: 28
                         onClicked: insertFormatting("\n- ", "")
+                    }
+
+                    VoiceInputButton {
+                        target: bodyInput
+                        width: 28
+                        height: 28
                     }
 
                     Item { Layout.fillWidth: true }

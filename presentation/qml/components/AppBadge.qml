@@ -5,6 +5,7 @@ Rectangle {
 
     property string text: ""
     property string variant: "accent" // "accent" | "neutral" | "success" | "warning" | "danger"
+    property string size: "md" // "sm" | "md" | "lg"
 
     readonly property color resolvedColor: {
         switch (variant) {
@@ -20,8 +21,8 @@ Rectangle {
     property color badgeColor: resolvedColor
     property color textColor: resolvedColor
 
-    implicitWidth: badgeText.implicitWidth + 16
-    implicitHeight: 22
+    implicitWidth: badgeText.implicitWidth + (size === "sm" ? 12 : 16)
+    implicitHeight: size === "sm" ? 18 : (size === "lg" ? 26 : 22)
     radius: 999
     color: Qt.rgba(badgeColor.r, badgeColor.g, badgeColor.b, 0.15)
     border.width: 1
@@ -31,7 +32,7 @@ Rectangle {
         id: badgeText
         anchors.centerIn: parent
         text: badgeRoot.text
-        font.pixelSize: 11
+        font.pixelSize: badgeRoot.size === "sm" ? 10 : (badgeRoot.size === "lg" ? 12 : 11)
         font.weight: Font.DemiBold
         color: badgeRoot.textColor
     }

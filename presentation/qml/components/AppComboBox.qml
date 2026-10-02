@@ -8,10 +8,62 @@ Column {
     property string label: ""
     property var model: []
     property int currentIndex: 0
-    property string currentValue: model && model.length > currentIndex ? model[currentIndex] : ""
+    property var selectedValue: null
+    property alias currentValue: root.selectedValue
+
+    signal valueSelected(var value)
 
     width: parent ? parent.width : 200
     spacing: 6
+
+    function _getItemText(item) {
+        if (item === undefined || item === null) return "";
+        if (typeof item === "object" && item.text !== undefined) return item.text;
+        return String(item);
+    }
+
+    function _getItemValue(item) {
+        if (item === undefined || item === null) return null;
+        if (typeof item === "object" && item.value !== undefined) return item.value;
+        return item;
+    }
+
+    onSelectedValueChanged: {
+        if (!model || model.length === 0) return;
+        for (var i = 0; i < model.length; i++) {
+            if (_getItemValue(model[i]) == selectedValue) {
+                if (currentIndex !== i) {
+                    currentIndex = i;
+                }
+                return;
+            }
+        }
+    }
+
+    onCurrentIndexChanged: {
+        if (!model || model.length === 0) return;
+        var item = model[currentIndex];
+        var val = _getItemValue(item);
+        if (selectedValue !== val) {
+            selectedValue = val;
+            valueSelected(val);
+        }
+    }
+
+    onModelChanged: {
+        if (selectedValue !== null && selectedValue !== undefined) {
+            for (var i = 0; i < model.length; i++) {
+                if (_getItemValue(model[i]) == selectedValue) {
+                    currentIndex = i;
+                    return;
+                }
+            }
+        }
+        if (model && model.length > 0 && (currentIndex >= 0 && currentIndex < model.length)) {
+            var item = model[currentIndex];
+            selectedValue = _getItemValue(item);
+        }
+    }
 
     Text {
         visible: root.label !== ""
@@ -38,7 +90,7 @@ Column {
 
             Text {
                 width: parent.width - 24
-                text: root.currentValue
+                text: root.model && root.model.length > root.currentIndex ? root._getItemText(root.model[root.currentIndex]) : ""
                 font.pixelSize: 13
                 color: themeBridge.textPrimary
                 anchors.verticalCenter: parent.verticalCenter
@@ -76,9 +128,11 @@ Column {
             Repeater {
                 model: root.model
                 MenuItem {
-                    text: modelData
+                    text: root._getItemText(modelData)
                     onTriggered: {
                         root.currentIndex = index;
+                        root.selectedValue = root._getItemValue(modelData);
+                        root.valueSelected(root.selectedValue);
                     }
                 }
             }

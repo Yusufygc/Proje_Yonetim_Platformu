@@ -15,6 +15,12 @@ Rectangle {
         onClicked: projectViewModel.closeDialog()
     }
 
+    Shortcut {
+        sequence: "Escape"
+        enabled: dialogRoot.visible
+        onActivated: projectViewModel.closeDialog()
+    }
+
     Rectangle {
         id: formCard
         width: Math.min(680, parent.width - 48)
@@ -76,6 +82,7 @@ Rectangle {
                         id: titleInput
                         label: i18nBridge.tr("field_project_title", "Proje Başlığı *")
                         placeholder: "Projenizin adını yazın..."
+                        showVoiceInput: true
                     }
 
                     AppTextInput {
@@ -83,6 +90,7 @@ Rectangle {
                         label: i18nBridge.tr("field_description", "Açıklama")
                         placeholder: "Projenin kapsamını ve amacını açıklayın..."
                         isTextArea: true
+                        showVoiceInput: true
                     }
 
                     Row {

@@ -5,6 +5,7 @@ AbstractButton {
     id: control
 
     property string variant: "secondary" // "primary", "secondary", "ghost", "danger"
+    property alias btnVariant: control.variant
     property string iconName: ""
     property int iconSize: 16
     property int radius: 8

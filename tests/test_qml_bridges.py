@@ -617,3 +617,26 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
         nb.navigateTo(page_key)
         qapp.processEvents()
 
+    from PySide6.QtQml import QQmlComponent  # noqa: PLC0415
+    for view_file in [
+        "presentation/qml/views/DashboardView.qml",
+        "presentation/qml/views/ProjectsView.qml",
+        "presentation/qml/views/IdeasView.qml",
+        "presentation/qml/views/TasksView.qml",
+        "presentation/qml/views/MemoView.qml",
+        "presentation/qml/views/AnalyticsView.qml",
+        "presentation/qml/views/ArchiveView.qml",
+        "presentation/qml/views/InfoView.qml",
+        "presentation/qml/views/SettingsView.qml",
+        "presentation/qml/dialogs/ProjectDialog.qml",
+        "presentation/qml/dialogs/TaskDialog.qml",
+        "presentation/qml/dialogs/IdeaDialog.qml",
+        "presentation/qml/components/GlobalSearchModal.qml",
+    ]:
+        comp = QQmlComponent(engine, view_file)
+        errs = [e.toString() for e in comp.errors()]
+        assert comp.isReady(), f"Bileşen yüklenemedi {view_file}: {errs}"
+        obj = comp.create()
+        assert obj is not None
+        qapp.processEvents()
+

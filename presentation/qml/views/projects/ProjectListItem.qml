@@ -83,19 +83,14 @@ Rectangle {
         }
 
         // Alt Satır: Durum Göstergesi ve İlerleme Çubuğu
-        Row {
+        Item {
             width: parent.width
-            spacing: 12
+            height: 20
 
             StatusIndicator {
                 status: root.status
+                anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Item {
-                width: 1
-                height: 1
-                Layout.fillWidth: true
             }
 
             AppProgressBar {
@@ -103,6 +98,7 @@ Rectangle {
                 showLabel: true
                 barHeight: 4
                 implicitWidth: 80
+                anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

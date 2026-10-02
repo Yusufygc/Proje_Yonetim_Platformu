@@ -17,6 +17,12 @@ Rectangle {
         onClicked: { /* modal diyalog dışı tıklamayı engeller */ }
     }
 
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.visible
+        onActivated: ideaViewModel.closeDialog()
+    }
+
     Connections {
         target: ideaViewModel
         function onDialogStateChanged() {
@@ -100,6 +106,7 @@ Rectangle {
                         label: i18nBridge.tr("idea_dialog_title_label", "Fikir Başlığı *")
                         placeholder: i18nBridge.tr("idea_dialog_title_placeholder", "Örn: Yeni mobil uygulama fikri...")
                         Layout.fillWidth: true
+                        showVoiceInput: true
                     }
 
                     // Durum ve Öncelik Yan Yana
@@ -149,6 +156,7 @@ Rectangle {
                         placeholder: i18nBridge.tr("idea_dialog_problem_placeholder", "Bu fikir hangi problemi çözüyor?")
                         isTextArea: true
                         Layout.fillWidth: true
+                        showVoiceInput: true
                     }
 
                     // Çözüm
@@ -158,6 +166,7 @@ Rectangle {
                         placeholder: i18nBridge.tr("idea_dialog_solution_placeholder", "Önerdiğiniz çözüm detayları...")
                         isTextArea: true
                         Layout.fillWidth: true
+                        showVoiceInput: true
                     }
 
                     // Notlar
@@ -167,6 +176,7 @@ Rectangle {
                         placeholder: i18nBridge.tr("idea_dialog_notes_placeholder", "Ek notlar...")
                         isTextArea: true
                         Layout.fillWidth: true
+                        showVoiceInput: true
                     }
 
                     // Kaynak URL
