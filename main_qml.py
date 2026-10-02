@@ -101,13 +101,17 @@ def run_qml_app() -> int:
     engine.addImageProvider("icons", icon_provider)
 
     from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel  # noqa: PLC0415
+    from presentation.viewmodels.idea_viewmodel import IdeaViewModel  # noqa: PLC0415
     from presentation.viewmodels.project_viewmodel import ProjectViewModel  # noqa: PLC0415
+    from presentation.viewmodels.task_viewmodel import TaskViewModel  # noqa: PLC0415
 
     theme_bridge = ThemeBridge(container.theme, container.prefs, parent=app)
     i18n_bridge = I18nBridge(container.strings, parent=app)
     nav_bridge = NavigationBridge(container.prefs, container.event_bus, parent=app)
     project_viewmodel = ProjectViewModel(container, parent=app)
     dashboard_viewmodel = DashboardViewModel(container.dashboard_controller, parent=app)
+    task_viewmodel = TaskViewModel(container, parent=app)
+    idea_viewmodel = IdeaViewModel(container, parent=app)
 
     # Python GC koruması için referansları sakla
     app._icon_provider = icon_provider  # type: ignore[attr-defined]
@@ -116,6 +120,8 @@ def run_qml_app() -> int:
     app._nav_bridge = nav_bridge  # type: ignore[attr-defined]
     app._project_viewmodel = project_viewmodel  # type: ignore[attr-defined]
     app._dashboard_viewmodel = dashboard_viewmodel  # type: ignore[attr-defined]
+    app._task_viewmodel = task_viewmodel  # type: ignore[attr-defined]
+    app._idea_viewmodel = idea_viewmodel  # type: ignore[attr-defined]
 
     # QML global context erişimleri
     context = engine.rootContext()
@@ -124,6 +130,8 @@ def run_qml_app() -> int:
     context.setContextProperty("navBridge", nav_bridge)
     context.setContextProperty("projectViewModel", project_viewmodel)
     context.setContextProperty("dashboardViewModel", dashboard_viewmodel)
+    context.setContextProperty("taskViewModel", task_viewmodel)
+    context.setContextProperty("ideaViewModel", idea_viewmodel)
 
     qml_file = Path(__file__).parent / "presentation" / "qml" / "main.qml"
     engine.load(str(qml_file))
