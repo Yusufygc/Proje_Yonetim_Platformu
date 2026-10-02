@@ -3,7 +3,21 @@ Reusable QChartView wrapper — bar ve pie grafikleri için tek widget.
 """
 from __future__ import annotations
 
-from PySide6.QtCharts import QBarCategoryAxis, QBarSeries, QBarSet, QChart, QChartView, QPieSeries, QValueAxis
+try:
+    from PySide6.QtCharts import (
+        QBarCategoryAxis,
+        QBarSeries,
+        QBarSet,
+        QChart,
+        QChartView,
+        QPieSeries,
+        QValueAxis,
+    )
+    _HAS_QTCHARTS = True
+except ImportError:
+    _HAS_QTCHARTS = False
+    QChart = object  # type: ignore[misc,assignment]
+    QChartView = object  # type: ignore[misc,assignment]
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QLabel, QSizePolicy, QVBoxLayout, QWidget
@@ -35,6 +49,10 @@ class AnalyticsChartWidget(QWidget):
     def __init__(self, title: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self._title = title
+        if not _HAS_QTCHARTS:
+            layout = QVBoxLayout(self)
+            layout.addWidget(QLabel(tr("chart_module_missing", "PySide6.QtCharts modülü bulunamadı.")))
+            return
         self._chart = QChart()
         self._chart.setAnimationOptions(QChart.AnimationOption.SeriesAnimations)
         self._chart.legend().setAlignment(Qt.AlignmentFlag.AlignBottom)
@@ -54,6 +72,8 @@ class AnalyticsChartWidget(QWidget):
         color: str = "#5C6BC0",
         show_legend: bool = False,
     ) -> None:
+        if not _HAS_QTCHARTS:
+            return
         self._chart.setTitle(self._title)
         self._chart.removeAllSeries()
         for ax in self._chart.axes():
@@ -79,6 +99,8 @@ class AnalyticsChartWidget(QWidget):
         self._chart.legend().setVisible(show_legend)
 
     def set_pie_chart(self, data: dict[str, int]) -> None:
+        if not _HAS_QTCHARTS:
+            return
         self._chart.setTitle(self._title)
         self._chart.removeAllSeries()
         series = QPieSeries()
@@ -96,6 +118,8 @@ class AnalyticsChartWidget(QWidget):
     def set_horizontal_bar_chart(
         self, labels: list[str], values: list[int], color: str = "#42A5F5"
     ) -> None:
+        if not _HAS_QTCHARTS:
+            return
         self._chart.setTitle(self._title)
         self._chart.removeAllSeries()
         for ax in self._chart.axes():
@@ -121,9 +145,8 @@ class AnalyticsChartWidget(QWidget):
         self._chart.legend().setVisible(False)
 
     def apply_theme(self, dark: bool, surface_color: str, text_color: str) -> None:
-        """Qt'nin hazır koyu/açık temasını uygular, ardından arka plan/metin
-        renklerini uygulamanın gerçek ThemeManager paletiyle senkronlar —
-        aksi halde grafik dark modda bile beyaz zeminde kalır."""
+        if not _HAS_QTCHARTS:
+            return
         theme = QChart.ChartTheme.ChartThemeDark if dark else QChart.ChartTheme.ChartThemeLight
         self._chart.setTheme(theme)
         surface = QColor(surface_color)
@@ -138,12 +161,16 @@ class AnalyticsChartWidget(QWidget):
         self._view.setBackgroundBrush(surface)
 
     def clear(self) -> None:
+        if not _HAS_QTCHARTS:
+            return
         self._chart.setTitle("")
         self._chart.removeAllSeries()
         for ax in self._chart.axes():
             self._chart.removeAxis(ax)
 
     def show_empty(self, message: str = "Veri yok") -> None:
+        if not _HAS_QTCHARTS:
+            return
         self.clear()
         self._chart.setTitle(message)
 
