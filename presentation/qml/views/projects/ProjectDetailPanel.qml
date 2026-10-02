@@ -351,74 +351,349 @@ Item {
                 }
 
                 // Tab 2: Kararlar
-                Column {
+                ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
                     visible: detailRoot.currentTab === 2
 
-                    Text {
-                        text: "Bu projeye ait kararlar:"
-                        font.pixelSize: 13
-                        color: themeBridge.textSecondary
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            text: i18nBridge.tr("tab_decisions", "Proje Kararları:")
+                            font.pixelSize: 13
+                            color: themeBridge.color("text_secondary")
+                            Layout.fillWidth: true
+                        }
+
+                        AppButton {
+                            btnVariant: "primary"
+                            text: "+ " + i18nBridge.tr("action_add_decision", "Karar Ekle")
+                            implicitHeight: 28
+                            onClicked: addDecisionDialog.open()
+                        }
+                    }
+
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+
+                        ColumnLayout {
+                            width: parent.width - 12
+                            spacing: 6
+
+                            Repeater {
+                                model: projectViewModel.selectedDecisions
+                                delegate: Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: 36
+                                    radius: 6
+                                    color: themeBridge.color("surface_alt")
+                                    border.color: themeBridge.color("border")
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 6
+                                        spacing: 8
+
+                                        AppBadge {
+                                            text: modelData.status || "APPROVED"
+                                            variant: modelData.status === "REJECTED" ? "danger" : "success"
+                                            size: "sm"
+                                        }
+
+                                        Text {
+                                            text: modelData.title
+                                            font.pixelSize: 12
+                                            font.weight: Font.DemiBold
+                                            color: themeBridge.color("text_primary")
+                                        }
+
+                                        Text {
+                                            text: "— " + modelData.decision
+                                            font.pixelSize: 12
+                                            color: themeBridge.color("text_secondary")
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                        }
+
+                                        AppButton {
+                                            iconName: "trash-2"
+                                            btnVariant: "secondary"
+                                            implicitWidth: 22
+                                            implicitHeight: 22
+                                            onClicked: projectViewModel.deleteDecision(modelData.id)
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                visible: !projectViewModel.selectedDecisions || projectViewModel.selectedDecisions.length === 0
+                                text: i18nBridge.tr("no_decisions", "Henüz kayıtlı karar yok.")
+                                font.pixelSize: 12
+                                color: themeBridge.color("text_muted")
+                            }
+                        }
                     }
                 }
 
                 // Tab 3: Notlar
-                Column {
+                ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
                     visible: detailRoot.currentTab === 3
 
-                    Text {
-                        text: "Proje notları ve zengin metin kayıtları."
-                        font.pixelSize: 13
-                        color: themeBridge.textSecondary
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            text: i18nBridge.tr("tab_notes", "Proje Notları:")
+                            font.pixelSize: 13
+                            color: themeBridge.color("text_secondary")
+                            Layout.fillWidth: true
+                        }
+
+                        AppButton {
+                            btnVariant: "primary"
+                            text: "+ " + i18nBridge.tr("action_add_note", "Not Ekle")
+                            implicitHeight: 28
+                            onClicked: addNoteDialog.open()
+                        }
+                    }
+
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+
+                        ColumnLayout {
+                            width: parent.width - 12
+                            spacing: 6
+
+                            Repeater {
+                                model: projectViewModel.selectedNotes
+                                delegate: Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: 36
+                                    radius: 6
+                                    color: themeBridge.color("surface_alt")
+                                    border.color: themeBridge.color("border")
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 6
+                                        spacing: 8
+
+                                        Text {
+                                            text: modelData.title
+                                            font.pixelSize: 12
+                                            font.weight: Font.DemiBold
+                                            color: themeBridge.color("text_primary")
+                                        }
+
+                                        Text {
+                                            text: "— " + modelData.body
+                                            font.pixelSize: 12
+                                            color: themeBridge.color("text_secondary")
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                        }
+
+                                        AppButton {
+                                            iconName: "trash-2"
+                                            btnVariant: "secondary"
+                                            implicitWidth: 22
+                                            implicitHeight: 22
+                                            onClicked: projectViewModel.deleteNote(modelData.id)
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                visible: !projectViewModel.selectedNotes || projectViewModel.selectedNotes.length === 0
+                                text: i18nBridge.tr("no_notes", "Henüz kayıtlı proje notu yok.")
+                                font.pixelSize: 12
+                                color: themeBridge.color("text_muted")
+                            }
+                        }
                     }
                 }
 
                 // Tab 4: Kaynaklar
-                Column {
+                ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
                     visible: detailRoot.currentTab === 4
 
-                    Text {
-                        text: "Ekip ve malzeme kaynak tahsisi."
-                        font.pixelSize: 13
-                        color: themeBridge.textSecondary
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            text: i18nBridge.tr("tab_resources", "Proje Kaynakları:")
+                            font.pixelSize: 13
+                            color: themeBridge.color("text_secondary")
+                            Layout.fillWidth: true
+                        }
+
+                        AppButton {
+                            btnVariant: "primary"
+                            text: "+ " + i18nBridge.tr("action_add_resource", "Kaynak Ekle")
+                            implicitHeight: 28
+                            onClicked: addResourceDialog.open()
+                        }
+                    }
+
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+
+                        ColumnLayout {
+                            width: parent.width - 12
+                            spacing: 6
+
+                            Repeater {
+                                model: projectViewModel.selectedResources
+                                delegate: Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: 36
+                                    radius: 6
+                                    color: themeBridge.color("surface_alt")
+                                    border.color: themeBridge.color("border")
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 6
+                                        spacing: 8
+
+                                        AppBadge {
+                                            text: modelData.resource_type || "DOCUMENT"
+                                            variant: "neutral"
+                                            size: "sm"
+                                        }
+
+                                        Text {
+                                            text: modelData.title
+                                            font.pixelSize: 12
+                                            font.weight: Font.DemiBold
+                                            color: themeBridge.color("text_primary")
+                                        }
+
+                                        Text {
+                                            text: "(" + modelData.url + ")"
+                                            font.pixelSize: 11
+                                            color: Theme.accent(themeBridge.currentTheme)
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                        }
+
+                                        AppButton {
+                                            iconName: "external-link"
+                                            btnVariant: "secondary"
+                                            implicitWidth: 22
+                                            implicitHeight: 22
+                                            onClicked: projectViewModel.openUrlOrPath(modelData.url)
+                                        }
+
+                                        AppButton {
+                                            iconName: "trash-2"
+                                            btnVariant: "secondary"
+                                            implicitWidth: 22
+                                            implicitHeight: 22
+                                            onClicked: projectViewModel.deleteResource(modelData.id)
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                visible: !projectViewModel.selectedResources || projectViewModel.selectedResources.length === 0
+                                text: i18nBridge.tr("no_resources", "Henüz kayıtlı kaynak yok.")
+                                font.pixelSize: 12
+                                color: themeBridge.color("text_muted")
+                            }
+                        }
                     }
                 }
 
                 // Tab 5: Çıktılar
-                Column {
+                ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
                     visible: detailRoot.currentTab === 5
 
-                    Row {
-                        width: parent.width
+                    RowLayout {
+                        Layout.fillWidth: true
                         Text {
-                            text: "Proje Çıktıları ve Ekleri:"
+                            text: i18nBridge.tr("tab_outputs", "Proje Çıktıları ve Ekleri:")
                             font.pixelSize: 13
-                            color: themeBridge.textSecondary
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 140
+                            color: themeBridge.color("text_secondary")
+                            Layout.fillWidth: true
                         }
 
                         AppButton {
-                            variant: "primary"
-                            text: "+ Çıktı Ekle"
+                            btnVariant: "primary"
+                            text: "+ " + i18nBridge.tr("action_add_output", "Çıktı Ekle")
                             implicitHeight: 28
                             onClicked: addOutputDialog.open()
                         }
                     }
 
-                    Repeater {
-                        model: projectViewModel.selectedOutputs
-                        delegate: Row {
-                            spacing: 8
-                            Text { text: "📎 " + modelData.title; font.pixelSize: 13; color: themeBridge.textPrimary }
-                            Text { text: "(" + modelData.file_path + ")"; font.pixelSize: 12; color: themeBridge.textMuted }
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+
+                        ColumnLayout {
+                            width: parent.width - 12
+                            spacing: 6
+
+                            Repeater {
+                                model: projectViewModel.selectedOutputs
+                                delegate: Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: 36
+                                    radius: 6
+                                    color: themeBridge.color("surface_alt")
+                                    border.color: themeBridge.color("border")
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 6
+                                        spacing: 8
+
+                                        Text {
+                                            text: "📎 " + modelData.title
+                                            font.pixelSize: 12
+                                            font.weight: Font.DemiBold
+                                            color: themeBridge.color("text_primary")
+                                        }
+
+                                        Text {
+                                            text: "(" + modelData.file_path + ")"
+                                            font.pixelSize: 11
+                                            color: themeBridge.color("text_muted")
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                        }
+
+                                        AppButton {
+                                            iconName: "external-link"
+                                            btnVariant: "secondary"
+                                            implicitWidth: 22
+                                            implicitHeight: 22
+                                            onClicked: projectViewModel.openUrlOrPath(modelData.file_path)
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                visible: !projectViewModel.selectedOutputs || projectViewModel.selectedOutputs.length === 0
+                                text: i18nBridge.tr("no_outputs", "Henüz kayıtlı çıktı yok.")
+                                font.pixelSize: 12
+                                color: themeBridge.color("text_muted")
+                            }
                         }
                     }
                 }
@@ -426,7 +701,7 @@ Item {
         }
     }
 
-    // Basit Çıktı Ekleme Dialogu
+    // Çıktı Ekleme Dialogu
     Dialog {
         id: addOutputDialog
         anchors.centerIn: parent
@@ -437,12 +712,12 @@ Item {
 
         background: Rectangle {
             radius: 12
-            color: themeBridge.surface
+            color: themeBridge.color("surface")
             border.width: 1
-            border.color: themeBridge.border
+            border.color: themeBridge.color("border")
         }
 
-        Column {
+        ColumnLayout {
             width: parent.width
             spacing: 12
 
@@ -450,12 +725,14 @@ Item {
                 id: outputTitleInput
                 label: "Çıktı Başlığı"
                 placeholder: "Rapor, doküman veya dosya adı"
+                Layout.fillWidth: true
             }
 
             AppTextInput {
                 id: outputPathInput
                 label: "Dosya Yolu / URL"
                 placeholder: "C:/docs/rapor.pdf veya https://..."
+                Layout.fillWidth: true
             }
         }
 
@@ -464,6 +741,140 @@ Item {
                 projectViewModel.addOutput(outputTitleInput.text, outputPathInput.text);
                 outputTitleInput.text = "";
                 outputPathInput.text = "";
+            }
+        }
+    }
+
+    // Karar Ekleme Dialogu
+    Dialog {
+        id: addDecisionDialog
+        anchors.centerIn: parent
+        width: 420
+        title: "Yeni Karar Ekle"
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        background: Rectangle {
+            radius: 12
+            color: themeBridge.color("surface")
+            border.width: 1
+            border.color: themeBridge.color("border")
+        }
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 12
+
+            AppTextInput {
+                id: decisionTitleInput
+                label: "Karar Konusu *"
+                placeholder: "Örn: Mimari Seçim Kararı"
+                Layout.fillWidth: true
+            }
+
+            AppTextInput {
+                id: decisionTextInput
+                label: "Alınan Karar *"
+                placeholder: "Detaylı karar açıklaması..."
+                isTextArea: true
+                Layout.fillWidth: true
+            }
+        }
+
+        onAccepted: {
+            if (decisionTitleInput.text && decisionTextInput.text) {
+                projectViewModel.createDecision(decisionTitleInput.text, decisionTextInput.text, "APPROVED");
+                decisionTitleInput.text = "";
+                decisionTextInput.text = "";
+            }
+        }
+    }
+
+    // Not Ekleme Dialogu
+    Dialog {
+        id: addNoteDialog
+        anchors.centerIn: parent
+        width: 420
+        title: "Yeni Proje Notu Ekle"
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        background: Rectangle {
+            radius: 12
+            color: themeBridge.color("surface")
+            border.width: 1
+            border.color: themeBridge.color("border")
+        }
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 12
+
+            AppTextInput {
+                id: noteTitleInput
+                label: "Not Başlığı *"
+                placeholder: "Örn: Toplantı Notu"
+                Layout.fillWidth: true
+            }
+
+            AppTextInput {
+                id: noteBodyInput
+                label: "Not İçeriği"
+                placeholder: "Not içeriği..."
+                isTextArea: true
+                Layout.fillWidth: true
+            }
+        }
+
+        onAccepted: {
+            if (noteTitleInput.text) {
+                projectViewModel.createNote(noteTitleInput.text, noteBodyInput.text);
+                noteTitleInput.text = "";
+                noteBodyInput.text = "";
+            }
+        }
+    }
+
+    // Kaynak Ekleme Dialogu
+    Dialog {
+        id: addResourceDialog
+        anchors.centerIn: parent
+        width: 420
+        title: "Yeni Kaynak Ekle"
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        background: Rectangle {
+            radius: 12
+            color: themeBridge.color("surface")
+            border.width: 1
+            border.color: themeBridge.color("border")
+        }
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 12
+
+            AppTextInput {
+                id: resourceTitleInput
+                label: "Kaynak Adı *"
+                placeholder: "Örn: API Dokümantasyonu"
+                Layout.fillWidth: true
+            }
+
+            AppTextInput {
+                id: resourceUrlInput
+                label: "Kaynak Bağlantısı (URL / Yol) *"
+                placeholder: "https://api.example.com veya dosya yolu"
+                Layout.fillWidth: true
+            }
+        }
+
+        onAccepted: {
+            if (resourceTitleInput.text && resourceUrlInput.text) {
+                projectViewModel.createResource(resourceTitleInput.text, resourceUrlInput.text, "DOCUMENT");
+                resourceTitleInput.text = "";
+                resourceUrlInput.text = "";
             }
         }
     }

@@ -29,6 +29,7 @@ from PySide6.QtWidgets import QApplication
 
 from app.di_container import DIContainer
 from domain.models.idea import Idea
+from domain.models.memo import Memo
 from domain.models.project import Project
 from domain.models.task import Task
 from infrastructure.database.db_manager import DatabaseManager
@@ -38,6 +39,8 @@ from presentation.viewmodels.i18n_bridge import I18nBridge
 from presentation.viewmodels.icon_provider import IconImageProvider
 from presentation.viewmodels.idea_list_model import IdeaListModel
 from presentation.viewmodels.idea_viewmodel import IdeaViewModel
+from presentation.viewmodels.memo_list_model import MemoListModel
+from presentation.viewmodels.memo_viewmodel import MemoViewModel
 from presentation.viewmodels.navigation_bridge import NavigationBridge
 from presentation.viewmodels.project_list_model import ProjectListModel
 from presentation.viewmodels.project_viewmodel import ProjectViewModel
@@ -335,6 +338,97 @@ def test_idea_viewmodel_crud_and_convert(qapp: QApplication, container: DIContai
     assert container.idea_controller.get_idea_sync(created_idea.id) is None
 
 
+def test_memo_list_model_and_search(qapp: QApplication) -> None:
+    model = MemoListModel(parent=qapp)
+    m1 = Memo(id=1, title="Toplantı Notları", body="Sprint planlama detayları")
+    m2 = Memo(id=2, title="Alışveriş Listesi", body="Ekipman ve kablo")
+    model.set_memos([m1, m2])
+
+    assert model.rowCount() == 2
+    model.setSearchQuery("Sprint")
+    assert model.rowCount() == 1
+    model.setSearchQuery("")
+    assert model.rowCount() == 2
+
+
+def test_memo_viewmodel_crud(qapp: QApplication, container: DIContainer) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    mvm = MemoViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    initial_count = mvm.totalMemos
+    memo_title = f"Test Memo {os.getpid()}"
+    mvm.createMemo(memo_title)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert mvm.totalMemos >= initial_count + 1
+    memo_id = mvm.selectedMemoId
+    assert memo_id != 0
+
+    mvm.saveMemo(memo_id, memo_title, "Not gövdesi", '[{"color":"#FFFFFF"}]')
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert mvm.selectedMemo.get("body") == "Not gövdesi"
+
+    mvm.deleteMemo(memo_id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert container.memo_controller.get_sync(memo_id) is None
+
+
+def test_project_viewmodel_decisions_notes_resources(qapp: QApplication, container: DIContainer) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    proj = container.project_controller._service.create_project("Alt Öğeler Test Projesi")
+    pvm = ProjectViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    pvm.selectProject(proj.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    # Karar Ekleme
+    pvm.createDecision("Mimari Karar", "QML Kullanımı", "APPROVED")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert len(pvm.selectedDecisions) >= 1
+
+    # Not Ekleme
+    pvm.createNote("Teknik Not", "Test not içeriği")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert len(pvm.selectedNotes) >= 1
+
+    # Kaynak Ekleme
+    pvm.createResource("Qt Docs", "https://doc.qt.io", "DOCUMENT")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert len(pvm.selectedResources) >= 1
+
+    # Karar Silme
+    dec_id = pvm.selectedDecisions[0]["id"]
+    pvm.deleteDecision(dec_id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    # Not Silme
+    note_id = pvm.selectedNotes[0]["id"]
+    pvm.deleteNote(note_id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    # Kaynak Silme
+    res_id = pvm.selectedResources[0]["id"]
+    pvm.deleteResource(res_id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+
 def test_qml_main_window_loads_successfully(qapp: QApplication, container: DIContainer) -> None:
     setup_modules(container)
     engine = QQmlApplicationEngine(parent=qapp)
@@ -349,6 +443,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     dv = DashboardViewModel(container.dashboard_controller, parent=qapp)
     tv = TaskViewModel(container, parent=qapp)
     iv = IdeaViewModel(container, parent=qapp)
+    mv = MemoViewModel(container, parent=qapp)
 
     qapp._test_tb = tb  # type: ignore[attr-defined]
     qapp._test_ib = ib  # type: ignore[attr-defined]
@@ -357,6 +452,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     qapp._test_dv = dv  # type: ignore[attr-defined]
     qapp._test_tv = tv  # type: ignore[attr-defined]
     qapp._test_iv = iv  # type: ignore[attr-defined]
+    qapp._test_mv = mv  # type: ignore[attr-defined]
 
     engine.rootContext().setContextProperty("themeBridge", tb)
     engine.rootContext().setContextProperty("i18nBridge", ib)
@@ -365,6 +461,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     engine.rootContext().setContextProperty("dashboardViewModel", dv)
     engine.rootContext().setContextProperty("taskViewModel", tv)
     engine.rootContext().setContextProperty("ideaViewModel", iv)
+    engine.rootContext().setContextProperty("memoViewModel", mv)
 
     qml_file = Path("presentation/qml/main.qml")
     engine.load(str(qml_file))

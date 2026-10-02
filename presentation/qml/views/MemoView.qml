@@ -1,45 +1,134 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import "../components"
+import "../theme"
+import "memo"
 
 Item {
     id: memoViewRoot
     anchors.fill: parent
 
-    Column {
+    ColumnLayout {
         anchors.fill: parent
-        padding: 24
-        spacing: 16
+        anchors.margins: Theme.spacing.xl
+        spacing: Theme.spacing.lg
 
-        AppCard {
-            width: parent.width - 48
-            height: parent.height - 48
+        // Üst Araç Çubuğu
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Theme.spacing.md
 
-            Column {
-                anchors.centerIn: parent
-                spacing: 12
-
+            RowLayout {
+                spacing: Theme.spacing.sm
                 AppIcon {
                     name: "note-sticky"
-                    size: 48
-                    color: themeBridge.warning
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    size: 24
+                    color: Theme.accent(themeBridge.currentTheme)
                 }
 
                 Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: i18nBridge.tr("memo_title", "Notlarım (Memos)")
-                    font.pixelSize: 16
-                    font.weight: Font.DemiBold
-                    color: themeBridge.textPrimary
+                    text: i18nBridge.tr("memo_title", "Notlarım")
+                    font.pixelSize: Theme.typography.sizeH2
+                    font.weight: Theme.typography.weightBold
+                    color: themeBridge.color("text_primary")
                 }
+            }
 
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: i18nBridge.tr("memo_desc", "Adım 4 kapsamında renkli yapışkan notlar grid görünümü eklenecektir.")
-                    font.pixelSize: 13
-                    color: themeBridge.textSecondary
+            Item { Layout.fillWidth: true }
+
+            // Arama Kutusu
+            AppTextInput {
+                id: searchInput
+                placeholder: i18nBridge.tr("memo_search_placeholder", "Notlarda ara...")
+                Layout.preferredWidth: 260
+                onTextChanged: {
+                    if (memoViewModel) memoViewModel.setSearchQuery(text)
                 }
+            }
+
+            // "+ Yeni Not Ekle" Butonu
+            AppButton {
+                text: i18nBridge.tr("memo_new_btn", "+ Yeni Not")
+                iconName: "plus"
+                btnVariant: "primary"
+                onClicked: {
+                    if (memoViewModel) memoViewModel.createMemo()
+                }
+            }
+        }
+
+        // Ana İçerik: Bölünmüş Görünüm (SplitView)
+        SplitView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            orientation: Qt.Horizontal
+
+            // Sol Panel: Yapışkan Notlar Listesi
+            AppCard {
+                SplitView.preferredWidth: 360
+                SplitView.minimumWidth: 280
+                SplitView.fillHeight: true
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Theme.spacing.md
+                    spacing: Theme.spacing.sm
+
+                    ListView {
+                        id: memoListView
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        model: memoViewModel ? memoViewModel.memoModel : null
+                        spacing: Theme.spacing.sm
+
+                        delegate: MemoCard {}
+
+                        // Boş Durum
+                        Item {
+                            anchors.centerIn: parent
+                            width: 260
+                            height: 180
+                            visible: memoListView.count === 0
+
+                            ColumnLayout {
+                                anchors.centerIn: parent
+                                spacing: Theme.spacing.md
+
+                                AppIcon {
+                                    name: "note-sticky"
+                                    size: 40
+                                    color: themeBridge.color("text_muted")
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+
+                                Text {
+                                    text: i18nBridge.tr("memo_empty_title", "Henüz not yok")
+                                    font.pixelSize: Theme.typography.sizeH3
+                                    font.weight: Theme.typography.weightSemiBold
+                                    color: themeBridge.color("text_primary")
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+
+                                AppButton {
+                                    text: i18nBridge.tr("memo_new_btn", "+ Yeni Not")
+                                    btnVariant: "primary"
+                                    Layout.alignment: Qt.AlignHCenter
+                                    onClicked: {
+                                        if (memoViewModel) memoViewModel.createMemo()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Sağ Panel: Zengin Metin ve Çizim Editörü
+            MemoEditor {
+                SplitView.fillWidth: true
+                SplitView.fillHeight: true
             }
         }
     }

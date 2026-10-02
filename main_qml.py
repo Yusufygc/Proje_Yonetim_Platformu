@@ -102,6 +102,7 @@ def run_qml_app() -> int:
 
     from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel  # noqa: PLC0415
     from presentation.viewmodels.idea_viewmodel import IdeaViewModel  # noqa: PLC0415
+    from presentation.viewmodels.memo_viewmodel import MemoViewModel  # noqa: PLC0415
     from presentation.viewmodels.project_viewmodel import ProjectViewModel  # noqa: PLC0415
     from presentation.viewmodels.task_viewmodel import TaskViewModel  # noqa: PLC0415
 
@@ -112,6 +113,7 @@ def run_qml_app() -> int:
     dashboard_viewmodel = DashboardViewModel(container.dashboard_controller, parent=app)
     task_viewmodel = TaskViewModel(container, parent=app)
     idea_viewmodel = IdeaViewModel(container, parent=app)
+    memo_viewmodel = MemoViewModel(container, parent=app)
 
     # Python GC koruması için referansları sakla
     app._icon_provider = icon_provider  # type: ignore[attr-defined]
@@ -122,6 +124,7 @@ def run_qml_app() -> int:
     app._dashboard_viewmodel = dashboard_viewmodel  # type: ignore[attr-defined]
     app._task_viewmodel = task_viewmodel  # type: ignore[attr-defined]
     app._idea_viewmodel = idea_viewmodel  # type: ignore[attr-defined]
+    app._memo_viewmodel = memo_viewmodel  # type: ignore[attr-defined]
 
     # QML global context erişimleri
     context = engine.rootContext()
@@ -132,6 +135,7 @@ def run_qml_app() -> int:
     context.setContextProperty("dashboardViewModel", dashboard_viewmodel)
     context.setContextProperty("taskViewModel", task_viewmodel)
     context.setContextProperty("ideaViewModel", idea_viewmodel)
+    context.setContextProperty("memoViewModel", memo_viewmodel)
 
     qml_file = Path(__file__).parent / "presentation" / "qml" / "main.qml"
     engine.load(str(qml_file))
