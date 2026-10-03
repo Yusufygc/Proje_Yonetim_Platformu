@@ -58,40 +58,42 @@ AbstractButton {
         Behavior on border.color { ColorAnimation { duration: 150 } }
     }
 
-    contentItem: Row {
-        id: contentLayout
-        spacing: 8
-        anchors.centerIn: parent
+    contentItem: Item {
+        Row {
+            id: contentLayout
+            anchors.centerIn: parent
+            spacing: (control.iconName !== "" && control.text !== "") ? 8 : 0
 
-        AppIcon {
-            id: btnIcon
-            visible: control.iconName !== ""
-            name: control.iconName
-            size: control.iconSize
-            color: {
-                if (control.variant === "primary") return themeBridge.iconOnAccent;
-                if (control.variant === "danger") return themeBridge.danger;
-                if (control.variant === "warning") return themeBridge.warning;
-                return control.hovered ? themeBridge.accentStart : themeBridge.textPrimary;
+            AppIcon {
+                id: btnIcon
+                visible: control.iconName !== ""
+                name: control.iconName
+                size: control.iconSize
+                color: {
+                    if (control.variant === "primary") return themeBridge.iconOnAccent;
+                    if (control.variant === "danger") return themeBridge.danger;
+                    if (control.variant === "warning") return themeBridge.warning;
+                    return control.hovered ? themeBridge.accentStart : themeBridge.textPrimary;
+                }
+                anchors.verticalCenter: parent.verticalCenter
             }
-            anchors.verticalCenter: parent.verticalCenter
-        }
 
-        Text {
-            id: btnText
-            visible: control.text !== ""
-            text: control.text
-            font.pixelSize: 13
-            font.weight: control.variant === "primary" ? Font.Medium : Font.Normal
-            color: {
-                if (!control.enabled) return themeBridge.textMuted;
-                if (control.variant === "primary") return themeBridge.iconOnAccent;
-                if (control.variant === "danger") return themeBridge.danger;
-                if (control.variant === "warning") return themeBridge.warning;
-                return control.hovered ? themeBridge.accentStart : themeBridge.textPrimary;
+            Text {
+                id: btnText
+                visible: control.text !== ""
+                text: control.text
+                font.pixelSize: control.text.length <= 2 ? 15 : 13
+                font.weight: control.variant === "primary" ? Font.Medium : Font.Normal
+                color: {
+                    if (!control.enabled) return themeBridge.textMuted;
+                    if (control.variant === "primary") return themeBridge.iconOnAccent;
+                    if (control.variant === "danger") return themeBridge.danger;
+                    if (control.variant === "warning") return themeBridge.warning;
+                    return control.hovered ? themeBridge.accentStart : themeBridge.textPrimary;
+                }
+                anchors.verticalCenter: parent.verticalCenter
+                Behavior on color { ColorAnimation { duration: 150 } }
             }
-            anchors.verticalCenter: parent.verticalCenter
-            Behavior on color { ColorAnimation { duration: 150 } }
         }
     }
 

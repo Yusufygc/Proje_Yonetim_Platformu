@@ -34,6 +34,7 @@ _ICON_ALIASES: dict[str, str] = {
     "notes": "note-sticky",
     "note": "note-sticky",
     "align-left": "note-sticky",
+    "sticky-note": "note-sticky",
 }
 
 _BUILTIN_SVGS: dict[str, str] = {

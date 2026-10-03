@@ -118,6 +118,18 @@ Item {
             Layout.fillHeight: true
             orientation: Qt.Horizontal
 
+            handle: Rectangle {
+                implicitWidth: 8
+                color: "transparent"
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 2
+                    height: parent.height
+                    radius: 1
+                    color: SplitHandle.hovered || SplitHandle.pressed ? Theme.accent(themeBridge.currentTheme) : themeBridge.color("border")
+                }
+            }
+
             // Sol Panel: Fikir Listesi
             AppCard {
                 SplitView.preferredWidth: 380

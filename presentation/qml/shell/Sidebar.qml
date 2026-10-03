@@ -73,12 +73,13 @@ Rectangle {
         // Hızlı Arama Butonu
         Rectangle {
             id: searchBtn
-            width: parent.width
+            width: sidebarRoot.isCollapsed ? 36 : parent.width
             height: 36
             radius: 8
-            color: searchMouse.containsMouse ? themeBridge.sidebarHoverBg : themeBridge.surface
+            anchors.horizontalCenter: sidebarRoot.isCollapsed ? parent.horizontalCenter : undefined
+            color: searchMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.12)
             border.width: 1
-            border.color: themeBridge.border
+            border.color: Qt.rgba(1, 1, 1, 0.2)
 
             Row {
                 anchors.centerIn: parent
@@ -87,14 +88,15 @@ Rectangle {
                 AppIcon {
                     name: "search"
                     size: 16
-                    color: searchMouse.containsMouse ? themeBridge.sidebarTextActive : themeBridge.sidebarText
+                    color: "#FFFFFF"
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Text {
                     text: i18nBridge.tr("sidebar_search", "Ara (Ctrl+F)")
                     font.pixelSize: 12
-                    color: searchMouse.containsMouse ? themeBridge.sidebarTextActive : themeBridge.sidebarText
+                    color: "#FFFFFF"
+                    opacity: 0.85
                     visible: !sidebarRoot.isCollapsed
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -246,7 +248,9 @@ Rectangle {
                 width: 36
                 height: 36
                 radius: 18
-                color: themeMouse.containsMouse ? themeBridge.sidebarHoverBg : "transparent"
+                color: themeMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.25) : Qt.rgba(1, 1, 1, 0.14)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.2)
                 anchors.centerIn: parent
                 visible: sidebarRoot.isCollapsed
 

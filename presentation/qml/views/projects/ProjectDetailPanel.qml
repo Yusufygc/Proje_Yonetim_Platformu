@@ -215,10 +215,10 @@ Item {
                     // Aşamalar Listesi
                     Repeater {
                         model: projectViewModel.selectedStages
-                        delegate: Row {
+                        delegate: RowLayout {
                             width: stagesColumn.width
-                            height: 32
-                            spacing: 10
+                            height: 36
+                            spacing: 12
 
                             Rectangle {
                                 width: 10
@@ -227,84 +227,91 @@ Item {
                                 color: modelData.status === "COMPLETED" ? themeBridge.success : (
                                     modelData.status === "IN_PROGRESS" ? themeBridge.accentStart : themeBridge.border
                                 )
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
                             }
 
                             Text {
                                 text: (index + 1) + ". " + modelData.name
                                 font.pixelSize: 13
-                                font.weight: modelData.status === "IN_PROGRESS" ? Font.Bold : Font.Normal
+                                font.weight: modelData.status === "IN_PROGRESS" ? Font.DemiBold : Font.Normal
                                 color: modelData.status === "COMPLETED" ? themeBridge.textMuted : themeBridge.textPrimary
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width - 160
+                                Layout.fillWidth: true
                                 elide: Text.ElideRight
+                                Layout.alignment: Qt.AlignVCenter
                             }
-
-                            Item { width: 1; height: 1; Layout.fillWidth: true }
 
                             AppButton {
                                 visible: modelData.status !== "COMPLETED"
                                 variant: "secondary"
                                 text: i18nBridge.tr("btn_complete_stage", "Tamamla")
-                                implicitHeight: 26
+                                implicitHeight: 28
                                 onClicked: projectViewModel.completeStage(modelData.id)
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
                             }
 
                             AppButton {
                                 visible: modelData.status === "NOT_STARTED"
                                 variant: "primary"
                                 text: i18nBridge.tr("btn_activate_stage", "Aktif Et")
-                                implicitHeight: 26
+                                implicitHeight: 28
                                 onClicked: projectViewModel.activateStage(modelData.id)
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
                             }
                         }
                     }
                 }
             }
 
-            // Sekme Çubuğu (Navbar Tabs)
-            Row {
+            // Sekme Çubuğu (Segmented Tabs)
+            Rectangle {
                 width: parent.width - 48
-                spacing: 8
+                height: 40
+                radius: 8
+                color: themeBridge.isDark ? themeBridge.surface : "#F1F5F9"
+                border.width: 1
+                border.color: themeBridge.border
 
-                Repeater {
-                    model: [
-                        i18nBridge.tr("tab_summary", "Özet"),
-                        i18nBridge.tr("tab_tasks", "Görevler"),
-                        i18nBridge.tr("tab_decisions", "Kararlar"),
-                        i18nBridge.tr("tab_notes", "Notlar"),
-                        i18nBridge.tr("tab_resources", "Kaynaklar"),
-                        i18nBridge.tr("tab_outputs", "Çıktılar")
-                    ]
+                Row {
+                    anchors.centerIn: parent
+                    spacing: 4
 
-                    Rectangle {
-                        id: tabBtn
-                        width: Math.max(70, tabText.implicitWidth + 20)
-                        height: 32
-                        radius: 6
-                        color: detailRoot.currentTab === index ?
-                            (themeBridge.isDark ? themeBridge.surfaceRaised : "#EEF2FF") :
-                            (tabMouse.containsMouse ? themeBridge.surfaceRaised : "transparent")
-                        border.width: detailRoot.currentTab === index ? 1 : 0
-                        border.color: themeBridge.accentStart
+                    Repeater {
+                        model: [
+                            i18nBridge.tr("tab_summary", "Özet"),
+                            i18nBridge.tr("tab_tasks", "Görevler"),
+                            i18nBridge.tr("tab_decisions", "Kararlar"),
+                            i18nBridge.tr("tab_notes", "Notlar"),
+                            i18nBridge.tr("tab_resources", "Kaynaklar"),
+                            i18nBridge.tr("tab_outputs", "Çıktılar")
+                        ]
 
-                        Text {
-                            id: tabText
-                            anchors.centerIn: parent
-                            text: modelData
-                            font.pixelSize: 12
-                            font.weight: detailRoot.currentTab === index ? Font.DemiBold : Font.Normal
-                            color: detailRoot.currentTab === index ? themeBridge.accentStart : themeBridge.textSecondary
-                        }
+                        Rectangle {
+                            id: tabBtn
+                            width: Math.max(76, tabText.implicitWidth + 24)
+                            height: 32
+                            radius: 6
+                            color: detailRoot.currentTab === index ?
+                                (themeBridge.isDark ? themeBridge.surfaceRaised : "#FFFFFF") :
+                                (tabMouse.containsMouse ? (themeBridge.isDark ? themeBridge.surfaceRaised : "#E2E8F0") : "transparent")
+                            border.width: detailRoot.currentTab === index ? 1 : 0
+                            border.color: themeBridge.isDark ? themeBridge.border : "#CBD5E1"
 
-                        MouseArea {
-                            id: tabMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: detailRoot.currentTab = index
+                            Text {
+                                id: tabText
+                                anchors.centerIn: parent
+                                text: modelData
+                                font.pixelSize: 12
+                                font.weight: detailRoot.currentTab === index ? Font.DemiBold : Font.Normal
+                                color: detailRoot.currentTab === index ? themeBridge.accentStart : themeBridge.textSecondary
+                            }
+
+                            MouseArea {
+                                id: tabMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: detailRoot.currentTab = index
+                            }
                         }
                     }
                 }

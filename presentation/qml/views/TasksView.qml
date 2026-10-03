@@ -23,8 +23,7 @@ Item {
             // Proje Seçici Dropdown
             AppComboBox {
                 id: projectSelector
-                label: i18nBridge.tr("label_project", "Proje")
-                Layout.preferredWidth: 260
+                Layout.preferredWidth: 240
                 model: {
                     if (!taskViewModel || !taskViewModel.projects) return []
                     var list = []

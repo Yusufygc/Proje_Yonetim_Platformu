@@ -240,13 +240,25 @@ ScrollView {
                         }
                     }
 
-                    Text {
+                    Column {
                         visible: dashboardViewModel.highPriorityTasks.length === 0
-                        text: i18nBridge.tr("dashboard_no_high_priority", "Kritik veya yüksek öncelikli görev bulunmuyor.")
-                        font.pixelSize: 12
-                        color: themeBridge.textMuted
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        topPadding: 32
+                        width: parent.width
+                        spacing: 8
+                        topPadding: 36
+
+                        AppIcon {
+                            name: "check"
+                            size: 28
+                            color: themeBridge.textMuted
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        Text {
+                            text: i18nBridge.tr("dashboard_no_high_priority", "Kritik veya yüksek öncelikli görev bulunmuyor.")
+                            font.pixelSize: 12
+                            color: themeBridge.textMuted
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
                     }
                 }
             }
@@ -302,13 +314,25 @@ ScrollView {
                         }
                     }
 
-                    Text {
+                    Column {
                         visible: dashboardViewModel.recentIdeas.length === 0
-                        text: i18nBridge.tr("dashboard_no_recent_ideas", "Henüz fikir eklenmedi.")
-                        font.pixelSize: 12
-                        color: themeBridge.textMuted
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        topPadding: 32
+                        width: parent.width
+                        spacing: 8
+                        topPadding: 36
+
+                        AppIcon {
+                            name: "lightbulb"
+                            size: 28
+                            color: themeBridge.textMuted
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        Text {
+                            text: i18nBridge.tr("dashboard_no_recent_ideas", "Henüz fikir eklenmedi.")
+                            font.pixelSize: 12
+                            color: themeBridge.textMuted
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
                     }
                 }
             }

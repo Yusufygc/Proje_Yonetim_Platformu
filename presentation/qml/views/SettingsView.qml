@@ -272,13 +272,13 @@ ScrollView {
                     spacing: 16
 
                     AppButton {
-                        text: "📤 " + i18nBridge.tr("settings_export_btn", "Tüm Veriyi Dışa Aktar (.json)")
+                        text: i18nBridge.tr("settings_export_btn", "Tüm Veriyi Dışa Aktar (.json)")
                         variant: "primary"
                         onClicked: settingsViewModel.exportToJson("")
                     }
 
                     AppButton {
-                        text: "💾 " + i18nBridge.tr("settings_backup_btn", "Veritabanını Yedekle (.db)")
+                        text: i18nBridge.tr("settings_backup_btn", "Veritabanını Yedekle (.db)")
                         variant: "secondary"
                         onClicked: settingsViewModel.backupDatabase("")
                     }

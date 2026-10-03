@@ -52,6 +52,7 @@ def run_qml_app() -> int:
     from PySide6.QtCore import QTimer  # noqa: PLC0415
     from PySide6.QtGui import QFont, QIcon  # noqa: PLC0415
     from PySide6.QtQml import QQmlApplicationEngine  # noqa: PLC0415
+    from PySide6.QtQuickControls2 import QQuickStyle  # noqa: PLC0415
     from PySide6.QtWidgets import QApplication  # noqa: PLC0415
 
     from presentation.dimensions import FontFamily  # noqa: PLC0415
@@ -61,6 +62,7 @@ def run_qml_app() -> int:
     from presentation.viewmodels.navigation_bridge import NavigationBridge  # noqa: PLC0415
     from presentation.viewmodels.theme_bridge import ThemeBridge  # noqa: PLC0415
 
+    QQuickStyle.setStyle("Basic")
     app = QApplication(sys.argv)
     app.setApplicationName(config.APP_NAME)
     app.setOrganizationName(config.APP_ORGANIZATION)

@@ -208,7 +208,7 @@ ScrollView {
                             desc: i18nBridge.tr("info_feat_ideas_desc", "Ham fikirleri kaydedin, puanlayın ve tek tıkla doğrudan projeye dönüştürün.")
                         },
                         {
-                            icon: "sticky-note",
+                            icon: "note-sticky",
                             color: "#EC4899",
                             title: i18nBridge.tr("nav_notes", "Notlarım (Memo)"),
                             desc: i18nBridge.tr("info_feat_memo_desc", "Zengin metin biçimlendirme ve serbest el çizim tuvali ile renkli yapışkan notlar.")

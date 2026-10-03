@@ -10,10 +10,10 @@ Item {
 
     property string activeStatusFilter: "ALL"
 
-    // Sol Liste Paneli (320px)
+    // Sol Liste Paneli (340px)
     Rectangle {
         id: leftPanel
-        width: 320
+        width: 340
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -21,34 +21,34 @@ Item {
         border.width: 1
         border.color: themeBridge.border
 
-            Column {
-                anchors.fill: parent
-                padding: 16
-                spacing: 12
+        Column {
+            anchors.fill: parent
+            padding: 16
+            spacing: 12
 
-                // Üst Başlık ve Yeni Buton
-                Row {
-                    width: parent.width - 32
-                    spacing: 8
+            // Üst Başlık ve Yeni Buton
+            Row {
+                width: parent.width - 32
+                spacing: 8
 
-                    Text {
-                        text: i18nBridge.tr("nav_projects", "Projeler")
-                        font.pixelSize: 18
-                        font.weight: Font.Bold
-                        color: themeBridge.textPrimary
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 40
-                    }
-
-                    AppButton {
-                        variant: "primary"
-                        text: "+"
-                        implicitWidth: 32
-                        implicitHeight: 32
-                        onClicked: projectViewModel.openCreateDialog()
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
+                Text {
+                    text: i18nBridge.tr("nav_projects", "Projeler")
+                    font.pixelSize: 18
+                    font.weight: Font.Bold
+                    color: themeBridge.textPrimary
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width - 40
                 }
+
+                AppButton {
+                    variant: "primary"
+                    iconName: "plus"
+                    implicitWidth: 32
+                    implicitHeight: 32
+                    onClicked: projectViewModel.openCreateDialog()
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
 
                 // Arama Kutusu
                 Rectangle {
@@ -103,7 +103,7 @@ Item {
 
                     Row {
                         id: filterRow
-                        spacing: 6
+                        spacing: 4
 
                         Repeater {
                             model: [
@@ -115,7 +115,7 @@ Item {
                             ]
 
                             Rectangle {
-                                width: filterText.implicitWidth + 16
+                                width: filterText.implicitWidth + 14
                                 height: 26
                                 radius: 13
                                 color: projectsViewRoot.activeStatusFilter === modelData.key ? themeBridge.accentStart : themeBridge.background
