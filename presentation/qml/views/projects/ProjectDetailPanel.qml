@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import "../../components"
+import "../../theme"
 
 Item {
     id: detailRoot
@@ -851,57 +852,130 @@ Item {
         }
     }
 
+    // ========================================================
+    // MODAL DİYALOGLAR (Özel Modern Kart Modalları)
+    // ========================================================
+
     // Çıktı Ekleme Dialogu
-    Dialog {
+    Rectangle {
         id: addOutputDialog
-        anchors.centerIn: parent
-        width: 380
-        title: i18nBridge.tr("dialog_add_output_title", "Yeni Çıktı Ekle")
-        modal: true
+        objectName: "addOutputDialog"
+        parent: detailRoot.parent ? detailRoot.parent : detailRoot
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.65)
+        visible: false
+        z: 9999
 
-        background: Rectangle {
-            radius: 12
-            color: themeBridge.color("surface")
-            border.width: 1
-            border.color: themeBridge.color("border")
+        function open() {
+            outputTitleInput.text = "";
+            outputPathInput.text = "";
+            visible = true;
         }
 
-        ColumnLayout {
-            width: parent.width
-            spacing: 12
-
-            AppTextInput {
-                id: outputTitleInput
-                label: i18nBridge.tr("field_output_title", "Çıktı Başlığı *")
-                placeholder: i18nBridge.tr("output_title_placeholder", "Rapor, doküman veya dosya adı")
-                Layout.fillWidth: true
-            }
-
-            AppTextInput {
-                id: outputPathInput
-                label: i18nBridge.tr("field_output_path", "Dosya Yolu / URL")
-                placeholder: "C:/docs/rapor.pdf veya https://..."
-                Layout.fillWidth: true
-            }
+        function close() {
+            visible = false;
         }
 
-        footer: RowLayout {
-            width: parent.width
-            Item { Layout.fillWidth: true }
-            AppButton {
-                btnVariant: "secondary"
-                text: i18nBridge.tr("action_cancel", "İptal")
-                onClicked: addOutputDialog.close()
-            }
-            AppButton {
-                btnVariant: "primary"
-                text: i18nBridge.tr("action_add", "Ekle")
-                onClicked: {
-                    if (outputTitleInput.text) {
-                        projectViewModel.addOutput(outputTitleInput.text, outputPathInput.text);
-                        outputTitleInput.text = "";
-                        outputPathInput.text = "";
-                        addOutputDialog.close();
+        MouseArea {
+            anchors.fill: parent
+            onClicked: { /* modal dışı tıklamayı engeller */ }
+        }
+
+        Shortcut {
+            sequence: "Escape"
+            enabled: addOutputDialog.visible
+            onActivated: addOutputDialog.close()
+        }
+
+        AppCard {
+            id: outputCard
+            width: Math.min(480, parent.width - 48)
+            height: Math.min(outputCol.implicitHeight + outputCard.padding * 2, parent.height - 48)
+            anchors.centerIn: parent
+            padding: Theme.spacing.xl
+
+            ColumnLayout {
+                id: outputCol
+                width: parent.width
+                spacing: Theme.spacing.md
+
+                // Başlık Çubuğu
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    AppIcon {
+                        name: "copy"
+                        size: 20
+                        color: Theme.accent(themeBridge.currentTheme)
+                    }
+
+                    Text {
+                        text: i18nBridge.tr("dialog_add_output_title", "Yeni Çıktı Ekle")
+                        font.pixelSize: Theme.typography.sizeH3
+                        font.weight: Theme.typography.weightBold
+                        color: themeBridge.color("text_primary")
+                        Layout.fillWidth: true
+                    }
+
+                    AppButton {
+                        iconName: "x"
+                        btnVariant: "secondary"
+                        implicitWidth: 32
+                        implicitHeight: 32
+                        onClicked: addOutputDialog.close()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                AppTextInput {
+                    id: outputTitleInput
+                    label: i18nBridge.tr("field_output_title", "Çıktı Başlığı *")
+                    placeholder: i18nBridge.tr("output_title_placeholder", "Rapor, doküman veya dosya adı")
+                    Layout.fillWidth: true
+                    showVoiceInput: true
+                }
+
+                AppTextInput {
+                    id: outputPathInput
+                    label: i18nBridge.tr("field_output_path", "Dosya Yolu / URL")
+                    placeholder: i18nBridge.tr("output_path_placeholder", "C:/docs/rapor.pdf veya https://...")
+                    Layout.fillWidth: true
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                // Alt Butonlar
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    Item { Layout.fillWidth: true }
+
+                    AppButton {
+                        btnVariant: "secondary"
+                        text: i18nBridge.tr("btn_cancel", "İptal")
+                        onClicked: addOutputDialog.close()
+                    }
+
+                    AppButton {
+                        btnVariant: "primary"
+                        text: i18nBridge.tr("action_add", "Ekle")
+                        onClicked: {
+                            if (outputTitleInput.text.trim()) {
+                                projectViewModel.addOutput(outputTitleInput.text.trim(), outputPathInput.text.trim());
+                                addOutputDialog.close();
+                            }
+                        }
                     }
                 }
             }
@@ -909,57 +983,141 @@ Item {
     }
 
     // Karar Ekleme Dialogu
-    Dialog {
+    Rectangle {
         id: addDecisionDialog
-        anchors.centerIn: parent
-        width: 420
-        title: i18nBridge.tr("decision_dialog_new_title", "Yeni Karar Ekle")
-        modal: true
+        objectName: "addDecisionDialog"
+        parent: detailRoot.parent ? detailRoot.parent : detailRoot
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.65)
+        visible: false
+        z: 9999
 
-        background: Rectangle {
-            radius: 12
-            color: themeBridge.color("surface")
-            border.width: 1
-            border.color: themeBridge.color("border")
+        function open() {
+            decisionTitleInput.text = "";
+            decisionTextInput.text = "";
+            decisionStatusCombo.selectedValue = "APPROVED";
+            visible = true;
         }
 
-        ColumnLayout {
-            width: parent.width
-            spacing: 12
-
-            AppTextInput {
-                id: decisionTitleInput
-                label: i18nBridge.tr("decision_dialog_title_label", "Karar Konusu *")
-                placeholder: i18nBridge.tr("decision_title_placeholder", "Örn: Mimari Seçim Kararı")
-                Layout.fillWidth: true
-            }
-
-            AppTextInput {
-                id: decisionTextInput
-                label: i18nBridge.tr("decision_dialog_decision_label", "Alınan Karar *")
-                placeholder: i18nBridge.tr("decision_desc_placeholder", "Detaylı karar açıklaması...")
-                isTextArea: true
-                Layout.fillWidth: true
-            }
+        function close() {
+            visible = false;
         }
 
-        footer: RowLayout {
-            width: parent.width
-            Item { Layout.fillWidth: true }
-            AppButton {
-                btnVariant: "secondary"
-                text: i18nBridge.tr("action_cancel", "İptal")
-                onClicked: addDecisionDialog.close()
-            }
-            AppButton {
-                btnVariant: "primary"
-                text: i18nBridge.tr("action_add", "Ekle")
-                onClicked: {
-                    if (decisionTitleInput.text && decisionTextInput.text) {
-                        projectViewModel.createDecision(decisionTitleInput.text, decisionTextInput.text, "APPROVED");
-                        decisionTitleInput.text = "";
-                        decisionTextInput.text = "";
-                        addDecisionDialog.close();
+        MouseArea {
+            anchors.fill: parent
+            onClicked: { /* modal dışı tıklamayı engeller */ }
+        }
+
+        Shortcut {
+            sequence: "Escape"
+            enabled: addDecisionDialog.visible
+            onActivated: addDecisionDialog.close()
+        }
+
+        AppCard {
+            id: decisionCard
+            width: Math.min(500, parent.width - 48)
+            height: Math.min(decisionCol.implicitHeight + decisionCard.padding * 2, parent.height - 48)
+            anchors.centerIn: parent
+            padding: Theme.spacing.xl
+
+            ColumnLayout {
+                id: decisionCol
+                width: parent.width
+                spacing: Theme.spacing.md
+
+                // Başlık Çubuğu
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    AppIcon {
+                        name: "check_square"
+                        size: 20
+                        color: Theme.accent(themeBridge.currentTheme)
+                    }
+
+                    Text {
+                        text: i18nBridge.tr("decision_dialog_new_title", "Yeni Karar Ekle")
+                        font.pixelSize: Theme.typography.sizeH3
+                        font.weight: Theme.typography.weightBold
+                        color: themeBridge.color("text_primary")
+                        Layout.fillWidth: true
+                    }
+
+                    AppButton {
+                        iconName: "x"
+                        btnVariant: "secondary"
+                        implicitWidth: 32
+                        implicitHeight: 32
+                        onClicked: addDecisionDialog.close()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                AppTextInput {
+                    id: decisionTitleInput
+                    label: i18nBridge.tr("decision_dialog_title_label", "Karar Konusu *")
+                    placeholder: i18nBridge.tr("decision_title_placeholder", "Örn: Mimari Seçim Kararı")
+                    Layout.fillWidth: true
+                    showVoiceInput: true
+                }
+
+                AppTextInput {
+                    id: decisionTextInput
+                    label: i18nBridge.tr("decision_dialog_decision_label", "Alınan Karar *")
+                    placeholder: i18nBridge.tr("decision_desc_placeholder", "Detaylı karar açıklaması...")
+                    isTextArea: true
+                    inputHeight: 80
+                    Layout.fillWidth: true
+                    showVoiceInput: true
+                }
+
+                AppComboBox {
+                    id: decisionStatusCombo
+                    label: i18nBridge.tr("field_status", "Durum")
+                    Layout.fillWidth: true
+                    model: [
+                        { "text": i18nBridge.tr("decision_approved", "Onaylandı"), "value": "APPROVED" },
+                        { "text": i18nBridge.tr("decision_proposed", "Önerildi"), "value": "PROPOSED" },
+                        { "text": i18nBridge.tr("decision_rejected", "Reddedildi"), "value": "REJECTED" }
+                    ]
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                // Alt Butonlar
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    Item { Layout.fillWidth: true }
+
+                    AppButton {
+                        btnVariant: "secondary"
+                        text: i18nBridge.tr("btn_cancel", "İptal")
+                        onClicked: addDecisionDialog.close()
+                    }
+
+                    AppButton {
+                        btnVariant: "primary"
+                        text: i18nBridge.tr("action_add", "Ekle")
+                        onClicked: {
+                            if (decisionTitleInput.text.trim()) {
+                                var st = decisionStatusCombo.selectedValue || "APPROVED";
+                                projectViewModel.createDecision(decisionTitleInput.text.trim(), decisionTextInput.text.trim(), st);
+                                addDecisionDialog.close();
+                            }
+                        }
                     }
                 }
             }
@@ -967,57 +1125,128 @@ Item {
     }
 
     // Not Ekleme Dialogu
-    Dialog {
+    Rectangle {
         id: addNoteDialog
-        anchors.centerIn: parent
-        width: 420
-        title: i18nBridge.tr("note_dialog_new_title", "Yeni Proje Notu Ekle")
-        modal: true
+        objectName: "addNoteDialog"
+        parent: detailRoot.parent ? detailRoot.parent : detailRoot
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.65)
+        visible: false
+        z: 9999
 
-        background: Rectangle {
-            radius: 12
-            color: themeBridge.color("surface")
-            border.width: 1
-            border.color: themeBridge.color("border")
+        function open() {
+            noteTitleInput.text = "";
+            noteBodyInput.text = "";
+            visible = true;
         }
 
-        ColumnLayout {
-            width: parent.width
-            spacing: 12
-
-            AppTextInput {
-                id: noteTitleInput
-                label: i18nBridge.tr("note_dialog_title_label", "Not Başlığı *")
-                placeholder: i18nBridge.tr("note_title_placeholder", "Örn: Toplantı Notu")
-                Layout.fillWidth: true
-            }
-
-            AppTextInput {
-                id: noteBodyInput
-                label: i18nBridge.tr("note_dialog_body_label", "Not İçeriği")
-                placeholder: i18nBridge.tr("note_body_placeholder", "Not içeriği...")
-                isTextArea: true
-                Layout.fillWidth: true
-            }
+        function close() {
+            visible = false;
         }
 
-        footer: RowLayout {
-            width: parent.width
-            Item { Layout.fillWidth: true }
-            AppButton {
-                btnVariant: "secondary"
-                text: i18nBridge.tr("action_cancel", "İptal")
-                onClicked: addNoteDialog.close()
-            }
-            AppButton {
-                btnVariant: "primary"
-                text: i18nBridge.tr("action_add", "Ekle")
-                onClicked: {
-                    if (noteTitleInput.text) {
-                        projectViewModel.createNote(noteTitleInput.text, noteBodyInput.text);
-                        noteTitleInput.text = "";
-                        noteBodyInput.text = "";
-                        addNoteDialog.close();
+        MouseArea {
+            anchors.fill: parent
+            onClicked: { /* modal dışı tıklamayı engeller */ }
+        }
+
+        Shortcut {
+            sequence: "Escape"
+            enabled: addNoteDialog.visible
+            onActivated: addNoteDialog.close()
+        }
+
+        AppCard {
+            id: noteCard
+            width: Math.min(500, parent.width - 48)
+            height: Math.min(noteCol.implicitHeight + noteCard.padding * 2, parent.height - 48)
+            anchors.centerIn: parent
+            padding: Theme.spacing.xl
+
+            ColumnLayout {
+                id: noteCol
+                width: parent.width
+                spacing: Theme.spacing.md
+
+                // Başlık Çubuğu
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    AppIcon {
+                        name: "note-sticky"
+                        size: 20
+                        color: Theme.accent(themeBridge.currentTheme)
+                    }
+
+                    Text {
+                        text: i18nBridge.tr("note_dialog_new_title", "Yeni Proje Notu Ekle")
+                        font.pixelSize: Theme.typography.sizeH3
+                        font.weight: Theme.typography.weightBold
+                        color: themeBridge.color("text_primary")
+                        Layout.fillWidth: true
+                    }
+
+                    AppButton {
+                        iconName: "x"
+                        btnVariant: "secondary"
+                        implicitWidth: 32
+                        implicitHeight: 32
+                        onClicked: addNoteDialog.close()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                AppTextInput {
+                    id: noteTitleInput
+                    label: i18nBridge.tr("note_dialog_title_label", "Not Başlığı *")
+                    placeholder: i18nBridge.tr("note_title_placeholder", "Örn: Toplantı Notu")
+                    Layout.fillWidth: true
+                    showVoiceInput: true
+                }
+
+                AppTextInput {
+                    id: noteBodyInput
+                    label: i18nBridge.tr("note_dialog_body_label", "Not İçeriği")
+                    placeholder: i18nBridge.tr("note_body_placeholder", "Not içeriği...")
+                    isTextArea: true
+                    inputHeight: 100
+                    Layout.fillWidth: true
+                    showVoiceInput: true
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                // Alt Butonlar
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    Item { Layout.fillWidth: true }
+
+                    AppButton {
+                        btnVariant: "secondary"
+                        text: i18nBridge.tr("btn_cancel", "İptal")
+                        onClicked: addNoteDialog.close()
+                    }
+
+                    AppButton {
+                        btnVariant: "primary"
+                        text: i18nBridge.tr("action_add", "Ekle")
+                        onClicked: {
+                            if (noteTitleInput.text.trim()) {
+                                projectViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
+                                addNoteDialog.close();
+                            }
+                        }
                     }
                 }
             }
@@ -1025,56 +1254,143 @@ Item {
     }
 
     // Kaynak Ekleme Dialogu
-    Dialog {
+    Rectangle {
         id: addResourceDialog
-        anchors.centerIn: parent
-        width: 420
-        title: i18nBridge.tr("resource_dialog_new_title", "Yeni Kaynak Ekle")
-        modal: true
+        objectName: "addResourceDialog"
+        parent: detailRoot.parent ? detailRoot.parent : detailRoot
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.65)
+        visible: false
+        z: 9999
 
-        background: Rectangle {
-            radius: 12
-            color: themeBridge.color("surface")
-            border.width: 1
-            border.color: themeBridge.color("border")
+        function open() {
+            resourceTitleInput.text = "";
+            resourceUrlInput.text = "";
+            resourceTypeCombo.selectedValue = "DOCUMENT";
+            visible = true;
         }
 
-        ColumnLayout {
-            width: parent.width
-            spacing: 12
-
-            AppTextInput {
-                id: resourceTitleInput
-                label: i18nBridge.tr("resource_dialog_title_label", "Kaynak Adı *")
-                placeholder: i18nBridge.tr("resource_title_placeholder", "Örn: API Dokümantasyonu")
-                Layout.fillWidth: true
-            }
-
-            AppTextInput {
-                id: resourceUrlInput
-                label: i18nBridge.tr("resource_dialog_url_label", "Kaynak Bağlantısı (URL / Yol) *")
-                placeholder: "https://api.example.com veya dosya yolu"
-                Layout.fillWidth: true
-            }
+        function close() {
+            visible = false;
         }
 
-        footer: RowLayout {
-            width: parent.width
-            Item { Layout.fillWidth: true }
-            AppButton {
-                btnVariant: "secondary"
-                text: i18nBridge.tr("action_cancel", "İptal")
-                onClicked: addResourceDialog.close()
-            }
-            AppButton {
-                btnVariant: "primary"
-                text: i18nBridge.tr("action_add", "Ekle")
-                onClicked: {
-                    if (resourceTitleInput.text && resourceUrlInput.text) {
-                        projectViewModel.createResource(resourceTitleInput.text, resourceUrlInput.text, "DOCUMENT");
-                        resourceTitleInput.text = "";
-                        resourceUrlInput.text = "";
-                        addResourceDialog.close();
+        MouseArea {
+            anchors.fill: parent
+            onClicked: { /* modal dışı tıklamayı engeller */ }
+        }
+
+        Shortcut {
+            sequence: "Escape"
+            enabled: addResourceDialog.visible
+            onActivated: addResourceDialog.close()
+        }
+
+        AppCard {
+            id: resourceCard
+            width: Math.min(500, parent.width - 48)
+            height: Math.min(resourceCol.implicitHeight + resourceCard.padding * 2, parent.height - 48)
+            anchors.centerIn: parent
+            padding: Theme.spacing.xl
+
+            ColumnLayout {
+                id: resourceCol
+                width: parent.width
+                spacing: Theme.spacing.md
+
+                // Başlık Çubuğu
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    AppIcon {
+                        name: "external-link"
+                        size: 20
+                        color: Theme.accent(themeBridge.currentTheme)
+                    }
+
+                    Text {
+                        text: i18nBridge.tr("resource_dialog_new_title", "Yeni Kaynak Ekle")
+                        font.pixelSize: Theme.typography.sizeH3
+                        font.weight: Theme.typography.weightBold
+                        color: themeBridge.color("text_primary")
+                        Layout.fillWidth: true
+                    }
+
+                    AppButton {
+                        iconName: "x"
+                        btnVariant: "secondary"
+                        implicitWidth: 32
+                        implicitHeight: 32
+                        onClicked: addResourceDialog.close()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                AppTextInput {
+                    id: resourceTitleInput
+                    label: i18nBridge.tr("resource_dialog_title_label", "Kaynak Adı *")
+                    placeholder: i18nBridge.tr("resource_title_placeholder", "Örn: API Dokümantasyonu")
+                    Layout.fillWidth: true
+                    showVoiceInput: true
+                }
+
+                AppTextInput {
+                    id: resourceUrlInput
+                    label: i18nBridge.tr("resource_dialog_url_label", "Kaynak Bağlantısı (URL / Yol) *")
+                    placeholder: i18nBridge.tr("resource_url_placeholder", "https://api.example.com veya dosya yolu")
+                    Layout.fillWidth: true
+                }
+
+                AppComboBox {
+                    id: resourceTypeCombo
+                    label: i18nBridge.tr("field_resource_type", "Kaynak Türü")
+                    Layout.fillWidth: true
+                    model: [
+                        { "text": i18nBridge.tr("resource_type_document", "Doküman"), "value": "DOCUMENT" },
+                        { "text": i18nBridge.tr("resource_type_article", "Makale"), "value": "ARTICLE" },
+                        { "text": i18nBridge.tr("resource_type_video", "Video"), "value": "VIDEO" },
+                        { "text": i18nBridge.tr("resource_type_repo", "GitHub / Repo"), "value": "REPO" },
+                        { "text": i18nBridge.tr("resource_type_design", "Tasarım"), "value": "DESIGN" },
+                        { "text": i18nBridge.tr("resource_type_api", "API Referansı"), "value": "API" },
+                        { "text": i18nBridge.tr("resource_type_tool", "Araç"), "value": "TOOL" },
+                        { "text": i18nBridge.tr("resource_type_other", "Diğer"), "value": "OTHER" }
+                    ]
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: themeBridge.color("border")
+                }
+
+                // Alt Butonlar
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacing.sm
+
+                    Item { Layout.fillWidth: true }
+
+                    AppButton {
+                        btnVariant: "secondary"
+                        text: i18nBridge.tr("btn_cancel", "İptal")
+                        onClicked: addResourceDialog.close()
+                    }
+
+                    AppButton {
+                        btnVariant: "primary"
+                        text: i18nBridge.tr("action_add", "Ekle")
+                        onClicked: {
+                            if (resourceTitleInput.text.trim() && resourceUrlInput.text.trim()) {
+                                var rType = resourceTypeCombo.selectedValue || "DOCUMENT";
+                                projectViewModel.createResource(resourceTitleInput.text.trim(), resourceUrlInput.text.trim(), rType);
+                                addResourceDialog.close();
+                            }
+                        }
                     }
                 }
             }

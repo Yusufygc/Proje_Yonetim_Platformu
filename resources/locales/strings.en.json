@@ -420,5 +420,19 @@
   "task_type_milestone": "Milestone",
   "task_type_epic": "Epic",
   "task_type_phase": "Phase",
-  "task_type_subtask": "Subtask"
+  "task_type_subtask": "Subtask",
+  "decision_title_placeholder": "e.g. Architectural Choice Decision",
+  "decision_desc_placeholder": "Detailed decision description...",
+  "note_title_placeholder": "e.g. Meeting Note",
+  "note_body_placeholder": "Note content...",
+  "resource_dialog_url_label": "Resource Link (URL / Path) *",
+  "resource_title_placeholder": "e.g. API Documentation",
+  "resource_url_placeholder": "https://api.example.com or file path",
+  "dialog_add_output_title": "Add New Output",
+  "field_output_title": "Output Title *",
+  "field_output_path": "File Path / URL",
+  "output_title_placeholder": "Report, document or file name",
+  "output_path_placeholder": "C:/docs/report.pdf or https://...",
+  "field_resource_type": "Resource Type",
+  "resource_type_repo": "GitHub / Repo"
 }

@@ -420,5 +420,19 @@
   "task_type_milestone": "Kilometre Taşı",
   "task_type_epic": "Büyük Hedef",
   "task_type_phase": "Faz",
-  "task_type_subtask": "Alt Görev"
+  "task_type_subtask": "Alt Görev",
+  "decision_title_placeholder": "Örn: Mimari Seçim Kararı",
+  "decision_desc_placeholder": "Detaylı karar açıklaması...",
+  "note_title_placeholder": "Örn: Toplantı Notu",
+  "note_body_placeholder": "Not içeriği...",
+  "resource_dialog_url_label": "Kaynak Bağlantısı (URL / Yol) *",
+  "resource_title_placeholder": "Örn: API Dokümantasyonu",
+  "resource_url_placeholder": "https://api.example.com veya dosya yolu",
+  "dialog_add_output_title": "Yeni Çıktı Ekle",
+  "field_output_title": "Çıktı Başlığı *",
+  "field_output_path": "Dosya Yolu / URL",
+  "output_title_placeholder": "Rapor, doküman veya dosya adı",
+  "output_path_placeholder": "C:/docs/rapor.pdf veya https://...",
+  "field_resource_type": "Kaynak Türü",
+  "resource_type_repo": "GitHub / Repo"
 }
