@@ -434,5 +434,12 @@
   "output_title_placeholder": "Rapor, doküman veya dosya adı",
   "output_path_placeholder": "C:/docs/rapor.pdf veya https://...",
   "field_resource_type": "Kaynak Türü",
-  "resource_type_repo": "GitHub / Repo"
+  "resource_type_repo": "GitHub / Repo",
+  "tab_tasks_title": "Proje Görevleri:",
+  "tab_tasks_wbs_page": "WBS Sayfasında Aç",
+  "placeholder_new_task": "Yeni görev başlığı yazın...",
+  "status_todo": "Yapılacak",
+  "status_in_progress": "Sürüyor",
+  "status_review": "İncelemede",
+  "priority_urgent": "Acil"
 }

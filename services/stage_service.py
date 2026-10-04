@@ -171,17 +171,25 @@ class StageService:
             s.status in {StageStatus.DONE.value, StageStatus.SKIPPED.value}
             for s in stages
         )
+        project = self._project_repo.get_by_id(project_id)
+        if project is None:
+            return
+
         if all_completed:
-            project = self._project_repo.get_by_id(project_id)
-            if project is not None and project.status != ProjectStatus.COMPLETED.value:
-                project.status = ProjectStatus.COMPLETED.value
+            project.status = ProjectStatus.COMPLETED.value
+            project.progress_percent = 100
+            self._project_repo.update(project)
+            if self._activity_logs is not None:
+                self._activity_logs.create(
+                    project_id=project_id,
+                    action="PROJECT_COMPLETED",
+                    summary="Tüm süreç aşamaları tamamlandığı için proje otomatik olarak tamamlandı durumuna getirildi.",
+                    entity_type="project",
+                    entity_id=project_id,
+                )
+            logger.info("Tüm aşamaları tamamlanan proje otomatik tamamlandı ve ilerleme %%100 yapıldı: id=%d", project_id)
+        elif project.progress_percent == 0 or project.progress_percent is None:
+            done_stages = sum(1 for s in stages if s.status in {StageStatus.DONE.value, StageStatus.SKIPPED.value})
+            if len(stages) > 0:
+                project.progress_percent = round((done_stages / len(stages)) * 100)
                 self._project_repo.update(project)
-                if self._activity_logs is not None:
-                    self._activity_logs.create(
-                        project_id=project_id,
-                        action="PROJECT_COMPLETED",
-                        summary="Tüm süreç aşamaları tamamlandığı için proje otomatik olarak tamamlandı durumuna getirildi.",
-                        entity_type="project",
-                        entity_id=project_id,
-                    )
-                logger.info("Tüm aşamaları tamamlanan proje otomatik tamamlandı olarak işaretlendi: id=%d", project_id)

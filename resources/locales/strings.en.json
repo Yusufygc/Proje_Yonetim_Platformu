@@ -434,5 +434,12 @@
   "output_title_placeholder": "Report, document or file name",
   "output_path_placeholder": "C:/docs/report.pdf or https://...",
   "field_resource_type": "Resource Type",
-  "resource_type_repo": "GitHub / Repo"
+  "resource_type_repo": "GitHub / Repo",
+  "tab_tasks_title": "Project Tasks:",
+  "tab_tasks_wbs_page": "Open in WBS Page",
+  "placeholder_new_task": "Type new task title...",
+  "status_todo": "To Do",
+  "status_in_progress": "In Progress",
+  "status_review": "Review",
+  "priority_urgent": "Urgent"
 }

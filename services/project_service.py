@@ -203,9 +203,23 @@ class ProjectService:
         if project.manual_progress_percent is not None:
             project.progress_percent = project.manual_progress_percent
             return self._repo.update(project)
+        if project.status == ProjectStatus.COMPLETED.value:
+            project.progress_percent = 100
+            return self._repo.update(project)
         if self._task_repo is None:
             return project
-        project.progress_percent = self._task_repo.calculate_progress_percent(project_id)
+        tasks = self._task_repo.get_by_project(project_id)
+        if tasks:
+            project.progress_percent = self._task_repo.calculate_progress_percent(project_id)
+        elif self._stage_service is not None:
+            stages = self._stage_service.get_stages(project_id)
+            if stages:
+                done_count = sum(1 for s in stages if s.status in {"DONE", "SKIPPED"})
+                project.progress_percent = round((done_count / len(stages)) * 100)
+            else:
+                project.progress_percent = 0
+        else:
+            project.progress_percent = 0
         return self._repo.update(project)
 
     def _validate_title(self, title: str) -> None:

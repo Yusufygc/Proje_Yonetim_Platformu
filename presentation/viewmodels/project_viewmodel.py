@@ -30,6 +30,7 @@ class ProjectViewModel(QObject):
     decisionsChanged = Signal()
     notesChanged = Signal()
     resourcesChanged = Signal()
+    tasksChanged = Signal()
     dialogStateChanged = Signal()
 
     def __init__(
@@ -54,6 +55,7 @@ class ProjectViewModel(QObject):
         self._decisions_data: list[dict[str, Any]] = []
         self._notes_data: list[dict[str, Any]] = []
         self._resources_data: list[dict[str, Any]] = []
+        self._tasks_data: list[dict[str, Any]] = []
 
         self._dialog_open: bool = False
         self._dialog_mode: str = "create"  # "create" veya "edit"
@@ -69,7 +71,7 @@ class ProjectViewModel(QObject):
         self._controller.project_updated.connect(self._on_project_updated)
         self._controller.project_deleted.connect(lambda _id: self.loadProjects())
         self._stage_controller.stages_loaded.connect(self._on_stages_loaded)
-        self._stage_controller.stage_updated.connect(lambda _s: self._reload_current_stages())
+        self._stage_controller.stage_updated.connect(self._on_stage_updated)
         self._decision_controller.decisions_loaded.connect(self._on_decisions_loaded)
         self._decision_controller.decision_created.connect(lambda _d: self._reload_project_subitems())
         self._decision_controller.decision_deleted.connect(lambda _d: self._reload_project_subitems())
@@ -85,6 +87,8 @@ class ProjectViewModel(QObject):
         self._event_bus.subscribe(PROJECT_DETAIL_REQUESTED, self._on_detail_requested)
         for evt in ("project.archived", "project.restored", "project.deleted"):
             self._event_bus.subscribe(evt, lambda **_kw: self.loadProjects())
+        for evt in ("task.created", "task.updated", "task.completed", "task.reopened", "task.deleted", "task.moved"):
+            self._event_bus.subscribe(evt, self._on_task_event)
 
     def _on_new_project_requested(self, **_kw: Any) -> None:
         self.openCreateDialog()
@@ -124,6 +128,10 @@ class ProjectViewModel(QObject):
     def selectedResources(self) -> list[dict[str, Any]]:
         return self._resources_data
 
+    @Property("QVariantList", notify=tasksChanged)
+    def selectedTasks(self) -> list[dict[str, Any]]:
+        return self._tasks_data
+
     @Property(bool, notify=dialogStateChanged)
     def isDialogOpen(self) -> bool:
         return self._dialog_open
@@ -156,29 +164,18 @@ class ProjectViewModel(QObject):
         self._reload_project_subitems()
 
     def _refresh_selected_project(self) -> None:
-        if self._selected_project_id == 0:
-            self._selected_project_data = {}
-            self.selectedProjectChanged.emit()
-            return
-        proj = self._controller.get_project_sync(self._selected_project_id)
-        if not proj:
-            self._selected_project_data = {}
-            self.selectedProjectChanged.emit()
-            return
-        self._selected_project_data = self._project_to_dict(proj)
+        proj = self._controller.get_project_sync(self._selected_project_id) if self._selected_project_id else None
+        self._selected_project_data = self._project_to_dict(proj) if proj else {}
         self.selectedProjectChanged.emit()
 
     def _project_to_dict(self, p: Project) -> dict[str, Any]:
-        status_val = p.status.value if hasattr(p.status, "value") else str(p.status)
-        priority_val = p.priority.value if hasattr(p.priority, "value") else str(p.priority)
-        health_val = p.health.value if hasattr(p.health, "value") else str(p.health)
         return {
             "id": p.id,
             "title": p.title,
             "description": p.short_description or "",
-            "status": str(status_val),
-            "priority": str(priority_val),
-            "health": str(health_val),
+            "status": str(getattr(p.status, "value", p.status)),
+            "priority": str(getattr(p.priority, "value", p.priority)),
+            "health": str(getattr(p.health, "value", p.health)),
             "progress": int(p.progress_percent or 0),
             "project_type": p.project_type or "",
             "target_date": p.completed_at.strftime("%d.%m.%Y") if p.completed_at else "",
@@ -192,13 +189,8 @@ class ProjectViewModel(QObject):
 
     def _on_stages_loaded(self, stages: list[ProjectStage]) -> None:
         self._stages_data = [
-            {
-                "id": s.id,
-                "name": s.name,
-                "status": str(s.status.value if hasattr(s.status, "value") else s.status),
-                "order_index": s.order_index,
-                "color": s.color or "#6366F1",
-            }
+            {"id": s.id, "name": s.name, "status": str(getattr(s.status, "value", s.status)),
+             "order_index": s.order_index, "color": s.color or "#6366F1"}
             for s in stages
         ]
         self.stagesChanged.emit()
@@ -206,6 +198,40 @@ class ProjectViewModel(QObject):
     def _reload_current_stages(self) -> None:
         if self._selected_project_id != 0:
             self._stage_controller.load_stages(self._selected_project_id)
+
+    def _on_stage_updated(self, _stage: Any = None) -> None:
+        self._reload_current_stages()
+        self._refresh_selected_project()
+        self.loadProjects()
+
+    def _on_task_event(self, **_kw: Any) -> None:
+        if self._selected_project_id != 0:
+            self._load_project_tasks(self._selected_project_id)
+            self._refresh_selected_project()
+        self.loadProjects()
+
+    def _load_project_tasks(self, project_id: int) -> None:
+        if project_id == 0:
+            self._tasks_data = []
+        else:
+            try:
+                tasks = self._di.services.task.get_tasks(project_id)
+                self._tasks_data = [
+                    {
+                        "id": t.id,
+                        "title": t.title,
+                        "status": str(getattr(t.status, "value", t.status)),
+                        "priority": str(getattr(t.priority, "value", t.priority)),
+                        "is_done": str(getattr(t.status, "value", t.status)) == "DONE",
+                        "parent_id": t.parent_task_id or 0,
+                        "due_date": t.due_date.strftime("%d.%m.%Y") if getattr(t, "due_date", None) else "",
+                    }
+                    for t in tasks
+                ]
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Tasks could not be loaded: %s", exc)
+                self._tasks_data = []
+        self.tasksChanged.emit()
 
     def _load_outputs(self, project_id: int) -> None:
         outputs = self._controller.get_attachments_sync(project_id)
@@ -220,27 +246,34 @@ class ProjectViewModel(QObject):
             self._decision_controller.load_project_decisions(self._selected_project_id)
             self._note_controller.load_project_notes(self._selected_project_id)
             self._resource_controller.load_project_resources(self._selected_project_id)
+            self._load_project_tasks(self._selected_project_id)
+        else:
+            self._load_project_tasks(0)
 
     def _on_decisions_loaded(self, decisions: list[Any]) -> None:
-        self._decisions_data = [
-            {"id": d.id, "title": d.title, "decision": d.decision, "status": d.status}
-            for d in decisions
-        ]
+        self._decisions_data = [{"id": d.id, "title": d.title, "decision": d.decision, "status": d.status} for d in decisions]
         self.decisionsChanged.emit()
 
     def _on_notes_loaded(self, notes: list[Any]) -> None:
-        self._notes_data = [
-            {"id": n.id, "title": n.title, "body": n.body, "note_type": getattr(n, "note_type", "GENERAL")}
-            for n in notes
-        ]
+        self._notes_data = [{"id": n.id, "title": n.title, "body": n.body, "note_type": getattr(n, "note_type", "GENERAL")} for n in notes]
         self.notesChanged.emit()
 
     def _on_resources_loaded(self, resources: list[Any]) -> None:
-        self._resources_data = [
-            {"id": r.id, "title": r.title, "url": r.url, "resource_type": r.resource_type}
-            for r in resources
-        ]
+        self._resources_data = [{"id": r.id, "title": r.title, "url": r.url, "resource_type": r.resource_type} for r in resources]
         self.resourcesChanged.emit()
+
+    @Slot(int)
+    def toggleTaskStatus(self, task_id: int) -> None:
+        self._di.task_controller.toggle_status(task_id)
+
+    @Slot(str)
+    def addTask(self, title: str) -> None:
+        if self._selected_project_id != 0 and title.strip():
+            self._di.task_controller.create_task(self._selected_project_id, title.strip())
+
+    @Slot(int)
+    def deleteTask(self, task_id: int) -> None:
+        self._di.task_controller.delete_task(task_id)
 
     @Slot(int)
     def completeStage(self, stage_id: int) -> None:
@@ -254,11 +287,7 @@ class ProjectViewModel(QObject):
     def addOutput(self, title: str, file_path: str) -> None:
         if self._selected_project_id == 0:
             return
-        att = Attachment(
-            project_id=self._selected_project_id,
-            file_name=title,
-            file_path=file_path,
-        )
+        att = Attachment(project_id=self._selected_project_id, file_name=title, file_path=file_path)
         self._controller.create_attachment_sync(att)
         self._load_outputs(self._selected_project_id)
         self._event_bus.publish("toast.show", message="Çıktı başarıyla eklendi", type_="success")  # l10n: data
@@ -306,16 +335,12 @@ class ProjectViewModel(QObject):
 
     @Slot()
     def openCreateDialog(self) -> None:
-        self._dialog_mode = "create"
-        self._dialog_project_id = 0
-        self._dialog_open = True
+        self._dialog_mode, self._dialog_project_id, self._dialog_open = "create", 0, True
         self.dialogStateChanged.emit()
 
     @Slot(int)
     def openEditDialog(self, project_id: int) -> None:
-        self._dialog_mode = "edit"
-        self._dialog_project_id = project_id
-        self._dialog_open = True
+        self._dialog_mode, self._dialog_project_id, self._dialog_open = "edit", project_id, True
         self.dialogStateChanged.emit()
 
     @Slot()

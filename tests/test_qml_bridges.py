@@ -675,3 +675,32 @@ def test_window_geometry_persistence_and_centering(qapp: QApplication, container
     prefs._settings.remove("window/rect")
 
 
+def test_project_viewmodel_tasks_and_stage_progress(qapp: QApplication, container: DIContainer) -> None:
+    from PySide6.QtCore import QThreadPool
+    pvm = ProjectViewModel(container, parent=qapp)
+    proj = container.project_controller._service.create_project("Görev ve Aşama Testi")
+    QThreadPool.globalInstance().waitForDone(2000)
+    pvm.selectProject(proj.id)
+    assert pvm.selectedProjectId == proj.id
+    assert len(pvm.selectedTasks) == 0
+
+    pvm.addTask("İlk Görev")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert len(pvm.selectedTasks) == 1
+    t = pvm.selectedTasks[0]
+    assert t["title"] == "İlk Görev"
+    assert not t["is_done"]
+
+    pvm.toggleTaskStatus(t["id"])
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert pvm.selectedTasks[0]["is_done"]
+    assert pvm.selectedProject["progress"] == 100
+
+    pvm.deleteTask(t["id"])
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert len(pvm.selectedTasks) == 0
+
+

@@ -364,6 +364,7 @@ def test_project_auto_completed_when_all_stages_completed(service_stack):
     updated_stages = service_stack["stage_service"].get_stages(project.id)
     assert all(s.status == "DONE" for s in updated_stages)
 
-    # Projenin otomatik olarak COMPLETED olduğunu doğrula
+    # Projenin otomatik olarak COMPLETED olduğunu ve ilerlemenin %100 olduğunu doğrula
     updated_project = service_stack["project_service"].get_project(project.id)
     assert updated_project.status == "COMPLETED"
+    assert updated_project.progress_percent == 100

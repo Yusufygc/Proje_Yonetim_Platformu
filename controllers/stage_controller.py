@@ -48,7 +48,8 @@ class StageController(QObject):
         try:
             stage = self._service.complete_stage(stage_id)
             self.stage_updated.emit(stage)
-            self._event_bus.publish("stage.completed", stage_id=stage_id)
+            self._event_bus.publish("stage.completed", stage_id=stage_id, project_id=stage.project_id)
+            self._event_bus.publish("project.updated", project_id=stage.project_id)
         except AppBaseException as exc:
             logger.error("Aşama tamamlanamadı: %s", exc)
             self.error_occurred.emit(str(exc))
@@ -57,7 +58,8 @@ class StageController(QObject):
         try:
             stage = self._service.activate_stage(stage_id)
             self.stage_updated.emit(stage)
-            self._event_bus.publish("stage.activated", stage_id=stage_id)
+            self._event_bus.publish("stage.activated", stage_id=stage_id, project_id=stage.project_id)
+            self._event_bus.publish("project.updated", project_id=stage.project_id)
         except AppBaseException as exc:
             logger.error("Aşama aktif edilemedi: %s", exc)
             self.error_occurred.emit(str(exc))
