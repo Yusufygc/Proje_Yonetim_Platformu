@@ -148,6 +148,11 @@ Item {
                         clip: true
                         model: ideaViewModel ? ideaViewModel.ideaModel : null
                         spacing: Theme.spacing.sm
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        ScrollBar.vertical: AppScrollBar {
+                            id: ideaScrollBar
+                        }
 
                         delegate: IdeaCard {}
 

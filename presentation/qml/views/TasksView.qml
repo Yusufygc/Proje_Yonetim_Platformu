@@ -227,6 +227,11 @@ Item {
                     clip: true
                     model: taskViewModel ? taskViewModel.taskModel : null
                     spacing: 2
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    ScrollBar.vertical: AppScrollBar {
+                        id: taskScrollBar
+                    }
 
                     delegate: TaskItemDelegate {}
 

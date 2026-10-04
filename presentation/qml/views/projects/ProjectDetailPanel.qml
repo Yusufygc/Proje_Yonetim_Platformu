@@ -41,6 +41,10 @@ Item {
         contentWidth: availableWidth
         clip: true
 
+        ScrollBar.vertical: AppScrollBar {
+            id: detailScrollBar
+        }
+
         Column {
             width: parent.width
             padding: 24

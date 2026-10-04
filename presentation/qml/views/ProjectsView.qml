@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import "../components"
 import "projects"
 import "../dialogs"
@@ -21,14 +22,15 @@ Item {
         border.width: 1
         border.color: themeBridge.border
 
-        Column {
+        ColumnLayout {
             anchors.fill: parent
-            padding: 16
+            anchors.margins: 16
             spacing: 12
 
             // Üst Başlık ve Yeni Buton
-            Row {
-                width: parent.width - 32
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 32
                 spacing: 8
 
                 Text {
@@ -36,8 +38,8 @@ Item {
                     font.pixelSize: 18
                     font.weight: Font.Bold
                     color: themeBridge.textPrimary
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - 40
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
                 }
 
                 AppButton {
@@ -46,60 +48,60 @@ Item {
                     implicitWidth: 32
                     implicitHeight: 32
                     onClicked: projectViewModel.openCreateDialog()
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                 }
             }
 
-                // Arama Kutusu
-                Rectangle {
-                    width: parent.width - 32
-                    height: 36
-                    radius: 8
-                    color: themeBridge.background
-                    border.width: 1
-                    border.color: searchInput.activeFocus ? themeBridge.accentStart : themeBridge.border
+            // Arama Kutusu
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 36
+                radius: 8
+                color: themeBridge.background
+                border.width: 1
+                border.color: searchInput.activeFocus ? themeBridge.accentStart : themeBridge.border
 
-                    Row {
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        spacing: 8
+                Row {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 8
 
-                        AppIcon {
-                            name: "search"
-                            size: 16
+                    AppIcon {
+                        name: "search"
+                        size: 16
+                        color: themeBridge.textMuted
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    TextInput {
+                        id: searchInput
+                        width: parent.width - 30
+                        anchors.verticalCenter: parent.verticalCenter
+                        font.pixelSize: 13
+                        color: themeBridge.textPrimary
+                        selectByMouse: true
+                        onTextChanged: projectViewModel.model.setSearchQuery(text)
+
+                        Text {
+                            anchors.fill: parent
+                            text: i18nBridge.tr("project_search_placeholder", "Projelerde ara...")
                             color: themeBridge.textMuted
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        TextInput {
-                            id: searchInput
-                            width: parent.width - 30
-                            anchors.verticalCenter: parent.verticalCenter
                             font.pixelSize: 13
-                            color: themeBridge.textPrimary
-                            selectByMouse: true
-                            onTextChanged: projectViewModel.model.setSearchQuery(text)
-
-                            Text {
-                                anchors.fill: parent
-                                text: i18nBridge.tr("project_search_placeholder", "Projelerde ara...")
-                                color: themeBridge.textMuted
-                                font.pixelSize: 13
-                                visible: !searchInput.text && !searchInput.activeFocus
-                            }
+                            visible: !searchInput.text && !searchInput.activeFocus
                         }
                     }
                 }
+            }
 
-                // Durum Filtreleme Butonları (Pills)
-                ScrollView {
-                    width: parent.width - 32
-                    height: 32
-                    contentWidth: filterRow.implicitWidth
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-                    clip: true
+            // Durum Filtreleme Butonları (Pills)
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 32
+                contentWidth: filterRow.implicitWidth
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                clip: true
 
                     Row {
                         id: filterRow
@@ -144,45 +146,51 @@ Item {
                     }
                 }
 
-                // Proje Listesi
-                ListView {
-                    id: projectList
-                    width: parent.width - 32
-                    height: parent.height - 140
-                    model: projectViewModel.model
-                    clip: true
-                    spacing: 8
+            // Proje Listesi
+            ListView {
+                id: projectList
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                model: projectViewModel.model
+                clip: true
+                spacing: 8
+                boundsBehavior: Flickable.StopAtBounds
 
-                    delegate: ProjectListItem {
-                        projectId: model.projectId
-                        title: model.title
-                        projectType: model.projectType
-                        status: model.status
-                        priority: model.priority
-                        progress: model.progress
-                        isSelected: projectViewModel.selectedProjectId === model.projectId
-                        onClicked: projectViewModel.selectProject(model.projectId)
-                    }
+                ScrollBar.vertical: AppScrollBar {
+                    id: projectScrollBar
+                }
 
-                    // Boş Liste Durumu
-                    Text {
-                        anchors.centerIn: parent
-                        text: i18nBridge.tr("projects_empty", "Henüz proje bulunmuyor.")
-                        font.pixelSize: 13
-                        color: themeBridge.textMuted
-                        visible: projectList.count === 0
-                    }
+                delegate: ProjectListItem {
+                    width: projectList.width - (projectScrollBar.visible ? 14 : 0)
+                    projectId: model.projectId
+                    title: model.title
+                    projectType: model.projectType
+                    status: model.status
+                    priority: model.priority
+                    progress: model.progress
+                    isSelected: projectViewModel.selectedProjectId === model.projectId
+                    onClicked: projectViewModel.selectProject(model.projectId)
+                }
+
+                // Boş Liste Durumu
+                Text {
+                    anchors.centerIn: parent
+                    text: i18nBridge.tr("projects_empty", "Henüz proje bulunmuyor.")
+                    font.pixelSize: 13
+                    color: themeBridge.textMuted
+                    visible: projectList.count === 0
                 }
             }
         }
+    }
 
-        // Sağ Detay Paneli
-        ProjectDetailPanel {
-            anchors.left: leftPanel.right
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-        }
+    // Sağ Detay Paneli
+    ProjectDetailPanel {
+        anchors.left: leftPanel.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+    }
 
     // Proje Ekle/Düzenle Dialogu
     ProjectDialog {
