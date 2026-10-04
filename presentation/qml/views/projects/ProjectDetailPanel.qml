@@ -437,7 +437,7 @@ Item {
             // Sekme İçerikleri
             AppCard {
                 width: parent.width - 48
-                height: detailRoot.currentTab === 1 ? 420 : (detailRoot.currentTab === 0 ? 120 : 280)
+                height: detailRoot.currentTab === 0 ? 120 : 420
 
                 // Tab 0: Özet
                 Column {
@@ -688,59 +688,72 @@ Item {
                         Layout.fillHeight: true
                         clip: true
 
+                        ScrollBar.vertical: AppScrollBar { }
+
                         ColumnLayout {
                             width: parent.width - 12
-                            spacing: 6
+                            spacing: 8
 
                             Repeater {
                                 model: projectViewModel.selectedDecisions
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    implicitHeight: 36
-                                    radius: 6
+                                    implicitHeight: decisionContentCol.implicitHeight + 16
+                                    radius: 8
                                     color: themeBridge.color("surface_alt")
                                     border.color: themeBridge.color("border")
+                                    border.width: 1
 
-                                    RowLayout {
+                                    ColumnLayout {
+                                        id: decisionContentCol
                                         anchors.fill: parent
-                                        anchors.margins: 6
-                                        spacing: 8
+                                        anchors.margins: 8
+                                        spacing: 6
 
-                                        AppBadge {
-                                            text: {
-                                                var st = (modelData.status || "APPROVED").toUpperCase();
-                                                switch (st) {
-                                                    case "APPROVED": case "ONAYLANDI": return i18nBridge.tr("decision_approved", "Onaylandı");
-                                                    case "REJECTED": case "REDDEDILDI": case "REDDEDİLDİ": return i18nBridge.tr("decision_rejected", "Reddedildi");
-                                                    case "PROPOSED": case "ONERILDI": case "ÖNERİLDİ": return i18nBridge.tr("decision_proposed", "Önerildi");
-                                                    default: return modelData.status;
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 8
+
+                                            AppBadge {
+                                                text: {
+                                                    var st = (modelData.status || "APPROVED").toUpperCase();
+                                                    switch (st) {
+                                                        case "APPROVED": case "ONAYLANDI": return i18nBridge.tr("decision_approved", "Onaylandı");
+                                                        case "REJECTED": case "REDDEDILDI": case "REDDEDİLDİ": return i18nBridge.tr("decision_rejected", "Reddedildi");
+                                                        case "PROPOSED": case "ONERILDI": case "ÖNERİLDİ": return i18nBridge.tr("decision_proposed", "Önerildi");
+                                                        default: return modelData.status;
+                                                    }
                                                 }
+                                                variant: (modelData.status === "REJECTED" || modelData.status === "REDDEDILDI") ? "danger" : "success"
+                                                size: "sm"
                                             }
-                                            variant: (modelData.status === "REJECTED" || modelData.status === "REDDEDILDI") ? "danger" : "success"
-                                            size: "sm"
+
+                                            Text {
+                                                text: modelData.title || ""
+                                                font.pixelSize: 12
+                                                font.weight: Font.DemiBold
+                                                color: themeBridge.color("text_primary")
+                                                Layout.fillWidth: true
+                                                wrapMode: Text.Wrap
+                                            }
+
+                                            AppButton {
+                                                iconName: "trash-2"
+                                                btnVariant: "secondary"
+                                                implicitWidth: 22
+                                                implicitHeight: 22
+                                                Layout.alignment: Qt.AlignTop
+                                                onClicked: projectViewModel.deleteDecision(modelData.id)
+                                            }
                                         }
 
                                         Text {
-                                            text: modelData.title
-                                            font.pixelSize: 12
-                                            font.weight: Font.DemiBold
-                                            color: themeBridge.color("text_primary")
-                                        }
-
-                                        Text {
-                                            text: "— " + modelData.decision
+                                            visible: !!modelData.decision
+                                            text: modelData.decision || ""
                                             font.pixelSize: 12
                                             color: themeBridge.color("text_secondary")
                                             Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                        }
-
-                                        AppButton {
-                                            iconName: "trash-2"
-                                            btnVariant: "secondary"
-                                            implicitWidth: 22
-                                            implicitHeight: 22
-                                            onClicked: projectViewModel.deleteDecision(modelData.id)
+                                            wrapMode: Text.Wrap
                                         }
                                     }
                                 }
@@ -780,61 +793,79 @@ Item {
                         }
                     }
 
-                    ScrollView {
+                    ListView {
+                        id: notesListView
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
+                        spacing: 8
+                        model: projectViewModel.selectedNotes
 
-                        ColumnLayout {
-                            width: parent.width - 12
-                            spacing: 6
+                        ScrollBar.vertical: AppScrollBar { }
 
-                            Repeater {
-                                model: projectViewModel.selectedNotes
-                                delegate: Rectangle {
-                                    Layout.fillWidth: true
-                                    implicitHeight: 36
-                                    radius: 6
-                                    color: themeBridge.color("surface_alt")
-                                    border.color: themeBridge.color("border")
+                        delegate: Rectangle {
+                            width: notesListView.width - 8
+                            height: noteCol.implicitHeight + 20
+                            radius: 8
+                            color: themeBridge.surfaceAlt
+                            border.color: themeBridge.border
+                            border.width: 1
 
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 6
-                                        spacing: 8
+                            Column {
+                                id: noteCol
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.margins: 10
+                                spacing: 6
 
-                                        Text {
-                                            text: modelData.title
-                                            font.pixelSize: 12
-                                            font.weight: Font.DemiBold
-                                            color: themeBridge.color("text_primary")
-                                        }
+                                Item {
+                                    width: parent.width
+                                    implicitHeight: Math.max(noteTitleText.implicitHeight, 24)
 
-                                        Text {
-                                            text: "— " + modelData.body
-                                            font.pixelSize: 12
-                                            color: themeBridge.color("text_secondary")
-                                            Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                        }
+                                    Text {
+                                        id: noteTitleText
+                                        anchors.left: parent.left
+                                        anchors.right: noteDeleteBtn.left
+                                        anchors.rightMargin: 8
+                                        anchors.top: parent.top
+                                        visible: !!modelData.title
+                                        text: modelData.title || ""
+                                        font.pixelSize: 13
+                                        font.weight: Font.DemiBold
+                                        color: themeBridge.textPrimary
+                                        wrapMode: Text.Wrap
+                                    }
 
-                                        AppButton {
-                                            iconName: "trash-2"
-                                            btnVariant: "secondary"
-                                            implicitWidth: 22
-                                            implicitHeight: 22
-                                            onClicked: projectViewModel.deleteNote(modelData.id)
-                                        }
+                                    AppButton {
+                                        id: noteDeleteBtn
+                                        iconName: "trash-2"
+                                        btnVariant: "secondary"
+                                        implicitWidth: 24
+                                        implicitHeight: 24
+                                        anchors.right: parent.right
+                                        anchors.top: parent.top
+                                        onClicked: projectViewModel.deleteNote(modelData.id)
                                     }
                                 }
-                            }
 
-                            Text {
-                                visible: !projectViewModel.selectedNotes || projectViewModel.selectedNotes.length === 0
-                                text: i18nBridge.tr("no_notes", "Henüz kayıtlı proje notu yok.")
-                                font.pixelSize: 12
-                                color: themeBridge.color("text_muted")
+                                Text {
+                                    width: parent.width
+                                    visible: !!modelData.body
+                                    text: modelData.body || ""
+                                    font.pixelSize: 12
+                                    color: themeBridge.textSecondary
+                                    wrapMode: Text.Wrap
+                                }
                             }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            visible: !projectViewModel.selectedNotes || projectViewModel.selectedNotes.length === 0
+                            text: i18nBridge.tr("no_notes", "Henüz kayıtlı proje notu yok.")
+                            font.pixelSize: 12
+                            color: themeBridge.textMuted
                         }
                     }
                 }
@@ -868,72 +899,84 @@ Item {
                         Layout.fillHeight: true
                         clip: true
 
+                        ScrollBar.vertical: AppScrollBar { }
+
                         ColumnLayout {
                             width: parent.width - 12
-                            spacing: 6
+                            spacing: 8
 
                             Repeater {
                                 model: projectViewModel.selectedResources
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    implicitHeight: 36
-                                    radius: 6
+                                    implicitHeight: resourceContentCol.implicitHeight + 16
+                                    radius: 8
                                     color: themeBridge.color("surface_alt")
                                     border.color: themeBridge.color("border")
+                                    border.width: 1
 
-                                    RowLayout {
+                                    ColumnLayout {
+                                        id: resourceContentCol
                                         anchors.fill: parent
-                                        anchors.margins: 6
-                                        spacing: 8
+                                        anchors.margins: 8
+                                        spacing: 6
 
-                                        AppBadge {
-                                            text: {
-                                                var rt = (modelData.resource_type || "DOCUMENT").toUpperCase();
-                                                switch (rt) {
-                                                    case "DOCUMENT": return i18nBridge.tr("resource_type_document", "Doküman");
-                                                    case "ARTICLE": return i18nBridge.tr("resource_type_article", "Makale");
-                                                    case "VIDEO": return i18nBridge.tr("resource_type_video", "Video");
-                                                    case "GITHUB": case "REPO": return i18nBridge.tr("resource_type_github", "GitHub / Repo");
-                                                    case "DESIGN": return i18nBridge.tr("resource_type_design", "Tasarım");
-                                                    case "API": return i18nBridge.tr("resource_type_api", "API Referansı");
-                                                    case "TOOL": return i18nBridge.tr("resource_type_tool", "Araç");
-                                                    case "OTHER": return i18nBridge.tr("resource_type_other", "Diğer");
-                                                    default: return modelData.resource_type;
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 8
+
+                                            AppBadge {
+                                                text: {
+                                                    var rt = (modelData.resource_type || "DOCUMENT").toUpperCase();
+                                                    switch (rt) {
+                                                        case "DOCUMENT": return i18nBridge.tr("resource_type_document", "Doküman");
+                                                        case "ARTICLE": return i18nBridge.tr("resource_type_article", "Makale");
+                                                        case "VIDEO": return i18nBridge.tr("resource_type_video", "Video");
+                                                        case "GITHUB": case "REPO": return i18nBridge.tr("resource_type_github", "GitHub / Repo");
+                                                        case "DESIGN": return i18nBridge.tr("resource_type_design", "Tasarım");
+                                                        case "API": return i18nBridge.tr("resource_type_api", "API Referansı");
+                                                        case "TOOL": return i18nBridge.tr("resource_type_tool", "Araç");
+                                                        case "OTHER": return i18nBridge.tr("resource_type_other", "Diğer");
+                                                        default: return modelData.resource_type;
+                                                    }
                                                 }
+                                                variant: "neutral"
+                                                size: "sm"
                                             }
-                                            variant: "neutral"
-                                            size: "sm"
+
+                                            Text {
+                                                text: modelData.title || ""
+                                                font.pixelSize: 12
+                                                font.weight: Font.DemiBold
+                                                color: themeBridge.color("text_primary")
+                                                Layout.fillWidth: true
+                                                wrapMode: Text.Wrap
+                                            }
+
+                                            AppButton {
+                                                iconName: "external-link"
+                                                btnVariant: "secondary"
+                                                implicitWidth: 22
+                                                implicitHeight: 22
+                                                onClicked: projectViewModel.openUrlOrPath(modelData.url)
+                                            }
+
+                                            AppButton {
+                                                iconName: "trash-2"
+                                                btnVariant: "secondary"
+                                                implicitWidth: 22
+                                                implicitHeight: 22
+                                                onClicked: projectViewModel.deleteResource(modelData.id)
+                                            }
                                         }
 
                                         Text {
-                                            text: modelData.title
-                                            font.pixelSize: 12
-                                            font.weight: Font.DemiBold
-                                            color: themeBridge.color("text_primary")
-                                        }
-
-                                        Text {
-                                            text: "(" + modelData.url + ")"
+                                            visible: !!modelData.url
+                                            text: modelData.url || ""
                                             font.pixelSize: 11
                                             color: Theme.accent(themeBridge.currentTheme)
                                             Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                        }
-
-                                        AppButton {
-                                            iconName: "external-link"
-                                            btnVariant: "secondary"
-                                            implicitWidth: 22
-                                            implicitHeight: 22
-                                            onClicked: projectViewModel.openUrlOrPath(modelData.url)
-                                        }
-
-                                        AppButton {
-                                            iconName: "trash-2"
-                                            btnVariant: "secondary"
-                                            implicitWidth: 22
-                                            implicitHeight: 22
-                                            onClicked: projectViewModel.deleteResource(modelData.id)
+                                            wrapMode: Text.WrapAnywhere
                                         }
                                     }
                                 }
@@ -978,45 +1021,57 @@ Item {
                         Layout.fillHeight: true
                         clip: true
 
+                        ScrollBar.vertical: AppScrollBar { }
+
                         ColumnLayout {
                             width: parent.width - 12
-                            spacing: 6
+                            spacing: 8
 
                             Repeater {
                                 model: projectViewModel.selectedOutputs
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    implicitHeight: 36
-                                    radius: 6
+                                    implicitHeight: outputContentCol.implicitHeight + 16
+                                    radius: 8
                                     color: themeBridge.color("surface_alt")
                                     border.color: themeBridge.color("border")
+                                    border.width: 1
 
-                                    RowLayout {
+                                    ColumnLayout {
+                                        id: outputContentCol
                                         anchors.fill: parent
-                                        anchors.margins: 6
-                                        spacing: 8
+                                        anchors.margins: 8
+                                        spacing: 6
 
-                                        Text {
-                                            text: "📎 " + modelData.title
-                                            font.pixelSize: 12
-                                            font.weight: Font.DemiBold
-                                            color: themeBridge.color("text_primary")
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 8
+
+                                            Text {
+                                                text: "📎 " + modelData.title
+                                                font.pixelSize: 12
+                                                font.weight: Font.DemiBold
+                                                color: themeBridge.color("text_primary")
+                                                Layout.fillWidth: true
+                                                wrapMode: Text.Wrap
+                                            }
+
+                                            AppButton {
+                                                iconName: "external-link"
+                                                btnVariant: "secondary"
+                                                implicitWidth: 22
+                                                implicitHeight: 22
+                                                onClicked: projectViewModel.openUrlOrPath(modelData.file_path)
+                                            }
                                         }
 
                                         Text {
-                                            text: "(" + modelData.file_path + ")"
+                                            visible: !!modelData.file_path
+                                            text: modelData.file_path || ""
                                             font.pixelSize: 11
                                             color: themeBridge.color("text_muted")
                                             Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                        }
-
-                                        AppButton {
-                                            iconName: "external-link"
-                                            btnVariant: "secondary"
-                                            implicitWidth: 22
-                                            implicitHeight: 22
-                                            onClicked: projectViewModel.openUrlOrPath(modelData.file_path)
+                                            wrapMode: Text.WrapAnywhere
                                         }
                                     }
                                 }
