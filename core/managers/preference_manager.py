@@ -35,6 +35,27 @@ class PreferenceManager:
     def load_window_geometry(self) -> QByteArray | None:
         return self._settings.value("window/geometry")  # type: ignore[return-value]
 
+    def save_window_rect(
+        self, x: int, y: int, width: int, height: int, is_maximized: bool = False
+    ) -> None:
+        """Pencere koordinat ve boyutlarını kaydeder."""
+        self._settings.setValue("window/rect", [x, y, width, height, int(is_maximized)])
+
+    def load_window_rect(self) -> tuple[int, int, int, int, bool] | None:
+        """Kayıtlı pencere koordinat, boyut ve ekran durumunu döndürür."""
+        val = self._settings.value("window/rect")
+        if isinstance(val, (list, tuple)) and len(val) >= 4:
+            try:
+                x = int(val[0])
+                y = int(val[1])
+                w = int(val[2])
+                h = int(val[3])
+                is_max = bool(int(val[4])) if len(val) >= 5 else False
+                return (x, y, w, h, is_max)
+            except (ValueError, TypeError):
+                return None
+        return None
+
     def save_last_project_id(self, project_id: int) -> None:
         self._settings.setValue("session/last_project_id", project_id)
 

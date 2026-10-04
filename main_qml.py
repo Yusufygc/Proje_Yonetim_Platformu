@@ -28,8 +28,73 @@ if getattr(sys, "frozen", False) and sys.platform == "win32":
 from app import config  # noqa: E402
 from app.di_container import DIContainer, OnboardingService  # noqa: E402
 from core.logger import setup_global_exception_handler, setup_logging  # noqa: E402
+from core.managers.preference_manager import PreferenceManager  # noqa: E402
+from PySide6.QtCore import QRect  # noqa: E402
+from PySide6.QtGui import QCursor, QScreen, QWindow  # noqa: E402
+from PySide6.QtQuick import QQuickWindow  # noqa: E402
+from PySide6.QtWidgets import QApplication  # noqa: E402
 
 logger = logging.getLogger(__name__)
+
+
+def _calculate_centered_rect(screen: QScreen) -> QRect:
+    """Ekranın kullanılabilir alanına göre ortalanmış ve sığdırılmış pencere geometrisi üretir."""
+    avail = screen.availableGeometry()
+    w = min(1280, max(800, int(avail.width() * 0.92)))
+    if w > avail.width():
+        w = avail.width()
+    h = min(800, max(520, int(avail.height() * 0.88)))
+    if h > avail.height():
+        h = avail.height()
+    x = avail.x() + max(0, (avail.width() - w) // 2)
+    y = avail.y() + max(0, (avail.height() - h) // 2)
+    return QRect(x, y, w, h)
+
+
+def _bind_geometry_persistence(win: QQuickWindow, prefs: PreferenceManager) -> None:
+    """Pencere kapandığında mevcut geometriyi QSettings'e kaydeder."""
+    def _on_closing() -> None:
+        is_max = win.visibility() == QWindow.Visibility.Maximized
+        rect = win.geometry()
+        prefs.save_window_rect(rect.x(), rect.y(), rect.width(), rect.height(), is_max)
+
+    win.closing.connect(_on_closing)
+
+
+def setup_window_geometry(
+    win: QQuickWindow, prefs: PreferenceManager, app: QApplication
+) -> None:
+    """Pencereyi kayıtlı konuma veya aktif ekranda sınırları aşmayacak şekilde yerleştirir."""
+    saved = prefs.load_window_rect()
+    restored = False
+    if saved:
+        sx, sy, sw, sh, is_max = saved
+        probe = QRect(sx, sy, min(sw, 200), min(sh, 40))
+        target_screen = next(
+            (s for s in app.screens() if s.availableGeometry().intersects(probe)),
+            None,
+        )
+        if target_screen:
+            avail = target_screen.availableGeometry()
+            w = min(sw, avail.width())
+            h = min(sh, avail.height())
+            max_x = avail.x() + avail.width() - w
+            max_y = avail.y() + avail.height() - h
+            x = max(avail.left(), min(sx, max_x))
+            y = max(avail.top(), min(sy, max_y))
+            win.setGeometry(x, y, w, h)
+            if is_max:
+                win.showMaximized()
+            restored = True
+
+    if not restored:
+        target_screen = app.screenAt(QCursor.pos()) or app.primaryScreen()
+        screens = app.screens()
+        target = target_screen or (screens[0] if screens else None)
+        if target:
+            win.setGeometry(_calculate_centered_rect(target))
+
+    _bind_geometry_persistence(win, prefs)
 
 
 def run_qml_app() -> int:
@@ -150,6 +215,10 @@ def run_qml_app() -> int:
     if not engine.rootObjects():
         logger.error("QML dosyası yüklenemedi: %s", qml_file)
         return -1
+
+    root_window = engine.rootObjects()[0]
+    if isinstance(root_window, QQuickWindow):
+        setup_window_geometry(root_window, container.prefs, app)
 
     QTimer.singleShot(200, container.run_deferred_startup_tasks)
     return app.exec()

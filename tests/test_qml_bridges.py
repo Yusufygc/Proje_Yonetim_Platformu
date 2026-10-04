@@ -640,3 +640,34 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
         assert obj is not None
         qapp.processEvents()
 
+
+def test_window_geometry_persistence_and_centering(qapp: QApplication, container: DIContainer) -> None:
+    from PySide6.QtQuick import QQuickWindow  # noqa: PLC0415
+    from main_qml import setup_window_geometry  # noqa: PLC0415
+
+    prefs = container.prefs
+
+    # 1. Konum kaydetme ve okuma doğrulaması
+    prefs.save_window_rect(100, 80, 600, 500, False)
+    assert prefs.load_window_rect() == (100, 80, 600, 500, False)
+
+    # 2. Geçerli kayıtlı konumun pencereye uygulanması
+    win = QQuickWindow()
+    setup_window_geometry(win, prefs, qapp)
+    assert win.x() == 100
+    assert win.y() == 80
+    assert win.width() == 600
+    assert win.height() == 500
+
+    # 3. Ekran dışı (offscreen) geçersiz koordinatların güvenli şekilde aktif ekranda kurtarılması
+    prefs.save_window_rect(-9999, -9999, 1200, 800, False)
+    win_recovered = QQuickWindow()
+    setup_window_geometry(win_recovered, prefs, qapp)
+    assert win_recovered.x() != -9999
+    assert win_recovered.y() != -9999
+    assert any(s.availableGeometry().contains(win_recovered.geometry()) for s in qapp.screens())
+
+    prefs.save_window_rect(0, 0, 0, 0, False)
+    prefs._settings.remove("window/rect")
+
+
