@@ -80,10 +80,14 @@ def test_theme_bridge_properties_and_toggle(qapp: QApplication, container: DICon
     assert isinstance(bridge.isDark, bool)
     assert bridge.background.startswith("#")
     assert bridge.surface.startswith("#")
+    assert bridge.surfaceAlt.startswith("#")
+    assert bridge.hoverOverlay.startswith("#")
 
     initial_dark = bridge.isDark
     bridge.toggleTheme()
     assert bridge.isDark != initial_dark
+    assert bridge.surfaceAlt.startswith("#")
+    assert bridge.hoverOverlay.startswith("#")
     bridge.toggleTheme()
     assert bridge.isDark == initial_dark
 

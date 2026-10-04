@@ -62,6 +62,10 @@ class ThemeBridge(QObject):
         return self._theme_mgr.color("surface_raised")
 
     @Property(str, notify=themeChanged)
+    def surfaceAlt(self) -> str:
+        return self._theme_mgr.color("surface_alt")
+
+    @Property(str, notify=themeChanged)
     def textPrimary(self) -> str:
         return self._theme_mgr.color("text_primary")
 
@@ -132,6 +136,10 @@ class ThemeBridge(QObject):
     @Property(str, notify=themeChanged)
     def accentHover(self) -> str:
         return self._theme_mgr.color("accent_end")
+
+    @Property(str, notify=themeChanged)
+    def hoverOverlay(self) -> str:
+        return self._theme_mgr.color("hover_overlay")
 
     @Slot(str, result=str)
     def color(self, token: str) -> str:

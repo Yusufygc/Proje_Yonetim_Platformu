@@ -37,18 +37,20 @@ AbstractButton {
         }
 
         color: {
-            if (!control.enabled) return themeBridge.isDark ? "#223333" : "#E2E8F0";
+            if (!control.enabled) return themeBridge.isDark ? themeBridge.surfaceAlt : themeBridge.border;
             if (control.variant === "primary") {
                 return control.pressed ? themeBridge.accentEnd : (control.hovered ? themeBridge.accentEnd : themeBridge.accentStart);
             }
             if (control.variant === "danger") {
-                return control.hovered ? (themeBridge.isDark ? "#4A1818" : "#FEE2E2") : "transparent";
+                var dc = Qt.color(themeBridge.danger);
+                return control.hovered ? Qt.rgba(dc.r, dc.g, dc.b, themeBridge.isDark ? 0.25 : 0.12) : "transparent";
             }
             if (control.variant === "warning") {
-                return control.hovered ? (themeBridge.isDark ? "#4D3800" : "#FEF3C7") : "transparent";
+                var wc = Qt.color(themeBridge.warning);
+                return control.hovered ? Qt.rgba(wc.r, wc.g, wc.b, themeBridge.isDark ? 0.25 : 0.12) : "transparent";
             }
             if (control.variant === "ghost") {
-                return control.hovered ? themeBridge.sidebarHoverBg : "transparent";
+                return control.hovered ? themeBridge.hoverOverlay : "transparent";
             }
             // secondary
             return control.hovered ? themeBridge.surfaceRaised : themeBridge.surface;

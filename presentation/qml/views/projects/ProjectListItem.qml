@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import "../../components"
+import "../../theme"
 
 Rectangle {
     id: root
@@ -20,7 +21,7 @@ Rectangle {
     radius: 10
 
     color: {
-        if (root.isSelected) return themeBridge.isDark ? Qt.rgba(0.38, 0.42, 0.95, 0.22) : "#EEF2FF";
+        if (root.isSelected) return Theme.accentAlpha(themeBridge.currentTheme, themeBridge.isDark ? 0.22 : 0.12);
         if (mouseArea.containsMouse) return themeBridge.surfaceRaised;
         return themeBridge.surface;
     }

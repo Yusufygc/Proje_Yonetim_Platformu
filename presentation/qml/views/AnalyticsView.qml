@@ -197,7 +197,7 @@ ScrollView {
                         text: analyticsViewModel.completionRate.toFixed(1) + " %"
                         font.pixelSize: 24
                         font.weight: Font.Bold
-                        color: "#10B981"
+                        color: themeBridge.success
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -228,7 +228,7 @@ ScrollView {
                         text: analyticsViewModel.streakDays.toString()
                         font.pixelSize: 24
                         font.weight: Font.Bold
-                        color: "#F59E0B"
+                        color: themeBridge.warning
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -259,7 +259,7 @@ ScrollView {
                         text: analyticsViewModel.onTimeRate.toFixed(1) + " %"
                         font.pixelSize: 24
                         font.weight: Font.Bold
-                        color: "#6366F1"
+                        color: themeBridge.accentStart
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter

@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import "../components"
+import "../theme"
 
 Rectangle {
     id: searchModalRoot
@@ -189,7 +190,7 @@ Rectangle {
                                         width: 32
                                         height: 32
                                         radius: 6
-                                        color: Qt.rgba(0.2, 0.4, 0.8, 0.1)
+                                        color: Theme.accentAlpha(themeBridge.currentTheme, 0.12)
                                         anchors.verticalCenter: parent.verticalCenter
 
                                         AppIcon {

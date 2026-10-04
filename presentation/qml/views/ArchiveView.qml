@@ -208,7 +208,7 @@ Item {
                     AppIcon {
                         name: "trash"
                         size: 24
-                        color: "#EF4444"
+                        color: themeBridge.danger
                         anchors.verticalCenter: parent.verticalCenter
                     }
 

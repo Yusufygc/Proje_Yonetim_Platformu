@@ -115,7 +115,7 @@ Rectangle {
         Rectangle {
             width: parent.width
             height: 1
-            color: themeBridge.border
+            color: Qt.rgba(1, 1, 1, 0.12)
         }
 
         // Modül Navigasyon Butonları Listesi

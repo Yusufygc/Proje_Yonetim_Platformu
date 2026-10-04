@@ -54,6 +54,7 @@ QtObject {
     readonly property color background: themeBridge.background
     readonly property color surface: themeBridge.surface
     readonly property color surfaceRaised: themeBridge.surfaceRaised
+    readonly property color surfaceAlt: themeBridge.surfaceAlt
     readonly property color textPrimary: themeBridge.textPrimary
     readonly property color textSecondary: themeBridge.textSecondary
     readonly property color textMuted: themeBridge.textMuted
@@ -70,5 +71,6 @@ QtObject {
     readonly property color warning: themeBridge.warning
     readonly property color danger: themeBridge.danger
     readonly property color iconOnAccent: themeBridge.iconOnAccent
+    readonly property color hoverOverlay: themeBridge.hoverOverlay
     readonly property bool isDark: themeBridge.isDark
 }

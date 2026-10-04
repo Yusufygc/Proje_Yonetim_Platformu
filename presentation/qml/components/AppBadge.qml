@@ -10,9 +10,9 @@ Rectangle {
     readonly property color resolvedColor: {
         switch (variant) {
             case "neutral": return themeBridge.textSecondary;
-            case "success": return "#10B981";
-            case "warning": return "#F59E0B";
-            case "danger": return "#EF4444";
+            case "success": return themeBridge.success;
+            case "warning": return themeBridge.warning;
+            case "danger": return themeBridge.danger;
             case "accent":
             default: return themeBridge.accentStart;
         }

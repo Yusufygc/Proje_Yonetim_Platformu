@@ -380,7 +380,7 @@ Item {
                 width: parent.width - 48
                 height: 40
                 radius: 8
-                color: themeBridge.isDark ? themeBridge.surface : "#F1F5F9"
+                color: themeBridge.surfaceAlt
                 border.width: 1
                 border.color: themeBridge.border
 
@@ -404,10 +404,10 @@ Item {
                             height: 32
                             radius: 6
                             color: detailRoot.currentTab === index ?
-                                (themeBridge.isDark ? themeBridge.surfaceRaised : "#FFFFFF") :
-                                (tabMouse.containsMouse ? (themeBridge.isDark ? themeBridge.surfaceRaised : "#E2E8F0") : "transparent")
+                                themeBridge.surfaceRaised :
+                                (tabMouse.containsMouse ? (themeBridge.isDark ? themeBridge.surfaceRaised : themeBridge.border) : "transparent")
                             border.width: detailRoot.currentTab === index ? 1 : 0
-                            border.color: themeBridge.isDark ? themeBridge.border : "#CBD5E1"
+                            border.color: themeBridge.border
 
                             Text {
                                 id: tabText

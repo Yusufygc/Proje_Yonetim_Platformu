@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import "../components"
+import "../theme"
 
 ScrollView {
     id: infoViewRoot
@@ -83,7 +84,7 @@ ScrollView {
                         AppIcon {
                             name: "lightbulb"
                             size: 24
-                            color: "#F59E0B"
+                            color: themeBridge.warning
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
                         Text {
@@ -143,7 +144,7 @@ ScrollView {
                         AppIcon {
                             name: "check-square"
                             size: 24
-                            color: "#10B981"
+                            color: themeBridge.success
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
                         Text {
@@ -191,19 +192,19 @@ ScrollView {
                         },
                         {
                             icon: "folder",
-                            color: "#6366F1",
+                            color: themeBridge.accentStart,
                             title: i18nBridge.tr("nav_projects", "Projeler"),
                             desc: i18nBridge.tr("info_feat_projects_desc", "Planlandı → Geliştirme → Test → Tamamlandı aşamaları, kararlar ve kaynaklar.")
                         },
                         {
                             icon: "check-square",
-                            color: "#10B981",
+                            color: themeBridge.success,
                             title: i18nBridge.tr("nav_tasks", "Görevler (WBS)"),
                             desc: i18nBridge.tr("info_feat_tasks_desc", "Hiyerarşik iş kırılımı, ilerleme çubukları, durum ve öncelik filtreleri.")
                         },
                         {
                             icon: "lightbulb",
-                            color: "#F59E0B",
+                            color: themeBridge.warning,
                             title: i18nBridge.tr("nav_ideas", "Fikir Havuzu"),
                             desc: i18nBridge.tr("info_feat_ideas_desc", "Ham fikirleri kaydedin, puanlayın ve tek tıkla doğrudan projeye dönüştürün.")
                         },
@@ -215,7 +216,7 @@ ScrollView {
                         },
                         {
                             icon: "chart-bar",
-                            color: "#8B5CF6",
+                            color: themeBridge.accentEnd,
                             title: i18nBridge.tr("nav_analytics", "Analitik"),
                             desc: i18nBridge.tr("info_feat_analytics_desc", "Dönem bazlı tamamlanma grafikleri, başarı oranı ve performans göstergeleri.")
                         }
@@ -234,7 +235,7 @@ ScrollView {
                                 width: 36
                                 height: 36
                                 radius: 8
-                                color: Qt.rgba(0.2, 0.4, 0.8, 0.1)
+                                color: Theme.accentAlpha(themeBridge.currentTheme, 0.12)
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 AppIcon {

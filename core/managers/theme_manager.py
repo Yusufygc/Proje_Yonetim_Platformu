@@ -91,6 +91,13 @@ class ThemeManager(QObject):
 
     def color(self, key: str) -> str:
         """Palet sözlüğünden renk kodu döndürür."""
+        if key in self._palette:
+            return str(self._palette[key])
+        if key == "surface_alt":
+            return str(self._palette.get("surface_raised", self._palette.get("surface", "#1E2738")))
+        if key == "hover_overlay":
+            bg = str(self._palette.get("background", "#000000"))
+            return "#FFFFFF12" if bg[:2] in ["#0", "#1", "#2"] else "#0000000A"
         return str(self._palette.get(key, "#FFFFFF"))
 
     # ── QSS üretimi ─────────────────────────────────────────────────────────
@@ -182,7 +189,7 @@ class ThemeManager(QObject):
 
     @staticmethod
     def derive_alpha_tokens(palette: dict[str, str]) -> dict[str, str]:
-        """8 alpha token'ını ana renklerden otomatik türetir (#RRGGBB22 formatı)."""
+        """Alpha token'larını ve eksik türetilmiş token'ları otomatik hesaplar."""
         result = dict(palette)
         mappings = [
             ("success_alpha", "success"),
@@ -197,40 +204,43 @@ class ThemeManager(QObject):
         for alpha_key, src_key in mappings:
             src_color = result.get(src_key, "#888888")
             result[alpha_key] = src_color[:7] + "22"
+        if "surface_alt" not in result:
+            result["surface_alt"] = result.get("surface_raised", result.get("surface", "#1C1F26"))
+        if "hover_overlay" not in result:
+            bg = str(result.get("background", "#000000"))
+            result["hover_overlay"] = "#FFFFFF12" if bg[:2] in ["#0", "#1", "#2"] else "#0000000A"
         return result
 
     # ── Varsayılan palet ─────────────────────────────────────────────────────
 
     @staticmethod
     def _default_dark_palette() -> dict[str, str]:
-        """Tema dosyası yokken kullanılacak gömülü koyu tema paleti.
-
-        QSS dosyalarının kullandığı tüm token'ları içermeli; eksik token
-        kısmî eşleşme hatalarına yol açar (ör. #6366F1_bg).
-        """
+        """Tema dosyası yokken kullanılacak gömülü koyu tema paleti."""
         return ThemeManager.derive_alpha_tokens({
-            "background": "#12141A",
-            "surface": "#1C1F26",
-            "surface_raised": "#22263A",
-            "text_primary": "#E8EAF0",
-            "text_secondary": "#8B8FA8",
-            "text_muted": "#4A4D5C",
-            "accent_start": "#6366F1",
-            "accent_end": "#8B5CF6",
+            "background": "#0B0F17",
+            "surface": "#151C28",
+            "surface_raised": "#1E2738",
+            "surface_alt": "#1B2433",
+            "text_primary": "#F8FAFC",
+            "text_secondary": "#94A3B8",
+            "text_muted": "#64748B",
+            "accent_start": "#3B82F6",
+            "accent_end": "#2563EB",
             "icon_on_accent": "#FFFFFF",
-            "success": "#22C55E",
+            "success": "#10B981",
             "warning": "#F59E0B",
             "danger": "#EF4444",
-            "border": "#2A2D38",
-            "scrollbar_bg": "#1C1F26",
-            "scrollbar_handle": "#3A3D4A",
-            "sidebar_bg": "#0F1117",
-            "sidebar_active": "#6366F1",
-            "sidebar_text": "#8B8FA8",
+            "border": "#263347",
+            "scrollbar_bg": "#0D121B",
+            "scrollbar_handle": "#263347",
+            "sidebar_bg": "#0D121B",
+            "sidebar_active": "#60A5FA",
+            "sidebar_text": "#94A3B8",
             "sidebar_text_active": "#FFFFFF",
-            "sidebar_hover_bg": "#1A1D25",
-            "sidebar_active_bg": "#1E2136",
-            "h-sidebar_bg": "#0A0C10",
-            "stage_active": "#6366F1",
-            "stage_done": "#22C55E",
+            "sidebar_hover_bg": "#1E2738",
+            "sidebar_active_bg": "#223047",
+            "h-sidebar_bg": "#0B0F17",
+            "stage_active": "#3B82F6",
+            "stage_done": "#10B981",
+            "hover_overlay": "#FFFFFF0D",
         })
