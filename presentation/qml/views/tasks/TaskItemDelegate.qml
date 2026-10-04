@@ -158,7 +158,18 @@ Rectangle {
 
         // Görev Tipi Rozeti
         AppBadge {
-            text: model.taskType
+            text: {
+                switch (model.taskType) {
+                    case "MILESTONE": return i18nBridge.tr("task_type_milestone", "Kilometre Taşı");
+                    case "EPIC": return i18nBridge.tr("task_type_epic", "Büyük Hedef");
+                    case "PHASE": return i18nBridge.tr("task_type_phase", "Faz");
+                    case "SUBTASK": return i18nBridge.tr("task_type_subtask", "Alt Görev");
+                    case "BUG": return i18nBridge.tr("task_type_bug", "Hata");
+                    case "IMPROVEMENT": return i18nBridge.tr("task_type_improvement", "İyileştirme");
+                    case "RESEARCH": return i18nBridge.tr("task_type_research", "Araştırma");
+                    default: return model.taskType;
+                }
+            }
             variant: "neutral"
             size: "sm"
             visible: model.taskType !== "TASK"

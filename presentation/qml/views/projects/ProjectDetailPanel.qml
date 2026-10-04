@@ -105,13 +105,27 @@ Item {
                 }
 
                 AppBadge {
-                    text: detailRoot.p.priority || "MEDIUM"
-                    badgeColor: themeBridge.accentStart
+                    text: {
+                        switch (detailRoot.p.priority) {
+                            case "CRITICAL": return i18nBridge.tr("priority_critical", "Kritik");
+                            case "HIGH": return i18nBridge.tr("priority_high", "Yüksek");
+                            case "LOW": return i18nBridge.tr("priority_low", "Düşük");
+                            default: return i18nBridge.tr("priority_medium", "Orta");
+                        }
+                    }
+                    badgeColor: {
+                        switch (detailRoot.p.priority) {
+                            case "CRITICAL": return themeBridge.danger;
+                            case "HIGH": return themeBridge.warning;
+                            case "LOW": return themeBridge.textSecondary;
+                            default: return themeBridge.accentStart;
+                        }
+                    }
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 AppBadge {
-                    visible: detailRoot.p.health !== ""
+                    visible: (detailRoot.p.health || "") !== ""
                     text: {
                         switch (detailRoot.p.health) {
                             case "GOOD": return i18nBridge.tr("health_good", "Yolunda");
@@ -127,8 +141,25 @@ Item {
                 }
 
                 AppBadge {
-                    visible: detailRoot.p.project_type !== ""
-                    text: detailRoot.p.project_type || ""
+                    visible: (detailRoot.p.project_type || "") !== ""
+                    text: {
+                        var pt = (detailRoot.p.project_type || "").toUpperCase();
+                        switch (pt) {
+                            case "SOFTWARE": case "YAZILIM": return i18nBridge.tr("project_type_software", "Yazılım");
+                            case "EDUCATION": case "EGITIM": case "EĞİTİM": return i18nBridge.tr("project_type_education", "Eğitim");
+                            case "RESEARCH": case "ARASTIRMA": case "ARAŞTIRMA": return i18nBridge.tr("project_type_research", "Araştırma");
+                            case "DESIGN": case "TASARIM": return i18nBridge.tr("project_type_design", "Tasarım");
+                            case "INTERNAL": case "IC ARAC": case "İÇ ARAÇ": return i18nBridge.tr("project_type_internal", "İç Araç");
+                            case "CLIENT": case "MUSTERI": case "MÜŞTERİ İŞİ": return i18nBridge.tr("project_type_client", "Müşteri İşi");
+                            case "EXPERIMENTAL": case "DENEYSEL": return i18nBridge.tr("project_type_experimental", "Deneysel");
+                            case "WEB": return "Web";
+                            case "MOBILE": return "Mobil";
+                            case "DESKTOP": return "Masaüstü";
+                            case "CLI": return "Komut Satırı";
+                            case "OTHER": case "DIGER": case "DİĞER": return i18nBridge.tr("project_type_other", "Diğer");
+                            default: return detailRoot.p.project_type || "";
+                        }
+                    }
                     badgeColor: themeBridge.textSecondary
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -195,67 +226,148 @@ Item {
                 }
             }
 
-            // Süreç Aşamaları (Timeline)
+            // Süreç Aşamaları (Açılır Kapanır Liste / Accordion)
             AppCard {
+                id: stagesCard
                 width: parent.width - 48
-                height: stagesColumn.implicitHeight + 32
+                height: stagesContentColumn.implicitHeight + 32
+                clip: true
+
+                property bool stagesExpanded: true
 
                 Column {
-                    id: stagesColumn
+                    id: stagesContentColumn
                     anchors.fill: parent
                     spacing: 12
 
-                    Text {
-                        text: i18nBridge.tr("section_stages", "SÜREÇ AŞAMALARI")
-                        font.pixelSize: 13
-                        font.weight: Font.DemiBold
-                        color: themeBridge.textPrimary
-                    }
+                    // Tıklanabilir Açılır / Kapanır Başlık Satırı
+                    Rectangle {
+                        width: parent.width
+                        height: 32
+                        color: "transparent"
 
-                    // Aşamalar Listesi
-                    Repeater {
-                        model: projectViewModel.selectedStages
-                        delegate: RowLayout {
-                            width: stagesColumn.width
-                            height: 36
-                            spacing: 12
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: stagesCard.stagesExpanded = !stagesCard.stagesExpanded
+                        }
 
-                            Rectangle {
-                                width: 10
-                                height: 10
-                                radius: 5
-                                color: modelData.status === "COMPLETED" ? themeBridge.success : (
-                                    modelData.status === "IN_PROGRESS" ? themeBridge.accentStart : themeBridge.border
-                                )
+                        RowLayout {
+                            anchors.fill: parent
+                            spacing: 8
+
+                            AppIcon {
+                                name: stagesCard.stagesExpanded ? "chevron-down" : "chevron-right"
+                                size: 16
+                                color: themeBridge.accentStart
                                 Layout.alignment: Qt.AlignVCenter
                             }
 
                             Text {
-                                text: (index + 1) + ". " + modelData.name
+                                text: i18nBridge.tr("section_stages", "SÜREÇ AŞAMALARI")
                                 font.pixelSize: 13
-                                font.weight: modelData.status === "IN_PROGRESS" ? Font.DemiBold : Font.Normal
-                                color: modelData.status === "COMPLETED" ? themeBridge.textMuted : themeBridge.textPrimary
-                                Layout.fillWidth: true
-                                elide: Text.ElideRight
+                                font.weight: Font.DemiBold
+                                color: themeBridge.textPrimary
                                 Layout.alignment: Qt.AlignVCenter
                             }
 
-                            AppButton {
-                                visible: modelData.status !== "COMPLETED"
-                                variant: "secondary"
-                                text: i18nBridge.tr("btn_complete_stage", "Tamamla")
-                                implicitHeight: 28
-                                onClicked: projectViewModel.completeStage(modelData.id)
+                            // Tamamlanan Aşama Sayacı
+                            Text {
+                                text: {
+                                    var list = projectViewModel.selectedStages || [];
+                                    var doneCount = 0;
+                                    for (var i = 0; i < list.length; i++) {
+                                        if (list[i].status === "DONE" || list[i].status === "COMPLETED") {
+                                            doneCount++;
+                                        }
+                                    }
+                                    return "(" + doneCount + "/" + list.length + " " + i18nBridge.tr("status_completed", "Tamamlandı") + ")";
+                                }
+                                font.pixelSize: 12
+                                color: themeBridge.textMuted
                                 Layout.alignment: Qt.AlignVCenter
                             }
 
-                            AppButton {
-                                visible: modelData.status === "NOT_STARTED"
-                                variant: "primary"
-                                text: i18nBridge.tr("btn_activate_stage", "Aktif Et")
-                                implicitHeight: 28
-                                onClicked: projectViewModel.activateStage(modelData.id)
+                            Item { Layout.fillWidth: true }
+
+                            Text {
+                                text: stagesCard.stagesExpanded ? i18nBridge.tr("action_collapse", "Daralt") : i18nBridge.tr("action_expand", "Genişlet")
+                                font.pixelSize: 11
+                                color: themeBridge.accentStart
                                 Layout.alignment: Qt.AlignVCenter
+                            }
+                        }
+                    }
+
+                    // Aşamalar Listesi (Açıkken Görünür)
+                    Column {
+                        id: stagesListColumn
+                        width: parent.width
+                        spacing: 10
+                        visible: stagesCard.stagesExpanded
+
+                        Repeater {
+                            model: projectViewModel.selectedStages
+                            delegate: RowLayout {
+                                width: stagesListColumn.width
+                                height: 36
+                                spacing: 12
+
+                                Rectangle {
+                                    width: 10
+                                    height: 10
+                                    radius: 5
+                                    color: (modelData.status === "DONE" || modelData.status === "COMPLETED") ? themeBridge.success : (
+                                        (modelData.status === "ACTIVE" || modelData.status === "IN_PROGRESS") ? themeBridge.accentStart : themeBridge.border
+                                    )
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                Text {
+                                    text: (index + 1) + ". " + modelData.name
+                                    font.pixelSize: 13
+                                    font.weight: (modelData.status === "ACTIVE" || modelData.status === "IN_PROGRESS") ? Font.DemiBold : Font.Normal
+                                    color: (modelData.status === "DONE" || modelData.status === "COMPLETED") ? themeBridge.textMuted : themeBridge.textPrimary
+                                    Layout.fillWidth: true
+                                    elide: Text.ElideRight
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                AppBadge {
+                                    text: {
+                                        var st = modelData.status;
+                                        if (st === "DONE" || st === "COMPLETED") return i18nBridge.tr("status_completed", "Tamamlandı");
+                                        if (st === "ACTIVE" || st === "IN_PROGRESS") return i18nBridge.tr("status_active", "Aktif");
+                                        if (st === "SKIPPED") return i18nBridge.tr("status_skipped", "Atlandı");
+                                        return i18nBridge.tr("status_not_started", "Başlamadı");
+                                    }
+                                    variant: {
+                                        var st = modelData.status;
+                                        if (st === "DONE" || st === "COMPLETED") return "success";
+                                        if (st === "ACTIVE" || st === "IN_PROGRESS") return "info";
+                                        return "neutral";
+                                    }
+                                    size: "sm"
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                AppButton {
+                                    visible: modelData.status !== "COMPLETED" && modelData.status !== "DONE"
+                                    variant: "secondary"
+                                    text: i18nBridge.tr("btn_complete_stage", "Tamamla")
+                                    implicitHeight: 28
+                                    onClicked: projectViewModel.completeStage(modelData.id)
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                AppButton {
+                                    visible: modelData.status === "NOT_STARTED"
+                                    variant: "primary"
+                                    text: i18nBridge.tr("btn_activate_stage", "Aktif Et")
+                                    implicitHeight: 28
+                                    onClicked: projectViewModel.activateStage(modelData.id)
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
                             }
                         }
                     }
@@ -411,8 +523,16 @@ Item {
                                         spacing: 8
 
                                         AppBadge {
-                                            text: modelData.status || "APPROVED"
-                                            variant: modelData.status === "REJECTED" ? "danger" : "success"
+                                            text: {
+                                                var st = (modelData.status || "APPROVED").toUpperCase();
+                                                switch (st) {
+                                                    case "APPROVED": case "ONAYLANDI": return i18nBridge.tr("decision_approved", "Onaylandı");
+                                                    case "REJECTED": case "REDDEDILDI": case "REDDEDİLDİ": return i18nBridge.tr("decision_rejected", "Reddedildi");
+                                                    case "PROPOSED": case "ONERILDI": case "ÖNERİLDİ": return i18nBridge.tr("decision_proposed", "Önerildi");
+                                                    default: return modelData.status;
+                                                }
+                                            }
+                                            variant: (modelData.status === "REJECTED" || modelData.status === "REDDEDILDI") ? "danger" : "success"
                                             size: "sm"
                                         }
 
@@ -583,7 +703,20 @@ Item {
                                         spacing: 8
 
                                         AppBadge {
-                                            text: modelData.resource_type || "DOCUMENT"
+                                            text: {
+                                                var rt = (modelData.resource_type || "DOCUMENT").toUpperCase();
+                                                switch (rt) {
+                                                    case "DOCUMENT": return i18nBridge.tr("resource_type_document", "Doküman");
+                                                    case "ARTICLE": return i18nBridge.tr("resource_type_article", "Makale");
+                                                    case "VIDEO": return i18nBridge.tr("resource_type_video", "Video");
+                                                    case "GITHUB": case "REPO": return i18nBridge.tr("resource_type_github", "GitHub / Repo");
+                                                    case "DESIGN": return i18nBridge.tr("resource_type_design", "Tasarım");
+                                                    case "API": return i18nBridge.tr("resource_type_api", "API Referansı");
+                                                    case "TOOL": return i18nBridge.tr("resource_type_tool", "Araç");
+                                                    case "OTHER": return i18nBridge.tr("resource_type_other", "Diğer");
+                                                    default: return modelData.resource_type;
+                                                }
+                                            }
                                             variant: "neutral"
                                             size: "sm"
                                         }
@@ -723,9 +856,8 @@ Item {
         id: addOutputDialog
         anchors.centerIn: parent
         width: 380
-        title: "Yeni Çıktı Ekle"
+        title: i18nBridge.tr("dialog_add_output_title", "Yeni Çıktı Ekle")
         modal: true
-        standardButtons: Dialog.Ok | Dialog.Cancel
 
         background: Rectangle {
             radius: 12
@@ -740,24 +872,38 @@ Item {
 
             AppTextInput {
                 id: outputTitleInput
-                label: "Çıktı Başlığı"
-                placeholder: "Rapor, doküman veya dosya adı"
+                label: i18nBridge.tr("field_output_title", "Çıktı Başlığı *")
+                placeholder: i18nBridge.tr("output_title_placeholder", "Rapor, doküman veya dosya adı")
                 Layout.fillWidth: true
             }
 
             AppTextInput {
                 id: outputPathInput
-                label: "Dosya Yolu / URL"
+                label: i18nBridge.tr("field_output_path", "Dosya Yolu / URL")
                 placeholder: "C:/docs/rapor.pdf veya https://..."
                 Layout.fillWidth: true
             }
         }
 
-        onAccepted: {
-            if (outputTitleInput.text) {
-                projectViewModel.addOutput(outputTitleInput.text, outputPathInput.text);
-                outputTitleInput.text = "";
-                outputPathInput.text = "";
+        footer: RowLayout {
+            width: parent.width
+            Item { Layout.fillWidth: true }
+            AppButton {
+                btnVariant: "secondary"
+                text: i18nBridge.tr("action_cancel", "İptal")
+                onClicked: addOutputDialog.close()
+            }
+            AppButton {
+                btnVariant: "primary"
+                text: i18nBridge.tr("action_add", "Ekle")
+                onClicked: {
+                    if (outputTitleInput.text) {
+                        projectViewModel.addOutput(outputTitleInput.text, outputPathInput.text);
+                        outputTitleInput.text = "";
+                        outputPathInput.text = "";
+                        addOutputDialog.close();
+                    }
+                }
             }
         }
     }
@@ -767,9 +913,8 @@ Item {
         id: addDecisionDialog
         anchors.centerIn: parent
         width: 420
-        title: "Yeni Karar Ekle"
+        title: i18nBridge.tr("decision_dialog_new_title", "Yeni Karar Ekle")
         modal: true
-        standardButtons: Dialog.Ok | Dialog.Cancel
 
         background: Rectangle {
             radius: 12
@@ -784,25 +929,39 @@ Item {
 
             AppTextInput {
                 id: decisionTitleInput
-                label: "Karar Konusu *"
-                placeholder: "Örn: Mimari Seçim Kararı"
+                label: i18nBridge.tr("decision_dialog_title_label", "Karar Konusu *")
+                placeholder: i18nBridge.tr("decision_title_placeholder", "Örn: Mimari Seçim Kararı")
                 Layout.fillWidth: true
             }
 
             AppTextInput {
                 id: decisionTextInput
-                label: "Alınan Karar *"
-                placeholder: "Detaylı karar açıklaması..."
+                label: i18nBridge.tr("decision_dialog_decision_label", "Alınan Karar *")
+                placeholder: i18nBridge.tr("decision_desc_placeholder", "Detaylı karar açıklaması...")
                 isTextArea: true
                 Layout.fillWidth: true
             }
         }
 
-        onAccepted: {
-            if (decisionTitleInput.text && decisionTextInput.text) {
-                projectViewModel.createDecision(decisionTitleInput.text, decisionTextInput.text, "APPROVED");
-                decisionTitleInput.text = "";
-                decisionTextInput.text = "";
+        footer: RowLayout {
+            width: parent.width
+            Item { Layout.fillWidth: true }
+            AppButton {
+                btnVariant: "secondary"
+                text: i18nBridge.tr("action_cancel", "İptal")
+                onClicked: addDecisionDialog.close()
+            }
+            AppButton {
+                btnVariant: "primary"
+                text: i18nBridge.tr("action_add", "Ekle")
+                onClicked: {
+                    if (decisionTitleInput.text && decisionTextInput.text) {
+                        projectViewModel.createDecision(decisionTitleInput.text, decisionTextInput.text, "APPROVED");
+                        decisionTitleInput.text = "";
+                        decisionTextInput.text = "";
+                        addDecisionDialog.close();
+                    }
+                }
             }
         }
     }
@@ -812,9 +971,8 @@ Item {
         id: addNoteDialog
         anchors.centerIn: parent
         width: 420
-        title: "Yeni Proje Notu Ekle"
+        title: i18nBridge.tr("note_dialog_new_title", "Yeni Proje Notu Ekle")
         modal: true
-        standardButtons: Dialog.Ok | Dialog.Cancel
 
         background: Rectangle {
             radius: 12
@@ -829,25 +987,39 @@ Item {
 
             AppTextInput {
                 id: noteTitleInput
-                label: "Not Başlığı *"
-                placeholder: "Örn: Toplantı Notu"
+                label: i18nBridge.tr("note_dialog_title_label", "Not Başlığı *")
+                placeholder: i18nBridge.tr("note_title_placeholder", "Örn: Toplantı Notu")
                 Layout.fillWidth: true
             }
 
             AppTextInput {
                 id: noteBodyInput
-                label: "Not İçeriği"
-                placeholder: "Not içeriği..."
+                label: i18nBridge.tr("note_dialog_body_label", "Not İçeriği")
+                placeholder: i18nBridge.tr("note_body_placeholder", "Not içeriği...")
                 isTextArea: true
                 Layout.fillWidth: true
             }
         }
 
-        onAccepted: {
-            if (noteTitleInput.text) {
-                projectViewModel.createNote(noteTitleInput.text, noteBodyInput.text);
-                noteTitleInput.text = "";
-                noteBodyInput.text = "";
+        footer: RowLayout {
+            width: parent.width
+            Item { Layout.fillWidth: true }
+            AppButton {
+                btnVariant: "secondary"
+                text: i18nBridge.tr("action_cancel", "İptal")
+                onClicked: addNoteDialog.close()
+            }
+            AppButton {
+                btnVariant: "primary"
+                text: i18nBridge.tr("action_add", "Ekle")
+                onClicked: {
+                    if (noteTitleInput.text) {
+                        projectViewModel.createNote(noteTitleInput.text, noteBodyInput.text);
+                        noteTitleInput.text = "";
+                        noteBodyInput.text = "";
+                        addNoteDialog.close();
+                    }
+                }
             }
         }
     }
@@ -857,9 +1029,8 @@ Item {
         id: addResourceDialog
         anchors.centerIn: parent
         width: 420
-        title: "Yeni Kaynak Ekle"
+        title: i18nBridge.tr("resource_dialog_new_title", "Yeni Kaynak Ekle")
         modal: true
-        standardButtons: Dialog.Ok | Dialog.Cancel
 
         background: Rectangle {
             radius: 12
@@ -874,24 +1045,38 @@ Item {
 
             AppTextInput {
                 id: resourceTitleInput
-                label: "Kaynak Adı *"
-                placeholder: "Örn: API Dokümantasyonu"
+                label: i18nBridge.tr("resource_dialog_title_label", "Kaynak Adı *")
+                placeholder: i18nBridge.tr("resource_title_placeholder", "Örn: API Dokümantasyonu")
                 Layout.fillWidth: true
             }
 
             AppTextInput {
                 id: resourceUrlInput
-                label: "Kaynak Bağlantısı (URL / Yol) *"
+                label: i18nBridge.tr("resource_dialog_url_label", "Kaynak Bağlantısı (URL / Yol) *")
                 placeholder: "https://api.example.com veya dosya yolu"
                 Layout.fillWidth: true
             }
         }
 
-        onAccepted: {
-            if (resourceTitleInput.text && resourceUrlInput.text) {
-                projectViewModel.createResource(resourceTitleInput.text, resourceUrlInput.text, "DOCUMENT");
-                resourceTitleInput.text = "";
-                resourceUrlInput.text = "";
+        footer: RowLayout {
+            width: parent.width
+            Item { Layout.fillWidth: true }
+            AppButton {
+                btnVariant: "secondary"
+                text: i18nBridge.tr("action_cancel", "İptal")
+                onClicked: addResourceDialog.close()
+            }
+            AppButton {
+                btnVariant: "primary"
+                text: i18nBridge.tr("action_add", "Ekle")
+                onClicked: {
+                    if (resourceTitleInput.text && resourceUrlInput.text) {
+                        projectViewModel.createResource(resourceTitleInput.text, resourceUrlInput.text, "DOCUMENT");
+                        resourceTitleInput.text = "";
+                        resourceUrlInput.text = "";
+                        addResourceDialog.close();
+                    }
+                }
             }
         }
     }
