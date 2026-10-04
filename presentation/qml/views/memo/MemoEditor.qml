@@ -52,7 +52,7 @@ AppCard {
                 }
 
                 AppButton {
-                    text: i18nBridge.tr("memo_new_btn", "+ Yeni Not Ekle")
+                    text: i18nBridge.tr("memo_new_btn", "Yeni Not Ekle")
                     btnVariant: "primary"
                     Layout.alignment: Qt.AlignHCenter
                     onClicked: {

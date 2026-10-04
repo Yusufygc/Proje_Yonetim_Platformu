@@ -8,7 +8,7 @@ AppCard {
     id: root
 
     property var idea: ideaViewModel ? ideaViewModel.selectedIdea : ({})
-    property bool hasIdea: idea && idea.id !== undefined && idea.id !== 0
+    property bool hasIdea: Boolean(idea && idea.id !== undefined && idea.id !== 0)
 
     ColumnLayout {
         anchors.fill: parent
@@ -104,7 +104,7 @@ AppCard {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Theme.spacing.xs
-                        visible: root.idea.targetUser && root.idea.targetUser.length > 0
+                        visible: Boolean(root.idea && root.idea.targetUser && root.idea.targetUser.length > 0)
 
                         Text {
                             text: i18nBridge.tr("label_target_user", "Hedef Kullanıcı")
@@ -126,7 +126,7 @@ AppCard {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Theme.spacing.xs
-                        visible: root.idea.problem && root.idea.problem.length > 0
+                        visible: Boolean(root.idea && root.idea.problem && root.idea.problem.length > 0)
 
                         Text {
                             text: i18nBridge.tr("idea_dialog_problem_label", "Çözülen Problem")
@@ -158,7 +158,7 @@ AppCard {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Theme.spacing.xs
-                        visible: root.idea.solution && root.idea.solution.length > 0
+                        visible: Boolean(root.idea && root.idea.solution && root.idea.solution.length > 0)
 
                         Text {
                             text: i18nBridge.tr("idea_dialog_solution_label", "Önerilen Çözüm")
@@ -190,7 +190,7 @@ AppCard {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Theme.spacing.xs
-                        visible: root.idea.notes && root.idea.notes.length > 0
+                        visible: Boolean(root.idea && root.idea.notes && root.idea.notes.length > 0)
 
                         Text {
                             text: i18nBridge.tr("label_notes", "Notlar")
@@ -212,7 +212,7 @@ AppCard {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Theme.spacing.xs
-                        visible: root.idea.sourceLink && root.idea.sourceLink.length > 0
+                        visible: Boolean(root.idea && root.idea.sourceLink && root.idea.sourceLink.length > 0)
 
                         Text {
                             text: i18nBridge.tr("label_source_url", "Kaynak URL")
@@ -270,7 +270,7 @@ AppCard {
                     text: i18nBridge.tr("ideas_convert_btn", "Projeye Dönüştür")
                     iconName: "plus"
                     btnVariant: "primary"
-                    visible: root.idea.status !== "CONVERTED"
+                    visible: Boolean(root.hasIdea && root.idea && root.idea.status !== "CONVERTED")
                     onClicked: {
                         if (ideaViewModel && root.hasIdea) {
                             ideaViewModel.convertToProject(root.idea.id)

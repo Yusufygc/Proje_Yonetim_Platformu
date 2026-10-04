@@ -125,6 +125,14 @@ class ThemeBridge(QObject):
     def iconOnAccent(self) -> str:
         return self._theme_mgr.color("icon_on_accent")
 
+    @Property(str, notify=themeChanged)
+    def surfaceHover(self) -> str:
+        return self._theme_mgr.color("surface_raised")
+
+    @Property(str, notify=themeChanged)
+    def accentHover(self) -> str:
+        return self._theme_mgr.color("accent_end")
+
     @Slot(str, result=str)
     def color(self, token: str) -> str:
         """İstenen token rengini döndürür."""

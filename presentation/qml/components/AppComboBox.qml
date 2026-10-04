@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import "../components"
 
 Column {
@@ -13,6 +14,7 @@ Column {
 
     signal valueSelected(var value)
 
+    Layout.fillWidth: true
     width: parent ? parent.width : 200
     spacing: 6
 
@@ -82,27 +84,26 @@ Column {
         border.width: 1
         border.color: comboMouse.containsMouse || menuPopup.opened ? themeBridge.accentStart : themeBridge.border
 
-        Row {
-            anchors.fill: parent
+        Text {
+            anchors.left: parent.left
             anchors.leftMargin: 12
+            anchors.right: arrowText.left
+            anchors.rightMargin: 8
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.model && root.model.length > root.currentIndex ? root._getItemText(root.model[root.currentIndex]) : ""
+            font.pixelSize: 13
+            color: themeBridge.textPrimary
+            elide: Text.ElideRight
+        }
+
+        Text {
+            id: arrowText
+            anchors.right: parent.right
             anchors.rightMargin: 12
-            spacing: 8
-
-            Text {
-                width: parent.width - 24
-                text: root.model && root.model.length > root.currentIndex ? root._getItemText(root.model[root.currentIndex]) : ""
-                font.pixelSize: 13
-                color: themeBridge.textPrimary
-                anchors.verticalCenter: parent.verticalCenter
-                elide: Text.ElideRight
-            }
-
-            Text {
-                text: "▼"
-                font.pixelSize: 10
-                color: themeBridge.textMuted
-                anchors.verticalCenter: parent.verticalCenter
-            }
+            anchors.verticalCenter: parent.verticalCenter
+            text: "▼"
+            font.pixelSize: 10
+            color: themeBridge.textMuted
         }
 
         MouseArea {

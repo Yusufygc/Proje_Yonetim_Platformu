@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 Column {
     id: root
@@ -14,6 +15,7 @@ Column {
 
     signal accepted()
 
+    Layout.fillWidth: true
     width: parent ? parent.width : 200
     spacing: 6
 

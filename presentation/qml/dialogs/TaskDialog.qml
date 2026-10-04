@@ -100,12 +100,14 @@ Rectangle {
 
             // Form Kaydırılabilir Alan
             ScrollView {
+                id: formScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                contentWidth: availableWidth
                 clip: true
 
                 ColumnLayout {
-                    width: parent.width - 12
+                    width: formScroll.availableWidth
                     spacing: Theme.spacing.md
 
                     // Görev Başlığı
@@ -136,6 +138,7 @@ Rectangle {
                             id: statusCombo
                             label: i18nBridge.tr("label_status", "Durum")
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             model: [
                                 { "text": i18nBridge.tr("task_status_todo", "Yapılacak"), "value": "TODO" },
                                 { "text": i18nBridge.tr("task_status_in_progress", "Devam Ediyor"), "value": "IN_PROGRESS" },
@@ -150,6 +153,7 @@ Rectangle {
                             id: priorityCombo
                             label: i18nBridge.tr("label_priority", "Öncelik")
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             model: [
                                 { "text": i18nBridge.tr("priority_low", "Düşük"), "value": "LOW" },
                                 { "text": i18nBridge.tr("priority_medium", "Orta"), "value": "MEDIUM" },
@@ -162,6 +166,7 @@ Rectangle {
                             id: typeCombo
                             label: i18nBridge.tr("label_type", "Tip")
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             model: [
                                 { "text": i18nBridge.tr("task_type_task", "Görev"), "value": "TASK" },
                                 { "text": i18nBridge.tr("task_type_group", "Grup"), "value": "GROUP" },
@@ -195,6 +200,8 @@ Rectangle {
                         AppButton {
                             text: i18nBridge.tr("action_add", "Ekle")
                             btnVariant: "secondary"
+                            Layout.preferredHeight: 38
+                            Layout.alignment: Qt.AlignVCenter
                             onClicked: addChecklistItem()
                         }
                     }

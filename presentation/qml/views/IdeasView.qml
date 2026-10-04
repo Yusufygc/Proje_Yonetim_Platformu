@@ -53,7 +53,7 @@ Item {
 
             // "+ Yeni Fikir" Butonu
             AppButton {
-                text: i18nBridge.tr("ideas_add_btn", "+ Yeni Fikir")
+                text: i18nBridge.tr("ideas_add_btn", "Yeni Fikir")
                 iconName: "plus"
                 btnVariant: "primary"
                 onClicked: {

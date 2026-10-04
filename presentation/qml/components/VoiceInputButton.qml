@@ -12,17 +12,17 @@ Rectangle {
     height: 32
     radius: 6
     color: {
-        if (voiceBridge.isListening) return Qt.rgba(0.93, 0.27, 0.27, 0.2);
-        if (mouseArea.containsMouse) return themeBridge.surfaceHover;
+        if (voiceBridge && voiceBridge.isListening) return Qt.rgba(0.93, 0.27, 0.27, 0.2);
+        if (mouseArea.containsMouse) return themeBridge.surfaceRaised;
         return "transparent";
     }
     border.width: 1
-    border.color: voiceBridge.isListening ? "#EF4444" : themeBridge.border
+    border.color: (voiceBridge && voiceBridge.isListening) ? "#EF4444" : themeBridge.border
 
     AppIcon {
         name: "mic"
         size: 16
-        color: voiceBridge.isListening ? "#EF4444" : themeBridge.textSecondary
+        color: (voiceBridge && voiceBridge.isListening) ? "#EF4444" : themeBridge.textSecondary
         anchors.centerIn: parent
     }
 

@@ -1,18 +1,20 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import "../components"
+import "../theme"
 
 Rectangle {
     id: dialogRoot
 
     anchors.fill: parent
     color: Qt.rgba(0, 0, 0, 0.65)
-    visible: projectViewModel.isDialogOpen
+    visible: projectViewModel ? projectViewModel.isDialogOpen : false
     z: 9999
 
     MouseArea {
         anchors.fill: parent
-        onClicked: projectViewModel.closeDialog()
+        onClicked: { /* modal dışı tıklamayı engeller */ }
     }
 
     Shortcut {
@@ -21,118 +23,147 @@ Rectangle {
         onActivated: projectViewModel.closeDialog()
     }
 
-    Rectangle {
+    AppCard {
         id: formCard
         width: Math.min(680, parent.width - 48)
-        height: Math.min(640, parent.height - 48)
+        height: Math.min(660, parent.height - 48)
         anchors.centerIn: parent
-        radius: 12
-        color: themeBridge.surface
-        border.width: 1
-        border.color: themeBridge.accentStart
 
-        MouseArea {
+        ColumnLayout {
             anchors.fill: parent
-            // prevent click outside
-        }
-
-        Column {
-            anchors.fill: parent
-            anchors.margins: 20
-            spacing: 14
+            anchors.margins: Theme.spacing.xl
+            spacing: Theme.spacing.md
 
             // Başlık Çubuğu
-            Row {
-                width: parent.width
-                spacing: 8
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.spacing.sm
+
+                AppIcon {
+                    name: "folder"
+                    size: 22
+                    color: Theme.accent(themeBridge.currentTheme)
+                }
 
                 Text {
-                    text: projectViewModel.dialogMode === "edit" ?
-                        i18nBridge.tr("dialog_edit_project", "Projeyi Düzenle") :
-                        i18nBridge.tr("dialog_new_project", "Yeni Proje Oluştur")
-                    font.pixelSize: 18
-                    font.weight: Font.Bold
-                    color: themeBridge.textPrimary
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - 40
+                    text: {
+                        if (!projectViewModel) return ""
+                        return projectViewModel.dialogMode === "edit"
+                            ? i18nBridge.tr("dialog_edit_project", "Projeyi Düzenle")
+                            : i18nBridge.tr("dialog_new_project", "Yeni Proje Oluştur")
+                    }
+                    font.pixelSize: Theme.typography.sizeH3
+                    font.weight: Theme.typography.weightBold
+                    color: themeBridge.color("text_primary")
+                    Layout.fillWidth: true
                 }
 
                 AppButton {
-                    variant: "ghost"
-                    text: "✕"
+                    iconName: "x"
+                    btnVariant: "secondary"
                     implicitWidth: 32
                     implicitHeight: 32
                     onClicked: projectViewModel.closeDialog()
-                    anchors.verticalCenter: parent.verticalCenter
                 }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: themeBridge.color("border")
             }
 
             // Form Kaydırma Alanı
             ScrollView {
-                width: parent.width
-                height: formCard.height - 120
+                id: projScroll
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 contentWidth: availableWidth
                 clip: true
 
-                Column {
-                    width: parent.width
-                    spacing: 12
+                ColumnLayout {
+                    width: projScroll.availableWidth
+                    spacing: Theme.spacing.md
 
                     AppTextInput {
                         id: titleInput
                         label: i18nBridge.tr("field_project_title", "Proje Başlığı *")
-                        placeholder: "Projenizin adını yazın..."
+                        placeholder: i18nBridge.tr("project_dialog_title_placeholder", "Projenizin adını yazın...")
+                        Layout.fillWidth: true
                         showVoiceInput: true
                     }
 
                     AppTextInput {
                         id: descInput
                         label: i18nBridge.tr("field_description", "Açıklama")
-                        placeholder: "Projenin kapsamını ve amacını açıklayın..."
+                        placeholder: i18nBridge.tr("project_dialog_short_desc_placeholder", "Projenin kapsamını ve amacını açıklayın...")
                         isTextArea: true
+                        Layout.fillWidth: true
                         showVoiceInput: true
                     }
 
-                    Row {
-                        width: parent.width
-                        spacing: 12
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.spacing.md
 
                         AppComboBox {
                             id: statusCombo
                             label: i18nBridge.tr("field_status", "Durum")
-                            width: (parent.width - 24) / 3
-                            model: ["PLANNED", "ACTIVE", "ON_HOLD", "BLOCKED", "COMPLETED", "CANCELLED"]
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            model: [
+                                { "text": i18nBridge.tr("status_planned", "Planlandı"), "value": "PLANNED" },
+                                { "text": i18nBridge.tr("status_active", "Aktif"), "value": "ACTIVE" },
+                                { "text": i18nBridge.tr("status_on_hold", "Beklemede"), "value": "ON_HOLD" },
+                                { "text": i18nBridge.tr("status_blocked", "Engellendi"), "value": "BLOCKED" },
+                                { "text": i18nBridge.tr("status_completed", "Tamamlandı"), "value": "COMPLETED" },
+                                { "text": i18nBridge.tr("status_cancelled", "İptal Edildi"), "value": "CANCELLED" }
+                            ]
                         }
 
                         AppComboBox {
                             id: priorityCombo
                             label: i18nBridge.tr("field_priority", "Öncelik")
-                            width: (parent.width - 24) / 3
-                            model: ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            model: [
+                                { "text": i18nBridge.tr("priority_low", "Düşük"), "value": "LOW" },
+                                { "text": i18nBridge.tr("priority_medium", "Orta"), "value": "MEDIUM" },
+                                { "text": i18nBridge.tr("priority_high", "Yüksek"), "value": "HIGH" },
+                                { "text": i18nBridge.tr("priority_critical", "Kritik"), "value": "CRITICAL" }
+                            ]
                         }
 
                         AppComboBox {
                             id: healthCombo
                             label: i18nBridge.tr("field_health", "Sağlık")
-                            width: (parent.width - 24) / 3
-                            model: ["GOOD", "AT_RISK", "BLOCKED", "UNKNOWN"]
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            model: [
+                                { "text": i18nBridge.tr("health_good", "Yolunda"), "value": "GOOD" },
+                                { "text": i18nBridge.tr("health_at_risk", "Riskli"), "value": "AT_RISK" },
+                                { "text": i18nBridge.tr("health_blocked", "Tıkandı"), "value": "BLOCKED" },
+                                { "text": i18nBridge.tr("health_unknown", "Belirsiz"), "value": "UNKNOWN" }
+                            ]
                         }
                     }
 
-                    Row {
-                        width: parent.width
-                        spacing: 12
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.spacing.md
 
                         AppTextInput {
                             id: typeInput
-                            width: (parent.width - 12) / 2
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             label: i18nBridge.tr("field_project_type", "Proje Türü")
                             placeholder: "Yazılım, Tasarım, Araştırma..."
                         }
 
                         AppTextInput {
                             id: audienceInput
-                            width: (parent.width - 12) / 2
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             label: i18nBridge.tr("field_target_audience", "Hedef Kitle")
                             placeholder: "Hedef kullanıcı kitlesi"
                         }
@@ -142,22 +173,26 @@ Rectangle {
                         id: problemInput
                         label: i18nBridge.tr("field_problem", "Problem Tanımı")
                         placeholder: "Bu proje hangi sorunu çözüyor?"
+                        Layout.fillWidth: true
+                        showVoiceInput: true
                     }
 
-                    Row {
-                        width: parent.width
-                        spacing: 12
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.spacing.md
 
                         AppTextInput {
                             id: githubInput
-                            width: (parent.width - 12) / 2
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             label: "GitHub Deposu"
                             placeholder: "https://github.com/..."
                         }
 
                         AppTextInput {
                             id: localPathInput
-                            width: (parent.width - 12) / 2
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             label: "Yerel Klasör Yolu"
                             placeholder: "C:/projeler/..."
                         }
@@ -165,27 +200,47 @@ Rectangle {
                 }
             }
 
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: themeBridge.color("border")
+            }
+
             // Alt Butonlar
-            Row {
-                anchors.right: parent.right
-                spacing: 12
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.spacing.sm
 
                 AppButton {
-                    variant: "secondary"
+                    text: i18nBridge.tr("action_delete", "Sil")
+                    btnVariant: "danger"
+                    visible: projectViewModel ? projectViewModel.dialogMode === "edit" : false
+                    onClicked: {
+                        if (projectViewModel && projectViewModel.selectedProject) {
+                            projectViewModel.deleteProject(projectViewModel.selectedProject.id)
+                            projectViewModel.closeDialog()
+                        }
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+
+                AppButton {
+                    btnVariant: "secondary"
                     text: i18nBridge.tr("btn_cancel", "İptal")
                     onClicked: projectViewModel.closeDialog()
                 }
 
                 AppButton {
-                    variant: "primary"
-                    text: i18nBridge.tr("btn_save", "Kaydet")
+                    btnVariant: "primary"
+                    text: i18nBridge.tr("action_save", "Kaydet")
                     onClicked: {
                         var data = {
                             "title": titleInput.text,
                             "description": descInput.text,
-                            "status": statusCombo.currentValue,
-                            "priority": priorityCombo.currentValue,
-                            "health": healthCombo.currentValue,
+                            "status": statusCombo.selectedValue || "PLANNED",
+                            "priority": priorityCombo.selectedValue || "MEDIUM",
+                            "health": healthCombo.selectedValue || "GOOD",
                             "project_type": typeInput.text,
                             "target_audience": audienceInput.text,
                             "problem_statement": problemInput.text,
@@ -200,16 +255,19 @@ Rectangle {
     }
 
     onVisibleChanged: {
-        if (visible) {
+        if (visible && projectViewModel) {
             if (projectViewModel.dialogMode === "edit" && projectViewModel.selectedProject) {
                 var p = projectViewModel.selectedProject;
                 titleInput.text = p.title || "";
                 descInput.text = p.description || "";
-                typeInput.text = p.project_type || "";
+                typeInput.text = p.project_type || "Yazılım";
                 audienceInput.text = p.target_audience || "";
                 problemInput.text = p.problem_statement || "";
                 githubInput.text = p.github_repo || "";
                 localPathInput.text = p.local_path || "";
+                statusCombo.selectedValue = p.status || "PLANNED";
+                priorityCombo.selectedValue = p.priority || "MEDIUM";
+                healthCombo.selectedValue = p.health || "GOOD";
             } else {
                 titleInput.text = "";
                 descInput.text = "";
@@ -218,6 +276,9 @@ Rectangle {
                 problemInput.text = "";
                 githubInput.text = "";
                 localPathInput.text = "";
+                statusCombo.selectedValue = "PLANNED";
+                priorityCombo.selectedValue = "MEDIUM";
+                healthCombo.selectedValue = "GOOD";
             }
         }
     }

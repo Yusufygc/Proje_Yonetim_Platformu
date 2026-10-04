@@ -380,7 +380,8 @@ Item {
 
                         AppButton {
                             btnVariant: "primary"
-                            text: "+ " + i18nBridge.tr("action_add_decision", "Karar Ekle")
+                            iconName: "plus"
+                            text: i18nBridge.tr("action_add_decision", "Karar Ekle")
                             implicitHeight: 28
                             onClicked: addDecisionDialog.open()
                         }
@@ -468,7 +469,8 @@ Item {
 
                         AppButton {
                             btnVariant: "primary"
-                            text: "+ " + i18nBridge.tr("action_add_note", "Not Ekle")
+                            iconName: "plus"
+                            text: i18nBridge.tr("action_add_note", "Not Ekle")
                             implicitHeight: 28
                             onClicked: addNoteDialog.open()
                         }
@@ -550,7 +552,8 @@ Item {
 
                         AppButton {
                             btnVariant: "primary"
-                            text: "+ " + i18nBridge.tr("action_add_resource", "Kaynak Ekle")
+                            iconName: "plus"
+                            text: i18nBridge.tr("action_add_resource", "Kaynak Ekle")
                             implicitHeight: 28
                             onClicked: addResourceDialog.open()
                         }
@@ -646,7 +649,8 @@ Item {
 
                         AppButton {
                             btnVariant: "primary"
-                            text: "+ " + i18nBridge.tr("action_add_output", "Çıktı Ekle")
+                            iconName: "plus"
+                            text: i18nBridge.tr("action_add_output", "Çıktı Ekle")
                             implicitHeight: 28
                             onClicked: addOutputDialog.open()
                         }

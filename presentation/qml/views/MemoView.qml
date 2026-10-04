@@ -49,7 +49,7 @@ Item {
 
             // "+ Yeni Not Ekle" Butonu
             AppButton {
-                text: i18nBridge.tr("memo_new_btn", "+ Yeni Not")
+                text: i18nBridge.tr("memo_new_btn", "Yeni Not")
                 iconName: "plus"
                 btnVariant: "primary"
                 onClicked: {

@@ -372,7 +372,7 @@ ScrollView {
                                             anchors.bottom: parent.bottom
                                             height: Math.max(4, (parent.height - 16) * (modelData.value / Math.max(1, maxVal)))
                                             radius: 4
-                                            color: barMouse.containsMouse ? themeBridge.accentHover : themeBridge.accentStart
+                                            color: barMouse.containsMouse ? themeBridge.accentEnd : themeBridge.accentStart
 
                                             Behavior on height {
                                                 NumberAnimation { duration: 250; easing.type: Easing.OutQuad }

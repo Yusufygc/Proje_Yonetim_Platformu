@@ -91,7 +91,7 @@ ScrollView {
                             width: 90
                             height: 34
                             radius: 6
-                            color: settingsViewModel.activePackage === modelData.id ? themeBridge.surfaceHover : "transparent"
+                            color: settingsViewModel.activePackage === modelData.id ? themeBridge.surfaceRaised : "transparent"
                             border.width: settingsViewModel.activePackage === modelData.id ? 2 : 1
                             border.color: settingsViewModel.activePackage === modelData.id ? themeBridge.accentStart : themeBridge.border
 
@@ -161,7 +161,7 @@ ScrollView {
                             width: 120
                             height: 32
                             radius: 6
-                            color: settingsViewRoot.pendingFont === modelData ? themeBridge.surfaceHover : "transparent"
+                            color: settingsViewRoot.pendingFont === modelData ? themeBridge.surfaceRaised : "transparent"
                             border.width: 1
                             border.color: settingsViewRoot.pendingFont === modelData ? themeBridge.accentStart : themeBridge.border
 

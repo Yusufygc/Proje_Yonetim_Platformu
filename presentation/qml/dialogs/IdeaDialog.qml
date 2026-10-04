@@ -92,12 +92,14 @@ Rectangle {
 
             // Form Kaydırma Alanı
             ScrollView {
+                id: formScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                contentWidth: availableWidth
                 clip: true
 
                 ColumnLayout {
-                    width: parent.width - 12
+                    width: formScroll.availableWidth
                     spacing: Theme.spacing.md
 
                     // Başlık
@@ -118,6 +120,7 @@ Rectangle {
                             id: statusCombo
                             label: i18nBridge.tr("label_status", "Durum")
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             model: [
                                 { "text": i18nBridge.tr("idea_status_raw", "Ham Fikir"), "value": "RAW" },
                                 { "text": i18nBridge.tr("idea_status_reviewing", "İnceleniyor"), "value": "REVIEWING" },
@@ -132,6 +135,7 @@ Rectangle {
                             id: priorityCombo
                             label: i18nBridge.tr("label_priority", "Öncelik")
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             model: [
                                 { "text": i18nBridge.tr("priority_low", "Düşük"), "value": "LOW" },
                                 { "text": i18nBridge.tr("priority_medium", "Orta"), "value": "MEDIUM" },
