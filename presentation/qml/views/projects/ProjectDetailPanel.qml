@@ -503,7 +503,7 @@ Item {
                             id: quickTaskInput
                             placeholder: i18nBridge.tr("placeholder_new_task", "Yeni görev başlığı yazın...")
                             Layout.fillWidth: true
-                            inputHeight: 32
+                            inputHeight: 36
                             onAccepted: {
                                 if (quickTaskInput.text.trim()) {
                                     projectViewModel.addTask(quickTaskInput.text.trim());
@@ -516,7 +516,7 @@ Item {
                             btnVariant: "primary"
                             iconName: "plus"
                             text: i18nBridge.tr("action_add", "Ekle")
-                            implicitHeight: 32
+                            implicitHeight: 36
                             onClicked: {
                                 if (quickTaskInput.text.trim()) {
                                     projectViewModel.addTask(quickTaskInput.text.trim());

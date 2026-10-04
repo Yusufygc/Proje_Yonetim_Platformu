@@ -42,16 +42,19 @@ Column {
             anchors.fill: parent
             anchors.leftMargin: 10
             anchors.rightMargin: (root.showVoiceInput && !root.readOnly) ? 38 : 10
-            anchors.topMargin: 10
-            anchors.bottomMargin: 10
-            contentWidth: inputField.paintedWidth
-            contentHeight: inputField.paintedHeight
+            anchors.topMargin: root.isTextArea ? 8 : 0
+            anchors.bottomMargin: root.isTextArea ? 8 : 0
+            contentWidth: root.isTextArea ? flickableArea.width : inputField.paintedWidth
+            contentHeight: root.isTextArea ? inputField.paintedHeight : flickableArea.height
             clip: true
             interactive: root.isTextArea
+            boundsBehavior: Flickable.StopAtBounds
 
             TextEdit {
                 id: inputField
                 width: flickableArea.width
+                height: root.isTextArea ? Math.max(flickableArea.height, paintedHeight) : flickableArea.height
+                verticalAlignment: root.isTextArea ? TextEdit.AlignTop : TextEdit.AlignVCenter
                 font.pixelSize: 13
                 color: themeBridge.textPrimary
                 readOnly: root.readOnly
@@ -73,9 +76,12 @@ Column {
 
                 Text {
                     anchors.fill: parent
+                    verticalAlignment: root.isTextArea ? Text.AlignTop : Text.AlignVCenter
                     text: root.placeholder
                     color: themeBridge.textMuted
                     font.pixelSize: 13
+                    wrapMode: root.isTextArea ? Text.Wrap : Text.NoWrap
+                    elide: root.isTextArea ? Text.ElideNone : Text.ElideRight
                     visible: !inputField.text && !inputField.activeFocus
                 }
             }
