@@ -94,6 +94,11 @@ Item {
                         clip: true
                         model: memoViewModel ? memoViewModel.memoModel : null
                         spacing: Theme.spacing.sm
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        ScrollBar.vertical: AppScrollBar {
+                            id: memoScrollBar
+                        }
 
                         delegate: MemoCard {}
 

@@ -161,7 +161,7 @@ Item {
                 }
 
                 delegate: ProjectListItem {
-                    width: projectList.width - (projectScrollBar.visible ? 14 : 0)
+                    width: projectList.width - 14
                     projectId: model.projectId
                     title: model.title
                     projectType: model.projectType

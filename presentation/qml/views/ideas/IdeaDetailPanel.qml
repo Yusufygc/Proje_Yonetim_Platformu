@@ -92,12 +92,17 @@ AppCard {
 
             // İçerik Kaydırma Alanı
             ScrollView {
+                id: detailScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
 
+                ScrollBar.vertical: AppScrollBar {
+                    id: detailScrollBar
+                }
+
                 ColumnLayout {
-                    width: parent.width - 12
+                    width: detailScroll.availableWidth - 16
                     spacing: Theme.spacing.lg
 
                     // Hedef Kullanıcı
@@ -117,7 +122,7 @@ AppCard {
                             text: root.idea.targetUser || ""
                             font.pixelSize: Theme.typography.sizeBody
                             color: themeBridge.color("text_primary")
-                            wrapMode: Text.WordWrap
+                            wrapMode: Text.Wrap
                             Layout.fillWidth: true
                         }
                     }
@@ -137,19 +142,22 @@ AppCard {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            implicitHeight: probText.implicitHeight + 16
+                            implicitHeight: probText.implicitHeight + 20
                             radius: Theme.radius.small
                             color: themeBridge.color("surface_alt")
                             border.color: themeBridge.color("border")
+                            border.width: 1
 
                             Text {
                                 id: probText
-                                anchors.fill: parent
-                                anchors.margins: 8
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.margins: 10
                                 text: root.idea.problem || ""
                                 font.pixelSize: Theme.typography.sizeBody
                                 color: themeBridge.color("text_primary")
-                                wrapMode: Text.WordWrap
+                                wrapMode: Text.Wrap
                             }
                         }
                     }
@@ -169,19 +177,22 @@ AppCard {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            implicitHeight: solText.implicitHeight + 16
+                            implicitHeight: solText.implicitHeight + 20
                             radius: Theme.radius.small
                             color: themeBridge.color("surface_alt")
                             border.color: themeBridge.color("border")
+                            border.width: 1
 
                             Text {
                                 id: solText
-                                anchors.fill: parent
-                                anchors.margins: 8
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.margins: 10
                                 text: root.idea.solution || ""
                                 font.pixelSize: Theme.typography.sizeBody
                                 color: themeBridge.color("text_primary")
-                                wrapMode: Text.WordWrap
+                                wrapMode: Text.Wrap
                             }
                         }
                     }
@@ -203,7 +214,7 @@ AppCard {
                             text: root.idea.notes || ""
                             font.pixelSize: Theme.typography.sizeBody
                             color: themeBridge.color("text_primary")
-                            wrapMode: Text.WordWrap
+                            wrapMode: Text.Wrap
                             Layout.fillWidth: true
                         }
                     }
@@ -225,7 +236,7 @@ AppCard {
                             text: root.idea.sourceLink || ""
                             font.pixelSize: Theme.typography.sizeBody
                             color: Theme.accent(themeBridge.currentTheme)
-                            wrapMode: Text.WordWrap
+                            wrapMode: Text.Wrap
                             Layout.fillWidth: true
                         }
                     }

@@ -7,7 +7,7 @@ import "../../theme"
 Rectangle {
     id: root
 
-    width: ListView.view ? ListView.view.width : 400
+    width: ListView.view ? (ListView.view.width - 14) : 400
     height: 48
     radius: Theme.radius.small
 

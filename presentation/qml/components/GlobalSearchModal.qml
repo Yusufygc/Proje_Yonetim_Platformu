@@ -161,13 +161,16 @@ Rectangle {
 
                 // 3. Sonuç Listesi
                 ScrollView {
+                    id: searchScroll
                     anchors.fill: parent
                     contentWidth: availableWidth
                     clip: true
                     visible: searchViewModel.count > 0
 
+                    ScrollBar.vertical: AppScrollBar { }
+
                     Column {
-                        width: parent.width
+                        width: searchScroll.availableWidth - 14
                         spacing: 6
 
                         Repeater {

@@ -8,6 +8,8 @@ ScrollView {
     contentWidth: availableWidth
     clip: true
 
+    ScrollBar.vertical: AppScrollBar { }
+
     Column {
         width: parent.width
         padding: 24

@@ -98,8 +98,10 @@ Rectangle {
                 contentWidth: availableWidth
                 clip: true
 
+                ScrollBar.vertical: AppScrollBar { }
+
                 ColumnLayout {
-                    width: formScroll.availableWidth
+                    width: formScroll.availableWidth - 16
                     spacing: Theme.spacing.md
 
                     // Başlık
@@ -201,12 +203,14 @@ Rectangle {
 
             // Alt Buton Çubuğu
             RowLayout {
-                Layout.fillWidth: true
-                spacing: Theme.spacing.sm
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Theme.spacing.md
 
                 AppButton {
                     text: i18nBridge.tr("action_delete", "Sil")
                     btnVariant: "danger"
+                    implicitWidth: 120
+                    implicitHeight: 40
                     visible: ideaViewModel ? ideaViewModel.dialogMode === "edit" : false
                     onClicked: {
                         if (ideaViewModel) {
@@ -216,17 +220,19 @@ Rectangle {
                     }
                 }
 
-                Item { Layout.fillWidth: true }
-
                 AppButton {
                     text: i18nBridge.tr("action_cancel", "İptal")
                     btnVariant: "secondary"
+                    implicitWidth: 120
+                    implicitHeight: 40
                     onClicked: ideaViewModel.closeDialog()
                 }
 
                 AppButton {
                     text: i18nBridge.tr("action_save", "Kaydet")
                     btnVariant: "primary"
+                    implicitWidth: 120
+                    implicitHeight: 40
                     onClicked: {
                         if (ideaViewModel) {
                             ideaViewModel.saveIdea({

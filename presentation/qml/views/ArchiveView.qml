@@ -78,14 +78,17 @@ Item {
 
         // ── Arşiv Listesi ───────────────────────────────────────────────────
         ScrollView {
+            id: archiveScroll
             width: parent.width - 48
             height: parent.height - 100
             contentWidth: availableWidth
             clip: true
             visible: archiveViewModel.count > 0
 
+            ScrollBar.vertical: AppScrollBar { }
+
             Column {
-                width: parent.width
+                width: archiveScroll.availableWidth - 14
                 spacing: 12
 
                 Repeater {

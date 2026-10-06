@@ -532,10 +532,13 @@ Item {
                         Layout.fillHeight: true
                         clip: true
                         spacing: 6
+                        boundsBehavior: Flickable.StopAtBounds
                         model: projectViewModel.selectedTasks
 
+                        ScrollBar.vertical: AppScrollBar { }
+
                         delegate: Rectangle {
-                            width: projectTasksList.width - 4
+                            width: projectTasksList.width - 14
                             height: 38
                             radius: 6
                             color: themeBridge.surfaceAlt
@@ -684,6 +687,7 @@ Item {
                     }
 
                     ScrollView {
+                        id: decisionsScroll
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
@@ -691,7 +695,7 @@ Item {
                         ScrollBar.vertical: AppScrollBar { }
 
                         ColumnLayout {
-                            width: parent.width - 12
+                            width: decisionsScroll.availableWidth - 14
                             spacing: 8
 
                             Repeater {
@@ -804,7 +808,7 @@ Item {
                         ScrollBar.vertical: AppScrollBar { }
 
                         delegate: Rectangle {
-                            width: notesListView.width - 8
+                            width: notesListView.width - 14
                             height: noteCol.implicitHeight + 20
                             radius: 8
                             color: themeBridge.surfaceAlt
@@ -895,6 +899,7 @@ Item {
                     }
 
                     ScrollView {
+                        id: resourcesScroll
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
@@ -902,7 +907,7 @@ Item {
                         ScrollBar.vertical: AppScrollBar { }
 
                         ColumnLayout {
-                            width: parent.width - 12
+                            width: resourcesScroll.availableWidth - 14
                             spacing: 8
 
                             Repeater {
@@ -1017,6 +1022,7 @@ Item {
                     }
 
                     ScrollView {
+                        id: outputsScroll
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
@@ -1024,7 +1030,7 @@ Item {
                         ScrollBar.vertical: AppScrollBar { }
 
                         ColumnLayout {
-                            width: parent.width - 12
+                            width: outputsScroll.availableWidth - 14
                             spacing: 8
 
                             Repeater {

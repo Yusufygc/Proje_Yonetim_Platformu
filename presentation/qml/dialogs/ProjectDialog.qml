@@ -81,8 +81,10 @@ Rectangle {
                 contentWidth: availableWidth
                 clip: true
 
+                ScrollBar.vertical: AppScrollBar { }
+
                 ColumnLayout {
-                    width: projScroll.availableWidth
+                    width: projScroll.availableWidth - 16
                     spacing: Theme.spacing.md
 
                     AppTextInput {

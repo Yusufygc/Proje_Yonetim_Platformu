@@ -186,6 +186,8 @@ AppCard {
                     Layout.fillHeight: true
                     clip: true
 
+                    ScrollBar.vertical: AppScrollBar { }
+
                     TextArea {
                         id: bodyInput
                         placeholderText: i18nBridge.tr("memo_body_placeholder", "Notlarınızı buraya yazın...")
@@ -194,6 +196,7 @@ AppCard {
                         font.family: Theme.typography.fontFamily
                         wrapMode: TextEdit.Wrap
                         selectByMouse: true
+                        rightPadding: 16
                         background: Rectangle {
                             color: "transparent"
                         }

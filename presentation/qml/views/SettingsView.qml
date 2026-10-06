@@ -8,6 +8,8 @@ ScrollView {
     contentWidth: availableWidth
     clip: true
 
+    ScrollBar.vertical: AppScrollBar { }
+
     property string pendingFont: settingsViewModel.fontFamily
 
     Column {
