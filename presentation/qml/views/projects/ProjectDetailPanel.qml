@@ -1194,20 +1194,22 @@ Item {
 
                 // Alt Butonlar
                 RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Theme.spacing.sm
-
-                    Item { Layout.fillWidth: true }
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Theme.spacing.md
 
                     AppButton {
                         btnVariant: "secondary"
                         text: i18nBridge.tr("btn_cancel", "İptal")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: addOutputDialog.close()
                     }
 
                     AppButton {
                         btnVariant: "primary"
                         text: i18nBridge.tr("action_add", "Ekle")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: {
                             if (outputTitleInput.text.trim()) {
                                 projectViewModel.addOutput(outputTitleInput.text.trim(), outputPathInput.text.trim());
@@ -1335,20 +1337,22 @@ Item {
 
                 // Alt Butonlar
                 RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Theme.spacing.sm
-
-                    Item { Layout.fillWidth: true }
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Theme.spacing.md
 
                     AppButton {
                         btnVariant: "secondary"
                         text: i18nBridge.tr("btn_cancel", "İptal")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: addDecisionDialog.close()
                     }
 
                     AppButton {
                         btnVariant: "primary"
                         text: i18nBridge.tr("action_add", "Ekle")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: {
                             if (decisionTitleInput.text.trim()) {
                                 var st = decisionStatusCombo.selectedValue || "APPROVED";
@@ -1465,20 +1469,22 @@ Item {
 
                 // Alt Butonlar
                 RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Theme.spacing.sm
-
-                    Item { Layout.fillWidth: true }
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Theme.spacing.md
 
                     AppButton {
                         btnVariant: "secondary"
                         text: i18nBridge.tr("btn_cancel", "İptal")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: addNoteDialog.close()
                     }
 
                     AppButton {
                         btnVariant: "primary"
                         text: i18nBridge.tr("action_add", "Ekle")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: {
                             if (noteTitleInput.text.trim()) {
                                 projectViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
@@ -1608,20 +1614,22 @@ Item {
 
                 // Alt Butonlar
                 RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Theme.spacing.sm
-
-                    Item { Layout.fillWidth: true }
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Theme.spacing.md
 
                     AppButton {
                         btnVariant: "secondary"
                         text: i18nBridge.tr("btn_cancel", "İptal")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: addResourceDialog.close()
                     }
 
                     AppButton {
                         btnVariant: "primary"
                         text: i18nBridge.tr("action_add", "Ekle")
+                        implicitWidth: 120
+                        implicitHeight: 40
                         onClicked: {
                             if (resourceTitleInput.text.trim() && resourceUrlInput.text.trim()) {
                                 var rType = resourceTypeCombo.selectedValue || "DOCUMENT";

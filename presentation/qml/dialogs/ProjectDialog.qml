@@ -208,12 +208,14 @@ Rectangle {
 
             // Alt Butonlar
             RowLayout {
-                Layout.fillWidth: true
-                spacing: Theme.spacing.sm
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Theme.spacing.md
 
                 AppButton {
                     text: i18nBridge.tr("action_delete", "Sil")
                     btnVariant: "danger"
+                    implicitWidth: 120
+                    implicitHeight: 40
                     visible: projectViewModel ? projectViewModel.dialogMode === "edit" : false
                     onClicked: {
                         if (projectViewModel && projectViewModel.selectedProject) {
@@ -223,17 +225,19 @@ Rectangle {
                     }
                 }
 
-                Item { Layout.fillWidth: true }
-
                 AppButton {
                     btnVariant: "secondary"
                     text: i18nBridge.tr("btn_cancel", "İptal")
+                    implicitWidth: 120
+                    implicitHeight: 40
                     onClicked: projectViewModel.closeDialog()
                 }
 
                 AppButton {
                     btnVariant: "primary"
                     text: i18nBridge.tr("action_save", "Kaydet")
+                    implicitWidth: 120
+                    implicitHeight: 40
                     onClicked: {
                         var data = {
                             "title": titleInput.text,
