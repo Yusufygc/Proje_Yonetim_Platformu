@@ -8,7 +8,20 @@ from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, Sign
 
 from domain.models.memo import Memo
 
+from PySide6.QtGui import QTextDocument
+
 logger = logging.getLogger(__name__)
+
+
+def _clean_body_markdown(text: Optional[str]) -> str:
+    if not text:
+        return ""
+    lower = text.lower()
+    if "<!doctype" in lower or "<html" in lower or "<body" in lower:
+        doc = QTextDocument()
+        doc.setHtml(text)
+        return doc.toMarkdown().strip()
+    return text
 
 
 class MemoListModel(QAbstractListModel):
@@ -51,7 +64,7 @@ class MemoListModel(QAbstractListModel):
         if role == self.TitleRole:
             return m.title
         if role == self.BodyRole:
-            return m.body or ""
+            return _clean_body_markdown(m.body)
         if role == self.DrawingDataRole:
             return m.drawing_data or ""
         if role == self.SortOrderRole:

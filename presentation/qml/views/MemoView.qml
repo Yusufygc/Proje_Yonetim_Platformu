@@ -78,13 +78,13 @@ Item {
 
             // Sol Panel: Yapışkan Notlar Listesi
             AppCard {
-                SplitView.preferredWidth: 360
-                SplitView.minimumWidth: 280
+                SplitView.preferredWidth: 340
+                SplitView.minimumWidth: 260
                 SplitView.fillHeight: true
+                padding: 10
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: Theme.spacing.md
                     spacing: Theme.spacing.sm
 
                     ListView {

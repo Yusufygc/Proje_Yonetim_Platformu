@@ -8,11 +8,22 @@ Rectangle {
     id: root
 
     width: ListView.view ? (ListView.view.width - 14) : 280
-    height: 100
+    height: 104
     radius: Theme.radius.medium
+    clip: true
 
     property bool isSelected: memoViewModel ? memoViewModel.selectedMemoId === model.memoId : false
     property bool isHovered: cardMouseArea.containsMouse
+
+    function getCleanSummary(raw) {
+        if (!raw) return i18nBridge.tr("memo_empty_body", "Boş not...");
+        var s = ("" + raw).replace(/<[^>]*>/g, " ")
+                          .replace(/[#*_`~>-]/g, " ")
+                          .replace(/[\r\n]+/g, " ")
+                          .replace(/\s+/g, " ")
+                          .trim();
+        return s.length > 0 ? s : i18nBridge.tr("memo_empty_body", "Boş not...");
+    }
 
     // Pastel Yapışkan Not Renkleri
     readonly property var pastelLight: ["#FEF9C3", "#DCFCE7", "#E0F2FE", "#FCE7F3", "#EDE9FE"]
@@ -40,8 +51,8 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Theme.spacing.md
-        spacing: Theme.spacing.xs
+        anchors.margins: 12
+        spacing: 4
 
         // Başlık ve Eylemler
         RowLayout {
@@ -79,10 +90,11 @@ Rectangle {
 
         // Metin Özeti
         Text {
-            text: model.body || i18nBridge.tr("memo_empty_body", "Boş not...")
+            text: root.getCleanSummary(model.body)
             font.pixelSize: Theme.typography.sizeSmall
             color: themeBridge.color("text_secondary")
             Layout.fillWidth: true
+            wrapMode: Text.Wrap
             elide: Text.ElideRight
             maximumLineCount: 2
         }

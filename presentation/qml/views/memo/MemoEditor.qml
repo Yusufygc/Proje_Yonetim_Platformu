@@ -82,22 +82,29 @@ AppCard {
                     showVoiceInput: true
                 }
 
-                // Sekme Butonları (Metin / Çizim)
+                // Sekme Butonları (Düzenle / Önizleme / Çizim)
                 RowLayout {
                     spacing: 4
 
                     AppButton {
-                        text: i18nBridge.tr("tab_text_note", "Metin")
-                        iconName: "align-left"
+                        text: i18nBridge.tr("tab_edit_note", "Düzenle")
+                        iconName: "pencil"
                         btnVariant: root.currentTab === 0 ? "primary" : "secondary"
                         onClicked: root.currentTab = 0
                     }
 
                     AppButton {
-                        text: i18nBridge.tr("tab_drawing_note", "Çizim")
-                        iconName: "pen-tool"
+                        text: i18nBridge.tr("tab_preview_note", "Önizleme")
+                        iconName: "eye"
                         btnVariant: root.currentTab === 1 ? "primary" : "secondary"
                         onClicked: root.currentTab = 1
+                    }
+
+                    AppButton {
+                        text: i18nBridge.tr("tab_drawing_note", "Çizim")
+                        iconName: "pen-tool"
+                        btnVariant: root.currentTab === 2 ? "primary" : "secondary"
+                        onClicked: root.currentTab = 2
                     }
                 }
 
@@ -130,7 +137,7 @@ AppCard {
                 color: themeBridge.color("border")
             }
 
-            // Sekme 0: Metin Editörü
+            // Sekme 0: Markdown Düzenleyici
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -141,6 +148,14 @@ AppCard {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Theme.spacing.xs
+
+                    AppButton {
+                        text: "H"
+                        btnVariant: "secondary"
+                        implicitWidth: 28
+                        implicitHeight: 28
+                        onClicked: insertFormatting("### ", "")
+                    }
 
                     AppButton {
                         text: "B"
@@ -166,6 +181,22 @@ AppCard {
                         onClicked: insertFormatting("\n- ", "")
                     }
 
+                    AppButton {
+                        text: "1."
+                        btnVariant: "secondary"
+                        implicitWidth: 28
+                        implicitHeight: 28
+                        onClicked: insertFormatting("\n1. ", "")
+                    }
+
+                    AppButton {
+                        text: "</>"
+                        btnVariant: "secondary"
+                        implicitWidth: 32
+                        implicitHeight: 28
+                        onClicked: insertFormatting("`", "`")
+                    }
+
                     VoiceInputButton {
                         target: bodyInput
                         width: 28
@@ -182,6 +213,7 @@ AppCard {
                 }
 
                 ScrollView {
+                    id: editScroll
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
@@ -190,10 +222,11 @@ AppCard {
 
                     TextArea {
                         id: bodyInput
-                        placeholderText: i18nBridge.tr("memo_body_placeholder", "Notlarınızı buraya yazın...")
+                        placeholderText: i18nBridge.tr("memo_markdown_placeholder", "Notlarınızı Markdown formatında buraya yazın (örn: # Başlık, **kalın**, - liste)...")
                         color: themeBridge.color("text_primary")
                         font.pixelSize: Theme.typography.sizeBody
                         font.family: Theme.typography.fontFamily
+                        textFormat: TextEdit.PlainText
                         wrapMode: TextEdit.Wrap
                         selectByMouse: true
                         rightPadding: 16
@@ -204,12 +237,35 @@ AppCard {
                 }
             }
 
-            // Sekme 1: Çizim Tuvali
+            // Sekme 1: Markdown Önizleme
+            ScrollView {
+                id: previewScroll
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                visible: root.currentTab === 1
+
+                ScrollBar.vertical: AppScrollBar { }
+
+                Text {
+                    id: markdownPreview
+                    width: previewScroll.availableWidth - 16
+                    text: bodyInput.text.trim().length > 0 ? bodyInput.text : ("*" + i18nBridge.tr("memo_empty_preview", "Önizlenecek içerik bulunmuyor...") + "*")
+                    textFormat: Text.MarkdownText
+                    font.pixelSize: Theme.typography.sizeBody
+                    font.family: Theme.typography.fontFamily
+                    color: themeBridge.color("text_primary")
+                    wrapMode: Text.Wrap
+                    lineHeight: 1.4
+                }
+            }
+
+            // Sekme 2: Çizim Tuvali
             DrawingCanvas {
                 id: drawingCanvas
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                visible: root.currentTab === 1
+                visible: root.currentTab === 2
             }
         }
     }
@@ -221,9 +277,13 @@ AppCard {
         if (start !== end) {
             var selected = txt.substring(start, end)
             bodyInput.text = txt.substring(0, start) + prefix + selected + suffix + txt.substring(end)
+            bodyInput.select(start + prefix.length, start + prefix.length + selected.length)
         } else {
-            bodyInput.insert(bodyInput.cursorPosition, prefix + suffix)
+            var pos = bodyInput.cursorPosition
+            bodyInput.insert(pos, prefix + suffix)
+            bodyInput.cursorPosition = pos + prefix.length
         }
+        bodyInput.forceActiveFocus()
     }
 
     function saveCurrentMemo() {

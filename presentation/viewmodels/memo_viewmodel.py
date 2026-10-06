@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from domain.models.memo import Memo
-from presentation.viewmodels.memo_list_model import MemoListModel
+from presentation.viewmodels.memo_list_model import MemoListModel, _clean_body_markdown
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer
@@ -62,6 +62,9 @@ class MemoViewModel(QObject):
     # ── Controller Callbacks ────────────────────────────────────────────────
 
     def _on_memos_loaded(self, memos: list[Memo]) -> None:
+        for m in memos:
+            if m.body:
+                m.body = _clean_body_markdown(m.body)
         self._memos_cache = list(memos)
         self._memo_model.set_memos(memos)
         self.statsChanged.emit()
@@ -108,7 +111,7 @@ class MemoViewModel(QObject):
             self._selected_memo_data = {
                 "id": m.id,
                 "title": m.title,
-                "body": m.body or "",
+                "body": _clean_body_markdown(m.body),
                 "drawingData": m.drawing_data or "",
                 "updatedAt": m.updated_at.strftime("%d.%m.%Y %H:%M") if m.updated_at else "",
             }
