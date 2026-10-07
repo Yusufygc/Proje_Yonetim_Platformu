@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import "../components"
+import "analytics"
 
 ScrollView {
     id: analyticsViewRoot
@@ -64,145 +65,7 @@ ScrollView {
 
             Item { width: 20; height: 1 }
 
-            // Proje Filtresi
-            Rectangle {
-                id: projSelectBox
-                width: 240
-                height: 36
-                radius: 8
-                color: themeBridge.surface
-                border.width: 1
-                border.color: projMouse.containsMouse || projMenu.opened ? themeBridge.accentStart : themeBridge.border
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
-                    spacing: 8
-
-                    AppIcon {
-                        name: analyticsViewModel.projectId === 0 ? "dashboard" : "folder"
-                        size: 14
-                        color: themeBridge.accentStart
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: {
-                            var pList = analyticsViewModel.projects;
-                            for (var i = 0; i < pList.length; i++) {
-                                if (pList[i].id === analyticsViewModel.projectId) {
-                                    return pList[i].title;
-                                }
-                            }
-                            return i18nBridge.tr("analytics_all_projects", "Tüm Projeler");
-                        }
-                        font.pixelSize: 12
-                        font.weight: Font.Medium
-                        color: themeBridge.textPrimary
-                        elide: Text.ElideRight
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-
-                    Text {
-                        text: projMenu.opened ? "▲" : "▼"
-                        font.pixelSize: 9
-                        color: themeBridge.textMuted
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-                }
-
-                MouseArea {
-                    id: projMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        if (projMenu.opened) {
-                            projMenu.close();
-                        } else {
-                            projMenu.open();
-                        }
-                    }
-                }
-
-                Menu {
-                    id: projMenu
-                    y: projSelectBox.height + 4
-                    width: Math.max(projSelectBox.width, 280)
-                    padding: 6
-
-                    background: Rectangle {
-                        radius: 8
-                        color: themeBridge.surface
-                        border.width: 1
-                        border.color: themeBridge.border
-                    }
-
-                    Repeater {
-                        model: analyticsViewModel.projects
-                        MenuItem {
-                            id: projItem
-                            height: 36
-                            padding: 0
-
-                            contentItem: RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 10
-                                anchors.rightMargin: 10
-                                spacing: 8
-
-                                AppIcon {
-                                    name: modelData.id === 0 ? "dashboard" : "folder"
-                                    size: 14
-                                    color: analyticsViewModel.projectId === modelData.id ?
-                                           themeBridge.accentStart :
-                                           (projItem.hovered ? themeBridge.textPrimary : themeBridge.textMuted)
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: modelData.title
-                                    font.pixelSize: 12
-                                    font.weight: analyticsViewModel.projectId === modelData.id ? Font.DemiBold : Font.Normal
-                                    color: analyticsViewModel.projectId === modelData.id ?
-                                           themeBridge.accentStart :
-                                           (projItem.hovered ? themeBridge.textPrimary : themeBridge.textSecondary)
-                                    elide: Text.ElideRight
-                                    verticalAlignment: Text.AlignVCenter
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
-
-                                Text {
-                                    text: "✓"
-                                    font.pixelSize: 12
-                                    font.bold: true
-                                    color: themeBridge.accentStart
-                                    visible: analyticsViewModel.projectId === modelData.id
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
-                            }
-
-                            background: Rectangle {
-                                radius: 6
-                                color: {
-                                    if (analyticsViewModel.projectId === modelData.id) {
-                                        return themeBridge.isDark ? Qt.rgba(0.39, 0.4, 0.95, 0.16) : Qt.rgba(0.39, 0.4, 0.95, 0.08);
-                                    }
-                                    if (projItem.hovered) {
-                                        return themeBridge.isDark ? themeBridge.surfaceRaised : "#F1F5F9";
-                                    }
-                                    return "transparent";
-                                }
-                            }
-
-                            onTriggered: analyticsViewModel.setProjectId(modelData.id)
-                        }
-                    }
-                }
-            }
+            ProjectFilter { }
         }
 
         // ── KPI Kartları ───────────────────────────────────────────────────
@@ -210,273 +73,44 @@ ScrollView {
             width: parent.width - 48
             spacing: 12
 
-            // Kart 1: Tamamlanan
-            AppCard {
+            KpiCard {
                 width: (parent.width - 48) / 5
-                height: 100
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 4
-
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_total_completed", "Tamamlanan")
-                        font.pixelSize: 12
-                        color: themeBridge.textSecondary
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: analyticsViewModel.totalCompleted.toString()
-                        font.pixelSize: 24
-                        font.weight: Font.Bold
-                        color: themeBridge.accentStart
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_total_completed_desc", "Dönemde biten")
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
-                }
+                label: i18nBridge.tr("analytics_kpi_total_completed", "Tamamlanan")
+                value: analyticsViewModel.totalCompleted.toString()
+                description: i18nBridge.tr("analytics_kpi_total_completed_desc", "Dönemde biten")
             }
-
-            // Kart 2: Tamamlanma Oranı
-            AppCard {
+            KpiCard {
                 width: (parent.width - 48) / 5
-                height: 100
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 4
-
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_completion_rate", "Oran %")
-                        font.pixelSize: 12
-                        color: themeBridge.textSecondary
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: analyticsViewModel.completionRate.toFixed(1) + " %"
-                        font.pixelSize: 24
-                        font.weight: Font.Bold
-                        color: themeBridge.success
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_completion_rate_desc", "Biten / Toplam")
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
-                }
+                label: i18nBridge.tr("analytics_kpi_completion_rate", "Oran %")
+                value: analyticsViewModel.completionRate.toFixed(1) + " %"
+                description: i18nBridge.tr("analytics_kpi_completion_rate_desc", "Biten / Toplam")
+                valueColor: themeBridge.success
             }
-
-            // Kart 3: Seri (Streak)
-            AppCard {
+            KpiCard {
                 width: (parent.width - 48) / 5
-                height: 100
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 4
-
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_streak_days", "Seri (Gün)")
-                        font.pixelSize: 12
-                        color: themeBridge.textSecondary
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: analyticsViewModel.streakDays.toString()
-                        font.pixelSize: 24
-                        font.weight: Font.Bold
-                        color: themeBridge.warning
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_streak_days_desc", "Aktif gün")
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
-                }
+                label: i18nBridge.tr("analytics_kpi_streak_days", "Seri (Gün)")
+                value: analyticsViewModel.streakDays.toString()
+                description: i18nBridge.tr("analytics_kpi_streak_days_desc", "Aktif gün")
+                valueColor: themeBridge.warning
             }
-
-            // Kart 4: Zamanında Bitirme
-            AppCard {
+            KpiCard {
                 width: (parent.width - 48) / 5
-                height: 100
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 4
-
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_on_time_rate", "Zamanında %")
-                        font.pixelSize: 12
-                        color: themeBridge.textSecondary
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: analyticsViewModel.onTimeRate.toFixed(1) + " %"
-                        font.pixelSize: 24
-                        font.weight: Font.Bold
-                        color: themeBridge.accentStart
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_on_time_rate_desc", "Vadesinde biten")
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
-                }
+                label: i18nBridge.tr("analytics_kpi_on_time_rate", "Zamanında %")
+                value: analyticsViewModel.onTimeRate.toFixed(1) + " %"
+                description: i18nBridge.tr("analytics_kpi_on_time_rate_desc", "Vadesinde biten")
             }
-
-            // Kart 5: En İyi Dönem
-            AppCard {
+            KpiCard {
                 width: (parent.width - 48) / 5
-                height: 100
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 4
-
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18nBridge.tr("analytics_kpi_best_period", "En İyi Dönem")
-                        font.pixelSize: 12
-                        color: themeBridge.textSecondary
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: analyticsViewModel.bestPeriodLabel
-                        font.pixelSize: 16
-                        font.weight: Font.Bold
-                        color: themeBridge.textPrimary
-                        elide: Text.ElideRight
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "(" + analyticsViewModel.bestPeriodCount + " görev)"
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
-                }
+                label: i18nBridge.tr("analytics_kpi_best_period", "En İyi Dönem")
+                value: analyticsViewModel.bestPeriodLabel
+                description: "(" + analyticsViewModel.bestPeriodCount + " görev)"
+                valueColor: themeBridge.textPrimary
+                valueSize: 16
             }
         }
 
-        // ── Ana Grafik: Zaman Serisi ─────────────────────────────────────────
-        AppCard {
+        TimeSeriesChart {
             width: parent.width - 48
-            height: 240
-
-            Column {
-                anchors.fill: parent
-                spacing: 12
-
-                Text {
-                    text: i18nBridge.tr("analytics_panel_time_title", "Zaman İçinde Tamamlanan Görevler")
-                    font.pixelSize: 14
-                    font.weight: Font.DemiBold
-                    color: themeBridge.textPrimary
-                }
-
-                // Grafik Çizim Alanı
-                Item {
-                    width: parent.width
-                    height: parent.height - 30
-
-                    // Boş durum
-                    Text {
-                        anchors.centerIn: parent
-                        text: i18nBridge.tr("analytics_no_data", "Bu dönemde tamamlanan görev kaydı bulunmuyor.")
-                        font.pixelSize: 13
-                        color: themeBridge.textMuted
-                        visible: analyticsViewModel.timeSeries.length === 0
-                    }
-
-                    // Bar Çubukları
-                    Row {
-                        anchors.fill: parent
-                        spacing: Math.max(4, (width - (analyticsViewModel.timeSeries.length * 36)) / Math.max(1, analyticsViewModel.timeSeries.length))
-                        visible: analyticsViewModel.timeSeries.length > 0
-
-                        Repeater {
-                            model: analyticsViewModel.timeSeries
-
-                            Item {
-                                width: 36
-                                height: parent.height
-
-                                property int val: modelData.value
-                                property int maxVal: {
-                                    var m = 1;
-                                    for (var i = 0; i < analyticsViewModel.timeSeries.length; i++) {
-                                        if (analyticsViewModel.timeSeries[i].value > m) {
-                                            m = analyticsViewModel.timeSeries[i].value;
-                                        }
-                                    }
-                                    return m;
-                                }
-
-                                Column {
-                                    anchors.fill: parent
-                                    spacing: 4
-
-                                    // Çubuk Alanı
-                                    Item {
-                                        width: parent.width
-                                        height: parent.height - 24
-
-                                        Rectangle {
-                                            width: 24
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            anchors.bottom: parent.bottom
-                                            height: Math.max(4, (parent.height - 16) * (modelData.value / Math.max(1, maxVal)))
-                                            radius: 4
-                                            color: barMouse.containsMouse ? themeBridge.accentEnd : themeBridge.accentStart
-
-                                            Behavior on height {
-                                                NumberAnimation { duration: 250; easing.type: Easing.OutQuad }
-                                            }
-
-                                            Text {
-                                                anchors.horizontalCenter: parent.horizontalCenter
-                                                anchors.bottom: parent.top
-                                                anchors.bottomMargin: 2
-                                                text: modelData.value.toString()
-                                                font.pixelSize: 10
-                                                font.weight: Font.DemiBold
-                                                color: themeBridge.textPrimary
-                                                visible: modelData.value > 0 || barMouse.containsMouse
-                                            }
-                                        }
-
-                                        MouseArea {
-                                            id: barMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                        }
-                                    }
-
-                                    // Etiket
-                                    Text {
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        text: modelData.label
-                                        font.pixelSize: 10
-                                        color: themeBridge.textSecondary
-                                        elide: Text.ElideRight
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         // ── Alt Grafikler: Öncelik ve Proje Dağılımı ─────────────────────────

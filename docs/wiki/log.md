@@ -1,5 +1,10 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] REFACTOR | AnalyticsView Bölündü
+- **`AnalyticsView.qml`** 640 → 274 satır. Bileşenler `presentation/qml/views/analytics/` altında: `KpiCard` (beş kopya KPI kartının yerine), `ProjectFilter` (proje açılır menüsü), `TimeSeriesChart` (zaman serisi çubuk grafiği).
+- Dönem düğmeleri ve iki dağılım kartı yapıları farklı olduğundan (öncelik: renk noktası + toplam payı; proje: en büyüğe göre) ortak bileşene çevrilmedi.
+- Açık kalan: `DrawingCanvas.qml` (1325).
+
 ## [2026-10-07] REFACTOR | IdeaViewModel Bölündü
 - **`IdeaViewModel`** 250 → 151 satır, public üye 21 → 10: diyalog durumu ve kaydetme `IdeaDialogViewModel`'e (`ideaDialogViewModel` QML bağlamı) taşındı; `TaskDialogViewModel` ile aynı desen. Fikir önbelleğine `cached_idea()` ile erişilir.
 - **Davranış:** Kayıttan sonraki fazladan `loadIdeas()` çağrısı kaldırıldı; liste zaten controller sinyalleri ve olay veri yoluyla yenileniyor.
