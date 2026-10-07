@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, Signal, Slot
 
+from core.text_normalization import normalize_search_text
 from domain.models.memo import Memo
 
 from PySide6.QtGui import QTextDocument
@@ -79,7 +80,7 @@ class MemoListModel(QAbstractListModel):
 
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:
-        self._search_query = query.strip().lower()
+        self._search_query = normalize_search_text(query.strip())
         self._apply_filter()
 
     def _apply_filter(self) -> None:
@@ -90,7 +91,7 @@ class MemoListModel(QAbstractListModel):
             q = self._search_query
             self._filtered_memos = [
                 m for m in self._all_memos
-                if q in m.title.lower() or q in (m.body or "").lower()
+                if q in normalize_search_text(m.title) or q in normalize_search_text(m.body)
             ]
         self.endResetModel()
         self.countChanged.emit()

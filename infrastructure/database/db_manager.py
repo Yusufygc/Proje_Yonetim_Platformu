@@ -8,12 +8,14 @@ import logging
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from core.exceptions.base_exception import DatabaseConnectionError
+from core.text_normalization import SQL_FOLD_FUNCTION, normalize_search_text
 from infrastructure.database.alembic_runner import run_alembic_migrations
 
 logger = logging.getLogger(__name__)
@@ -33,9 +35,15 @@ class DatabaseManager:
             echo=False,
             connect_args={"check_same_thread": False},
         )
+        event.listen(self._engine, "connect", self._register_sql_functions)
         self._session_factory = sessionmaker(bind=self._engine, expire_on_commit=False)
         self._scoped_session = scoped_session(self._session_factory)
         self._enable_wal_mode()
+
+    @staticmethod
+    def _register_sql_functions(dbapi_connection: Any, _record: Any) -> None:
+        """Arama sorgularının kullandığı Türkçe uyumlu katlama fonksiyonunu her bağlantıya ekler."""
+        dbapi_connection.create_function(SQL_FOLD_FUNCTION, 1, normalize_search_text, deterministic=True)
 
     @classmethod
     def instance(cls, database_url: str | None = None) -> "DatabaseManager":

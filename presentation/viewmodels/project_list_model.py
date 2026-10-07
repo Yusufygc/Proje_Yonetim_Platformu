@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, Signal, Slot
 
+from core.text_normalization import normalize_search_text
 from domain.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -96,7 +97,7 @@ class ProjectListModel(QAbstractListModel):
 
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:
-        self._search_query = query.strip().lower()
+        self._search_query = normalize_search_text(query.strip())
         self._apply_filter()
 
     @Slot(str)
@@ -122,7 +123,7 @@ class ProjectListModel(QAbstractListModel):
                 return False
         if not self._search_query:
             return True
-        title = (project.title or "").lower()
-        desc = (project.short_description or "").lower()
-        p_type = (project.project_type or "").lower()
+        title = normalize_search_text(project.title)
+        desc = normalize_search_text(project.short_description)
+        p_type = normalize_search_text(project.project_type)
         return self._search_query in title or self._search_query in desc or self._search_query in p_type

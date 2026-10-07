@@ -4,14 +4,25 @@ Search Service - Tüm sistemde global arama yapar (Projeler, Görevler, Fikirler
 import logging
 from typing import Any
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
+from sqlalchemy.orm import InstrumentedAttribute, Session
 
+from core.text_normalization import LIKE_ESCAPE, SQL_FOLD_FUNCTION, escape_like, normalize_search_text
 from domain.models.idea import Idea
 from domain.models.project import Project
 from domain.models.task import Task
 from infrastructure.database.db_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)
+
+_MIN_QUERY_LENGTH = 2
+_RESULT_LIMIT = 20
+
+
+def _matches_any(columns: list[InstrumentedAttribute], pattern: str) -> Any:
+    """Kolonları Türkçe uyumlu katlayıp LIKE ile karşılaştırır (SQLite LIKE yalnızca ASCII'de duyarsızdır)."""
+    fold = getattr(func, SQL_FOLD_FUNCTION)
+    return or_(*(fold(column).like(pattern, escape=LIKE_ESCAPE) for column in columns))
 
 
 class SearchService:
@@ -20,60 +31,51 @@ class SearchService:
 
     def search_all(self, query: str) -> dict[str, list[dict[str, Any]]]:
         """Tüm tablolarda arama yapar ve formatlanmış sonuçları döner."""
-        if not query or len(query.strip()) < 2:
+        if not query or len(query.strip()) < _MIN_QUERY_LENGTH:
             return {"projects": [], "tasks": [], "ideas": []}
 
-        term = f"%{query.strip().lower()}%"
-        results = {"projects": [], "tasks": [], "ideas": []}
-
+        pattern = f"%{escape_like(normalize_search_text(query.strip()))}%"
         with self._db.session() as sess:
-            # Projelerde Arama
-            stmt_p = select(Project).where(
-                or_(
-                    Project.title.ilike(term),
-                    Project.short_description.ilike(term)
-                )
-            ).limit(20)
-            for p in sess.scalars(stmt_p):
-                results["projects"].append({
-                    "id": p.id,
-                    "title": p.title,
-                    "description": p.short_description or "",
-                    "type": "project"
-                })
+            return {
+                "projects": self._search_projects(sess, pattern),
+                "tasks": self._search_tasks(sess, pattern),
+                "ideas": self._search_ideas(sess, pattern),
+            }
 
-            # Görevlerde Arama
-            stmt_t = select(Task).where(
-                or_(
-                    Task.title.ilike(term),
-                    Task.description.ilike(term)
-                )
-            ).limit(20)
-            for t in sess.scalars(stmt_t):
-                results["tasks"].append({
-                    "id": t.id,
-                    "project_id": t.project_id,
-                    "title": t.title,
-                    "description": t.description or "",
-                    "type": "task"
-                })
+    def _search_projects(self, sess: Session, pattern: str) -> list[dict[str, Any]]:
+        stmt = select(Project).where(
+            _matches_any([Project.title, Project.short_description], pattern)
+        ).limit(_RESULT_LIMIT)
+        return [
+            {"id": p.id, "title": p.title, "description": p.short_description or "", "type": "project"}
+            for p in sess.scalars(stmt)
+        ]
 
-            # Fikirlerde Arama
-            stmt_i = select(Idea).where(
-                or_(
-                    Idea.title.ilike(term),
-                    Idea.problem.ilike(term),
-                    Idea.solution.ilike(term),
-                    Idea.notes.ilike(term),
-                )
-            ).limit(20)
-            for i in sess.scalars(stmt_i):
-                description = i.problem or i.solution or i.notes or ""
-                results["ideas"].append({
-                    "id": i.id,
-                    "title": i.title,
-                    "description": description,
-                    "type": "idea"
-                })
+    def _search_tasks(self, sess: Session, pattern: str) -> list[dict[str, Any]]:
+        stmt = select(Task).where(
+            _matches_any([Task.title, Task.description], pattern)
+        ).limit(_RESULT_LIMIT)
+        return [
+            {
+                "id": t.id,
+                "project_id": t.project_id,
+                "title": t.title,
+                "description": t.description or "",
+                "type": "task",
+            }
+            for t in sess.scalars(stmt)
+        ]
 
-        return results
+    def _search_ideas(self, sess: Session, pattern: str) -> list[dict[str, Any]]:
+        stmt = select(Idea).where(
+            _matches_any([Idea.title, Idea.problem, Idea.solution, Idea.notes], pattern)
+        ).limit(_RESULT_LIMIT)
+        return [
+            {
+                "id": i.id,
+                "title": i.title,
+                "description": i.problem or i.solution or i.notes or "",
+                "type": "idea",
+            }
+            for i in sess.scalars(stmt)
+        ]

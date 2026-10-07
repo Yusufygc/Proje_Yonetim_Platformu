@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, Signal, Slot
 
+from core.text_normalization import normalize_search_text
 from domain.models.idea import Idea
 
 logger = logging.getLogger(__name__)
@@ -90,7 +91,7 @@ class IdeaListModel(QAbstractListModel):
 
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:
-        self._search_query = query.strip().lower()
+        self._search_query = normalize_search_text(query.strip())
         self._apply_filters()
 
     @Slot(str)
@@ -109,9 +110,9 @@ class IdeaListModel(QAbstractListModel):
     def _matches_filters(self, idea: Idea) -> bool:
         if self._search_query:
             q = self._search_query
-            in_title = q in idea.title.lower()
-            in_problem = q in (idea.problem or "").lower()
-            in_solution = q in (idea.solution or "").lower()
+            in_title = q in normalize_search_text(idea.title)
+            in_problem = q in normalize_search_text(idea.problem)
+            in_solution = q in normalize_search_text(idea.solution)
             if not (in_title or in_problem or in_solution):
                 return False
         if self._status_filter != "ALL" and idea.status != self._status_filter:

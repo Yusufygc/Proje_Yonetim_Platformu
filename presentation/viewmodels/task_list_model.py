@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, Signal, Slot
 
+from core.text_normalization import normalize_search_text
 from domain.models.task import Task
 
 logger = logging.getLogger(__name__)
@@ -169,7 +170,7 @@ class TaskListModel(QAbstractListModel):
 
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:
-        self._search_query = query.strip().lower()
+        self._search_query = normalize_search_text(query.strip())
         self._rebuild_tree()
 
     @Slot(str)
@@ -188,7 +189,7 @@ class TaskListModel(QAbstractListModel):
         self._rebuild_tree()
 
     def _matches_filters(self, t: Task) -> bool:
-        if self._search_query and self._search_query not in t.title.lower():
+        if self._search_query and self._search_query not in normalize_search_text(t.title):
             return False
         if self._status_filter != "ALL" and t.status != self._status_filter:
             return False
