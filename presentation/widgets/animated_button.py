@@ -2,8 +2,7 @@
 Mikro-animasyonlu özel buton sınıfı.
 Hover durumunda QPropertyAnimation ile büyüme (scale) veya renk geçişi yapar.
 """
-from PySide6.QtCore import QPoint, QPropertyAnimation, QRect, Qt, QVariantAnimation
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtCore import QPropertyAnimation, QRect, Qt
 from PySide6.QtWidgets import QPushButton, QWidget
 
 

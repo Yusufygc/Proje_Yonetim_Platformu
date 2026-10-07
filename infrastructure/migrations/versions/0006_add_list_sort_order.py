@@ -29,7 +29,7 @@ def upgrade() -> None:
     _backfill(conn, "ideas", "sort_order")
 
 
-def _add_column_if_missing(conn, table_name: str, column_name: str) -> None:
+def _add_column_if_missing(conn: sa.engine.Connection, table_name: str, column_name: str) -> None:
     from sqlalchemy import inspect
 
     existing = {col["name"] for col in inspect(conn).get_columns(table_name)}
@@ -41,7 +41,7 @@ def _add_column_if_missing(conn, table_name: str, column_name: str) -> None:
     )
 
 
-def _backfill(conn, table_name: str, column_name: str) -> None:
+def _backfill(conn: sa.engine.Connection, table_name: str, column_name: str) -> None:
     table = sa.Table(table_name, sa.MetaData(), autoload_with=conn)
     id_col = table.c["id"]
     order_col = table.c["created_at"]

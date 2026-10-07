@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from domain.models.idea import Idea
+from presentation.viewmodels.qt_properties import variant_map_property
 from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.idea_list_model import IdeaListModel
 
@@ -68,7 +69,7 @@ class IdeaViewModel(QObject):
     def selectedIdeaId(self) -> int:
         return self._selected_idea_id
 
-    @Property("QVariantMap", notify=selectedIdeaChanged)
+    @variant_map_property(notify=selectedIdeaChanged)
     def selectedIdea(self) -> dict[str, Any]:
         return self._selected_idea_data
 
@@ -84,7 +85,7 @@ class IdeaViewModel(QObject):
     def dialogIdeaId(self) -> int:
         return self._dialog_idea_id
 
-    @Property("QVariantMap", notify=dialogStateChanged)
+    @variant_map_property(notify=dialogStateChanged)
     def dialogInitialData(self) -> dict[str, Any]:
         return self._dialog_initial_data
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from typing import Any
 
 from core.exceptions.task_exceptions import (
     TaskHierarchyError,
@@ -48,7 +49,7 @@ class TaskService:
             raise TaskNotFoundError(task_id)
         return task
 
-    def create_task(self, project_id: int, title: str, **kwargs: object) -> Task:
+    def create_task(self, project_id: int, title: str, **kwargs: Any) -> Task:
         if not str(title).strip():
             raise TaskValidationError("Gorev basligi bos olamaz.")
         parent_task_id = kwargs.get("parent_task_id")
@@ -76,7 +77,7 @@ class TaskService:
                 "yalnızca Engellendi veya İptal seçilebilir."
             )
 
-    def update_task(self, task_id: int, **kwargs: object) -> Task:
+    def update_task(self, task_id: int, **kwargs: Any) -> Task:
         task = self.get_task(task_id)
         old_status = task.status
         if "status" in kwargs:
@@ -275,7 +276,7 @@ class TaskService:
         summary: str,
         entity_type: str,
         entity_id: int | None = None,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         if self._activity_logs is not None:
             try:

@@ -4,6 +4,8 @@ Ham SQL yasaktır; tüm sorgular SQLAlchemy ORM ile yapılır (RULES.md).
 """
 from __future__ import annotations
 
+from typing import Any
+
 import logging
 
 from sqlalchemy import select
@@ -20,7 +22,7 @@ class ProjectRepository(BaseRepository[Project]):
 
     model = Project
 
-    def _query_options(self) -> tuple:
+    def _query_options(self) -> tuple[Any, ...]:
         # Proje detayı her zaman aşama/görev/etiketleriyle birlikte tüketilir;
         # N+1 sorgu yerine selectinload ile tek seferde yüklenir.
         return (

@@ -1,6 +1,8 @@
 """ProjectTag veri erişim katmanı."""
 from __future__ import annotations
 
+from typing import Any
+
 from sqlalchemy import select
 
 from domain.models.project_tag import ProjectTag
@@ -10,7 +12,7 @@ from infrastructure.repositories.base_repository import ProjectScopedRepository
 class ProjectTagRepository(ProjectScopedRepository[ProjectTag]):
     model = ProjectTag
 
-    def _project_order(self) -> tuple:
+    def _project_order(self) -> tuple[Any, ...]:
         return (ProjectTag.tag_name,)
 
     def replace_for_project(self, project_id: int, tags: list[str]) -> list[ProjectTag]:

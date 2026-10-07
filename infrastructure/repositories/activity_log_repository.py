@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from typing import Any
 
 from sqlalchemy import select
 
@@ -12,14 +13,14 @@ from infrastructure.repositories.base_repository import BaseRepository
 class ActivityLogRepository(BaseRepository[ActivityLog]):
     model = ActivityLog
 
-    def create(  # type: ignore[override] — log kaydı alanlardan kurulur, entity dışarıdan gelmez
+    def create(  # type: ignore[override]  # log kaydı alanlardan kurulur, entity dışarıdan gelmez
         self,
         project_id: int,
         action: str,
         summary: str,
         entity_type: str,
         entity_id: int | None = None,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> ActivityLog:
         log = ActivityLog(
             project_id=project_id,

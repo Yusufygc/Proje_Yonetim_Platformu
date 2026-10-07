@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 EXPORT_FORMAT_VERSION = 2
 
 # Proje altında listelenen tablolar: JSON anahtarı -> model. Yeni tablo eklemek tek satırdır.
-_PROJECT_CHILDREN: dict[str, type] = {
+_PROJECT_CHILDREN: dict[str, type[Any]] = {
     "stages": ProjectStage,
     "tasks": Task,
     "decisions": DecisionRecord,
@@ -55,7 +55,7 @@ def _row_to_dict(row: Any) -> dict[str, Any]:
     return {column.key: _to_jsonable(getattr(row, column.key)) for column in columns}
 
 
-def _all_rows(sess: Session, model: type) -> list[dict[str, Any]]:
+def _all_rows(sess: Session, model: type[Any]) -> list[dict[str, Any]]:
     return [_row_to_dict(row) for row in sess.scalars(select(model))]
 
 

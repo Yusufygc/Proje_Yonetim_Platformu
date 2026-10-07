@@ -10,6 +10,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 
 from app import config
+from presentation.viewmodels.qt_properties import variant_list_property
 from presentation.dimensions import FontFamily
 from presentation.utils.i18n import tr
 
@@ -103,7 +104,7 @@ class SettingsViewModel(QObject):
         self._font_family = family
         self._prefs.save_font_family(family)
         app = QApplication.instance()
-        if app:
+        if isinstance(app, QApplication):
             app.setFont(QFont(family, FontFamily.DEFAULT_SIZE))
         self.fontChanged.emit()
 
@@ -150,7 +151,7 @@ class SettingsViewModel(QObject):
     def activePackage(self) -> str:
         return self._active_package
 
-    @Property("QVariantList", constant=True)
+    @variant_list_property()
     def themePackages(self) -> list[dict[str, Any]]:
         return _THEME_PACKAGES
 
@@ -158,7 +159,7 @@ class SettingsViewModel(QObject):
     def fontFamily(self) -> str:
         return self._font_family
 
-    @Property("QVariantList", constant=True)
+    @variant_list_property()
     def fontFamilies(self) -> list[str]:
         return _FONT_CHOICES
 

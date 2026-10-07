@@ -32,7 +32,7 @@ class I18nBridge(QObject):
         return self._string_mgr.current_language
 
     @Slot(str, str, result=str)
-    def tr(self, key: str, default: str = "") -> str:
+    def tr(self, key: str, default: str = "") -> str:  # type: ignore[override]  # QML sözleşmesi: i18nBridge.tr(key, default)
         """Belirtilen anahtara karşılık gelen yerelleştirilmiş metni döndürür."""
         return self._string_mgr.get(key, default)
 

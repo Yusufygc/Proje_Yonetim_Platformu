@@ -4,7 +4,15 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, Signal, Slot
+from PySide6.QtCore import (
+    QAbstractListModel,
+    QByteArray,
+    QModelIndex,
+    QPersistentModelIndex,
+    Qt,
+    Signal,
+    Slot,
+)
 
 from core.text_normalization import normalize_search_text
 from domain.models.project import Project
@@ -53,10 +61,10 @@ class ProjectListModel(QAbstractListModel):
             self.IsArchivedRole: QByteArray(b"isArchived"),
         }
 
-    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+    def rowCount(self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()) -> int:
         return len(self._filtered_projects)
 
-    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+    def data(self, index: QModelIndex | QPersistentModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
         if not index.isValid() or not (0 <= index.row() < len(self._filtered_projects)):
             return None
 

@@ -18,10 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from controllers.project_controller import ProjectController
-from controllers.stage_controller import StageController
-from controllers.task_controller import TaskController
 from core.events.app_events import NEW_PROJECT_REQUESTED, PROJECT_DETAIL_REQUESTED
-from core.events.event_bus import EventBus
 from app.di_container import DIContainer
 from domain.models.project import Project
 from presentation.dialogs.project_dialog import ProjectDialog

@@ -8,7 +8,7 @@ import inspect
 import logging
 import weakref
 from collections import defaultdict
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 logger = logging.getLogger(__name__)
 
@@ -110,5 +110,5 @@ class EventBus:
     def _resolve(entry: Any) -> Callable[..., None] | None:
         """WeakMethod girdisini çözer; referans öldüyse None döner."""
         if isinstance(entry, weakref.WeakMethod):
-            return entry()
-        return entry
+            return cast(Callable[..., None] | None, entry())
+        return cast(Callable[..., None] | None, entry)

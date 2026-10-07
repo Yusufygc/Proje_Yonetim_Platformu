@@ -8,6 +8,7 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from core.managers.preference_manager import PreferenceManager
 from core.managers.theme_manager import ThemeManager
+from presentation.viewmodels.qt_properties import variant_map_property
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ class ThemeBridge(QObject):
     def isDark(self) -> bool:
         return self._prefs.load_active_mode() == "dark"
 
-    @Property("QVariantMap", notify=themeChanged)
+    @variant_map_property(notify=themeChanged)
     def colors(self) -> dict[str, Any]:
         """Tüm tema token'larını sözlük olarak döndürür."""
         palette: dict[str, Any] = getattr(self._theme_mgr, "_palette", {})

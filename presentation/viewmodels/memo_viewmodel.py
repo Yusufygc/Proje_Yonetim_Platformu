@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QFileDialog
 
 from app import config
 from domain.models.memo import Memo
+from presentation.viewmodels.qt_properties import variant_map_property
 from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.memo_list_model import MemoListModel, _clean_body_markdown
 
@@ -59,7 +60,7 @@ class MemoViewModel(QObject):
     def selectedMemoId(self) -> int:
         return self._selected_memo_id
 
-    @Property("QVariantMap", notify=selectedMemoChanged)
+    @variant_map_property(notify=selectedMemoChanged)
     def selectedMemo(self) -> dict[str, Any]:
         return self._selected_memo_data
 
@@ -177,7 +178,7 @@ class MemoViewModel(QObject):
         config.MEMO_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
         filename = f"memo_img_{uuid.uuid4().hex[:12]}.png"
         target_path = config.MEMO_IMAGES_DIR / filename
-        saved = image.save(str(target_path), "PNG")
+        saved = image.save(str(target_path))
         if not saved:
             return ""
         return target_path.as_uri()

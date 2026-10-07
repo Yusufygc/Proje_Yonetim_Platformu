@@ -4,17 +4,8 @@ Search Dialog - Global arama ekranı. Yazıldıkça sonuçları günceller.
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QKeySequence, QShortcut
-from PySide6.QtWidgets import (
-    QDialog,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QListWidget,
-    QListWidgetItem,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtWidgets import QDialog, QLineEdit, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
 
 from controllers.search_controller import SearchController
 from presentation.dimensions import Spacing

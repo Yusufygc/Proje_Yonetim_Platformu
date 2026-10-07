@@ -1,6 +1,8 @@
 """Proje aşaması veri erişim katmanı."""
 from __future__ import annotations
 
+from typing import Any
+
 from domain.models.project_stage import ProjectStage
 from infrastructure.repositories.base_repository import ProjectScopedRepository
 
@@ -10,5 +12,5 @@ class StageRepository(ProjectScopedRepository[ProjectStage]):
 
     model = ProjectStage
 
-    def _project_order(self) -> tuple:
+    def _project_order(self) -> tuple[Any, ...]:
         return (ProjectStage.order_index,)

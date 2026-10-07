@@ -10,6 +10,7 @@ from core.events.app_events import NEW_PROJECT_REQUESTED
 from core.events.event_bus import EventBus
 from core.managers.preference_manager import PreferenceManager
 from core.module_registry import ModuleRegistry
+from presentation.viewmodels.qt_properties import variant_list_property
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class NavigationBridge(QObject):
     def searchModalOpen(self) -> bool:
         return self._search_modal_open
 
-    @Property("QVariantList", constant=True)
+    @variant_list_property()
     def modules(self) -> list[dict[str, str]]:
         """Kayıtlı tüm modüllerin navigasyon meta-verilerini döndürür."""
         result: list[dict[str, str]] = []

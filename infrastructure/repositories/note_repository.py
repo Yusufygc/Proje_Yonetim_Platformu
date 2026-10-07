@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 from domain.models.note import Note
 from infrastructure.repositories.base_repository import ProjectScopedRepository
 
@@ -7,7 +11,7 @@ class NoteRepository(ProjectScopedRepository[Note]):
 
     model = Note
 
-    def _project_order(self) -> tuple:
+    def _project_order(self) -> tuple[Any, ...]:
         return (Note.sort_order, Note.id)
 
     def reorder(self, ordered_ids: list[int]) -> None:

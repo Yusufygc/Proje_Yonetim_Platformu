@@ -11,7 +11,6 @@ from PySide6.QtCore import QObject, Signal
 
 from core.events.event_bus import EventBus
 from core.exceptions.base_exception import AppBaseException
-from domain.models.project_stage import ProjectStage
 from services.stage_service import StageService
 
 logger = logging.getLogger(__name__)

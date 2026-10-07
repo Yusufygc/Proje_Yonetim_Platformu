@@ -2,7 +2,6 @@
 SearchController - UI ile SearchService arasındaki haberleşmeyi sağlar.
 """
 import logging
-from typing import Any
 
 from PySide6.QtCore import QObject, Signal
 

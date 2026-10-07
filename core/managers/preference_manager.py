@@ -5,6 +5,7 @@ kullanıcı tercihlerini kalıcı olarak saklayan Singleton.
 from __future__ import annotations
 
 import logging
+from typing import cast
 
 from PySide6.QtCore import QByteArray, QSettings
 
@@ -33,7 +34,7 @@ class PreferenceManager:
         self._settings.setValue("window/geometry", geometry)
 
     def load_window_geometry(self) -> QByteArray | None:
-        return self._settings.value("window/geometry")  # type: ignore[return-value]
+        return cast(QByteArray | None, self._settings.value("window/geometry"))
 
     def save_window_rect(
         self, x: int, y: int, width: int, height: int, is_maximized: bool = False

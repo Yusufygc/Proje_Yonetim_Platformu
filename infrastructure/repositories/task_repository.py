@@ -1,7 +1,7 @@
 """Görev ve checklist öğesi veri erişim katmanı."""
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Any
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
@@ -16,11 +16,11 @@ class TaskRepository(ProjectScopedRepository[Task]):
 
     model = Task
 
-    def _query_options(self) -> tuple:
+    def _query_options(self) -> tuple[Any, ...]:
         # Checklist ilerleme hesabı görevle birlikte tüketilir; N+1 önlenir.
         return (selectinload(Task.checklist_items),)
 
-    def _project_order(self) -> tuple:
+    def _project_order(self) -> tuple[Any, ...]:
         # Kök görevler önce, ardından parent ve sıra indeksine göre WBS düzeni.
         return (Task.parent_task_id.is_not(None), Task.parent_task_id, Task.order_index, Task.id)
 

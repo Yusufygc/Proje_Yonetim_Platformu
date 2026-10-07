@@ -41,7 +41,7 @@ class ThemeManager(QObject):
         self._current_theme = "dark"
         # QSS önbelleği — tema değişene kadar disk I/O tekrarlanmaz
         self._qss_cache: str | None = None
-        self._compiled_patterns: dict[str, re.Pattern] = {}
+        self._compiled_patterns: dict[str, re.Pattern[str]] = {}
         self._load_theme(self._current_theme)
 
     @classmethod

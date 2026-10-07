@@ -19,7 +19,7 @@ _MIN_QUERY_LENGTH = 2
 _RESULT_LIMIT = 20
 
 
-def _matches_any(columns: list[InstrumentedAttribute], pattern: str) -> Any:
+def _matches_any(columns: list[InstrumentedAttribute[Any]], pattern: str) -> Any:
     """Kolonları Türkçe uyumlu katlayıp LIKE ile karşılaştırır (SQLite LIKE yalnızca ASCII'de duyarsızdır)."""
     fold = getattr(func, SQL_FOLD_FUNCTION)
     return or_(*(fold(column).like(pattern, escape=LIKE_ESCAPE) for column in columns))

@@ -19,7 +19,7 @@ from infrastructure.repositories.workflow_stage_repository import WorkflowStageR
 logger = logging.getLogger(__name__)
 
 # İlk aşama ACTIVE, geri kalanlar NOT_STARTED olarak başlar
-DEFAULT_STAGES: list[dict] = [
+DEFAULT_STAGES: list[dict[str, str | None]] = [
     {"name": "Fikir", "description": "Fikir ve ihtiyaç netleştirme", "color": "#6366F1"},
     {"name": "Analiz", "description": "Kapsam, problem ve çözüm analizi", "color": "#0EA5E9"},
     {"name": "Tasarım", "description": "Mimari ve UI/UX tasarımı", "color": "#8B5CF6"},

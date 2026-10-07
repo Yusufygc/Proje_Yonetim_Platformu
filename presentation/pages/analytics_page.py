@@ -7,19 +7,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (
-    QButtonGroup,
-    QComboBox,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QScrollArea,
-    QSizePolicy,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QButtonGroup, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from controllers.analytics_controller import AnalyticsController
 from controllers.project_controller import ProjectController

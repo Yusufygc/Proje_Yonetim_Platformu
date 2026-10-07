@@ -8,6 +8,7 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from domain.models.project import Project
 from presentation.utils.i18n import tr
+from presentation.viewmodels.qt_properties import variant_list_property
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer
@@ -119,7 +120,7 @@ class AnalyticsViewModel(QObject):
     def isLoading(self) -> bool:
         return self._is_loading
 
-    @Property("QVariantList", notify=projectsChanged)
+    @variant_list_property(notify=projectsChanged)
     def projects(self) -> list[dict[str, Any]]:
         return self._projects_list
 
@@ -147,14 +148,14 @@ class AnalyticsViewModel(QObject):
     def bestPeriodCount(self) -> int:
         return int(self._kpis.get("best_period_count", 0))
 
-    @Property("QVariantList", notify=dataChanged)
+    @variant_list_property(notify=dataChanged)
     def timeSeries(self) -> list[dict[str, Any]]:
         return self._time_series
 
-    @Property("QVariantList", notify=dataChanged)
+    @variant_list_property(notify=dataChanged)
     def priorityDistribution(self) -> list[dict[str, Any]]:
         return self._priority_dist
 
-    @Property("QVariantList", notify=dataChanged)
+    @variant_list_property(notify=dataChanged)
     def projectDistribution(self) -> list[dict[str, Any]]:
         return self._project_dist

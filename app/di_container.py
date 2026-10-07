@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from services.speech.speech_to_text_service import SpeechToTextService
@@ -192,7 +192,7 @@ class DIContainer:
     def controllers(self) -> ControllerRegistry:
         return ControllerRegistry(services=self.services, event_bus=self.event_bus)
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Any:
         # Geriye dönük uyumluluk: di.task_controller → di.controllers.task_controller.
         # __getattr__ yalnızca normal aramada bulunamayan adlar için çalışır.
         if name.endswith("_controller"):

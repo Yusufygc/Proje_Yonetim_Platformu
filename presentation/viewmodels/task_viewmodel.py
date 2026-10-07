@@ -8,6 +8,7 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 from PySide6.QtGui import QGuiApplication
 
 from domain.models.task import Task
+from presentation.viewmodels.qt_properties import variant_list_property, variant_map_property
 from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.task_list_model import TaskListModel
 
@@ -75,7 +76,7 @@ class TaskViewModel(QObject):
     def taskModel(self) -> TaskListModel:
         return self._task_model
 
-    @Property("QVariantList", notify=projectsChanged)
+    @variant_list_property(notify=projectsChanged)
     def projects(self) -> list[dict[str, Any]]:
         return self._projects
 
@@ -87,7 +88,7 @@ class TaskViewModel(QObject):
     def selectedTaskId(self) -> int:
         return self._selected_task_id
 
-    @Property("QVariantMap", notify=selectedTaskChanged)
+    @variant_map_property(notify=selectedTaskChanged)
     def selectedTask(self) -> dict[str, Any]:
         return self._selected_task_data
 
@@ -107,7 +108,7 @@ class TaskViewModel(QObject):
     def dialogParentTaskId(self) -> int:
         return self._dialog_parent_task_id
 
-    @Property("QVariantMap", notify=dialogStateChanged)
+    @variant_map_property(notify=dialogStateChanged)
     def dialogInitialData(self) -> dict[str, Any]:
         return self._dialog_initial_data
 

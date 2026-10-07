@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 import webbrowser
 from pathlib import Path
 from typing import Any, Optional
@@ -17,6 +18,7 @@ from core.events.event_bus import EventBus
 from domain.models.attachment import Attachment
 from domain.models.project import Project
 from domain.models.project_stage import ProjectStage
+from presentation.viewmodels.qt_properties import variant_list_property, variant_map_property
 from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.project_list_model import ProjectListModel
 
@@ -122,35 +124,35 @@ class ProjectViewModel(QObject):
     def selectedProjectId(self) -> int:
         return self._selected_project_id
 
-    @Property("QVariantMap", notify=selectedProjectChanged)
+    @variant_map_property(notify=selectedProjectChanged)
     def selectedProject(self) -> dict[str, Any]:
         return self._selected_project_data
 
-    @Property("QVariantList", notify=stagesChanged)
+    @variant_list_property(notify=stagesChanged)
     def selectedStages(self) -> list[dict[str, Any]]:
         return self._stages_data
 
-    @Property("QVariantList", notify=outputsChanged)
+    @variant_list_property(notify=outputsChanged)
     def selectedOutputs(self) -> list[dict[str, Any]]:
         return self._outputs_data
 
-    @Property("QVariantList", notify=activityChanged)
+    @variant_list_property(notify=activityChanged)
     def selectedActivity(self) -> list[dict[str, Any]]:
         return self._activity_data
 
-    @Property("QVariantList", notify=decisionsChanged)
+    @variant_list_property(notify=decisionsChanged)
     def selectedDecisions(self) -> list[dict[str, Any]]:
         return self._decisions_data
 
-    @Property("QVariantList", notify=notesChanged)
+    @variant_list_property(notify=notesChanged)
     def selectedNotes(self) -> list[dict[str, Any]]:
         return self._notes_data
 
-    @Property("QVariantList", notify=resourcesChanged)
+    @variant_list_property(notify=resourcesChanged)
     def selectedResources(self) -> list[dict[str, Any]]:
         return self._resources_data
 
-    @Property("QVariantList", notify=tasksChanged)
+    @variant_list_property(notify=tasksChanged)
     def selectedTasks(self) -> list[dict[str, Any]]:
         return self._tasks_data
 
@@ -247,7 +249,7 @@ class ProjectViewModel(QObject):
                         "priority": str(getattr(t.priority, "value", t.priority)),
                         "is_done": str(getattr(t.status, "value", t.status)) == "DONE",
                         "parent_id": t.parent_task_id or 0,
-                        "due_date": t.due_date.strftime("%d.%m.%Y") if getattr(t, "due_date", None) else "",
+                        "due_date": t.due_date.strftime("%d.%m.%Y") if t.due_date else "",
                     }
                     for t in tasks
                 ]
@@ -386,8 +388,8 @@ class ProjectViewModel(QObject):
         if target.startswith("http://") or target.startswith("https://"):
             webbrowser.open(target)
             return
-        if os.path.exists(target):
-            os.startfile(target)  # type: ignore[attr-defined]
+        if os.path.exists(target) and sys.platform == "win32":
+            os.startfile(target)
 
     @Slot()
     def openCreateDialog(self) -> None:

@@ -8,6 +8,7 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from domain.models.project import Project
 from presentation.utils.i18n import tr
+from presentation.viewmodels.qt_properties import variant_list_property
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer
@@ -99,7 +100,7 @@ class ArchiveViewModel(QObject):
 
     # ── Properties ──────────────────────────────────────────────────────────
 
-    @Property("QVariantList", notify=archivedProjectsChanged)
+    @variant_list_property(notify=archivedProjectsChanged)
     def archivedProjects(self) -> list[dict[str, Any]]:
         return self._archived_projects
 

@@ -8,7 +8,7 @@ ile detached olarak döndürülür (UI thread'e güvenli aktarım).
 """
 from __future__ import annotations
 
-from typing import ClassVar, Generic, Optional, TypeVar
+from typing import Any, ClassVar, Generic, Optional, TypeVar, cast, Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,23 +16,24 @@ from sqlalchemy.orm import Session
 from infrastructure.database.db_manager import DatabaseManager
 
 T = TypeVar("T")
+E = TypeVar("E")  # _detach yalnızca depo modeli (T) değil, alt kayıtlar (örn. ChecklistItem) için de kullanılır
 
 
 class BaseRepository(Generic[T]):
     """Tek bir ORM modeli üzerinde standart CRUD işlemleri."""
 
     #: Alt sınıfın bağlı olduğu ORM model sınıfı.
-    model: ClassVar[type]
+    model: ClassVar[type[Any]]
 
     def __init__(self, db: DatabaseManager) -> None:
         self._db = db
 
-    def _query_options(self) -> tuple:
+    def _query_options(self) -> tuple[Any, ...]:
         """select() sorgularına eklenecek loader seçenekleri (örn. selectinload)."""
         return ()
 
     @staticmethod
-    def _detach(sess: Session, entity: T) -> T:
+    def _detach(sess: Session, entity: E) -> E:
         """Entity'yi kalıcılaştırıp session'dan koparır; dışarıda güvenle taşınır."""
         sess.flush()
         sess.refresh(entity)
@@ -57,9 +58,9 @@ class BaseRepository(Generic[T]):
         with self._db.session() as sess:
             options = self._query_options()
             if not options:
-                return sess.get(self.model, entity_id)
+                return cast(Optional[T], sess.get(self.model, entity_id))
             stmt = select(self.model).options(*options).where(self.model.id == entity_id)
-            return sess.scalar(stmt)
+            return cast(Optional[T], sess.scalar(stmt))
 
     def update(self, entity: T) -> T:
         with self._db.session() as sess:
@@ -100,7 +101,7 @@ class BaseRepository(Generic[T]):
 class ProjectScopedRepository(BaseRepository[T]):
     """project_id kolonuna sahip modeller için ortak proje-bazlı sorgu."""
 
-    def _project_order(self) -> tuple:
+    def _project_order(self) -> tuple[Any, ...]:
         """get_by_project sıralaması; alt sınıf kendi kolon(lar)ını döndürür."""
         return ()
 
