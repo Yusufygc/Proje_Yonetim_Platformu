@@ -62,14 +62,31 @@ Rectangle {
                 Layout.fillWidth: true
             }
 
-            Text {
-                text: i18nBridge.tr("update_dialog_current", "Mevcut sürüm") + ": v" + updateViewModel.currentVersion
-                      + "   →   " + i18nBridge.tr("update_dialog_latest", "Yeni sürüm") + ": v" + updateViewModel.latestVersion
-                font.pixelSize: 12
-                font.weight: Font.DemiBold
-                color: themeBridge.textPrimary
-                wrapMode: Text.Wrap
+            RowLayout {
                 Layout.fillWidth: true
+                spacing: Theme.spacing.sm
+
+                Text {
+                    text: i18nBridge.tr("update_dialog_current", "Mevcut sürüm") + ": v" + updateViewModel.currentVersion
+                    font.pixelSize: 12
+                    font.weight: Font.DemiBold
+                    color: themeBridge.textMuted
+                }
+
+                AppIcon {
+                    name: "arrow-right"
+                    size: 14
+                    color: themeBridge.textMuted
+                }
+
+                Text {
+                    text: i18nBridge.tr("update_dialog_latest", "Yeni sürüm") + ": v" + updateViewModel.latestVersion
+                    font.pixelSize: 12
+                    font.weight: Font.DemiBold
+                    color: themeBridge.textPrimary
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
             }
 
             ScrollView {

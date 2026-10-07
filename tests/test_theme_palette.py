@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -90,6 +91,23 @@ def test_qml_files_when_scanned_should_not_call_non_reactive_theme_color_slot() 
         str(path.relative_to(qml_root))
         for path in qml_root.rglob("*.qml")
         if "themeBridge.color(" in path.read_text(encoding="utf-8")
+    ]
+
+    assert offenders == []
+
+
+def test_qml_files_when_scanned_should_not_contain_emoji_or_symbol_glyphs() -> None:
+    """Emoji ve `▼`, `↳` gibi sembol karakterler temayla boyanmaz, platforma göre farklı görünür.
+
+    İkon gereken yerde `AppIcon`/`AppButton.iconName` kullanılır. Düz yazı içindeki `→` serbesttir.
+    """
+    glyphs = re.compile("[🌀-🫿☀-➿⭐■-◿←-↑↓-⇿⌫]")
+    qml_root = Path(__file__).parent.parent / "presentation" / "qml"
+    offenders = [
+        f"{path.relative_to(qml_root)}:{number}"
+        for path in qml_root.rglob("*.qml")
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+        if glyphs.search(line)
     ]
 
     assert offenders == []

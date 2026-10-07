@@ -87,7 +87,7 @@ Column {
         Text {
             anchors.left: parent.left
             anchors.leftMargin: 12
-            anchors.right: arrowText.left
+            anchors.right: arrowIcon.left
             anchors.rightMargin: 8
             anchors.verticalCenter: parent.verticalCenter
             text: root.model && root.model.length > root.currentIndex ? root._getItemText(root.model[root.currentIndex]) : ""
@@ -96,13 +96,13 @@ Column {
             elide: Text.ElideRight
         }
 
-        Text {
-            id: arrowText
+        AppIcon {
+            id: arrowIcon
             anchors.right: parent.right
             anchors.rightMargin: 12
             anchors.verticalCenter: parent.verticalCenter
-            text: "▼"
-            font.pixelSize: 10
+            name: menuPopup.opened ? "chevron-up" : "chevron-down"
+            size: 12
             color: themeBridge.textMuted
         }
 

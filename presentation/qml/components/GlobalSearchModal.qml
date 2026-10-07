@@ -239,9 +239,9 @@ Rectangle {
                                         }
                                     }
 
-                                    Text {
-                                        text: "↵"
-                                        font.pixelSize: 14
+                                    AppIcon {
+                                        name: "corner-down-left"
+                                        size: 14
                                         color: themeBridge.textMuted
                                         anchors.verticalCenter: parent.verticalCenter
                                         visible: resMouse.containsMouse

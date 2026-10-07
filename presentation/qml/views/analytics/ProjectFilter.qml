@@ -44,9 +44,9 @@ import "../../components"
                 Layout.alignment: Qt.AlignVCenter
             }
 
-            Text {
-                text: projMenu.opened ? "▲" : "▼"
-                font.pixelSize: 9
+            AppIcon {
+                name: projMenu.opened ? "chevron-up" : "chevron-down"
+                size: 12
                 color: themeBridge.textMuted
                 Layout.alignment: Qt.AlignVCenter
             }

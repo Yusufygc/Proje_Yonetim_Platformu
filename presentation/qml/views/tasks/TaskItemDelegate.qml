@@ -61,10 +61,10 @@ Rectangle {
             height: 20
             visible: model.hasChildren
 
-            Text {
+            AppIcon {
                 anchors.centerIn: parent
-                text: model.isExpanded ? "▼" : "▶"
-                font.pixelSize: 10
+                name: model.isExpanded ? "chevron-down" : "chevron-right"
+                size: 12
                 color: themeBridge.textSecondary
             }
 

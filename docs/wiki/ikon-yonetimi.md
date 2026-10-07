@@ -11,6 +11,7 @@ Yeni ikon eklemek: `resources/icons/<ad>.svg` dosyası ekle (tek renkli, `curren
 
 ## Emoji yerine SVG ikon
 Arayüzde emoji kullanılmaz; ikon gereken yerde `AppIcon`/`AppButton.iconName` ve `resources/icons/*.svg` kullanılır (emoji temayla boyanamaz, platforma göre farklı görünür). Çizim araç çubukları için çizgi ikonlar eklendi: `pencil`, `minus`, `arrow-right`, `square`, `square-fill`, `square-round`, `circle`, `eraser`, `capsule`, `diamond`, `parallelogram`, `workflow`, `clipboard`, `undo`, `redo`, `image`; ayrıca `check`, `triangle-alert`, `paperclip`, `upload`, `circle-check`, `circle-x`. Yerelleştirme metinlerine emoji yazılmaz (ikon QML tarafında verilir).
+Açılır liste ve ağaç okları `chevron-down/up/right`, alt görev işareti `corner-down-right`, Enter ipucu `corner-down-left` ikonlarıdır. İkon rengi her zaman bildirimli `themeBridge` özelliğinden verilir (`color: themeBridge.textMuted`); sabit renk kodu yazılırsa tema değişince ikon eski renkte kalır. Sağlayıcı önbelleği renk kodunu anahtara kattığı için yeni renk yeniden boyanır. `tests/test_theme_palette.py` QML'de emoji ve sembol karakterleri taramasıyla bunu korur (düz yazıdaki `→` serbest).
 Tema geçiş düğmeleri `moon`/`sun` ikonlarını kullanır (Ayarlar'da "Koyu"/"Açık" yazısıyla, daraltılmış kenar çubuğunda yalnızca ikon).
 
 ## Geçmiş

@@ -120,10 +120,10 @@ ColumnLayout {
                 }
 
                 // Alt görev oku
-                Text {
+                AppIcon {
                     visible: modelData.parent_id > 0
-                    text: "↳"
-                    font.pixelSize: 12
+                    name: "corner-down-right"
+                    size: 14
                     color: themeBridge.textMuted
                 }
 

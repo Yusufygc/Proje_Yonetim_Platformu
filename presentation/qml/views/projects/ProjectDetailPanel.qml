@@ -18,10 +18,10 @@ Item {
         spacing: 12
         visible: !detailRoot.hasProject
 
-        Text {
+        AppIcon {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "◈"
-            font.pixelSize: 36
+            name: "folder"
+            size: 36
             color: themeBridge.textMuted
         }
 
