@@ -1,5 +1,13 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] REVIEW+FIX | Denetim Raporu Bulguları 6-10: Türkçe Arama, Kalite Kapıları, Testler, ViewModel Bölme
+- **[6] Arama:** `core/text_normalization` (İ/I/ı/i katlama, LIKE joker kaçırma); SQLite bağlantısına `tr_fold` fonksiyonu; liste modelleri aynı yardımcıyı kullanıyor.
+- **[7] Kalite:** mypy 87 hatadan 0'a; ruff F401/F821 açık; 20 kullanılmayan import temizlendi; `.github/workflows/ci.yml` (ruff, mypy, pytest); pre-commit mypy tüm paketlerde. `ruff.exe` bu makinede Uygulama Denetimi tarafından engelli olduğundan ruff ilk kez CI'da koşacak.
+- **[7 ek] Dashboard hatası:** `DashboardViewModel` servis sözlüklerini ORM nesnesi sanıp süzüyordu; son fikirler boş, yüksek öncelikli görevler başlıksızdı. Düzeltildi.
+- **[8] Test:** karar, kaynak, pano servisleri, controller hata yolları, çıktı ve not akışları (+12 test).
+- **[9] ViewModel bölme:** karar, not, kaynak, çıktı ve etkinlik alt kayıtları `ProjectSubitemsViewModel`'e taşındı (QML bağlamı: `projectSubitemsViewModel`); `ProjectViewModel` 456 satırdan 289'a indi.
+- **[10] Katman ve UI thread:** `ProjectViewModel` servise doğrudan gitmiyor, görevler `TaskController.load_tasks` ile arka planda; etkinlik ve ek yükleme/oluşturma `ProjectController` içinde `Worker` ile asenkron.
+
 ## [2026-10-07] REVIEW+FIX | Denetim Raporu Bulguları 1, 2, 4, 3: Yedek Bütünlüğü, Tam Dışa Aktarım, Hata Bildirimi, Üst Görev Durumu
 `DENETIM_RAPORU_2026-10-07.md` bulgularından ilk dördü uygulandı:
 - **[1] Yedek:** `BackupManager` artık `sqlite3.Connection.backup` kullanıyor; WAL modunda `-wal` dosyasındaki veri yedeğe giriyor (regresyon testi: `test_startup_backup_when_data_only_in_wal_should_include_it`). Ayarlar'daki "Veritabanını Yedekle" butonu ve `ExportService.backup_database`, `SettingsController.backup_database`, `SettingsViewModel.backupDatabase` kaldırıldı; otomatik açılış yedeği sürüyor.
