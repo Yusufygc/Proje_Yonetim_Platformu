@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from controllers.settings_controller import SettingsController
     from controllers.stage_controller import StageController
     from controllers.task_controller import TaskController
+    from controllers.update_controller import UpdateController
     from core.events.event_bus import EventBus
     from infrastructure.database.db_manager import DatabaseManager
     from infrastructure.repositories.activity_log_repository import ActivityLogRepository
@@ -52,6 +53,7 @@ if TYPE_CHECKING:
     from services.speech.speech_to_text_service import SpeechToTextService
     from services.stage_service import StageService
     from services.task_service import TaskService
+    from services.update_service import UpdateService
 
 
 class RepositoryRegistry:
@@ -215,6 +217,12 @@ class ServiceRegistry:
         return AnalyticsService(db=self._db)
 
     @cached_property
+    def update(self) -> UpdateService:
+        from app.config import APP_VERSION, UPDATE_ASSET_NAME, UPDATE_REPOSITORY
+        from services.update_service import UpdateService
+        return UpdateService(APP_VERSION, UPDATE_REPOSITORY, UPDATE_ASSET_NAME)
+
+    @cached_property
     def speech_to_text(self) -> SpeechToTextService:
         from app.config import VOSK_TR_MODEL_DIR
         from services.speech.speech_to_text_service import SpeechToTextService
@@ -292,3 +300,8 @@ class ControllerRegistry:
             service=self._services.analytics,
             event_bus=self._event_bus,
         )
+
+    @cached_property
+    def update_controller(self) -> UpdateController:
+        from controllers.update_controller import UpdateController
+        return UpdateController(service=self._services.update)

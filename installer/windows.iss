@@ -13,6 +13,8 @@ OutputBaseFilename=ProjeTakipPlatformuSetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+; Uygulama içi güncellemede çalışan sürüm kapatılıp dosyalar yerinde değiştirilir.
+CloseApplications=yes
 
 [Files]
 Source: "..\dist\ProjeTakipPlatformu\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -28,3 +30,5 @@ Name: "desktopicon"; Description: "Masaustu kisayolu olustur"; GroupDescription:
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{#MyAppName} uygulamasini baslat"; Flags: nowait postinstall skipifsilent
+; Sessiz kurulum (uygulama içi güncelleme) sonrası uygulama kendiliğinden yeniden açılır.
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait; Check: WizardSilent

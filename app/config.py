@@ -18,6 +18,11 @@ APP_NAME = "Proje Takip Platformu"
 APP_VERSION = "0.1.0"
 APP_ORGANIZATION = "ProjeTakip"
 
+# --- Güncelleme ---
+# Sürümler GitHub Releases üzerinden dağıtılır; depo public olduğundan token gerekmez.
+UPDATE_REPOSITORY = "Yusufygc/Proje_Yonetim_Platformu"
+UPDATE_ASSET_NAME = "ProjeTakipPlatformuSetup.exe"
+
 
 def _resolve_data_dir() -> Path:
     """Windows'ta %LOCALAPPDATA%\\ProjeTakip; env değişkeni yoksa eski konuma düşer.

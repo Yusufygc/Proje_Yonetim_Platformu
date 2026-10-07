@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.15
 
 import "shell"
 import "components"
+import "dialogs"
 
 ApplicationWindow {
     id: appWindow
@@ -92,4 +93,7 @@ ApplicationWindow {
     GlobalSearchModal {
         anchors.fill: parent
     }
+
+    // Yeni sürüm bildirimi
+    UpdateDialog { }
 }

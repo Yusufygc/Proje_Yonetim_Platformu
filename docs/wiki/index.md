@@ -19,6 +19,7 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[gorevler-modulu]] — QML Görev Ağacı (WBS): filtreler, kopyalama/çoğaltma, akıllı daraltma, scroll koruma ve üst görev durum kuralı.
 - [[notlar-modulu]] — Markdown notlar, zengin serbest çizim tuvali, geometrik şekiller, algoritma akış şemaları ve resim ekleme.
 - [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton.qml` + `VoiceBridge` + `TranscriptionWorker` + `SpeechToTextService`.
+- [[guncelleme-sistemi]] — Açılışta GitHub Releases denetimi, güncelleme penceresi, doğrulamalı indirme ve sessiz kurulum; etiketle yayın akışı.
 - [[liste-siralama]] — Liste sıralama altyapısı (`sort_order`/`display_order`, `reorder` zinciri); QML'de sürükle-bırak arayüzü şu an yok.
 
 ## Kurallar ve Süreç

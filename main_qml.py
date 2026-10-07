@@ -104,6 +104,7 @@ def run_qml_app() -> int:
     from presentation.viewmodels.settings_viewmodel import SettingsViewModel  # noqa: PLC0415
     from presentation.viewmodels.task_dialog_viewmodel import TaskDialogViewModel  # noqa: PLC0415
     from presentation.viewmodels.task_viewmodel import TaskViewModel  # noqa: PLC0415
+    from presentation.viewmodels.update_viewmodel import UpdateViewModel  # noqa: PLC0415
     from presentation.viewmodels.voice_bridge import VoiceBridge  # noqa: PLC0415
 
     theme_bridge = ThemeBridge(container.theme, container.prefs, parent=app)
@@ -122,6 +123,8 @@ def run_qml_app() -> int:
     settings_viewmodel = SettingsViewModel(container, parent=app)
     search_viewmodel = SearchViewModel(container, nav_bridge, parent=app)
     voice_bridge = VoiceBridge(container, parent=app)
+    update_viewmodel = UpdateViewModel(container, parent=app)
+    update_viewmodel.quitRequested.connect(app.quit)
 
     # Python GC koruması için referansları sakla
     app._icon_provider = icon_provider  # type: ignore[attr-defined]
@@ -141,6 +144,7 @@ def run_qml_app() -> int:
     app._settings_viewmodel = settings_viewmodel  # type: ignore[attr-defined]
     app._search_viewmodel = search_viewmodel  # type: ignore[attr-defined]
     app._voice_bridge = voice_bridge  # type: ignore[attr-defined]
+    app._update_viewmodel = update_viewmodel  # type: ignore[attr-defined]
 
     # QML global context erişimleri
     context = engine.rootContext()
@@ -160,6 +164,7 @@ def run_qml_app() -> int:
     context.setContextProperty("settingsViewModel", settings_viewmodel)
     context.setContextProperty("searchViewModel", search_viewmodel)
     context.setContextProperty("voiceBridge", voice_bridge)
+    context.setContextProperty("updateViewModel", update_viewmodel)
 
     qml_file = Path(__file__).parent / "presentation" / "qml" / "main.qml"
     engine.load(str(qml_file))
@@ -173,6 +178,8 @@ def run_qml_app() -> int:
         setup_window_geometry(root_window, container.prefs, app)
 
     QTimer.singleShot(200, container.run_deferred_startup_tasks)
+    # Açılış yavaşlamasın diye arayüz yerleştikten sonra denetlenir.
+    QTimer.singleShot(3000, update_viewmodel.checkOnStartup)
     return app.exec()
 
 

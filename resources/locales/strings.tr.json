@@ -225,5 +225,13 @@
   "status_todo": "Yapılacak",
   "status_in_progress": "Sürüyor",
   "status_review": "İncelemede",
-  "priority_urgent": "Acil"
+  "priority_urgent": "Acil",
+  "update_dialog_title": "Yeni güncelleme var",
+  "update_dialog_message": "Yeni bir sürüm yayınlandı. Şimdi güncellemek ister misiniz?",
+  "update_dialog_current": "Mevcut sürüm",
+  "update_dialog_latest": "Yeni sürüm",
+  "update_downloading": "İndiriliyor... Kurulum sırasında uygulama kapanıp yeniden açılır.",
+  "update_action_now": "Güncelle",
+  "update_action_later": "Sonra",
+  "settings_update_check": "Güncellemeleri Denetle"
 }

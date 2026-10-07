@@ -1,5 +1,12 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] FEATURE | Uygulama İçi Güncelleme
+- **Akış:** Açılışta GitHub Releases denetimi, "Yeni güncelleme var" penceresi, boyut/SHA-256 doğrulamalı indirme, sessiz kurulum ve yeniden açılış. Ayrıntı: `guncelleme-sistemi`.
+- **Kod:** `UpdateService`, `UpdateController`, `UpdateViewModel`, `UpdateDialog.qml`, Ayarlar'da "Güncellemeleri Denetle"; yerelleştirme anahtarları (tr/en) eklendi.
+- **Yayın:** `scripts/set_version.py` (dört dosyada sürüm), `.github/workflows/release.yml` (etiketle derle ve yayınla), `installer/windows.iss` (kapatma ve sessiz kurulum sonrası yeniden açma).
+- **CI:** `ruff` I001/F401/F811 bulguları giderildi (28 import bloğu); `uv.lock` `keyring` kaldırılınca yeniden üretildi.
+- **Doğrulanmadı:** Release iş akışı ve gerçek güncelleme (installer'ın uygulamayı kapatıp yeniden açması) henüz hiç koşmadı.
+
 ## [2026-10-07] REFACTOR | DrawingCanvas Bölündü
 - **`DrawingCanvas.qml`** 1325 → 399 satır. Araç çubukları, metin düzenleme penceresi ve çizim mantığı `presentation/qml/views/memo/drawing/` altına taşındı (ayrıntı: `notlar-modulu`).
 - Dışa açık API (`loadDrawingJson`, `getDrawingJson`, `undo`, `redo`, `clearCanvas`, `setBackgroundImage`) değişmedi; kullanılmayan `isEraser`, `lines`, `currentLine` takma adları kaldırıldı.

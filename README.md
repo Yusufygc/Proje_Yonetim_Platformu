@@ -166,6 +166,19 @@ Kaynak koddan tek dosya EXE üretmek için:
 
 Build parametreleri `packaging\proje_takip_platformu.spec` içinde tanımlıdır.
 
+### Sürüm yayınlama ve otomatik güncelleme
+
+Kurulu uygulama açılışta GitHub Releases'te yeni sürüm arar ve güncelleme teklif eder. Sürüm çıkarmak için:
+
+```powershell
+python scripts/set_version.py 0.2.0
+git commit -am "chore(surum): v0.2.0 sürümü hazırlandı"
+git tag v0.2.0
+git push --follow-tags
+```
+
+Etiket push edilince `.github/workflows/release.yml` installer'ı derleyip yayınlar. Ayrıntı: `docs/wiki/guncelleme-sistemi.md`.
+
 ---
 
 ## Klasör Yapısı

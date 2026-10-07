@@ -278,6 +278,14 @@ ScrollView {
             }
         }
 
+        // Güncelleme denetimi
+        AppButton {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: i18nBridge.tr("settings_update_check", "Güncellemeleri Denetle")
+            variant: "secondary"
+            onClicked: updateViewModel.checkForUpdates()
+        }
+
         // Sürüm Bilgisi
         Text {
             anchors.horizontalCenter: parent.horizontalCenter

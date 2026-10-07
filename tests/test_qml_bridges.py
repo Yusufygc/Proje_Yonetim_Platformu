@@ -51,6 +51,7 @@ from presentation.viewmodels.settings_viewmodel import SettingsViewModel
 from presentation.viewmodels.task_dialog_viewmodel import TaskDialogViewModel
 from presentation.viewmodels.task_list_model import TaskListModel
 from presentation.viewmodels.task_viewmodel import TaskViewModel
+from presentation.viewmodels.update_viewmodel import UpdateViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
 from presentation.viewmodels.voice_bridge import VoiceBridge
 
@@ -696,6 +697,7 @@ def test_search_viewmodel(qapp: QApplication, container: DIContainer) -> None:
 
 def test_voice_bridge(qapp: QApplication, container: DIContainer) -> None:
     vb = VoiceBridge(container, parent=qapp)
+    uv = UpdateViewModel(container, parent=qapp)
     assert vb.isListening is False
     assert vb.partialText == ""
 
@@ -747,6 +749,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     qapp._test_stv = stv  # type: ignore[attr-defined]
     qapp._test_scv = scv  # type: ignore[attr-defined]
     qapp._test_vb = vb  # type: ignore[attr-defined]
+    qapp._test_uv = uv  # type: ignore[attr-defined]
 
     engine.rootContext().setContextProperty("themeBridge", tb)
     engine.rootContext().setContextProperty("i18nBridge", ib)
@@ -764,6 +767,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     engine.rootContext().setContextProperty("settingsViewModel", stv)
     engine.rootContext().setContextProperty("searchViewModel", scv)
     engine.rootContext().setContextProperty("voiceBridge", vb)
+    engine.rootContext().setContextProperty("updateViewModel", uv)
 
     qml_file = Path("presentation/qml/main.qml")
     engine.load(str(qml_file))
