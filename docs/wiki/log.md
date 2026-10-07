@@ -1,5 +1,10 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] FIX | Testler Gerçek Veri Klasörüne Yazıyordu
+- Ayar denetiminin devamında bulundu: `DIContainer.bootstrap()` log dosyasını `%LOCALAPPDATA%\ProjeTakip\logs` altında açıyor, `test_memo_viewmodel_crud` panodaki görseli `memo_images` altına kaydediyordu. Her test çalışması kullanıcının log geçmişini DEBUG gürültüsüyle döndürüyor (3 yedek x 5 MB) ve klasöre 118 baytlık test görseli ekliyordu (103 adet birikmişti, veritabanından hiçbiri referanslı değil).
+- `tests/conftest.py` artık `config.DATA_DIR`, veritabanı, log, yedek ve görsel yollarını geçici dizine yönlendiriyor; `test_data_paths_when_running_tests_should_not_point_to_real_user_data` bunu doğruluyor. Test sonrası gerçek klasörün değişmediği elle doğrulandı.
+- Gerçek `.backups` yedekleri gerçek uygulama açılışlarından (testler yedeği geçici dizine alıyordu); veritabanı içeriğinde test kaydı yok.
+
 ## [2026-10-08] FIX | Dikte Metni Her Alana Yazılıyordu, Testler Gerçek Ayarları Değiştiriyordu
 - **Dikte:** Mikrofonla söylenen metin hızlı ekleme alanıyla birlikte arama kutusuna da yazılıyordu: sonuç sinyalini gizli olanlar dahil her mikrofon düğmesi dinliyordu. `VoiceBridge.activeOwner` + `toggleListeningFor(owner)` eklendi; yalnızca dinlemeyi başlatan düğme metni alır. Mikrofon düğmesi artık `showVoiceInput` olmayan alanlarda hiç oluşturulmuyor (`Loader`). Testler: iki alanlı QML denemesi ve sahip kaydı.
 - **Ayarlar:** `QSettings(org, app)` kurucusu `setDefaultFormat`'ı yok sayıyor; testler ve çizim betikleri tema, kenar çubuğu ve pencere tercihlerini kullanıcının gerçek kayıt defterine yazıyordu. `PreferenceManager` biçimi açıkça `QSettings.defaultFormat()` ile veriyor (üretimde varsayılan NativeFormat, yer değişmedi); `tests/conftest.py` testleri geçici ini dosyasına yönlendiriyor, doğrulayan test eklendi.

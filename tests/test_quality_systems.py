@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import sqlite3
 import sys
 from pathlib import Path
@@ -115,3 +116,15 @@ def test_memory_migration_stamps_alembic_head(test_db):
     with test_db.engine.connect() as conn:
         version = conn.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one()
     assert version == HEAD_REVISION
+
+
+def test_data_paths_when_running_tests_should_not_point_to_real_user_data() -> None:
+    from app import config
+
+    real_dirs = (
+        Path(os.environ.get("LOCALAPPDATA", str(Path.home()))).resolve() / "ProjeTakip",
+        Path.home().resolve() / ".proje_takip",
+    )
+    for path in (config.DATA_DIR, config.LOG_FILE, config.MEMO_IMAGES_DIR, config.BACKUPS_DIR):
+        resolved = Path(path).resolve()
+        assert not any(resolved == real or real in resolved.parents for real in real_dirs)

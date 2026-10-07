@@ -24,6 +24,27 @@ QSettings.setDefaultFormat(QSettings.Format.IniFormat)
 QSettings.setPath(QSettings.Format.IniFormat, QSettings.Scope.UserScope, _SETTINGS_DIR)
 
 
+def _redirect_data_dir(root: Path) -> None:
+    """Veri, log, yedek ve görsel yollarını geçici dizine yönlendirir.
+
+    DIContainer.bootstrap() log dosyasını açıyor, MemoViewModel panodaki görseli kaydediyor; bunlar
+    gerçek %LOCALAPPDATA%\\ProjeTakip altına yazınca kullanıcının log geçmişi test gürültüsüyle
+    dönüp siliniyor ve veri klasörü test görselleriyle doluyordu.
+    """
+    from app import config
+
+    config.DATA_DIR = root
+    config.DATABASE_PATH = root / "proje_takip.db"
+    config.DATABASE_URL = f"sqlite:///{config.DATABASE_PATH}"
+    config.BACKUPS_DIR = root / ".backups"
+    config.LOGS_DIR = root / "logs"
+    config.LOG_FILE = config.LOGS_DIR / "app.log"
+    config.MEMO_IMAGES_DIR = root / "memo_images"
+
+
+_redirect_data_dir(Path(tempfile.mkdtemp(prefix="proje_takip_test_data_")))
+
+
 @pytest.fixture(scope="function")
 def test_db() -> DatabaseManager:
     """
