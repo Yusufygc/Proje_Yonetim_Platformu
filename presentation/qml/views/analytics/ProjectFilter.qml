@@ -114,10 +114,9 @@ import "../../components"
                             Layout.alignment: Qt.AlignVCenter
                         }
 
-                        Text {
-                            text: "✓"
-                            font.pixelSize: 12
-                            font.bold: true
+                        AppIcon {
+                            name: "check"
+                            size: 14
                             color: themeBridge.accentStart
                             visible: analyticsViewModel.projectId === modelData.id
                             Layout.alignment: Qt.AlignVCenter

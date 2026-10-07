@@ -277,6 +277,7 @@ ScrollView {
                 }
 
                 AppButton {
+                    iconName: "upload"
                     text: i18nBridge.tr("settings_export_btn", "Tüm Veriyi Dışa Aktar (.json)")
                     variant: "primary"
                     onClicked: settingsViewModel.exportToJson("")

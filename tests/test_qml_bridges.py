@@ -986,6 +986,28 @@ def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContaine
     canvas.loadDrawingJson(json.dumps(data_with_img))
     assert canvas.property("backgroundImage") == test_img_url
 
+    # 7. Araç çubuğu düğmeleri durumu tuvalde değiştirmeli (çubuk durum tutmaz, sinyalle bildirir)
+    from PySide6.QtCore import QMetaObject  # noqa: PLC0415
+
+    def find_button(item, label):
+        if item.property("text") == label:
+            return item
+        for child in item.childItems():
+            found = find_button(child, label)
+            if found is not None:
+                return found
+        return None
+
+    flow_button = find_button(canvas, ib.tr("tab_tools_flowchart", "Akış Şeması"))
+    assert flow_button is not None
+    QMetaObject.invokeMethod(flow_button, "click")
+    assert canvas.property("toolMode") == "flowchart"
+    assert canvas.property("activeTool") == "flow_process"
+    draw_button = find_button(canvas, ib.tr("tab_tools_draw", "Çizim"))
+    QMetaObject.invokeMethod(draw_button, "click")
+    assert canvas.property("toolMode") == "draw"
+    assert canvas.property("activeTool") == "pen"
+
     # Asenkron Image bir görsel okuyucu iş parçacığı başlatır; motor süreç çıkışına kadar yaşarsa
     # kapanış sonsuza dek takılır. Bu yüzden nesneleri açıkça, olay döngüsü olmadan silerek bitir.
     from PySide6.QtCore import QCoreApplication, QEvent  # noqa: PLC0415

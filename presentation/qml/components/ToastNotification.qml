@@ -40,16 +40,15 @@ Rectangle {
         anchors.centerIn: parent
         spacing: 10
 
-        Text {
+        AppIcon {
             id: iconText
-            text: {
-                if (toastRoot.toastType === "success") return "✓";
-                if (toastRoot.toastType === "danger" || toastRoot.toastType === "error") return "✕";
-                if (toastRoot.toastType === "warning") return "⚠";
-                return "ℹ";
+            name: {
+                if (toastRoot.toastType === "success") return "check";
+                if (toastRoot.toastType === "danger" || toastRoot.toastType === "error") return "x";
+                if (toastRoot.toastType === "warning") return "triangle-alert";
+                return "circle-info";
             }
-            font.pixelSize: 15
-            font.bold: true
+            size: 16
             color: "#FFFFFF"
             anchors.verticalCenter: parent.verticalCenter
         }

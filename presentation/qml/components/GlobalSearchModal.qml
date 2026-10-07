@@ -131,10 +131,11 @@ Rectangle {
                     spacing: 8
                     visible: !searchInput.text
 
-                    Text {
+                    AppIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "🔍"
-                        font.pixelSize: 28
+                        name: "search"
+                        size: 28
+                        color: themeBridge.textMuted
                     }
 
                     Text {

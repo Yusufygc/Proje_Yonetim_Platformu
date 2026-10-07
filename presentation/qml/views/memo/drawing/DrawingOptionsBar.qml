@@ -92,7 +92,8 @@ Flickable {
 
         // Dolgu Seçimi
         AppButton {
-            text: bar.fillEnabled ? "■ " + i18nBridge.tr("label_fill", "Dolgulu") : "□ " + i18nBridge.tr("label_outline", "İçi Boş")
+            iconName: bar.fillEnabled ? "square-fill" : "square"
+            text: bar.fillEnabled ? i18nBridge.tr("label_fill", "Dolgulu") : i18nBridge.tr("label_outline", "İçi Boş")
             btnVariant: bar.fillEnabled ? "primary" : "secondary"
             implicitHeight: 28
             onClicked: bar.fillToggled()
@@ -102,14 +103,15 @@ Flickable {
 
         // Görsel Ekle / Arka Planı Kaldır
         AppButton {
-            text: "🖼️ " + i18nBridge.tr("tool_image", "Görsel")
+            iconName: "image"
+            text: i18nBridge.tr("tool_image", "Görsel")
             btnVariant: "secondary"
             implicitHeight: 28
             onClicked: bar.imagePickRequested()
         }
 
         AppButton {
-            text: "❌"
+            iconName: "x"
             btnVariant: "danger"
             implicitWidth: 28
             implicitHeight: 28

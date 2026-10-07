@@ -62,8 +62,15 @@ ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 8
 
+                            AppIcon {
+                                name: "paperclip"
+                                size: 14
+                                color: themeBridge.textMuted
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
                             Text {
-                                text: "📎 " + modelData.title
+                                text: modelData.title
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
                                 color: themeBridge.textPrimary

@@ -198,7 +198,7 @@ AppCard {
                     }
 
                     AppButton {
-                        text: "🖼️"
+                        iconName: "image"
                         btnVariant: "secondary"
                         implicitWidth: 32
                         implicitHeight: 28

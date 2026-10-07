@@ -47,23 +47,19 @@ Flickable {
                 spacing: 2
 
                 AppButton {
-                    text: "✏️ " + i18nBridge.tr("tab_tools_draw", "Çizim")
+                    iconName: "pencil"
+                    text: i18nBridge.tr("tab_tools_draw", "Çizim")
                     btnVariant: bar.toolMode === "draw" ? "primary" : "ghost"
                     implicitHeight: 24
-                    onClicked: {
-                        bar.toolMode = "draw"
-                        if (bar.activeTool.startsWith("flow_")) bar.activeTool = "pen"
-                    }
+                    onClicked: bar.modeSelected("draw")
                 }
 
                 AppButton {
-                    text: "🔷 " + i18nBridge.tr("tab_tools_flowchart", "Akış Şeması")
+                    iconName: "workflow"
+                    text: i18nBridge.tr("tab_tools_flowchart", "Akış Şeması")
                     btnVariant: bar.toolMode === "flowchart" ? "primary" : "ghost"
                     implicitHeight: 24
-                    onClicked: {
-                        bar.toolMode = "flowchart"
-                        bar.activeTool = "flow_process"
-                    }
+                    onClicked: bar.modeSelected("flowchart")
                 }
             }
         }
@@ -76,49 +72,56 @@ Flickable {
             spacing: Theme.spacing.xs
 
             AppButton {
-                text: "✏️ " + i18nBridge.tr("tool_pen", "Kalem")
+                iconName: "pencil"
+                text: i18nBridge.tr("tool_pen", "Kalem")
                 btnVariant: bar.activeTool === "pen" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("pen")
             }
 
             AppButton {
-                text: "➖ " + i18nBridge.tr("tool_line", "Çizgi")
+                iconName: "minus"
+                text: i18nBridge.tr("tool_line", "Çizgi")
                 btnVariant: bar.activeTool === "line" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("line")
             }
 
             AppButton {
-                text: "➔ " + i18nBridge.tr("tool_arrow", "Ok")
+                iconName: "arrow-right"
+                text: i18nBridge.tr("tool_arrow", "Ok")
                 btnVariant: bar.activeTool === "arrow" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("arrow")
             }
 
             AppButton {
-                text: "▭ " + i18nBridge.tr("tool_rect", "Kutu")
+                iconName: "square"
+                text: i18nBridge.tr("tool_rect", "Kutu")
                 btnVariant: bar.activeTool === "rect" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("rect")
             }
 
             AppButton {
-                text: "▢ " + i18nBridge.tr("tool_round_rect", "Oval")
+                iconName: "square-round"
+                text: i18nBridge.tr("tool_round_rect", "Oval")
                 btnVariant: bar.activeTool === "round_rect" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("round_rect")
             }
 
             AppButton {
-                text: "◯ " + i18nBridge.tr("tool_circle", "Daire")
+                iconName: "circle"
+                text: i18nBridge.tr("tool_circle", "Daire")
                 btnVariant: bar.activeTool === "circle" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("circle")
             }
 
             AppButton {
-                text: "⌫ " + i18nBridge.tr("tool_eraser", "Silgi")
+                iconName: "eraser"
+                text: i18nBridge.tr("tool_eraser", "Silgi")
                 btnVariant: bar.activeTool === "eraser" ? "warning" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("eraser")
@@ -131,42 +134,48 @@ Flickable {
             spacing: Theme.spacing.xs
 
             AppButton {
-                text: "🟢 " + i18nBridge.tr("flow_terminator", "Başla/Bitir")
+                iconName: "capsule"
+                text: i18nBridge.tr("flow_terminator", "Başla/Bitir")
                 btnVariant: bar.activeTool === "flow_start" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("flow_start")
             }
 
             AppButton {
-                text: "🟦 " + i18nBridge.tr("flow_process", "İşlem")
+                iconName: "square"
+                text: i18nBridge.tr("flow_process", "İşlem")
                 btnVariant: bar.activeTool === "flow_process" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("flow_process")
             }
 
             AppButton {
-                text: "🔶 " + i18nBridge.tr("flow_decision", "Karar")
+                iconName: "diamond"
+                text: i18nBridge.tr("flow_decision", "Karar")
                 btnVariant: bar.activeTool === "flow_decision" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("flow_decision")
             }
 
             AppButton {
-                text: "▱ " + i18nBridge.tr("flow_io", "Girdi/Çıktı")
+                iconName: "parallelogram"
+                text: i18nBridge.tr("flow_io", "Girdi/Çıktı")
                 btnVariant: bar.activeTool === "flow_io" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("flow_io")
             }
 
             AppButton {
-                text: "➔ " + i18nBridge.tr("flow_arrow", "Akış Oku")
+                iconName: "arrow-right"
+                text: i18nBridge.tr("flow_arrow", "Akış Oku")
                 btnVariant: bar.activeTool === "arrow" ? "primary" : "secondary"
                 implicitHeight: 28
                 onClicked: bar.toolSelected("arrow")
             }
 
             AppButton {
-                text: "📋 " + i18nBridge.tr("flow_template", "Hazır Şema")
+                iconName: "clipboard"
+                text: i18nBridge.tr("flow_template", "Hazır Şema")
                 btnVariant: "secondary"
                 implicitHeight: 28
                 onClicked: bar.templateRequested()
@@ -179,7 +188,7 @@ Flickable {
 
         // Geri Al / İleri Al
         AppButton {
-            text: "↩"
+            iconName: "undo"
             btnVariant: "secondary"
             implicitWidth: 32
             implicitHeight: 28
@@ -189,7 +198,7 @@ Flickable {
         }
 
         AppButton {
-            text: "↪"
+            iconName: "redo"
             btnVariant: "secondary"
             implicitWidth: 32
             implicitHeight: 28
