@@ -1,109 +1,105 @@
 """
-Export Service - Uygulama verilerinin yedeklenmesi ve dışa aktarılması.
+Export Service - Uygulama verilerinin JSON olarak dışa aktarılması.
 """
 import json
 import logging
-import shutil
+from collections import defaultdict
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select
+from sqlalchemy.orm import Session
 
-from app import config
+from domain.models.activity_log import ActivityLog
+from domain.models.attachment import Attachment
+from domain.models.checklist_item import ChecklistItem
 from domain.models.decision_record import DecisionRecord
 from domain.models.idea import Idea
+from domain.models.memo import Memo
 from domain.models.note import Note
 from domain.models.project import Project
+from domain.models.project_idea import ProjectIdea
+from domain.models.project_stage import ProjectStage
+from domain.models.project_tag import ProjectTag
 from domain.models.resource import Resource
 from domain.models.task import Task
 from infrastructure.database.db_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
+EXPORT_FORMAT_VERSION = 2
+
+# Proje altında listelenen tablolar: JSON anahtarı -> model. Yeni tablo eklemek tek satırdır.
+_PROJECT_CHILDREN: dict[str, type] = {
+    "stages": ProjectStage,
+    "tasks": Task,
+    "decisions": DecisionRecord,
+    "notes": Note,
+    "resources": Resource,
+    "attachments": Attachment,
+    "tags": ProjectTag,
+    "activity_logs": ActivityLog,
+}
+
+
+def _to_jsonable(value: Any) -> Any:
+    if isinstance(value, (datetime, date)):
+        return value.isoformat()
+    return value
+
+
+def _row_to_dict(row: Any) -> dict[str, Any]:
+    """Modelin tüm kolonlarını yazar; yeni eklenen kolonlar da kendiliğinden dışa aktarılır."""
+    columns = inspect(type(row)).mapper.column_attrs
+    return {column.key: _to_jsonable(getattr(row, column.key)) for column in columns}
+
+
+def _all_rows(sess: Session, model: type) -> list[dict[str, Any]]:
+    return [_row_to_dict(row) for row in sess.scalars(select(model))]
+
+
+def _group_by(rows: list[dict[str, Any]], key: str) -> dict[Any, list[dict[str, Any]]]:
+    grouped: dict[Any, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        grouped[row[key]].append(row)
+    return grouped
+
+
+def _attach_checklists(tasks: list[dict[str, Any]], checklist_rows: list[dict[str, Any]]) -> None:
+    by_task = _group_by(checklist_rows, "task_id")
+    for task in tasks:
+        task["checklist_items"] = by_task.get(task["id"], [])
+
+
+def _build_projects(sess: Session) -> list[dict[str, Any]]:
+    children = {name: _group_by(_all_rows(sess, model), "project_id") for name, model in _PROJECT_CHILDREN.items()}
+    checklists = _all_rows(sess, ChecklistItem)
+    projects = _all_rows(sess, Project)
+    for project in projects:
+        for name, grouped in children.items():
+            project[name] = grouped.get(project["id"], [])
+        _attach_checklists(project["tasks"], checklists)
+    return projects
+
 
 class ExportService:
     def __init__(self, db: DatabaseManager) -> None:
         self._db = db
 
-    def backup_database(self, target_path: str) -> None:
-        """Mevcut SQLite veritabanını hedef dizine/dosyaya kopyalar."""
-        source = config.DATABASE_PATH
-        if not source.exists():
-            raise FileNotFoundError("Veritabanı dosyası bulunamadı.")
-            
-        target = Path(target_path)
-        shutil.copy2(source, target)
-        logger.info("Veritabanı yedeklendi: %s", target)
-
     def export_to_json(self, target_path: str) -> None:
-        """Tüm proje verilerini (ve alt ilişkileri) JSON formatında dışa aktarır."""
-        export_data: dict[str, Any] = {"projects": [], "ideas": []}
-
+        """Tüm tabloları (projeler ve alt kayıtları, fikirler, memolar) JSON olarak yazar."""
         with self._db.session() as sess:
-            # Fikirler
-            for idea in sess.scalars(select(Idea)):
-                export_data["ideas"].append({
-                    "id": idea.id,
-                    "title": idea.title,
-                    "problem": idea.problem,
-                    "solution": idea.solution,
-                    "notes": idea.notes,
-                    "created_at": idea.created_at.isoformat() if idea.created_at else None
-                })
-
-            # Projeler ve alt nesneleri
-            for proj in sess.scalars(select(Project)):
-                proj_data = {
-                    "id": proj.id,
-                    "title": proj.title,
-                    "description": proj.short_description,
-                    "status": proj.status,
-                    "tasks": [],
-                    "decisions": [],
-                    "notes": [],
-                    "resources": []
-                }
-                
-                # Görevler
-                tasks = sess.scalars(select(Task).where(Task.project_id == proj.id))
-                for t in tasks:
-                    proj_data["tasks"].append({
-                        "id": t.id,
-                        "title": t.title,
-                        "status": t.status,
-                        "parent_task_id": t.parent_task_id,
-                        "order_index": t.order_index
-                    })
-                    
-                # Kararlar
-                decisions = sess.scalars(select(DecisionRecord).where(DecisionRecord.project_id == proj.id))
-                for d in decisions:
-                    proj_data["decisions"].append({
-                        "id": d.id,
-                        "title": d.title,
-                        "status": d.status
-                    })
-
-                # Notlar
-                notes = sess.scalars(select(Note).where(Note.project_id == proj.id))
-                for n in notes:
-                    proj_data["notes"].append({
-                        "id": n.id,
-                        "title": n.title
-                    })
-
-                # Kaynaklar
-                resources = sess.scalars(select(Resource).where(Resource.project_id == proj.id))
-                for r in resources:
-                    proj_data["resources"].append({
-                        "id": r.id,
-                        "title": r.title,
-                        "url": r.url
-                    })
-
-                export_data["projects"].append(proj_data)
+            export_data = {
+                "format_version": EXPORT_FORMAT_VERSION,
+                "exported_at": datetime.now(timezone.utc).isoformat(),
+                "projects": _build_projects(sess),
+                "ideas": _all_rows(sess, Idea),
+                "project_ideas": _all_rows(sess, ProjectIdea),
+                "memos": _all_rows(sess, Memo),
+            }
 
         with open(target_path, "w", encoding="utf-8") as f:
-            json.dump(export_data, f, ensure_ascii=False, indent=4)
-            
-        logger.info("JSON dışa aktarımı tamamlandı: %s", target_path)
+            json.dump(export_data, f, ensure_ascii=False, indent=2)
+
+        logger.info("JSON export completed: %s", Path(target_path))

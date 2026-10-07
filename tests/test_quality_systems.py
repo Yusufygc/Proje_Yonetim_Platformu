@@ -95,6 +95,23 @@ def test_startup_backup_creates_file_and_rotates(tmp_path):
     assert len(backups) <= 2
 
 
+def test_startup_backup_when_data_only_in_wal_should_include_it(tmp_path):
+    db_path = tmp_path / "app.db"
+    live = sqlite3.connect(db_path)
+    live.execute("PRAGMA journal_mode=WAL")
+    live.execute("PRAGMA wal_autocheckpoint=0")
+    live.execute("CREATE TABLE sample(id INTEGER PRIMARY KEY, label TEXT)")
+    live.execute("INSERT INTO sample(label) VALUES ('wal-only')")
+    live.commit()
+
+    backup = BackupManager(db_path, tmp_path / ".backups").run_startup_backup()
+
+    assert backup is not None
+    with sqlite3.connect(backup) as restored:
+        assert restored.execute("SELECT label FROM sample").fetchall() == [("wal-only",)]
+    live.close()
+
+
 def test_secret_manager_uses_keyring(monkeypatch):
     store: dict[tuple[str, str], str] = {}
 

@@ -546,7 +546,6 @@ def test_settings_viewmodel(qapp: QApplication, container: DIContainer) -> None:
     assert len(svm.fontFamilies) >= 5
     assert svm.appName != ""
     assert svm.appVersion != ""
-    assert svm.dbPath != ""
 
     svm.setMode(True)
     assert svm.isDark is True
@@ -566,8 +565,6 @@ def test_settings_viewmodel(qapp: QApplication, container: DIContainer) -> None:
 
     exp_path = svm.getDefaultExportPath()
     assert exp_path.endswith(".json")
-    bck_path = svm.getDefaultBackupPath()
-    assert bck_path.endswith(".db")
 
 
 def test_search_viewmodel(qapp: QApplication, container: DIContainer) -> None:

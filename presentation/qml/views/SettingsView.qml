@@ -254,55 +254,26 @@ ScrollView {
             }
         }
 
-        // ── 4. Veri Yönetimi ve Yedekleme ───────────────────────────────────
+        // ── 4. Veri Yönetimi ───────────────────────────────────
         AppCard {
             width: parent.width - 48
-            height: 190
+            height: 110
 
             Column {
                 anchors.fill: parent
                 spacing: 14
 
                 Text {
-                    text: i18nBridge.tr("settings_data_section", "Veri Yönetimi & Yedekleme")
+                    text: i18nBridge.tr("settings_data_section", "Veri Yönetimi")
                     font.pixelSize: 15
                     font.weight: Font.DemiBold
                     color: themeBridge.textPrimary
                 }
 
-                Row {
-                    spacing: 16
-
-                    AppButton {
-                        text: i18nBridge.tr("settings_export_btn", "Tüm Veriyi Dışa Aktar (.json)")
-                        variant: "primary"
-                        onClicked: settingsViewModel.exportToJson("")
-                    }
-
-                    AppButton {
-                        text: i18nBridge.tr("settings_backup_btn", "Veritabanını Yedekle (.db)")
-                        variant: "secondary"
-                        onClicked: settingsViewModel.backupDatabase("")
-                    }
-                }
-
-                Column {
-                    spacing: 4
-                    Text {
-                        text: "• " + i18nBridge.tr("settings_db_location", "Aktif Veritabanı: ") + settingsViewModel.dbPath
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
-                    Text {
-                        text: "• " + i18nBridge.tr("settings_backup_location", "Yedekleme Konumu: ") + settingsViewModel.getDefaultBackupPath()
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
-                    Text {
-                        text: "• " + i18nBridge.tr("settings_export_location", "JSON Çıktı Konumu: ") + settingsViewModel.getDefaultExportPath()
-                        font.pixelSize: 11
-                        color: themeBridge.textMuted
-                    }
+                AppButton {
+                    text: i18nBridge.tr("settings_export_btn", "Tüm Veriyi Dışa Aktar (.json)")
+                    variant: "primary"
+                    onClicked: settingsViewModel.exportToJson("")
                 }
             }
         }

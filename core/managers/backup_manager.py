@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import logging
-import shutil
 import sqlite3
+from contextlib import closing
 from datetime import datetime
 from pathlib import Path
 
@@ -32,10 +32,17 @@ class BackupManager:
         while target.exists():
             target = self._backups_dir / f"backup_{timestamp}_{counter}.db"
             counter += 1
-        shutil.copy2(self._database_path, target)
+        self._copy_database(target)
         self._rotate()
         logger.info("Startup database backup created: %s", target)
         return target
+
+    def _copy_database(self, target: Path) -> None:
+        # WAL modunda son yazımlar "-wal" dosyasında kalır; dosya kopyası bunları kaçırır,
+        # SQLite yedekleme API'si tutarlı bir anlık görüntü üretir.
+        with closing(sqlite3.connect(self._database_path)) as source:
+            with closing(sqlite3.connect(target)) as destination:
+                source.backup(destination)
 
     def _assert_integrity(self) -> None:
         try:

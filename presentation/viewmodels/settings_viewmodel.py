@@ -53,7 +53,6 @@ class SettingsViewModel(QObject):
 
     def _connect_signals(self) -> None:
         self._theme.theme_changed.connect(self._on_theme_changed)
-        self._controller.backup_completed.connect(self._on_backup_completed)
         self._controller.export_completed.connect(self._on_export_completed)
         self._controller.error_occurred.connect(self._on_error)
 
@@ -120,20 +119,11 @@ class SettingsViewModel(QObject):
         path = target_path or self.getDefaultExportPath()
         self._controller.export_to_json(path)
 
-    @Slot(str)
-    def backupDatabase(self, target_path: str = "") -> None:
-        path = target_path or self.getDefaultBackupPath()
-        self._controller.backup_database(path)
-
     @Slot(result=str)
     def getDefaultExportPath(self) -> str:
         downloads = Path.home() / "Downloads"
         dest_dir = downloads if downloads.exists() else Path.home()
         return str(dest_dir / "proje_takip_export.json")
-
-    @Slot(result=str)
-    def getDefaultBackupPath(self) -> str:
-        return str(config.BACKUPS_DIR / "manual_backup.db")
 
     def _on_export_completed(self, path: str) -> None:
         if self._event_bus:
@@ -142,17 +132,6 @@ class SettingsViewModel(QObject):
                 message=tr(
                     "settings_export_toast",
                     "Veriler başarıyla dışa aktarıldı: {path}",
-                ).format(path=path),
-                type_="success",
-            )
-
-    def _on_backup_completed(self, path: str) -> None:
-        if self._event_bus:
-            self._event_bus.publish(
-                "toast.show",
-                message=tr(
-                    "settings_backup_toast",
-                    "Veritabanı yedeği alındı: {path}",
                 ).format(path=path),
                 type_="success",
             )
@@ -194,7 +173,3 @@ class SettingsViewModel(QObject):
     @Property(str, constant=True)
     def appVersion(self) -> str:
         return config.APP_VERSION
-
-    @Property(str, constant=True)
-    def dbPath(self) -> str:
-        return str(config.DATABASE_PATH)
