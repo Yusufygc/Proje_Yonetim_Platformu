@@ -16,6 +16,7 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[tema-sistemi]] — JSON palet + `ThemeBridge` ile QML'e açılan tokenlar; 6 küratörlü tema paketi (Slate/Indigo/Emerald/Ocean/Rose/Violet) × 2 mod. Font boyutu sabit (`FontFamily.DEFAULT_SIZE`), kullanıcı sadece aile seçer.
 - [[l10n-string-yonetimi]] — StringManager, `tr()` / `I18nBridge.tr()`, dil değişimi ve ratchet testi.
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve QML `IconImageProvider`.
+- [[analitik-sayfasi]] — Analitik ve Metrikler: KPI, zaman serisi, açılan/biten akışı, aktivite ısı haritası, durum halkası; veri kaynakları ve kararlar.
 - [[gorevler-modulu]] — QML Görev Ağacı (WBS): filtreler, kopyalama/çoğaltma, akıllı daraltma, scroll koruma ve üst görev durum kuralı.
 - [[notlar-modulu]] — Markdown notlar, zengin serbest çizim tuvali, geometrik şekiller, algoritma akış şemaları ve resim ekleme.
 - [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton.qml` + `VoiceBridge` + `TranscriptionWorker` + `SpeechToTextService`.

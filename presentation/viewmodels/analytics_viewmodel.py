@@ -8,7 +8,7 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from domain.models.project import Project
 from presentation.utils.i18n import tr
-from presentation.viewmodels.qt_properties import variant_list_property
+from presentation.viewmodels.qt_properties import variant_list_property, variant_map_property
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer
@@ -21,6 +21,16 @@ _PRIORITY_META = {
     "MEDIUM": {"key": "priority_medium", "default": "Orta", "color": "#3B82F6"},
     "LOW": {"key": "priority_low", "default": "Düşük", "color": "#10B981"},  # l10n: data
 }
+
+# Durum dağılımı halkasının sırası ve renkleri (grafik veri renkleri tema-bağımsızdır).
+_STATUS_META = [
+    ("TODO", "task_status_todo", "Yapılacak", "#8B5CF6"),  # l10n: data
+    ("IN_PROGRESS", "task_status_in_progress", "Devam Ediyor", "#3B82F6"),  # l10n: data
+    ("WAITING", "task_status_waiting", "Beklemede", "#F59E0B"),  # l10n: data
+    ("BLOCKED", "task_status_blocked", "Engellendi", "#EF4444"),  # l10n: data
+    ("DONE", "task_status_done", "Tamamlandı", "#10B981"),  # l10n: data
+    ("CANCELLED", "task_status_cancelled", "İptal", "#6B7280"),  # l10n: data
+]
 
 
 class AnalyticsViewModel(QObject):
@@ -45,6 +55,9 @@ class AnalyticsViewModel(QObject):
         self._time_series: list[dict[str, Any]] = []
         self._priority_dist: list[dict[str, Any]] = []
         self._project_dist: list[dict[str, Any]] = []
+        self._flow_series: list[dict[str, Any]] = []
+        self._status_dist: list[dict[str, Any]] = []
+        self._heatmap: dict[str, Any] = {"cells": [], "max": 0}
         self._projects_list: list[dict[str, Any]] = []
 
         self._connect_signals()
@@ -91,7 +104,19 @@ class AnalyticsViewModel(QObject):
         self._priority_dist = self._format_priority_dist(data.get("priority_distribution", {}))
         raw_proj = data.get("project_distribution", [])
         self._project_dist = [{"title": str(p[0]), "count": int(p[1])} for p in raw_proj]
+        self._flow_series = [
+            {"label": str(f[0]), "created": int(f[1]), "completed": int(f[2])} for f in data.get("flow_series", [])
+        ]
+        self._status_dist = self._format_status_dist(data.get("status_distribution", {}))
+        self._heatmap = data.get("heatmap", {"cells": [], "max": 0})
         self.dataChanged.emit()
+
+    @staticmethod
+    def _format_status_dist(raw: dict[str, int]) -> list[dict[str, Any]]:
+        return [
+            {"key": key, "label": tr(label_key, default), "value": int(raw.get(key, 0)), "color": color}
+            for key, label_key, default, color in _STATUS_META
+        ]
 
     def _format_priority_dist(self, raw: dict[str, int]) -> list[dict[str, Any]]:
         result = []
@@ -124,29 +149,18 @@ class AnalyticsViewModel(QObject):
     def projects(self) -> list[dict[str, Any]]:
         return self._projects_list
 
-    @Property(int, notify=dataChanged)
-    def totalCompleted(self) -> int:
-        return int(self._kpis.get("total_completed", 0))
-
-    @Property(float, notify=dataChanged)
-    def completionRate(self) -> float:
-        return float(self._kpis.get("completion_rate", 0.0))
-
-    @Property(int, notify=dataChanged)
-    def streakDays(self) -> int:
-        return int(self._kpis.get("streak_days", 0))
-
-    @Property(float, notify=dataChanged)
-    def onTimeRate(self) -> float:
-        return float(self._kpis.get("on_time_rate", 0.0))
-
-    @Property(str, notify=dataChanged)
-    def bestPeriodLabel(self) -> str:
-        return str(self._kpis.get("best_period_label", "—"))
-
-    @Property(int, notify=dataChanged)
-    def bestPeriodCount(self) -> int:
-        return int(self._kpis.get("best_period_count", 0))
+    @variant_map_property(notify=dataChanged)
+    def kpis(self) -> dict[str, Any]:
+        """Kart değerleri tek haritada: QML yalnızca `kpis.<ad>` okur."""
+        k = self._kpis
+        return {
+            "totalCompleted": int(k.get("total_completed", 0)),
+            "completionRate": float(k.get("completion_rate", 0.0)),
+            "streakDays": int(k.get("streak_days", 0)),
+            "avgCompletionDays": float(k.get("avg_completion_days", 0.0)),
+            "bestPeriodLabel": str(k.get("best_period_label", "—")),
+            "bestPeriodCount": int(k.get("best_period_count", 0)),
+        }
 
     @variant_list_property(notify=dataChanged)
     def timeSeries(self) -> list[dict[str, Any]]:
@@ -159,3 +173,15 @@ class AnalyticsViewModel(QObject):
     @variant_list_property(notify=dataChanged)
     def projectDistribution(self) -> list[dict[str, Any]]:
         return self._project_dist
+
+    @variant_list_property(notify=dataChanged)
+    def flowSeries(self) -> list[dict[str, Any]]:
+        return self._flow_series
+
+    @variant_list_property(notify=dataChanged)
+    def statusDistribution(self) -> list[dict[str, Any]]:
+        return self._status_dist
+
+    @variant_map_property(notify=dataChanged)
+    def heatmap(self) -> dict[str, Any]:
+        return self._heatmap

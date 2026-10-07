@@ -596,10 +596,13 @@ def test_analytics_viewmodel(qapp: QApplication, container: DIContainer) -> None
 
     assert avm.period == "weekly"
     assert avm.projectId == 0
-    assert isinstance(avm.totalCompleted, int)
-    assert isinstance(avm.completionRate, float)
-    assert isinstance(avm.streakDays, int)
-    assert isinstance(avm.onTimeRate, float)
+    assert isinstance(avm.kpis["totalCompleted"], int)
+    assert isinstance(avm.kpis["completionRate"], float)
+    assert isinstance(avm.kpis["streakDays"], int)
+    assert isinstance(avm.kpis["avgCompletionDays"], float)
+    assert isinstance(avm.flowSeries, list)
+    assert [s["key"] for s in avm.statusDistribution] == ["TODO", "IN_PROGRESS", "WAITING", "BLOCKED", "DONE", "CANCELLED"]
+    assert len(avm.heatmap["cells"]) == 84
     assert isinstance(avm.timeSeries, list)
     assert isinstance(avm.priorityDistribution, list)
     assert isinstance(avm.projectDistribution, list)

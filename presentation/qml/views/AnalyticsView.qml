@@ -38,8 +38,8 @@ ScrollView {
             }
         }
 
-        // Dönem ve Proje Filtre Satırı
-        Row {
+        // Dönem butonları solda, proje filtresi aynı satırda en sağda
+        RowLayout {
             width: parent.width - 48
             spacing: 12
 
@@ -63,9 +63,12 @@ ScrollView {
                 }
             }
 
-            Item { width: 20; height: 1 }
+            Item { Layout.fillWidth: true }
 
-            ProjectFilter { }
+            ProjectFilter {
+                Layout.preferredWidth: 240
+                Layout.preferredHeight: 36
+            }
         }
 
         // ── KPI Kartları ───────────────────────────────────────────────────
@@ -76,34 +79,34 @@ ScrollView {
             KpiCard {
                 width: (parent.width - 48) / 5
                 label: i18nBridge.tr("analytics_kpi_total_completed", "Tamamlanan")
-                value: analyticsViewModel.totalCompleted.toString()
+                value: analyticsViewModel.kpis.totalCompleted.toString()
                 description: i18nBridge.tr("analytics_kpi_total_completed_desc", "Dönemde biten")
             }
             KpiCard {
                 width: (parent.width - 48) / 5
                 label: i18nBridge.tr("analytics_kpi_completion_rate", "Oran %")
-                value: analyticsViewModel.completionRate.toFixed(1) + " %"
+                value: analyticsViewModel.kpis.completionRate.toFixed(1) + " %"
                 description: i18nBridge.tr("analytics_kpi_completion_rate_desc", "Biten / Toplam")
                 valueColor: themeBridge.success
             }
             KpiCard {
                 width: (parent.width - 48) / 5
                 label: i18nBridge.tr("analytics_kpi_streak_days", "Seri (Gün)")
-                value: analyticsViewModel.streakDays.toString()
+                value: analyticsViewModel.kpis.streakDays.toString()
                 description: i18nBridge.tr("analytics_kpi_streak_days_desc", "Aktif gün")
                 valueColor: themeBridge.warning
             }
             KpiCard {
                 width: (parent.width - 48) / 5
-                label: i18nBridge.tr("analytics_kpi_on_time_rate", "Zamanında %")
-                value: analyticsViewModel.onTimeRate.toFixed(1) + " %"
-                description: i18nBridge.tr("analytics_kpi_on_time_rate_desc", "Vadesinde biten")
+                label: i18nBridge.tr("analytics_kpi_avg_days", "Ort. Süre")
+                value: analyticsViewModel.kpis.avgCompletionDays.toFixed(1) + " " + i18nBridge.tr("analytics_unit_days", "gün")
+                description: i18nBridge.tr("analytics_kpi_avg_days_desc", "Oluşturmadan bitene")
             }
             KpiCard {
                 width: (parent.width - 48) / 5
                 label: i18nBridge.tr("analytics_kpi_best_period", "En İyi Dönem")
-                value: analyticsViewModel.bestPeriodLabel
-                description: "(" + analyticsViewModel.bestPeriodCount + " görev)"
+                value: analyticsViewModel.kpis.bestPeriodLabel
+                description: "(" + analyticsViewModel.kpis.bestPeriodCount + " " + i18nBridge.tr("analytics_tasks_unit", "görev") + ")"
                 valueColor: themeBridge.textPrimary
                 valueSize: 16
             }
@@ -111,6 +114,24 @@ ScrollView {
 
         TimeSeriesChart {
             width: parent.width - 48
+        }
+
+        FlowChart {
+            width: parent.width - 48
+        }
+
+        // ── Aktivite ısı haritası ve durum halkası ────────────────────────────
+        Row {
+            width: parent.width - 48
+            spacing: 16
+
+            ActivityHeatmap {
+                width: (parent.width - 16) * 0.58
+            }
+
+            StatusDonut {
+                width: (parent.width - 16) * 0.42
+            }
         }
 
         // ── Alt Grafikler: Öncelik ve Proje Dağılımı ─────────────────────────
@@ -180,7 +201,7 @@ ScrollView {
 
                                 Rectangle {
                                     width: {
-                                        var total = analyticsViewModel.totalCompleted;
+                                        var total = analyticsViewModel.kpis.totalCompleted;
                                         return total > 0 ? (parent.width * (modelData.value / total)) : 0;
                                     }
                                     height: parent.height

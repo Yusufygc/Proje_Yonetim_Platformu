@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] FEATURE | Analitik Sayfası Yeni Grafikler
+- Eklendi: aktivite ısı haritası (son 12 hafta), görev durum halkası, açılan/tamamlanan akış çizgisi (net birikim), ortalama tamamlanma süresi kartı. Ayrıntı: `analitik-sayfasi`.
+- "Zamanında %" kartı kaldırıldı (bitiş tarihi alanı olmadığı için anlamsızdı); haftalık etiket `H40/26` yerine `40.Hafta`; proje filtresi dönem düğmeleriyle aynı satırda en sağa alındı.
+- `AnalyticsViewModel` KPI özellikleri tek `kpis` haritasında toplandı; yeni sorgular `services/analytics_overview.py` içinde.
+- Çevrimdışı çizimle denendi (yazı tipi olmadan yalnızca yerleşim görüldü); açık tema ve gerçek yazı tipiyle görünüm elle kontrol edilmeli.
+
 ## [2026-10-08] REFACTOR | Tema Düğmeleri SVG İkon
 - Ayarlar'daki açık/koyu düğmeleri `sun`/`moon` SVG ikonu ve "Açık"/"Koyu" yazısıyla; daraltılmış kenar çubuğundaki tema düğmesi aynı ikonlarla. Yerelleştirme metinlerindeki `●` işareti kaldırıldı.
 - Metin sembolleri de SVG'ye çevrildi: açılır liste/ağaç okları (`chevron-*`), alt görev (`corner-down-right`), Enter ipucu (`corner-down-left`), boş proje durumu (`folder`), güncelleme penceresindeki `→` (`arrow-right`). Hepsi tema property'sinden boyanıyor; QML'de emoji/sembol karakterini yasaklayan test eklendi.

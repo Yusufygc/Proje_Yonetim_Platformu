@@ -15,6 +15,7 @@ from domain.enums.task_status import TaskStatus
 from domain.models.project import Project
 from domain.models.task import Task
 from infrastructure.database.db_manager import DatabaseManager
+from services import analytics_overview
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +28,8 @@ def _fmt_daily(key: str) -> str:
 
 
 def _fmt_weekly(key: str) -> str:
-    year, week = key.split("-W")
-    return f"H{week}/{year[2:]}"
+    _, week = key.split("-W")
+    return f"{int(week)}.Hafta"  # l10n: data
 
 
 def _fmt_monthly(key: str) -> str:
@@ -54,7 +55,13 @@ class AnalyticsService:
             priority_dist = self._priority_dist(sess, start_dt, end_dt, project_id)
             project_dist = self._project_dist(sess, start_dt, end_dt, project_id)
             kpis = self._kpis(sess, start_dt, end_dt, project_id, time_series)
+            flow = analytics_overview.flow_series(sess, start_dt, end_dt, fmt, all_keys, label_fn, project_id)
+            status_dist = analytics_overview.status_distribution(sess, project_id)
+            heatmap = analytics_overview.activity_heatmap(sess, project_id, end_dt.date())
         return {
+            "flow_series": flow,
+            "status_distribution": status_dist,
+            "heatmap": heatmap,
             "time_series": time_series,
             "priority_distribution": priority_dist,
             "project_distribution": project_dist,
@@ -155,7 +162,7 @@ class AnalyticsService:
             "streak_days": self._streak_days(sess, project_id),
             "best_period_label": best_label,
             "best_period_count": best_count,
-            "on_time_rate": self._on_time_rate(sess, start, end, project_id),
+            "avg_completion_days": analytics_overview.avg_completion_days(sess, start, end, project_id),
         }
 
     def _total_completed(
@@ -198,24 +205,6 @@ class AnalyticsService:
             streak += 1
             current -= timedelta(days=1)
         return streak
-
-    def _on_time_rate(
-        self, sess: Any, start: datetime, end: datetime, project_id: int | None
-    ) -> float:
-        base = (
-            select(Task.due_date, Task.completed_at)
-            .where(Task.status == TaskStatus.DONE.value)
-            .where(Task.completed_at >= start)
-            .where(Task.completed_at <= end)
-            .where(Task.due_date.is_not(None))
-        )
-        if project_id is not None:
-            base = base.where(Task.project_id == project_id)
-        rows = list(sess.execute(base))
-        if not rows:
-            return 0.0
-        on_time = sum(1 for r in rows if r.completed_at and r.completed_at.date() <= r.due_date)
-        return round(on_time / len(rows) * 100, 1)
 
     @staticmethod
     def _best_period(time_series: list[tuple[str, int]]) -> tuple[str, int]:
