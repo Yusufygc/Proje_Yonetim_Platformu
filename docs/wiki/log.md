@@ -1,5 +1,12 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] FIX+FEATURE | QML Backend Uyumu: Görev Tipleri, Karar Durumları, Çıktılar, Düzenleme ve Geçmiş
+Backend'de olup QML'de eksik ya da uyumsuz kalan alanlar giderildi:
+- **[GÖREVLER]** Satır rozeti ve diyalog `TaskType` enum'u ile hizalandı (`GROUP`, `DOCUMENTATION`, `DESIGN`, `TEST`, `REVIEW` eklendi; enum'da olmayan `MILESTONE/EPIC/PHASE/SUBTASK` kaldırıldı). "Engellendi" durumunda `blocked_reason` alanı eklendi; öncelik ve tip filtreleri `TasksView`'a bağlandı. Hover butonları artık `HoverHandler` ile satırın tamamını izliyor.
+- **[PROJE DETAY]** Karar, not ve kaynak kartlarına düzenleme eklendi (`updateDecision/updateNote/updateResource`). Karar durumları `DecisionStatus` enum'una çevrildi; eski `APPROVED/PROPOSED/REJECTED` kayıtlar gösterimde çevriliyor. Kaynak tipi `REPO` yerine `GITHUB`. Backend karar silmediği için karar kartındaki çöp kutusu "iptal et" (`x`) oldu. Yeni "Geçmiş" sekmesi `ActivityLog` kayıtlarını listeler.
+- **[HATA]** Çıktılar sekmesi var olmayan `Attachment.file_name` alanını kullanıyordu; `caption` alanına geçirildi.
+- **[ORTAM]** Conda kalıntıları temizlendi; çalışma ortamı proje kökündeki `.venv`. PyInstaller spec dosyalarından conda DLL listesi kaldırıldı.
+
 ## [2026-10-07] FEATURE+FIX | QML Notlar Çizim/Akış Şeması, Görevler Çoğaltma/Scroll, Header Sadeleştirme ve Analitik Listesi
 QML modernizasyonu ve kullanıcı deneyimi odaklı kapsamlı özellik ve arayüz geliştirmeleri tamamlandı:
 - **[NOTLAR & ÇİZİM] Zengin Çizim ve Algoritma Akış Şeması Araçları:**

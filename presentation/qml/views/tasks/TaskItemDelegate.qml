@@ -12,7 +12,8 @@ Rectangle {
     radius: Theme.radius.small
 
     property bool isSelected: taskViewModel ? taskViewModel.selectedTaskId === model.taskId : false
-    property bool isHovered: hoverArea.containsMouse
+    // MouseArea.containsMouse çocuk butonların üstünde false olur; HoverHandler pasif olduğu için satırın tamamını izler
+    property bool isHovered: rowHoverHandler.hovered
 
     color: {
         if (isSelected) return Theme.accentAlpha(themeBridge.currentTheme, 0.15)
@@ -25,10 +26,13 @@ Rectangle {
 
     Behavior on color { ColorAnimation { duration: Theme.animation.fast } }
 
+    HoverHandler {
+        id: rowHoverHandler
+    }
+
     MouseArea {
         id: hoverArea
         anchors.fill: parent
-        hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: function(mouse) {
             if (taskViewModel) {
@@ -173,13 +177,14 @@ Rectangle {
         AppBadge {
             text: {
                 switch (model.taskType) {
-                    case "MILESTONE": return i18nBridge.tr("task_type_milestone", "Kilometre Taşı");
-                    case "EPIC": return i18nBridge.tr("task_type_epic", "Büyük Hedef");
-                    case "PHASE": return i18nBridge.tr("task_type_phase", "Faz");
-                    case "SUBTASK": return i18nBridge.tr("task_type_subtask", "Alt Görev");
+                    case "GROUP": return i18nBridge.tr("task_type_group", "Grup");
                     case "BUG": return i18nBridge.tr("task_type_bug", "Hata");
                     case "IMPROVEMENT": return i18nBridge.tr("task_type_improvement", "İyileştirme");
                     case "RESEARCH": return i18nBridge.tr("task_type_research", "Araştırma");
+                    case "DOCUMENTATION": return i18nBridge.tr("task_type_documentation", "Dokümantasyon");
+                    case "DESIGN": return i18nBridge.tr("task_type_design", "Tasarım");
+                    case "TEST": return i18nBridge.tr("task_type_test", "Test");
+                    case "REVIEW": return i18nBridge.tr("task_type_review", "İnceleme");
                     default: return model.taskType;
                 }
             }
@@ -241,7 +246,7 @@ Rectangle {
             }
 
             AppButton {
-                iconName: "settings"
+                iconName: "pencil"
                 btnVariant: "secondary"
                 implicitWidth: 26
                 implicitHeight: 26

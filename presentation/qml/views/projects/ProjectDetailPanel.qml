@@ -399,7 +399,8 @@ Item {
                             i18nBridge.tr("tab_decisions", "Kararlar"),
                             i18nBridge.tr("tab_notes", "Notlar"),
                             i18nBridge.tr("tab_resources", "Kaynaklar"),
-                            i18nBridge.tr("tab_outputs", "Çıktılar")
+                            i18nBridge.tr("tab_outputs", "Çıktılar"),
+                            i18nBridge.tr("tab_activity", "Geçmiş")
                         ]
 
                         Rectangle {
@@ -720,15 +721,22 @@ Item {
 
                                             AppBadge {
                                                 text: {
-                                                    var st = (modelData.status || "APPROVED").toUpperCase();
-                                                    switch (st) {
-                                                        case "APPROVED": case "ONAYLANDI": return i18nBridge.tr("decision_approved", "Onaylandı");
-                                                        case "REJECTED": case "REDDEDILDI": case "REDDEDİLDİ": return i18nBridge.tr("decision_rejected", "Reddedildi");
-                                                        case "PROPOSED": case "ONERILDI": case "ÖNERİLDİ": return i18nBridge.tr("decision_proposed", "Önerildi");
+                                                    switch (modelData.status) {
+                                                        case "ACCEPTED": return i18nBridge.tr("decision_status_accepted", "Kabul Edildi");
+                                                        case "DRAFT": return i18nBridge.tr("decision_status_draft", "Taslak");
+                                                        case "SUPERSEDED": return i18nBridge.tr("decision_status_superseded", "Güncellendi");
+                                                        case "CANCELLED": return i18nBridge.tr("decision_status_cancelled", "İptal Edildi");
                                                         default: return modelData.status;
                                                     }
                                                 }
-                                                variant: (modelData.status === "REJECTED" || modelData.status === "REDDEDILDI") ? "danger" : "success"
+                                                variant: {
+                                                    switch (modelData.status) {
+                                                        case "ACCEPTED": return "success";
+                                                        case "CANCELLED": return "danger";
+                                                        case "SUPERSEDED": return "warning";
+                                                        default: return "neutral";
+                                                    }
+                                                }
                                                 size: "sm"
                                             }
 
@@ -742,10 +750,21 @@ Item {
                                             }
 
                                             AppButton {
-                                                iconName: "trash-2"
+                                                iconName: "pencil"
                                                 btnVariant: "secondary"
                                                 implicitWidth: 22
                                                 implicitHeight: 22
+                                                Layout.alignment: Qt.AlignTop
+                                                onClicked: addDecisionDialog.open(modelData)
+                                            }
+
+                                            // Backend karar silmez, "İptal Edildi" durumuna alır
+                                            AppButton {
+                                                iconName: "x"
+                                                btnVariant: "secondary"
+                                                implicitWidth: 22
+                                                implicitHeight: 22
+                                                visible: modelData.status !== "CANCELLED"
                                                 Layout.alignment: Qt.AlignTop
                                                 onClicked: projectViewModel.deleteDecision(modelData.id)
                                             }
@@ -830,7 +849,7 @@ Item {
                                     Text {
                                         id: noteTitleText
                                         anchors.left: parent.left
-                                        anchors.right: noteDeleteBtn.left
+                                        anchors.right: noteEditBtn.left
                                         anchors.rightMargin: 8
                                         anchors.top: parent.top
                                         visible: !!modelData.title
@@ -839,6 +858,18 @@ Item {
                                         font.weight: Font.DemiBold
                                         color: themeBridge.textPrimary
                                         wrapMode: Text.Wrap
+                                    }
+
+                                    AppButton {
+                                        id: noteEditBtn
+                                        iconName: "pencil"
+                                        btnVariant: "secondary"
+                                        implicitWidth: 24
+                                        implicitHeight: 24
+                                        anchors.right: noteDeleteBtn.left
+                                        anchors.rightMargin: 4
+                                        anchors.top: parent.top
+                                        onClicked: addNoteDialog.open(modelData)
                                     }
 
                                     AppButton {
@@ -967,6 +998,14 @@ Item {
                                             }
 
                                             AppButton {
+                                                iconName: "pencil"
+                                                btnVariant: "secondary"
+                                                implicitWidth: 22
+                                                implicitHeight: 22
+                                                onClicked: addResourceDialog.open(modelData)
+                                            }
+
+                                            AppButton {
                                                 iconName: "trash-2"
                                                 btnVariant: "secondary"
                                                 implicitWidth: 22
@@ -990,6 +1029,74 @@ Item {
                             Text {
                                 visible: !projectViewModel.selectedResources || projectViewModel.selectedResources.length === 0
                                 text: i18nBridge.tr("no_resources", "Henüz kayıtlı kaynak yok.")
+                                font.pixelSize: 12
+                                color: themeBridge.color("text_muted")
+                            }
+                        }
+                    }
+                }
+
+                // Tab 6: Etkinlik Geçmişi
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 8
+                    visible: detailRoot.currentTab === 6
+
+                    Text {
+                        text: i18nBridge.tr("tab_activity_title", "Son Etkinlikler:")
+                        font.pixelSize: 13
+                        color: themeBridge.color("text_secondary")
+                        Layout.fillWidth: true
+                    }
+
+                    ScrollView {
+                        id: activityScroll
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+
+                        ScrollBar.vertical: AppScrollBar { }
+
+                        ColumnLayout {
+                            width: activityScroll.availableWidth - 14
+                            spacing: 6
+
+                            Repeater {
+                                model: projectViewModel.selectedActivity
+                                delegate: Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: activityRow.implicitHeight + 14
+                                    radius: 8
+                                    color: themeBridge.color("surface_alt")
+                                    border.color: themeBridge.color("border")
+                                    border.width: 1
+
+                                    RowLayout {
+                                        id: activityRow
+                                        anchors.fill: parent
+                                        anchors.margins: 7
+                                        spacing: 10
+
+                                        Text {
+                                            text: modelData.summary
+                                            font.pixelSize: 12
+                                            color: themeBridge.color("text_primary")
+                                            Layout.fillWidth: true
+                                            wrapMode: Text.Wrap
+                                        }
+
+                                        Text {
+                                            text: modelData.created_at
+                                            font.pixelSize: 11
+                                            color: themeBridge.color("text_muted")
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                visible: !projectViewModel.selectedActivity || projectViewModel.selectedActivity.length === 0
+                                text: i18nBridge.tr("no_activity", "Henüz kayıtlı etkinlik yok.")
                                 font.pixelSize: 12
                                 color: themeBridge.color("text_muted")
                             }
@@ -1238,10 +1345,14 @@ Item {
         visible: false
         z: 9999
 
-        function open() {
-            decisionTitleInput.text = "";
-            decisionTextInput.text = "";
-            decisionStatusCombo.selectedValue = "APPROVED";
+        // editId 0 ise yeni kayıt, değilse düzenleme modu
+        property int editId: 0
+
+        function open(existing) {
+            editId = existing ? existing.id : 0;
+            decisionTitleInput.text = existing ? existing.title : "";
+            decisionTextInput.text = existing ? existing.decision : "";
+            decisionStatusCombo.selectedValue = existing ? existing.status : "ACCEPTED";
             visible = true;
         }
 
@@ -1284,7 +1395,9 @@ Item {
                     }
 
                     Text {
-                        text: i18nBridge.tr("decision_dialog_new_title", "Yeni Karar Ekle")
+                        text: addDecisionDialog.editId !== 0
+                              ? i18nBridge.tr("decision_dialog_edit_title", "Kararı Düzenle")
+                              : i18nBridge.tr("decision_dialog_new_title", "Yeni Karar Ekle")
                         font.pixelSize: Theme.typography.sizeH3
                         font.weight: Theme.typography.weightBold
                         color: themeBridge.color("text_primary")
@@ -1329,9 +1442,10 @@ Item {
                     label: i18nBridge.tr("field_status", "Durum")
                     Layout.fillWidth: true
                     model: [
-                        { "text": i18nBridge.tr("decision_approved", "Onaylandı"), "value": "APPROVED" },
-                        { "text": i18nBridge.tr("decision_proposed", "Önerildi"), "value": "PROPOSED" },
-                        { "text": i18nBridge.tr("decision_rejected", "Reddedildi"), "value": "REJECTED" }
+                        { "text": i18nBridge.tr("decision_status_accepted", "Kabul Edildi"), "value": "ACCEPTED" },
+                        { "text": i18nBridge.tr("decision_status_draft", "Taslak"), "value": "DRAFT" },
+                        { "text": i18nBridge.tr("decision_status_superseded", "Güncellendi"), "value": "SUPERSEDED" },
+                        { "text": i18nBridge.tr("decision_status_cancelled", "İptal Edildi"), "value": "CANCELLED" }
                     ]
                 }
 
@@ -1356,13 +1470,16 @@ Item {
 
                     AppButton {
                         btnVariant: "primary"
-                        text: i18nBridge.tr("action_add", "Ekle")
+                        text: addDecisionDialog.editId !== 0 ? i18nBridge.tr("action_save", "Kaydet") : i18nBridge.tr("action_add", "Ekle")
                         implicitWidth: 120
                         implicitHeight: 40
                         onClicked: {
-                            if (decisionTitleInput.text.trim()) {
-                                var st = decisionStatusCombo.selectedValue || "APPROVED";
-                                projectViewModel.createDecision(decisionTitleInput.text.trim(), decisionTextInput.text.trim(), st);
+                            if (decisionTitleInput.text.trim() && decisionTextInput.text.trim()) {
+                                var st = decisionStatusCombo.selectedValue || "ACCEPTED";
+                                if (addDecisionDialog.editId !== 0)
+                                    projectViewModel.updateDecision(addDecisionDialog.editId, decisionTitleInput.text, decisionTextInput.text, st);
+                                else
+                                    projectViewModel.createDecision(decisionTitleInput.text.trim(), decisionTextInput.text.trim(), st);
                                 addDecisionDialog.close();
                             }
                         }
@@ -1382,9 +1499,13 @@ Item {
         visible: false
         z: 9999
 
-        function open() {
-            noteTitleInput.text = "";
-            noteBodyInput.text = "";
+        // editId 0 ise yeni kayıt, değilse düzenleme modu
+        property int editId: 0
+
+        function open(existing) {
+            editId = existing ? existing.id : 0;
+            noteTitleInput.text = existing ? existing.title : "";
+            noteBodyInput.text = existing ? existing.body : "";
             visible = true;
         }
 
@@ -1427,7 +1548,9 @@ Item {
                     }
 
                     Text {
-                        text: i18nBridge.tr("note_dialog_new_title", "Yeni Proje Notu Ekle")
+                        text: addNoteDialog.editId !== 0
+                              ? i18nBridge.tr("note_dialog_edit_title", "Notu Düzenle")
+                              : i18nBridge.tr("note_dialog_new_title", "Yeni Proje Notu Ekle")
                         font.pixelSize: Theme.typography.sizeH3
                         font.weight: Theme.typography.weightBold
                         color: themeBridge.color("text_primary")
@@ -1488,12 +1611,15 @@ Item {
 
                     AppButton {
                         btnVariant: "primary"
-                        text: i18nBridge.tr("action_add", "Ekle")
+                        text: addNoteDialog.editId !== 0 ? i18nBridge.tr("action_save", "Kaydet") : i18nBridge.tr("action_add", "Ekle")
                         implicitWidth: 120
                         implicitHeight: 40
                         onClicked: {
-                            if (noteTitleInput.text.trim()) {
-                                projectViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
+                            if (noteTitleInput.text.trim() && noteBodyInput.text.trim()) {
+                                if (addNoteDialog.editId !== 0)
+                                    projectViewModel.updateNote(addNoteDialog.editId, noteTitleInput.text, noteBodyInput.text.trim());
+                                else
+                                    projectViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
                                 addNoteDialog.close();
                             }
                         }
@@ -1513,10 +1639,14 @@ Item {
         visible: false
         z: 9999
 
-        function open() {
-            resourceTitleInput.text = "";
-            resourceUrlInput.text = "";
-            resourceTypeCombo.selectedValue = "DOCUMENT";
+        // editId 0 ise yeni kayıt, değilse düzenleme modu
+        property int editId: 0
+
+        function open(existing) {
+            editId = existing ? existing.id : 0;
+            resourceTitleInput.text = existing ? existing.title : "";
+            resourceUrlInput.text = existing ? existing.url : "";
+            resourceTypeCombo.selectedValue = existing ? existing.resource_type : "DOCUMENT";
             visible = true;
         }
 
@@ -1559,7 +1689,9 @@ Item {
                     }
 
                     Text {
-                        text: i18nBridge.tr("resource_dialog_new_title", "Yeni Kaynak Ekle")
+                        text: addResourceDialog.editId !== 0
+                              ? i18nBridge.tr("resource_dialog_edit_title", "Kaynağı Düzenle")
+                              : i18nBridge.tr("resource_dialog_new_title", "Yeni Kaynak Ekle")
                         font.pixelSize: Theme.typography.sizeH3
                         font.weight: Theme.typography.weightBold
                         color: themeBridge.color("text_primary")
@@ -1604,7 +1736,7 @@ Item {
                         { "text": i18nBridge.tr("resource_type_document", "Doküman"), "value": "DOCUMENT" },
                         { "text": i18nBridge.tr("resource_type_article", "Makale"), "value": "ARTICLE" },
                         { "text": i18nBridge.tr("resource_type_video", "Video"), "value": "VIDEO" },
-                        { "text": i18nBridge.tr("resource_type_repo", "GitHub / Repo"), "value": "REPO" },
+                        { "text": i18nBridge.tr("resource_type_github", "GitHub / Repo"), "value": "GITHUB" },
                         { "text": i18nBridge.tr("resource_type_design", "Tasarım"), "value": "DESIGN" },
                         { "text": i18nBridge.tr("resource_type_api", "API Referansı"), "value": "API" },
                         { "text": i18nBridge.tr("resource_type_tool", "Araç"), "value": "TOOL" },
@@ -1633,13 +1765,16 @@ Item {
 
                     AppButton {
                         btnVariant: "primary"
-                        text: i18nBridge.tr("action_add", "Ekle")
+                        text: addResourceDialog.editId !== 0 ? i18nBridge.tr("action_save", "Kaydet") : i18nBridge.tr("action_add", "Ekle")
                         implicitWidth: 120
                         implicitHeight: 40
                         onClicked: {
                             if (resourceTitleInput.text.trim() && resourceUrlInput.text.trim()) {
                                 var rType = resourceTypeCombo.selectedValue || "DOCUMENT";
-                                projectViewModel.createResource(resourceTitleInput.text.trim(), resourceUrlInput.text.trim(), rType);
+                                if (addResourceDialog.editId !== 0)
+                                    projectViewModel.updateResource(addResourceDialog.editId, resourceTitleInput.text, resourceUrlInput.text, rType);
+                                else
+                                    projectViewModel.createResource(resourceTitleInput.text.trim(), resourceUrlInput.text.trim(), rType);
                                 addResourceDialog.close();
                             }
                         }

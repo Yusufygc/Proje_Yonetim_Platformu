@@ -35,6 +35,7 @@ Rectangle {
                 statusCombo.selectedValue = init.status || "TODO"
                 priorityCombo.selectedValue = init.priority || "MEDIUM"
                 typeCombo.selectedValue = init.task_type || "TASK"
+                blockedReasonInput.text = init.blocked_reason || ""
                 newChecklistInput.text = ""
 
                 var chk = []
@@ -174,9 +175,23 @@ Rectangle {
                                 { "text": i18nBridge.tr("task_type_group", "Grup"), "value": "GROUP" },
                                 { "text": i18nBridge.tr("task_type_bug", "Hata"), "value": "BUG" },
                                 { "text": i18nBridge.tr("task_type_improvement", "İyileştirme"), "value": "IMPROVEMENT" },
-                                { "text": i18nBridge.tr("task_type_research", "Araştırma"), "value": "RESEARCH" }
+                                { "text": i18nBridge.tr("task_type_research", "Araştırma"), "value": "RESEARCH" },
+                                { "text": i18nBridge.tr("task_type_documentation", "Dokümantasyon"), "value": "DOCUMENTATION" },
+                                { "text": i18nBridge.tr("task_type_design", "Tasarım"), "value": "DESIGN" },
+                                { "text": i18nBridge.tr("task_type_test", "Test"), "value": "TEST" },
+                                { "text": i18nBridge.tr("task_type_review", "İnceleme"), "value": "REVIEW" }
                             ]
                         }
+                    }
+
+                    // Engel Nedeni (yalnızca "Engellendi" durumunda)
+                    AppTextInput {
+                        id: blockedReasonInput
+                        label: i18nBridge.tr("label_blocked_reason", "Engel Nedeni")
+                        placeholder: i18nBridge.tr("task_blocked_reason_placeholder", "Görev neden engellendi?")
+                        isTextArea: true
+                        visible: statusCombo.selectedValue === "BLOCKED"
+                        Layout.fillWidth: true
                     }
 
                     // Checklist Bölümü
@@ -318,6 +333,7 @@ Rectangle {
                                 "status": statusCombo.selectedValue,
                                 "priority": priorityCombo.selectedValue,
                                 "task_type": typeCombo.selectedValue,
+                                "blocked_reason": blockedReasonInput.text,
                                 "checklist_items": root.checklistItems
                             })
                         }

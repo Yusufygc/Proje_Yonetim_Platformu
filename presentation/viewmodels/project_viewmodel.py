@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 import os
 import webbrowser
+from pathlib import Path
 from typing import Any, Optional
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
@@ -20,6 +21,9 @@ from presentation.viewmodels.project_list_model import ProjectListModel
 
 logger = logging.getLogger(__name__)
 
+# QML'in eski sürümü DecisionStatus enum'unda olmayan değerler yazıyordu; gösterimde enum'a çevrilir.
+_LEGACY_DECISION_STATUS = {"APPROVED": "ACCEPTED", "PROPOSED": "DRAFT", "REJECTED": "CANCELLED"}
+
 
 class ProjectViewModel(QObject):
     """QML Projeler ekranı ve detay paneli için iş mantığı ve reaktif state köprüsü."""
@@ -27,6 +31,7 @@ class ProjectViewModel(QObject):
     selectedProjectChanged = Signal()
     stagesChanged = Signal()
     outputsChanged = Signal()
+    activityChanged = Signal()
     decisionsChanged = Signal()
     notesChanged = Signal()
     resourcesChanged = Signal()
@@ -52,6 +57,7 @@ class ProjectViewModel(QObject):
         self._selected_project_data: dict[str, Any] = {}
         self._stages_data: list[dict[str, Any]] = []
         self._outputs_data: list[dict[str, Any]] = []
+        self._activity_data: list[dict[str, Any]] = []
         self._decisions_data: list[dict[str, Any]] = []
         self._notes_data: list[dict[str, Any]] = []
         self._resources_data: list[dict[str, Any]] = []
@@ -75,12 +81,15 @@ class ProjectViewModel(QObject):
         self._decision_controller.decisions_loaded.connect(self._on_decisions_loaded)
         self._decision_controller.decision_created.connect(lambda _d: self._reload_project_subitems())
         self._decision_controller.decision_deleted.connect(lambda _d: self._reload_project_subitems())
+        self._decision_controller.decision_updated.connect(lambda _d: self._reload_project_subitems())
         self._note_controller.notes_loaded.connect(self._on_notes_loaded)
         self._note_controller.note_created.connect(lambda _n: self._reload_project_subitems())
         self._note_controller.note_deleted.connect(lambda _n: self._reload_project_subitems())
+        self._note_controller.note_updated.connect(lambda _n: self._reload_project_subitems())
         self._resource_controller.resources_loaded.connect(self._on_resources_loaded)
         self._resource_controller.resource_created.connect(lambda _r: self._reload_project_subitems())
         self._resource_controller.resource_deleted.connect(lambda _r: self._reload_project_subitems())
+        self._resource_controller.resource_updated.connect(lambda _r: self._reload_project_subitems())
 
     def _subscribe_events(self) -> None:
         self._event_bus.subscribe(NEW_PROJECT_REQUESTED, self._on_new_project_requested)
@@ -115,6 +124,10 @@ class ProjectViewModel(QObject):
     @Property("QVariantList", notify=outputsChanged)
     def selectedOutputs(self) -> list[dict[str, Any]]:
         return self._outputs_data
+
+    @Property("QVariantList", notify=activityChanged)
+    def selectedActivity(self) -> list[dict[str, Any]]:
+        return self._activity_data
 
     @Property("QVariantList", notify=decisionsChanged)
     def selectedDecisions(self) -> list[dict[str, Any]]:
@@ -207,6 +220,7 @@ class ProjectViewModel(QObject):
     def _on_task_event(self, **_kw: Any) -> None:
         if self._selected_project_id != 0:
             self._load_project_tasks(self._selected_project_id)
+            self._load_activity(self._selected_project_id)
             self._refresh_selected_project()
         self.loadProjects()
 
@@ -236,12 +250,21 @@ class ProjectViewModel(QObject):
     def _load_outputs(self, project_id: int) -> None:
         outputs = self._controller.get_attachments_sync(project_id)
         self._outputs_data = [
-            {"id": o.id, "title": o.file_name, "file_path": o.file_path}
+            {"id": o.id, "title": o.caption or Path(o.file_path).name or o.file_path, "file_path": o.file_path}
             for o in outputs
         ]
         self.outputsChanged.emit()
 
+    def _load_activity(self, project_id: int) -> None:
+        logs = self._controller.get_activity_logs_sync(project_id) if project_id else []
+        self._activity_data = [
+            {"summary": log.summary, "created_at": log.created_at.strftime("%d.%m.%Y %H:%M")}
+            for log in logs
+        ]
+        self.activityChanged.emit()
+
     def _reload_project_subitems(self) -> None:
+        self._load_activity(self._selected_project_id)
         if self._selected_project_id != 0:
             self._decision_controller.load_project_decisions(self._selected_project_id)
             self._note_controller.load_project_notes(self._selected_project_id)
@@ -251,7 +274,10 @@ class ProjectViewModel(QObject):
             self._load_project_tasks(0)
 
     def _on_decisions_loaded(self, decisions: list[Any]) -> None:
-        self._decisions_data = [{"id": d.id, "title": d.title, "decision": d.decision, "status": d.status} for d in decisions]
+        self._decisions_data = [
+            {"id": d.id, "title": d.title, "decision": d.decision, "status": _LEGACY_DECISION_STATUS.get(d.status, d.status)}
+            for d in decisions
+        ]
         self.decisionsChanged.emit()
 
     def _on_notes_loaded(self, notes: list[Any]) -> None:
@@ -287,17 +313,38 @@ class ProjectViewModel(QObject):
     def addOutput(self, title: str, file_path: str) -> None:
         if self._selected_project_id == 0:
             return
-        att = Attachment(project_id=self._selected_project_id, file_name=title, file_path=file_path)
+        att = Attachment(
+            project_id=self._selected_project_id,
+            file_path=file_path,
+            caption=title,
+            attachment_type="OUTPUT",
+        )
         self._controller.create_attachment_sync(att)
         self._load_outputs(self._selected_project_id)
         self._event_bus.publish("toast.show", message="Çıktı başarıyla eklendi", type_="success")  # l10n: data
 
     @Slot(str, str, str)
-    def createDecision(self, title: str, decision: str, status: str = "APPROVED") -> None:
+    def createDecision(self, title: str, decision: str, status: str = "ACCEPTED") -> None:
         if self._selected_project_id != 0 and title.strip():
             self._decision_controller.create_decision(
                 self._selected_project_id, title.strip(), decision.strip(), status=status
             )
+
+    @Slot(int, str, str, str)
+    def updateDecision(self, decision_id: int, title: str, decision: str, status: str) -> None:
+        self._decision_controller.update_decision(
+            decision_id, title=title.strip(), decision=decision.strip(), status=status
+        )
+
+    @Slot(int, str, str)
+    def updateNote(self, note_id: int, title: str, body: str) -> None:
+        self._note_controller.update_note(note_id, title=title.strip(), body=body)
+
+    @Slot(int, str, str, str)
+    def updateResource(self, resource_id: int, title: str, url: str, resource_type: str) -> None:
+        self._resource_controller.update_resource(
+            resource_id, title=title.strip(), url=url.strip(), resource_type=resource_type
+        )
 
     @Slot(int)
     def deleteDecision(self, decision_id: int) -> None:

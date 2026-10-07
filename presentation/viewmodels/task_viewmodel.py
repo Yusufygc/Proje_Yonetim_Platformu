@@ -249,6 +249,7 @@ class TaskViewModel(QObject):
             "status": "TODO",
             "priority": "MEDIUM",
             "task_type": "TASK",
+            "blocked_reason": "",
             "checklist": [],
         }
         self._is_dialog_open = True
@@ -272,6 +273,7 @@ class TaskViewModel(QObject):
             "status": t.status,
             "priority": t.priority,
             "task_type": t.task_type,
+            "blocked_reason": t.blocked_reason or "",
             "checklist": chk_list,
         }
         self._is_dialog_open = True
@@ -289,12 +291,7 @@ class TaskViewModel(QObject):
             self._event_bus.publish("toast.show", message="Görev başlığı boş olamaz", type_="danger")  # l10n: data
             return
 
-        kwargs = {
-            "description": str(data.get("description", "")),
-            "status": str(data.get("status", "TODO")),
-            "priority": str(data.get("priority", "MEDIUM")),
-            "task_type": str(data.get("task_type", "TASK")),
-        }
+        kwargs = self._build_task_fields(data)
 
         if self._dialog_mode == "edit" and self._dialog_task_id != 0:
             self._task_controller.update_task(self._dialog_task_id, title=title, **kwargs)
@@ -315,6 +312,19 @@ class TaskViewModel(QObject):
             self._event_bus.publish("toast.show", message="Görev oluşturuldu", type_="success")  # l10n: data
 
         self.closeDialog()
+
+    def _build_task_fields(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Form verisini servis alanlarına çevirir."""
+        status = str(data.get("status", "TODO"))
+        blocked_reason = str(data.get("blocked_reason", "")).strip()
+        return {
+            "description": str(data.get("description", "")),
+            "status": status,
+            "priority": str(data.get("priority", "MEDIUM")),
+            "task_type": str(data.get("task_type", "TASK")),
+            # Engel nedeni yalnızca "Engellendi" durumunda anlamlı; durum değişince eski neden kalmasın.
+            "blocked_reason": blocked_reason if status == "BLOCKED" and blocked_reason else None,
+        }
 
     @Slot(int)
     def deleteTask(self, task_id: int) -> None:
