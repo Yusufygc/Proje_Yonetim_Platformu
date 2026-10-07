@@ -21,14 +21,7 @@ Paketlenmiş uygulama açılışta GitHub Releases'te yeni sürüm arar; varsa "
 
 ## Sürüm çıkarma
 
-```powershell
-python scripts/set_version.py 0.2.0      # config, pyproject, exe sürüm bilgisi ve installer güncellenir
-git commit -am "chore(surum): v0.2.0 sürümü hazırlandı"
-git tag v0.2.0
-git push origin qml v0.2.0
-```
-
-Etiket ile `APP_VERSION` farklıysa release iş akışı yayın yapmadan durur.
+Adımlar, kontrol listesi ve geri alma: [[surum-yayinlama]]. Etiket ile `APP_VERSION` farklıysa release iş akışı yayın yapmadan durur.
 
 ## Sınırlar
 

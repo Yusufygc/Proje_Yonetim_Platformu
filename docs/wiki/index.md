@@ -23,5 +23,6 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[liste-siralama]] — Liste sıralama altyapısı (`sort_order`/`display_order`, `reorder` zinciri); QML'de sürükle-bırak arayüzü şu an yok.
 
 ## Kurallar ve Süreç
+- [[surum-yayinlama]] — Etiketle sürüm yayınlama: `set_version.py`, release iş akışı, kontrol listesi, hata/geri alma tablosu ve asistan kısıtı.
 - [[kurallar-ve-sozlesmeler]] — RULES.md limitleri, bellek yönetimi, tema/L10N sözleşmeleri ve commit kuralları.
 - [[yol-haritasi]] — Tamamlanan P0-P2 işleri ve bekleyen P3 + L10N migrasyon kuyruğu.

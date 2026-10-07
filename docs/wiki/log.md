@@ -1,5 +1,10 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] DOCS | Sürüm Yayınlama Süreci ve Kuralı
+- `surum-yayinlama` wiki sayfası eklendi (sürüm numarası, yayın adımları, kontrol listesi, hata/geri alma tablosu, güvenlik).
+- `Project_docs/RULES.md` §8 "Sürüm Yayınlama ve Güncelleme Kuralları" ve `CLAUDE.md` §11 eklendi: tek sürüm kaynağı, yalnızca etiketle yayın, yayınlanmış etiket değişmez, asistan açık istek olmadan etiket/push yapmaz.
+- `kurallar-ve-sozlesmeler`, `guncelleme-sistemi`, `index` ve README güncellendi; yinelenen sürüm çıkarma anlatımı tek yere indirildi.
+
 ## [2026-10-07] FEATURE | Uygulama İçi Güncelleme
 - **Akış:** Açılışta GitHub Releases denetimi, "Yeni güncelleme var" penceresi, boyut/SHA-256 doğrulamalı indirme, sessiz kurulum ve yeniden açılış. Ayrıntı: `guncelleme-sistemi`.
 - **Kod:** `UpdateService`, `UpdateController`, `UpdateViewModel`, `UpdateDialog.qml`, Ayarlar'da "Güncellemeleri Denetle"; yerelleştirme anahtarları (tr/en) eklendi.

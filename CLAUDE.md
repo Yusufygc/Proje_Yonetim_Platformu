@@ -153,3 +153,13 @@ feat(task_service): Görev tamamlanma yüzdesi hesaplama servise taşındı
 - Alt görev ağırlıkları dikkate alınan ağırlıklı ortalama algoritması eklendi.
 - TaskRepository.fetch_subtasks() metodu lazy load desteğiyle güncellendi.
 ```
+
+---
+
+## 11. Sürüm Yayınlama
+
+- Sürüm numarası yalnızca `python scripts/set_version.py X.Y.Z` ile değişir; yayın `vX.Y.Z` etiketinin push edilmesiyle olur (`Project_docs/RULES.md` §8, `docs/wiki/surum-yayinlama.md`).
+- **Kullanıcı açıkça istemeden etiket oluşturma, etiket push etme, `gh release` komutu çalıştırma.** Yayın tüm kurulu kullanıcılara güncelleme penceresi çıkarır; geri alınması zordur.
+- `git push --follow-tags` hafif etiketi göndermez; etiket `git push origin <dal> vX.Y.Z` ile gönderilir.
+- Yayınlanmış etiketi taşıma veya silme; hatalı sürüm için yeni PATCH sürümü çıkar.
+

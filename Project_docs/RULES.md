@@ -87,3 +87,15 @@ Bu doküman, **Proje Yönetim ve Takip Platformu** projesinde geliştirilecek t�
     * `docs/wiki/` — Değişikliği ilgilendiren wiki sayfası (yoksa yeni sayfa oluşturulur).
     * `Project_docs/` — Etkilenen modül veya mimari dokümanı.
     * Uygulama içi **Bilgilendirme / Hakkında** sayfası (varsa) — Sürüm notu veya özellik listesi.
+
+---
+
+## 8. Sürüm Yayınlama ve Güncelleme Kuralları
+
+* **Tek Sürüm Kaynağı:** Uygulama sürümü `app/config.py` içindeki `APP_VERSION` değeridir (`MAJOR.MINOR.PATCH`). Sürüm yalnızca `python scripts/set_version.py X.Y.Z` ile değiştirilir; `pyproject.toml`, `packaging/version_info.txt` ve `installer/windows.iss` dosyaları elle düzenlenmez.
+* **Yayın Yalnızca Etiketle:** Sürüm, yeşil CI'lı bir commit üzerinde oluşturulan `vX.Y.Z` etiketinin push edilmesiyle yayınlanır (`.github/workflows/release.yml`). Etiket `APP_VERSION` ile birebir aynı olmalıdır; farklıysa iş akışı yayın yapmadan durur. Etiket `git push origin <dal> vX.Y.Z` ile gönderilir; `--follow-tags` hafif etiketleri göndermediği için kullanılmaz.
+* **Sürüm Commit'i:** `chore(surum): vX.Y.Z sürümü hazırlandı` biçiminde, yalnızca sürüm dosyalarını içerir. Sürüm notları commit mesajlarından üretildiği için commit mesajları kullanıcıya görünür kabul edilir (§6 kuralları geçerlidir).
+* **Yayınlanmış Etiket Değişmez:** Yayın (Release) oluştuktan sonra etiket taşınmaz veya yeniden yazılmaz; hatalı sürüm için yeni PATCH sürümü çıkarılır. Yayın oluşmadan önceki bir derleme hatasında etiket yeni commit'e taşınabilir.
+* **Güncelleme Güvenliği:** Güncelleyici yalnızca bu deponun `releases/download/` adresinden indirir ve GitHub'ın verdiği SHA-256 özetini doğrular; bu kontroller kaldırılamaz. Güncelleme penceresi ve indirme UI thread'i bloke etmez (§5).
+* **Yapay Zeka Kısıtı:** Yayın tüm kurulu kullanıcılara popup çıkarır; asistanlar kullanıcının açık isteği olmadan etiket oluşturmaz veya push etmez.
+* **Dokümantasyon:** Süreç ayrıntısı, kontrol listesi ve hata/geri alma tablosu `docs/wiki/surum-yayinlama.md` içindedir; yayın akışı değişirse aynı commit'te güncellenir (§7).

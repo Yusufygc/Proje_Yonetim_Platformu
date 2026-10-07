@@ -174,10 +174,10 @@ Kurulu uygulama açılışta GitHub Releases'te yeni sürüm arar ve güncelleme
 python scripts/set_version.py 0.2.0
 git commit -am "chore(surum): v0.2.0 sürümü hazırlandı"
 git tag v0.2.0
-git push origin qml v0.2.0
+git push origin <dal> v0.2.0
 ```
 
-Etiket push edilince `.github/workflows/release.yml` installer'ı derleyip yayınlar. Ayrıntı: `docs/wiki/guncelleme-sistemi.md`.
+Etiket push edilince `.github/workflows/release.yml` installer'ı derleyip yayınlar. Kurallar: `Project_docs/RULES.md` §8; adımlar ve geri alma: `docs/wiki/surum-yayinlama.md`; güncelleme mekanizması: `docs/wiki/guncelleme-sistemi.md`.
 
 ---
 

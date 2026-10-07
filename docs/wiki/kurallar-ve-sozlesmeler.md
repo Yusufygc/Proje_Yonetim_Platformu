@@ -8,6 +8,9 @@
 - Yorumlar "neden"i anlatır, "ne"yi değil.
 - Graphify zorunluluğu 2026-06-12'de kaldırıldı; mimari bilgi bu wiki'de tutulur ([[log]]).
 
+## Sürüm yayınlama sözleşmesi
+Sürüm tek kaynaktan (`APP_VERSION`) `scripts/set_version.py` ile değişir; yayın yalnızca `vX.Y.Z` etiketiyle olur ve etiket sürümle birebir aynı olmalıdır. Yayınlanmış etiket taşınmaz; asistanlar açık istek olmadan etiket oluşturmaz/push etmez. RULES.md §8. Detay: [[surum-yayinlama]].
+
 ## Tema sözleşmesi
 Renk yalnızca `ThemeManager`/`ThemeBridge` paletinden gelir (`themeBridge.color("key")`); QML dosyalarına sabit renk yazılmaz. Detay: [[tema-sistemi]].
 
@@ -23,4 +26,4 @@ Yeni repo `BaseRepository[T]` veya `ProjectScopedRepository[T]`'den türer; `mod
 ## Boyut sabitleri
 QML boyut/aralık/süre değerleri `presentation/qml/theme/Theme.qml` sabitlerinden alınır (`Theme.spacing`, `Theme.radius`, `Theme.animation`); `presentation/dimensions.py` yalnızca font ailesi sabitlerini taşır.
 
-İlgili: [[mimari-genel-bakis]], [[yol-haritasi]]
+İlgili: [[mimari-genel-bakis]], [[yol-haritasi]], [[surum-yayinlama]]
