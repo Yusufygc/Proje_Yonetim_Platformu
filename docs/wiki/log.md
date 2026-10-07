@@ -1,5 +1,10 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] FIX | Rozet (AppBadge) Görünümü
+- Açık zeminde turuncu/sarı rozet yazısı okunmuyordu: yazı rengi artık temaya göre koyulaşıyor (açık tema) veya açılıyor (koyu tema); zemin ve çerçeve saydamlığı temaya göre ayarlandı.
+- Durum rozetlerine (öncelik, proje sağlığı) renkli nokta eklendi (`showDot`); proje tipi nötr, noktasız kaldı, böylece üç rozet aynı görünmüyor.
+- Sağlık bilinmiyorsa ("Belirsiz") rozet kırmızı yerine nötr gri; kırmızı "Tıkandı" anlamını taşır.
+
 ## [2026-10-08] CLEANUP | Graphify Projeden Kaldırıldı
 - Silindi: `.graphifyignore`, `graphify-out/` (üretilmiş harita çıktıları, 2,4 MB), `.gitignore` içindeki Graphify bloğu.
 - Güncellendi: `Project_docs/RULES.md` §7 (Graphify güncelleme maddesi çıkarıldı), `AGENTS.md` (graphify adımları wiki okuma/güncelleme ile değiştirildi), `Project_docs/18_PROJE_INSA_SURECI_PIPELINE.md`, `scripts/quality.py` (derleme taramasından `graphify-out` hariç tutması çıkarıldı).

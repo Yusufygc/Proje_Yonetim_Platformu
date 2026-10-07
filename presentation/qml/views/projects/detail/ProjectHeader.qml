@@ -87,6 +87,7 @@ Column {
                     default: return themeBridge.accentStart;
                 }
             }
+            showDot: true
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -100,9 +101,16 @@ Column {
                     default: return i18nBridge.tr("health_unknown", "Belirsiz");
                 }
             }
-            badgeColor: root.project.health === "GOOD" ? themeBridge.success : (
-                root.project.health === "AT_RISK" ? themeBridge.warning : themeBridge.danger
-            )
+            // Sağlık bilinmiyorsa kırmızı değil nötr renk: kırmızı "tıkandı" anlamına gelir, "belirsiz" alarm değildir.
+            badgeColor: {
+                switch (root.project.health) {
+                    case "GOOD": return themeBridge.success;
+                    case "AT_RISK": return themeBridge.warning;
+                    case "BLOCKED": return themeBridge.danger;
+                    default: return themeBridge.textSecondary;
+                }
+            }
+            showDot: true
             anchors.verticalCenter: parent.verticalCenter
         }
 
