@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import importlib.util
 from pathlib import Path
 
 # SPECPATH = packaging/ dizini; bir üst = proje kökü
@@ -7,7 +8,8 @@ ROOT = Path(SPECPATH).parent
 
 # Vosk CFFI native kütüphaneleri — PyInstaller cffi.dlopen() ile yüklenen
 # DLL'leri statik analizle bulamaz; elle eklenmesi zorunludur.
-VOSK_DIR = str(ROOT / ".venv" / "Lib" / "site-packages" / "vosk")
+# Yol, kurulu paketten bulunur: sabit ".venv" yolu CI ve farklı sanal ortamlarda bulunmuyor.
+VOSK_DIR = str(Path(importlib.util.find_spec("vosk").submodule_search_locations[0]))
 
 a = Analysis(
     [str(ROOT / "main.py")],

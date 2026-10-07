@@ -1,7 +1,7 @@
 """Uygulama sürümünü dört dosyada birden günceller: config, pyproject, exe sürüm bilgisi, installer.
 
 Kullanım:  python scripts/set_version.py 0.2.0
-Sonra:     git commit -am "chore(surum): v0.2.0" && git tag v0.2.0 && git push --follow-tags
+Sonra:     git commit -am "chore(surum): v0.2.0" && git tag v0.2.0 && git push origin <dal> v0.2.0
 Release iş akışı etiket ile app/config.py sürümünün aynı olduğunu doğrular; farklıysa yayın yapmaz.
 """
 from __future__ import annotations

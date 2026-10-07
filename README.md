@@ -174,7 +174,7 @@ Kurulu uygulama açılışta GitHub Releases'te yeni sürüm arar ve güncelleme
 python scripts/set_version.py 0.2.0
 git commit -am "chore(surum): v0.2.0 sürümü hazırlandı"
 git tag v0.2.0
-git push --follow-tags
+git push origin qml v0.2.0
 ```
 
 Etiket push edilince `.github/workflows/release.yml` installer'ı derleyip yayınlar. Ayrıntı: `docs/wiki/guncelleme-sistemi.md`.
