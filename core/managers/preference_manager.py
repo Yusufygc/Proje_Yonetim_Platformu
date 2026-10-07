@@ -21,7 +21,12 @@ class PreferenceManager:
     _instance: PreferenceManager | None = None
 
     def __init__(self) -> None:
-        self._settings = QSettings(config.APP_ORGANIZATION, config.APP_NAME)
+        # (organizasyon, uygulama) kurucusu QSettings.setDefaultFormat'ı yok sayar; biçim açıkça verilir ki
+        # testler ve araçlar ayarları gerçek kayıt defteri yerine geçici dosyaya yönlendirebilsin.
+        # Varsayılan biçim NativeFormat olduğundan uygulamanın saklama yeri değişmez.
+        self._settings = QSettings(
+            QSettings.defaultFormat(), QSettings.Scope.UserScope, config.APP_ORGANIZATION, config.APP_NAME
+        )
 
     @classmethod
     def instance(cls) -> "PreferenceManager":

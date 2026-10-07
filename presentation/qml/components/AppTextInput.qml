@@ -138,14 +138,17 @@ Column {
             ToolTip.delay: 450
         }
 
-        VoiceInputButton {
+        // Mikrofon düğmesi yalnızca istenen alanlarda oluşturulur: gizli bile olsa her düğme dikte sinyalini dinler.
+        Loader {
             anchors.right: parent.right
             anchors.rightMargin: 4
             anchors.verticalCenter: root.isTextArea ? undefined : parent.verticalCenter
             anchors.top: root.isTextArea ? parent.top : undefined
             anchors.topMargin: root.isTextArea ? 4 : 0
-            visible: root.showVoiceInput && !root.readOnly
-            target: inputField
+            active: root.showVoiceInput && !root.readOnly
+            sourceComponent: VoiceInputButton {
+                target: inputField
+            }
         }
     }
 }

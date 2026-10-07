@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 
 from core.managers.theme_manager import ThemeManager
@@ -111,3 +112,13 @@ def test_qml_files_when_scanned_should_not_contain_emoji_or_symbol_glyphs() -> N
     ]
 
     assert offenders == []
+
+
+def test_preference_manager_when_running_tests_should_not_use_native_registry_storage() -> None:
+    """Testler kullanıcının gerçek ayarlarını (kayıt defteri) değiştirmemeli; conftest geçici ini kullanır."""
+    from core.managers.preference_manager import PreferenceManager
+
+    storage = PreferenceManager()._settings
+
+    assert storage.format() == QSettings.Format.IniFormat
+    assert "proje_takip_test_settings_" in storage.fileName()

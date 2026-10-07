@@ -8,21 +8,25 @@ Rectangle {
     property var target: null // Hedef TextInput veya TextArea
     signal transcriptReceived(string text)
 
+    // Dikte sonucu tüm düğmelere yayınlanır; yalnızca dinlemeyi başlatan düğme metni alır.
+    readonly property string ownerId: "voice-" + Math.random().toString(36).slice(2)
+    readonly property bool isActive: voiceBridge && voiceBridge.isListening && voiceBridge.activeOwner === ownerId
+
     width: 32
     height: 32
     radius: 6
     color: {
-        if (voiceBridge && voiceBridge.isListening) return Qt.rgba(0.93, 0.27, 0.27, 0.2);
+        if (voiceBtnRoot.isActive) return Qt.rgba(0.93, 0.27, 0.27, 0.2);
         if (mouseArea.containsMouse) return themeBridge.surfaceRaised;
         return "transparent";
     }
     border.width: 1
-    border.color: (voiceBridge && voiceBridge.isListening) ? "#EF4444" : themeBridge.border
+    border.color: voiceBtnRoot.isActive ? "#EF4444" : themeBridge.border
 
     AppIcon {
         name: "mic"
         size: 16
-        color: (voiceBridge && voiceBridge.isListening) ? "#EF4444" : themeBridge.textSecondary
+        color: voiceBtnRoot.isActive ? "#EF4444" : themeBridge.textSecondary
         anchors.centerIn: parent
     }
 
@@ -31,12 +35,13 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: voiceBridge.toggleListening()
+        onClicked: voiceBridge.toggleListeningFor(voiceBtnRoot.ownerId)
     }
 
     Connections {
         target: voiceBridge
         function onTextTranscribed(text) {
+            if (voiceBridge.activeOwner !== voiceBtnRoot.ownerId) return;
             voiceBtnRoot.transcriptReceived(text);
             if (voiceBtnRoot.target) {
                 var current = voiceBtnRoot.target.text || "";
@@ -50,7 +55,7 @@ Rectangle {
     }
 
     ToolTip.visible: mouseArea.containsMouse
-    ToolTip.text: voiceBridge.isListening
+    ToolTip.text: voiceBtnRoot.isActive
         ? i18nBridge.tr("voice_stop_tooltip", "Dinlemeyi durdur")
         : i18nBridge.tr("voice_start_tooltip", "Sesle yaz (Mikrofon)")
     ToolTip.delay: 300

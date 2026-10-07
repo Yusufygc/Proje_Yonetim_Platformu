@@ -739,6 +739,86 @@ def test_voice_bridge(qapp: QApplication, container: DIContainer) -> None:
     assert transcripts[0] == "merhaba dünya"
 
 
+def test_voice_bridge_when_toggled_by_owner_should_record_owner_and_stop_on_second_toggle(
+    qapp: QApplication, container: DIContainer, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vb = VoiceBridge(container, parent=qapp)
+    started: list[str] = []
+
+    def fake_start() -> None:
+        started.append(vb.activeOwner)
+        vb._is_listening = True
+
+    monkeypatch.setattr(vb, "startListening", fake_start)
+    monkeypatch.setattr(vb, "stopListening", lambda: setattr(vb, "_is_listening", False))
+    owners: list[str] = []
+    vb.activeOwnerChanged.connect(owners.append)
+
+    vb.toggleListeningFor("hizli-ekle")
+    assert vb.activeOwner == "hizli-ekle"
+    assert started == ["hizli-ekle"]
+    assert vb.isListening is True
+
+    # Dinleme sürerken başka düğmeye basmak sahibi değiştirmez, yalnızca durdurur.
+    vb.toggleListeningFor("arama")
+    assert vb.isListening is False
+    assert vb.activeOwner == "hizli-ekle"
+    assert owners == ["hizli-ekle"]
+
+
+def test_voice_dictation_when_two_inputs_exist_should_write_only_to_the_owner_input(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QObject  # noqa: PLC0415
+    from PySide6.QtQml import QQmlComponent  # noqa: PLC0415
+
+    engine = QQmlApplicationEngine(parent=qapp)
+    tb = ThemeBridge(container.theme, container.prefs, parent=qapp)
+    ib = I18nBridge(container.strings, parent=qapp)
+    vb = VoiceBridge(container, parent=qapp)
+    for name, obj in (("themeBridge", tb), ("i18nBridge", ib), ("voiceBridge", vb)):
+        engine.rootContext().setContextProperty(name, obj)
+    components = Path("presentation/qml/components").resolve().as_uri()
+    comp = QQmlComponent(engine)
+    comp.setData(
+        f"""
+        import QtQuick 2.15
+        import "{components}"
+        Item {{
+            width: 400; height: 200
+            AppTextInput {{ objectName: "firstInput"; showVoiceInput: true }}
+            AppTextInput {{ objectName: "searchInput"; y: 80 }}
+        }}
+        """.encode(),
+        "file:///voice_sheet.qml",
+    )
+    sheet = comp.create()
+    assert sheet is not None, [e.toString() for e in comp.errors()]
+
+    def find_voice_button(item):
+        if item.property("ownerId"):
+            return item
+        for child in item.childItems():
+            found = find_voice_button(child)
+            if found is not None:
+                return found
+        return None
+
+    first_input = sheet.findChild(QObject, "firstInput")
+    search_input = sheet.findChild(QObject, "searchInput")
+    first_button = find_voice_button(first_input)
+    assert first_button is not None
+    vb._active_owner = first_button.property("ownerId")
+    vb.textTranscribed.emit("merhaba dünya")
+
+    assert first_input.property("text") == "merhaba dünya"
+    assert search_input.property("text") == ""
+    sheet.deleteLater()
+    engine.deleteLater()
+    from PySide6.QtCore import QCoreApplication, QEvent  # noqa: PLC0415
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
 def test_qml_main_window_loads_successfully(qapp: QApplication, container: DIContainer) -> None:
     setup_modules(container)
     engine = QQmlApplicationEngine(parent=qapp)

@@ -32,7 +32,7 @@ VoiceInputButton.qml + VoiceBridge (UI)
    açılır; callback ses çerçevelerini `queue.Queue`'ya yazar.
 3. Kuyruk döngüsü `recognizer.AcceptWaveform(data)` ile beslenir: tam cümlede `final`,
    ara sonuçta `partial` sinyali atılır (partial şu an UI'da kullanılmıyor — bkz. Kapsam Dışı).
-4. `VoiceBridge` `final` sinyalinde `textTranscribed` yayar; QML buton hedef metin alanının imleç konumuna ekler, önceki metin boşlukla bitmiyorsa boşluk koyar.
+4. `VoiceBridge` `final` sinyalinde `textTranscribed` yayar. Sinyal tüm mikrofon düğmelerine ulaşır; her düğmenin benzersiz `ownerId`'si vardır ve dinlemeyi `toggleListeningFor(ownerId)` ile başlatan düğme `VoiceBridge.activeOwner` olur. Yalnızca sahip düğme metni hedef alanına ekler (önceki metin boşlukla bitmiyorsa boşluk koyar); diğerleri yok sayar. Sahip kimliği olmadan her açık alan (arama kutusu, diyaloglar) aynı metni yazıyordu. Mikrofon düğmesi yalnızca `showVoiceInput: true` alanlarda `Loader` ile oluşturulur; kırmızı "dinliyor" görünümü de yalnızca sahip düğmededir.
 5. Tekrar tıklama → `worker.stop()` → `_stop_flag` set edilir → döngü çıkar →
    `FinalResult()` ile kalan parça da işlenir → `finished` sinyali.
 

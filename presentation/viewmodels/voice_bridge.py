@@ -21,6 +21,7 @@ class VoiceBridge(QObject):
     listeningChanged = Signal(bool)
     textTranscribed = Signal(str)
     partialChanged = Signal(str)
+    activeOwnerChanged = Signal(str)
 
     def __init__(self, container: DIContainer, parent: Optional[QObject] = None) -> None:
         super().__init__(parent=parent)
@@ -29,6 +30,7 @@ class VoiceBridge(QObject):
         self._worker: Optional[TranscriptionWorker] = None
         self._is_listening: bool = False
         self._partial_text: str = ""
+        self._active_owner: str = ""
 
     @Property(bool, notify=listeningChanged)
     def isListening(self) -> bool:
@@ -38,12 +40,24 @@ class VoiceBridge(QObject):
     def partialText(self) -> str:
         return self._partial_text
 
-    @Slot()
-    def toggleListening(self) -> None:
+    @Property(str, notify=activeOwnerChanged)
+    def activeOwner(self) -> str:
+        """Dinlemeyi başlatan mikrofon düğmesinin kimliği; metni yalnızca o düğme alır."""
+        return self._active_owner
+
+    @Slot(str)
+    def toggleListeningFor(self, owner: str) -> None:
+        """Dinleme açıksa durdurur; kapalıysa `owner` düğmesi adına başlatır.
+
+        Sonuç sinyali tüm mikrofon düğmelerine ulaşır; sahip kimliği olmadan her açık alan
+        (arama kutusu dahil) aynı metni yazıyordu.
+        """
         if self._is_listening:
             self.stopListening()
-        else:
-            self.startListening()
+            return
+        self._active_owner = owner
+        self.activeOwnerChanged.emit(owner)
+        self.startListening()
 
     @Slot()
     def startListening(self) -> None:

@@ -1,5 +1,10 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] FIX | Dikte Metni Her Alana Yazılıyordu, Testler Gerçek Ayarları Değiştiriyordu
+- **Dikte:** Mikrofonla söylenen metin hızlı ekleme alanıyla birlikte arama kutusuna da yazılıyordu: sonuç sinyalini gizli olanlar dahil her mikrofon düğmesi dinliyordu. `VoiceBridge.activeOwner` + `toggleListeningFor(owner)` eklendi; yalnızca dinlemeyi başlatan düğme metni alır. Mikrofon düğmesi artık `showVoiceInput` olmayan alanlarda hiç oluşturulmuyor (`Loader`). Testler: iki alanlı QML denemesi ve sahip kaydı.
+- **Ayarlar:** `QSettings(org, app)` kurucusu `setDefaultFormat`'ı yok sayıyor; testler ve çizim betikleri tema, kenar çubuğu ve pencere tercihlerini kullanıcının gerçek kayıt defterine yazıyordu. `PreferenceManager` biçimi açıkça `QSettings.defaultFormat()` ile veriyor (üretimde varsayılan NativeFormat, yer değişmedi); `tests/conftest.py` testleri geçici ini dosyasına yönlendiriyor, doğrulayan test eklendi.
+- Denetim: başka global sinyal dinleyen çoğaltılmış bileşen bulunamadı (`Connections` kullanımları tekil bileşenlerde).
+
 ## [2026-10-08] FEATURE | Hızlı Görev Ekleme Alanına Sesli Dikte
 - Görev listesinin altındaki mevcut hızlı ekleme satırına mikrofon düğmesi bağlandı (`showVoiceInput`). Başarıda `quickAddTask` artık "Görev oluşturuldu" bildirimi gösteriyor.
 - İlk denemede araç çubuğunun altına ikinci bir hızlı ekleme alanı eklenmişti; aynı satır zaten listenin altında olduğu için geri alındı.
