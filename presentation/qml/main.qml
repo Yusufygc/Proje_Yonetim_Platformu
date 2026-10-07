@@ -10,12 +10,13 @@ ApplicationWindow {
     id: appWindow
 
     visible: true
-    width: Math.min(1280, Math.floor(Screen.width * 0.92))
-    height: Math.min(800, Math.floor(Screen.height * 0.88))
+    // Başlangıç boyutu sabit; konum ve boyutu presentation/window_geometry.py belirler.
+    // x/y/width/height için Screen'e bağlı binding KULLANILMAZ: pencere büyütülünce binding yeniden
+    // hesaplanıp pencereyi kaydırır ve başlık çubuğunu ekranın dışına iter.
+    width: 1280
+    height: 800
     minimumWidth: Math.min(800, Math.floor(Screen.width * 0.75))
     minimumHeight: Math.min(520, Math.floor(Screen.height * 0.75))
-    x: Screen.virtualX + Math.max(0, Math.floor((Screen.width - width) / 2))
-    y: Screen.virtualY + Math.max(0, Math.floor((Screen.height - height) / 2))
 
     title: i18nBridge.tr("app_name", "Proje Takip Platformu")
     color: themeBridge.background

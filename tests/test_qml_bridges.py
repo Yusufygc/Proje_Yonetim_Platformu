@@ -799,7 +799,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
 
 def test_window_geometry_persistence_and_centering(qapp: QApplication, container: DIContainer) -> None:
     from PySide6.QtQuick import QQuickWindow  # noqa: PLC0415
-    from main_qml import setup_window_geometry  # noqa: PLC0415
+    from presentation.window_geometry import setup_window_geometry  # noqa: PLC0415
 
     prefs = container.prefs
 
@@ -825,6 +825,31 @@ def test_window_geometry_persistence_and_centering(qapp: QApplication, container
 
     prefs.save_window_rect(0, 0, 0, 0, False)
     prefs._settings.remove("window/rect")
+
+
+def test_fit_rect_to_screen_when_saved_at_screen_top_should_leave_room_for_title_bar() -> None:
+    from PySide6.QtCore import QRect  # noqa: PLC0415
+    from presentation.window_geometry import fit_rect_to_screen  # noqa: PLC0415
+
+    avail = QRect(0, 0, 1920, 1040)
+
+    fitted = fit_rect_to_screen(QRect(0, 0, 1920, 1040), avail, top_margin=31)
+
+    assert fitted.top() >= 31
+    assert fitted.bottom() <= avail.bottom()
+    assert fitted.width() <= avail.width()
+
+
+def test_fit_rect_to_screen_when_saved_below_screen_should_pull_back_inside() -> None:
+    from PySide6.QtCore import QRect  # noqa: PLC0415
+    from presentation.window_geometry import fit_rect_to_screen  # noqa: PLC0415
+
+    avail = QRect(0, 0, 1366, 728)
+
+    fitted = fit_rect_to_screen(QRect(1300, 700, 800, 600), avail, top_margin=31)
+
+    assert avail.contains(fitted)
+    assert fitted.top() >= 31
 
 
 def test_project_viewmodel_tasks_and_stage_progress(qapp: QApplication, container: DIContainer) -> None:
