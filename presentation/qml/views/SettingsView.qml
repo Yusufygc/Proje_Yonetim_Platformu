@@ -62,21 +62,17 @@ ScrollView {
                     }
 
                     AppButton {
-                        text: "🌙"
+                        iconName: "moon"
+                        text: i18nBridge.tr("settings_theme_mode_dark", "Koyu")
                         variant: settingsViewModel.isDark ? "primary" : "secondary"
                         onClicked: settingsViewModel.setMode(true)
-                        ToolTip.visible: hovered
-                        ToolTip.text: i18nBridge.tr("settings_theme_mode_dark", "Koyu Mod")
-                        ToolTip.delay: 300
                     }
 
                     AppButton {
-                        text: "☀️"
+                        iconName: "sun"
+                        text: i18nBridge.tr("settings_theme_mode_light", "Açık")
                         variant: !settingsViewModel.isDark ? "primary" : "secondary"
                         onClicked: settingsViewModel.setMode(false)
-                        ToolTip.visible: hovered
-                        ToolTip.text: i18nBridge.tr("settings_theme_mode_light", "Açık Mod")
-                        ToolTip.delay: 300
                     }
                 }
 

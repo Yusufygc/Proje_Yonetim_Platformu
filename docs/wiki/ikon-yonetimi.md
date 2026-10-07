@@ -11,7 +11,7 @@ Yeni ikon eklemek: `resources/icons/<ad>.svg` dosyası ekle (tek renkli, `curren
 
 ## Emoji yerine SVG ikon
 Arayüzde emoji kullanılmaz; ikon gereken yerde `AppIcon`/`AppButton.iconName` ve `resources/icons/*.svg` kullanılır (emoji temayla boyanamaz, platforma göre farklı görünür). Çizim araç çubukları için çizgi ikonlar eklendi: `pencil`, `minus`, `arrow-right`, `square`, `square-fill`, `square-round`, `circle`, `eraser`, `capsule`, `diamond`, `parallelogram`, `workflow`, `clipboard`, `undo`, `redo`, `image`; ayrıca `check`, `triangle-alert`, `paperclip`, `upload`, `circle-check`, `circle-x`. Yerelleştirme metinlerine emoji yazılmaz (ikon QML tarafında verilir).
-Bilinçli istisna: tema geçiş düğmelerindeki 🌙/☀️ (kullanıcı isteği).
+Tema geçiş düğmeleri `moon`/`sun` ikonlarını kullanır (Ayarlar'da "Koyu"/"Açık" yazısıyla, daraltılmış kenar çubuğunda yalnızca ikon).
 
 ## Geçmiş
 - 2026-10-07: Eski Widgets arayüzünün `get_icon` (QIcon üretimi), `Icons` sabit sınıfı, `try_instance()` ve QSS ok ikonu üretimi kaldırıldı; yalnızca QML'in kullandığı `get_svg_content` kaldı. `chevron-right.svg` eklendi (aşama kartı).

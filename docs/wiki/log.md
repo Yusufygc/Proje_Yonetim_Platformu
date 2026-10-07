@@ -1,5 +1,9 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] REFACTOR | Tema Düğmeleri SVG İkon
+- Ayarlar'daki açık/koyu düğmeleri `sun`/`moon` SVG ikonu ve "Açık"/"Koyu" yazısıyla; daraltılmış kenar çubuğundaki tema düğmesi aynı ikonlarla. Yerelleştirme metinlerindeki `●` işareti kaldırıldı.
+- Arayüzde emoji kalmadı; metin sembolleri (`▼`, `▶`, `↳`, `◈`, `↵`) bilinçli bırakıldı.
+
 ## [2026-10-08] REFACTOR | Emoji Yerine SVG İkon
 - Çizim araç çubukları, Notlar'daki görsel düğmesi, Çıktılar'daki ataç, arama modalı, toast bildirimleri, analitik proje filtresindeki tik ve Ayarlar'daki dışa aktarma düğmesi emoji/metin sembolü yerine SVG ikon kullanıyor (21 yeni ikon dosyası). Yerelleştirme metinlerinden 📤/✅/❌ kaldırıldı.
 - Bırakılanlar: tema düğmelerindeki 🌙/☀️ (istek), açılır liste ve ağaç oklarındaki `▼`/`▶`, `↳`, `◈`, `↵` metin sembolleri.

@@ -259,9 +259,10 @@ Rectangle {
                 anchors.centerIn: parent
                 visible: sidebarRoot.isCollapsed
 
-                Text {
-                    text: themeBridge.isDark ? "🌙" : "☀️"
-                    font.pixelSize: 16
+                AppIcon {
+                    name: themeBridge.isDark ? "moon" : "sun"
+                    size: 16
+                    color: "#FFFFFF"
                     anchors.centerIn: parent
                 }
 
