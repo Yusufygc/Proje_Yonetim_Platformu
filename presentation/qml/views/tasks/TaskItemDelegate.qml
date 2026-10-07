@@ -44,7 +44,7 @@ Rectangle {
         }
         onDoubleClicked: {
             if (taskViewModel) {
-                taskViewModel.openEditDialog(model.taskId)
+                taskDialogViewModel.openEditDialog(model.taskId)
             }
         }
     }
@@ -230,7 +230,7 @@ Rectangle {
                 implicitHeight: 26
                 onClicked: {
                     if (taskViewModel) {
-                        taskViewModel.openCreateDialog(model.taskId)
+                        taskDialogViewModel.openCreateDialog(model.taskId)
                     }
                 }
             }
@@ -254,7 +254,7 @@ Rectangle {
                 implicitHeight: 26
                 onClicked: {
                     if (taskViewModel) {
-                        taskViewModel.openEditDialog(model.taskId)
+                        taskDialogViewModel.openEditDialog(model.taskId)
                     }
                 }
             }
@@ -268,14 +268,14 @@ Rectangle {
         MenuItem {
             text: i18nBridge.tr("task_add_child", "Alt Görev Ekle")
             onTriggered: {
-                if (taskViewModel) taskViewModel.openCreateDialog(model.taskId)
+                if (taskViewModel) taskDialogViewModel.openCreateDialog(model.taskId)
             }
         }
 
         MenuItem {
             text: i18nBridge.tr("action_edit", "Düzenle")
             onTriggered: {
-                if (taskViewModel) taskViewModel.openEditDialog(model.taskId)
+                if (taskViewModel) taskDialogViewModel.openEditDialog(model.taskId)
             }
         }
 

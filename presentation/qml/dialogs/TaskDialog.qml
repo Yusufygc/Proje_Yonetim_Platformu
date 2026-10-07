@@ -7,7 +7,7 @@ import "../theme"
 Rectangle {
     id: root
 
-    visible: taskViewModel ? taskViewModel.isDialogOpen : false
+    visible: taskDialogViewModel ? taskDialogViewModel.isDialogOpen : false
     anchors.fill: parent
     color: "#80000000"
     z: 999
@@ -20,7 +20,7 @@ Rectangle {
     Shortcut {
         sequence: "Escape"
         enabled: root.visible
-        onActivated: taskViewModel.closeDialog()
+        onActivated: taskDialogViewModel.closeDialog()
     }
 
     property var checklistItems: []
@@ -41,10 +41,10 @@ Rectangle {
     ]
 
     Connections {
-        target: taskViewModel
+        target: taskDialogViewModel
         function onDialogStateChanged() {
-            if (taskViewModel && taskViewModel.isDialogOpen) {
-                var init = taskViewModel.dialogInitialData
+            if (taskDialogViewModel && taskDialogViewModel.isDialogOpen) {
+                var init = taskDialogViewModel.dialogInitialData
                 titleInput.text = init.title || ""
                 descInput.text = init.description || ""
                 root.hasChildren = init.has_children === true
@@ -90,9 +90,9 @@ Rectangle {
 
                 Text {
                     text: {
-                        if (!taskViewModel) return ""
-                        if (taskViewModel.dialogMode === "edit") return i18nBridge.tr("task_dialog_edit_title", "Görevi Düzenle")
-                        if (taskViewModel.dialogMode === "create_subtask") return i18nBridge.tr("task_add_child", "Alt Görev Ekle")
+                        if (!taskDialogViewModel) return ""
+                        if (taskDialogViewModel.dialogMode === "edit") return i18nBridge.tr("task_dialog_edit_title", "Görevi Düzenle")
+                        if (taskDialogViewModel.dialogMode === "create_subtask") return i18nBridge.tr("task_add_child", "Alt Görev Ekle")
                         return i18nBridge.tr("task_dialog_new_title", "Yeni Görev Ekle")
                     }
                     font.pixelSize: Theme.typography.sizeH3
@@ -106,7 +106,7 @@ Rectangle {
                     btnVariant: "secondary"
                     implicitWidth: 32
                     implicitHeight: 32
-                    onClicked: taskViewModel.closeDialog()
+                    onClicked: taskDialogViewModel.closeDialog()
                 }
             }
 
@@ -314,11 +314,11 @@ Rectangle {
                     btnVariant: "danger"
                     implicitWidth: 120
                     implicitHeight: 40
-                    visible: taskViewModel ? taskViewModel.dialogMode === "edit" : false
+                    visible: taskDialogViewModel ? taskDialogViewModel.dialogMode === "edit" : false
                     onClicked: {
-                        if (taskViewModel) {
-                            taskViewModel.deleteTask(taskViewModel.dialogTaskId)
-                            taskViewModel.closeDialog()
+                        if (taskDialogViewModel) {
+                            taskViewModel.deleteTask(taskDialogViewModel.dialogTaskId)
+                            taskDialogViewModel.closeDialog()
                         }
                     }
                 }
@@ -328,7 +328,7 @@ Rectangle {
                     btnVariant: "secondary"
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: taskViewModel.closeDialog()
+                    onClicked: taskDialogViewModel.closeDialog()
                 }
 
                 AppButton {
@@ -337,8 +337,8 @@ Rectangle {
                     implicitWidth: 120
                     implicitHeight: 40
                     onClicked: {
-                        if (taskViewModel) {
-                            taskViewModel.saveTask({
+                        if (taskDialogViewModel) {
+                            taskDialogViewModel.saveTask({
                                 "title": titleInput.text,
                                 "description": descInput.text,
                                 "status": statusCombo.selectedValue,

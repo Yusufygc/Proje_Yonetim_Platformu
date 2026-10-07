@@ -8,8 +8,9 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 from PySide6.QtGui import QGuiApplication
 
 from domain.models.task import Task
-from presentation.viewmodels.qt_properties import variant_list_property, variant_map_property
 from presentation.viewmodels.error_reporting import forward_errors_to_toast
+from presentation.viewmodels.qt_properties import variant_list_property, variant_map_property
+from presentation.viewmodels.task_clipboard import collect_task_copy_lines
 from presentation.viewmodels.task_list_model import TaskListModel
 
 if TYPE_CHECKING:
@@ -17,17 +18,12 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# Diyalogdaki "Otomatik" durum seçeneği; alt görevi olan görevler için kullanılır.
-_AUTO_STATUS = "AUTO"
-
-
 class TaskViewModel(QObject):
     """Görevler (WBS) modülünün QML kullanıcı arayüzü ile iş katmanı arasındaki köprüsü."""
 
     selectedProjectChanged = Signal(int)
     selectedTaskChanged = Signal()
     projectsChanged = Signal()
-    dialogStateChanged = Signal()
     statsChanged = Signal()
 
     def __init__(self, container: DIContainer, parent: Optional[QObject] = None) -> None:
@@ -42,13 +38,6 @@ class TaskViewModel(QObject):
         self._selected_project_id: int = 0
         self._selected_task_id: int = 0
         self._selected_task_data: dict[str, Any] = {}
-
-        # Dialog durumu
-        self._is_dialog_open: bool = False
-        self._dialog_mode: str = "create"  # "create" | "create_subtask" | "edit"
-        self._dialog_task_id: int = 0
-        self._dialog_parent_task_id: int = 0
-        self._dialog_initial_data: dict[str, Any] = {}
 
         self._tasks_cache: list[Task] = []
         self._connect_signals()
@@ -91,26 +80,6 @@ class TaskViewModel(QObject):
     @variant_map_property(notify=selectedTaskChanged)
     def selectedTask(self) -> dict[str, Any]:
         return self._selected_task_data
-
-    @Property(bool, notify=dialogStateChanged)
-    def isDialogOpen(self) -> bool:
-        return self._is_dialog_open
-
-    @Property(str, notify=dialogStateChanged)
-    def dialogMode(self) -> str:
-        return self._dialog_mode
-
-    @Property(int, notify=dialogStateChanged)
-    def dialogTaskId(self) -> int:
-        return self._dialog_task_id
-
-    @Property(int, notify=dialogStateChanged)
-    def dialogParentTaskId(self) -> int:
-        return self._dialog_parent_task_id
-
-    @variant_map_property(notify=dialogStateChanged)
-    def dialogInitialData(self) -> dict[str, Any]:
-        return self._dialog_initial_data
 
     @Property(int, notify=statsChanged)
     def totalTasks(self) -> int:
@@ -168,6 +137,14 @@ class TaskViewModel(QObject):
 
     def _on_bus_project_changed(self, **kwargs: Any) -> None:
         self.loadProjects()
+
+    # ── Diğer ViewModel'ler için tipli erişim (QML kullanmaz) ───────────────
+
+    def current_project_id(self) -> int:
+        return self._selected_project_id
+
+    def cached_tasks(self) -> list[Task]:
+        return self._tasks_cache
 
     # ── Public Slots ────────────────────────────────────────────────────────
 
@@ -242,108 +219,6 @@ class TaskViewModel(QObject):
             parent_task_id=parent_id,
         )
 
-    # ── Dialog Slots ────────────────────────────────────────────────────────
-
-    @Slot(int)
-    def openCreateDialog(self, parent_task_id: int = 0) -> None:
-        self._dialog_mode = "create_subtask" if parent_task_id != 0 else "create"
-        self._dialog_task_id = 0
-        self._dialog_parent_task_id = parent_task_id
-        self._dialog_initial_data = {
-            "title": "",
-            "description": "",
-            "status": "TODO",
-            "priority": "MEDIUM",
-            "task_type": "TASK",
-            "blocked_reason": "",
-            "checklist": [],
-        }
-        self._is_dialog_open = True
-        self.dialogStateChanged.emit()
-
-    @Slot(int)
-    def openEditDialog(self, task_id: int) -> None:
-        t = next((x for x in self._tasks_cache if x.id == task_id), None)
-        if not t:
-            return
-        self._dialog_mode = "edit"
-        self._dialog_task_id = task_id
-        self._dialog_parent_task_id = t.parent_task_id or 0
-        chk_list = [
-            {"id": c.id, "text": c.text, "isDone": c.is_done}
-            for c in (t.checklist_items or [])
-        ]
-        self._dialog_initial_data = {
-            "title": t.title,
-            "description": t.description or "",
-            "status": t.status,
-            "priority": t.priority,
-            "task_type": t.task_type,
-            "blocked_reason": t.blocked_reason or "",
-            "has_children": any(x.parent_task_id == task_id for x in self._tasks_cache),
-            "checklist": chk_list,
-        }
-        self._is_dialog_open = True
-        self.dialogStateChanged.emit()
-
-    @Slot()
-    def closeDialog(self) -> None:
-        self._is_dialog_open = False
-        self.dialogStateChanged.emit()
-
-    @Slot("QVariantMap")
-    def saveTask(self, data: dict[str, Any]) -> None:
-        title = str(data.get("title", "")).strip()
-        if not title:
-            self._event_bus.publish("toast.show", message="Görev başlığı boş olamaz", type_="danger")  # l10n: data
-            return
-
-        kwargs = self._build_task_fields(data)
-        if kwargs["status"] == _AUTO_STATUS:
-            self._resolve_auto_status(kwargs)
-
-        if self._dialog_mode == "edit" and self._dialog_task_id != 0:
-            self._task_controller.update_task(self._dialog_task_id, title=title, **kwargs)
-            self._event_bus.publish("toast.show", message="Görev güncellendi", type_="success")  # l10n: data
-        else:
-            parent_id = self._dialog_parent_task_id if self._dialog_parent_task_id != 0 else None
-            created = self._task_controller.create_task(
-                self._selected_project_id,
-                title,
-                parent_task_id=parent_id,
-                **kwargs,
-            )
-            if created is None:
-                # Hata toast'ı controller sinyalinden geldi; diyalog açık kalsın ki girilen veri kaybolmasın.
-                return
-            for item_text in data.get("checklist_items", []):
-                if str(item_text).strip():
-                    self._task_controller.add_checklist_item(created.id, str(item_text).strip())
-            self._event_bus.publish("toast.show", message="Görev oluşturuldu", type_="success")  # l10n: data
-
-        self.closeDialog()
-
-    def _resolve_auto_status(self, kwargs: dict[str, Any]) -> None:
-        """"Otomatik" seçimi: durum alt görevlerden türetilir, engelli/iptal ise önce kilit açılır."""
-        task = next((x for x in self._tasks_cache if x.id == self._dialog_task_id), None)
-        if task is not None and task.status in ("BLOCKED", "CANCELLED"):
-            kwargs["status"] = "TODO"
-            return
-        kwargs.pop("status")
-
-    def _build_task_fields(self, data: dict[str, Any]) -> dict[str, Any]:
-        """Form verisini servis alanlarına çevirir."""
-        status = str(data.get("status", "TODO"))
-        blocked_reason = str(data.get("blocked_reason", "")).strip()
-        return {
-            "description": str(data.get("description", "")),
-            "status": status,
-            "priority": str(data.get("priority", "MEDIUM")),
-            "task_type": str(data.get("task_type", "TASK")),
-            # Engel nedeni yalnızca "Engellendi" durumunda anlamlı; durum değişince eski neden kalmasın.
-            "blocked_reason": blocked_reason if status == "BLOCKED" and blocked_reason else None,
-        }
-
     @Slot(int)
     def deleteTask(self, task_id: int) -> None:
         self._task_controller.delete_task(task_id)
@@ -379,7 +254,7 @@ class TaskViewModel(QObject):
         if not t:
             return
 
-        lines = self._collect_task_copy_lines(task_id)
+        lines = collect_task_copy_lines(self._tasks_cache, task_id)
         if lines:
             text = "\n".join(lines)
             clipboard = QGuiApplication.clipboard()
@@ -390,33 +265,6 @@ class TaskViewModel(QObject):
                 message="Görev panoya kopyalandı",  # l10n: data
                 type_="success",
             )
-
-    def _collect_task_copy_lines(self, root_task_id: int) -> list[str]:
-        """Görevi ve alt görevlerini derinliğe göre girintili toplar."""
-        lines: list[str] = []
-        tasks_by_parent: dict[int | None, list[Task]] = {}
-        by_id: dict[int, Task] = {}
-        for item in self._tasks_cache:
-            by_id[item.id] = item
-            tasks_by_parent.setdefault(item.parent_task_id, []).append(item)
-
-        root_task = by_id.get(root_task_id)
-        if not root_task:
-            return lines
-
-        stack: list[tuple[Task, int]] = [(root_task, 0)]
-        while stack:
-            cur, depth = stack.pop()
-            indent = "  " * depth
-            lines.append(f"{indent}[{cur.status}] {cur.title}")
-            for c in (cur.checklist_items or []):
-                chk_mark = "[x]" if c.is_done else "[ ]"
-                lines.append(f"{indent}  {chk_mark} {c.text}")
-            children = tasks_by_parent.get(cur.id, [])
-            for child in reversed(children):
-                stack.append((child, depth + 1))
-
-        return lines
 
     @Slot(int)
     def duplicateTask(self, task_id: int) -> None:

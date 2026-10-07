@@ -48,6 +48,7 @@ from presentation.viewmodels.project_viewmodel import ProjectViewModel
 from presentation.viewmodels.search_viewmodel import SearchViewModel
 from presentation.viewmodels.settings_viewmodel import SettingsViewModel
 from presentation.viewmodels.task_list_model import TaskListModel
+from presentation.viewmodels.task_dialog_viewmodel import TaskDialogViewModel
 from presentation.viewmodels.task_viewmodel import TaskViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
 from presentation.viewmodels.voice_bridge import VoiceBridge
@@ -317,18 +318,19 @@ def test_task_viewmodel_crud_and_dialog_state(qapp: QApplication, container: DIC
 
     proj = container.project_controller._service.create_project("Görev Test Projesi")
     tvm = TaskViewModel(container, parent=qapp)
+    dialog = TaskDialogViewModel(container, tvm, parent=qapp)
     QThreadPool.globalInstance().waitForDone(2000)
 
     tvm.selectProject(proj.id)
     QThreadPool.globalInstance().waitForDone(2000)
 
-    assert not tvm.isDialogOpen
-    tvm.openCreateDialog()
-    assert tvm.isDialogOpen
-    assert tvm.dialogMode == "create"
+    assert not dialog.isDialogOpen
+    dialog.openCreateDialog()
+    assert dialog.isDialogOpen
+    assert dialog.dialogMode == "create"
 
     task_title = f"Test Görev {os.getpid()}"
-    tvm.saveTask({
+    dialog.saveTask({
         "title": task_title,
         "description": "Görev açıklaması",
         "status": "TODO",
@@ -375,6 +377,45 @@ def test_task_viewmodel_crud_and_dialog_state(qapp: QApplication, container: DIC
     qapp.processEvents()
     assert container.task_controller.get_task_sync(created_task.id) is None
     assert container.task_controller.get_task_sync(duplicated_task.id) is None
+
+
+def test_collect_task_copy_lines_when_tree_has_checklist_should_indent_children() -> None:
+    from domain.models.checklist_item import ChecklistItem
+    from presentation.viewmodels.task_clipboard import collect_task_copy_lines
+
+    root = Task(id=1, project_id=1, parent_task_id=None, order_index=0, title="Ana", status="TODO", priority="LOW", task_type="TASK")
+    child = Task(id=2, project_id=1, parent_task_id=1, order_index=0, title="Alt", status="DONE", priority="LOW", task_type="TASK")
+    root.checklist_items = [ChecklistItem(task_id=1, text="Madde", is_done=True)]
+    child.checklist_items = []
+
+    assert collect_task_copy_lines([root, child], 1) == ["[TODO] Ana", "  [x] Madde", "  [DONE] Alt"]
+    assert collect_task_copy_lines([root, child], 99) == []
+
+
+def test_task_dialog_viewmodel_when_parent_saved_with_auto_status_should_keep_derived_status(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    project = container.services.project.create_project(title="Otomatik durum projesi")
+    parent = container.services.task.create_task(project.id, "Üst görev")
+    container.services.task.create_task(project.id, "Alt görev", parent_task_id=parent.id)
+    tvm = TaskViewModel(container, parent=qapp)
+    dialog = TaskDialogViewModel(container, tvm, parent=qapp)
+    tvm.selectProject(project.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    dialog.openEditDialog(parent.id)
+    assert dialog.dialogInitialData["has_children"] is True
+
+    dialog.saveTask({"title": "Üst görev (yeni ad)", "status": "AUTO", "priority": "MEDIUM", "task_type": "TASK"})
+    QThreadPool.globalInstance().waitForDone(2000)
+
+    saved = container.services.task.get_task(parent.id)
+    assert saved.title == "Üst görev (yeni ad)"
+    assert saved.status == "TODO"
+    assert not dialog.isDialogOpen
 
 
 def test_idea_list_model_and_filters(qapp: QApplication) -> None:
@@ -681,6 +722,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     psv = ProjectSubitemsViewModel(container, pv, parent=qapp)
     dv = DashboardViewModel(container.dashboard_controller, parent=qapp)
     tv = TaskViewModel(container, parent=qapp)
+    tdv = TaskDialogViewModel(container, tv, parent=qapp)
     iv = IdeaViewModel(container, parent=qapp)
     mv = MemoViewModel(container, parent=qapp)
     anv = AnalyticsViewModel(container, parent=qapp)
@@ -696,6 +738,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     qapp._test_psv = psv  # type: ignore[attr-defined]
     qapp._test_dv = dv  # type: ignore[attr-defined]
     qapp._test_tv = tv  # type: ignore[attr-defined]
+    qapp._test_tdv = tdv  # type: ignore[attr-defined]
     qapp._test_iv = iv  # type: ignore[attr-defined]
     qapp._test_mv = mv  # type: ignore[attr-defined]
     qapp._test_anv = anv  # type: ignore[attr-defined]
@@ -711,6 +754,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     engine.rootContext().setContextProperty("projectSubitemsViewModel", psv)
     engine.rootContext().setContextProperty("dashboardViewModel", dv)
     engine.rootContext().setContextProperty("taskViewModel", tv)
+    engine.rootContext().setContextProperty("taskDialogViewModel", tdv)
     engine.rootContext().setContextProperty("ideaViewModel", iv)
     engine.rootContext().setContextProperty("memoViewModel", mv)
     engine.rootContext().setContextProperty("analyticsViewModel", anv)
