@@ -1,5 +1,12 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] REFACTOR | Denetim Bulgusu 9'un Kalanı: Proje Detay Paneli ve Görev ViewModel'i Bölündü
+- **`ProjectDetailPanel.qml`** 1786 → 126 satır. Bileşenler `presentation/qml/views/projects/detail/` altında: `ProjectHeader`, `ProjectStagesCard`, `ProjectTabBar`, yedi sekme (`ProjectSummaryTab`, `ProjectTasksTab`, `ProjectDecisionsTab`, `ProjectNotesTab`, `ProjectResourcesTab`, `ProjectOutputsTab`, `ProjectActivityTab`) ve dört modal (`ProjectDecisionDialog`, `ProjectNoteDialog`, `ProjectResourceDialog`, `ProjectOutputDialog`). Sekmeler `addRequested`/`editRequested` sinyalleriyle diyalogları panelden açar.
+- **`TaskViewModel`** 448 → 296 satır: diyalog durumu ve kaydetme `TaskDialogViewModel`'e, panoya kopyalama metni `task_clipboard.collect_task_copy_lines` saf fonksiyonuna taşındı. QML'de `taskDialogViewModel` bağlamı eklendi.
+- **`TasksView.qml`** araç çubuğu `tasks/TaskToolbar.qml` olarak ayrıldı (415 → 314 satır).
+- **Paketleme:** PyInstaller spec dosyalarına `presentation/qml` veri klasörü eklendi (QML dosyaları pakete girmiyordu). Derleme denenmedi.
+- Açık kalanlar: `DrawingCanvas.qml` (1325), `AnalyticsView.qml` (640), `IdeaViewModel` (30 metot).
+
 ## [2026-10-07] REVIEW+REFACTOR | Eski Qt Widgets Arayüzü ve QSS Altyapısı Kaldırıldı (Denetim Bulgusu 5)
 - **Silindi:** `presentation/pages`, `widgets`, `dialogs`, `shell` (45 dosya, ~8,8 bin satır), `presentation/utils/{scroll_filter,ui_utils}.py`, `tests/test_ui_smoke.py`, `scripts/commit_all.py`, `resources/styles` (QSS), `resources/illustrations`, `resources/templates` (yalnızca eski sayfalar kullanıyordu).
 - **Sadeleşti:** `main.py` yalnızca QML'i başlatır (`--legacy`/`--widgets` kolu yok); `FeaturePlugin` artık `factory` taşımaz, yalnızca navigasyon meta-verisi (`presentation/modules.py` veri tabanlı); `ThemeManager(themes_dir)` QSS üretimi, ikon token'ları ve `styles_dir` olmadan; `presentation/dimensions.py` yalnızca `FontFamily`; `config.STYLES_DIR` kalktı.

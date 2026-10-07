@@ -11,6 +11,8 @@ a = Analysis(
     binaries=[],
     datas=[
         (str(ROOT / "resources"), "resources"),
+        # QML arayüz dosyaları çalışma anında Path(__file__) ile yüklenir; pakete dahil edilmezse pencere açılmaz.
+        (str(ROOT / "presentation" / "qml"), "presentation/qml"),
         (str(ROOT / "icons"), "icons"),
         (str(ROOT / "alembic.ini"), "."),
         (str(ROOT / "infrastructure" / "migrations"), "infrastructure/migrations"),

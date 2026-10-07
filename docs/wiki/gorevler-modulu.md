@@ -2,10 +2,11 @@
 
 QML arayüzü (eski Widgets `presentation/pages/tasks/` paketi 2026-10-07'de kaldırıldı):
 
-- **`presentation/qml/views/TasksView.qml`** — proje seçici, arama, durum/öncelik/tip filtreleri, görev ağacı ve hızlı ekleme.
+- **`presentation/qml/views/TasksView.qml`** — istatistik çubuğu, görev ağacı ve hızlı ekleme; araç çubuğu (proje seçici, arama, durum/öncelik/tip filtreleri, ana görev ekleme) `tasks/TaskToolbar.qml` bileşenindedir.
 - **`presentation/qml/views/tasks/TaskItemDelegate.qml`** — ağaç satırı: durum kutusu, WBS kodu, başlık, checklist rozeti, tip/öncelik/durum rozetleri ve hover'da beliren hızlı butonlar (`HoverHandler` ile satırın tamamını izler).
 - **`presentation/qml/dialogs/TaskDialog.qml`** — oluşturma/düzenleme: başlık, açıklama, durum, öncelik, tip, engel nedeni (yalnızca Engellendi'de) ve checklist. Alt görevi olan görevlerde durum seçenekleri "Otomatik / Engellendi / İptal"dir.
-- **`presentation/viewmodels/task_viewmodel.py` + `task_list_model.py`** — filtre ve seçim durumu, ağaç düzleştirme, WBS kodu üretimi.
+- **`presentation/viewmodels/task_viewmodel.py` + `task_list_model.py`** — filtre ve seçim durumu, ağaç düzleştirme, WBS kodu üretimi, kopyalama/çoğaltma (`task_clipboard.py` saf yardımcı).
+- **`presentation/viewmodels/task_dialog_viewmodel.py`** — diyalog durumu (`taskDialogViewModel` QML bağlamı), form → servis alanı dönüşümü ve kaydetme; seçili proje ve görev önbelleğini `TaskViewModel.current_project_id()` / `cached_tasks()` ile okur.
 
 ## Sıralama davranışı
 `TaskService.create_task` yeni görevi `TaskRepository.first_order_index()` ile kardeş
