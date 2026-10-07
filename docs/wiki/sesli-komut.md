@@ -60,7 +60,7 @@ VoiceInputButton.qml + VoiceBridge (UI)
 
 ## Kapsam
 
-Mikrofon butonu `AppTextInput`'ta `showVoiceInput: true` olan alanlarda görünür (görev/fikir/not/karar/kaynak başlık ve açıklama alanları, memo editörü, Görevler ekranındaki hızlı görev ekleme alanı).
+Mikrofon butonu `AppTextInput`'ta `showVoiceInput: true` olan alanlarda görünür (görev/fikir/not/karar/kaynak başlık ve açıklama alanları, memo editörü, Görev listesinin altındaki hızlı görev ekleme alanı).
 
 ## Kapsam Dışı (sonraki iterasyon)
 

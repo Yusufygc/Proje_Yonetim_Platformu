@@ -28,11 +28,6 @@ Item {
             Layout.fillWidth: true
         }
 
-        // Hızlı görev ekleme (yazı veya sesli dikte)
-        TaskQuickAdd {
-            Layout.fillWidth: true
-        }
-
         // Görev İstatistikleri Rozet Çubuğu
         RowLayout {
             Layout.fillWidth: true
@@ -288,6 +283,7 @@ Item {
                         id: quickAddInput
                         placeholder: i18nBridge.tr("task_quick_add_placeholder", "Seçili görevin altına hızlı görev ekle...")
                         Layout.fillWidth: true
+                        showVoiceInput: true
                         onAccepted: {
                             if (taskViewModel && text.trim().length > 0) {
                                 taskViewModel.quickAddTask(text.trim())
