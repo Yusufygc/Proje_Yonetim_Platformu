@@ -52,46 +52,30 @@ ApplicationWindow {
         z: 10
     }
 
-    // Sağ İçerik Bölümü (Header + Dinamik Sayfa)
+    // Sağ İçerik Bölümü (Dinamik Sayfa)
     Item {
         anchors.left: mainSidebar.right
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        clip: true
 
-        TopHeader {
-            id: topHeader
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            height: 56
-        }
-
-        // Sayfa Yükleyici (Loader)
-        Item {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: topHeader.bottom
-            anchors.bottom: parent.bottom
-            clip: true
-
-            Loader {
-                id: pageLoader
-                anchors.fill: parent
-                asynchronous: false
-                source: {
-                    switch (navBridge.currentPage) {
-                        case "dashboard": return "views/DashboardView.qml";
-                        case "projects": return "views/ProjectsView.qml";
-                        case "ideas": return "views/IdeasView.qml";
-                        case "tasks": return "views/TasksView.qml";
-                        case "memo": return "views/MemoView.qml";
-                        case "analytics": return "views/AnalyticsView.qml";
-                        case "archive": return "views/ArchiveView.qml";
-                        case "info": return "views/InfoView.qml";
-                        case "settings": return "views/SettingsView.qml";
-                        default: return "views/DashboardView.qml";
-                    }
+        Loader {
+            id: pageLoader
+            anchors.fill: parent
+            asynchronous: false
+            source: {
+                switch (navBridge.currentPage) {
+                    case "dashboard": return "views/DashboardView.qml";
+                    case "projects": return "views/ProjectsView.qml";
+                    case "ideas": return "views/IdeasView.qml";
+                    case "tasks": return "views/TasksView.qml";
+                    case "memo": return "views/MemoView.qml";
+                    case "analytics": return "views/AnalyticsView.qml";
+                    case "archive": return "views/ArchiveView.qml";
+                    case "info": return "views/InfoView.qml";
+                    case "settings": return "views/SettingsView.qml";
+                    default: return "views/DashboardView.qml";
                 }
             }
         }

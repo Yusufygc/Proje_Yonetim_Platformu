@@ -78,6 +78,7 @@ Rectangle {
                         font.pixelSize: 14
                         color: themeBridge.textPrimary
                         selectByMouse: true
+                        clip: true
 
                         Text {
                             anchors.fill: parent

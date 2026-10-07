@@ -5,6 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Optional
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
+from PySide6.QtGui import QGuiApplication
 
 from domain.models.task import Task
 from presentation.viewmodels.task_list_model import TaskListModel
@@ -173,6 +174,7 @@ class TaskViewModel(QObject):
         if self._selected_project_id == project_id:
             return
         self._selected_project_id = project_id
+        self._task_model.clear_overrides()
         self.selectedProjectChanged.emit(project_id)
         if project_id != 0:
             self._task_controller.load_tasks(project_id)
@@ -339,3 +341,80 @@ class TaskViewModel(QObject):
     @Slot(str)
     def setTypeFilter(self, task_type: str) -> None:
         self._task_model.setTypeFilter(task_type)
+
+    # ── Kopyalama ve Çoğaltma İşlemleri ────────────────────────────────────
+
+    @Slot(int)
+    def copyTaskToClipboard(self, task_id: int) -> None:
+        """Belirtilen görevi ve alt görevlerini metin (WBS) formatında panoya kopyalar."""
+        t = next((x for x in self._tasks_cache if x.id == task_id), None)
+        if not t:
+            return
+
+        lines = self._collect_task_copy_lines(task_id)
+        if lines:
+            text = "\n".join(lines)
+            clipboard = QGuiApplication.clipboard()
+            if clipboard:
+                clipboard.setText(text)
+            self._event_bus.publish(
+                "toast.show",
+                message="Görev panoya kopyalandı",  # l10n: data
+                type_="success",
+            )
+
+    def _collect_task_copy_lines(self, root_task_id: int) -> list[str]:
+        """Görevi ve alt görevlerini derinliğe göre girintili toplar."""
+        lines: list[str] = []
+        tasks_by_parent: dict[int | None, list[Task]] = {}
+        by_id: dict[int, Task] = {}
+        for item in self._tasks_cache:
+            by_id[item.id] = item
+            tasks_by_parent.setdefault(item.parent_task_id, []).append(item)
+
+        root_task = by_id.get(root_task_id)
+        if not root_task:
+            return lines
+
+        stack: list[tuple[Task, int]] = [(root_task, 0)]
+        while stack:
+            cur, depth = stack.pop()
+            indent = "  " * depth
+            lines.append(f"{indent}[{cur.status}] {cur.title}")
+            for c in (cur.checklist_items or []):
+                chk_mark = "[x]" if c.is_done else "[ ]"
+                lines.append(f"{indent}  {chk_mark} {c.text}")
+            children = tasks_by_parent.get(cur.id, [])
+            for child in reversed(children):
+                stack.append((child, depth + 1))
+
+        return lines
+
+    @Slot(int)
+    def duplicateTask(self, task_id: int) -> None:
+        """Görevi aynı proje ve üst görev altına yeni bir kopya olarak çoğaltır."""
+        t = next((x for x in self._tasks_cache if x.id == task_id), None)
+        if not t:
+            return
+
+        new_title = f"{t.title} (Kopya)"  # l10n: data
+        created = self._task_controller.create_task(
+            t.project_id,
+            new_title,
+            parent_task_id=t.parent_task_id,
+            description=t.description or "",
+            status="TODO",
+            priority=t.priority,
+            task_type=t.task_type,
+        )
+        if created and t.checklist_items:
+            for item in t.checklist_items:
+                if item.text.strip():
+                    self._task_controller.add_checklist_item(created.id, item.text.strip())
+
+        self._event_bus.publish(
+            "toast.show",
+            message="Görev çoğaltıldı",  # l10n: data
+            type_="success",
+        )
+

@@ -44,15 +44,45 @@ Column {
             anchors.rightMargin: (root.showVoiceInput && !root.readOnly) ? 38 : 10
             anchors.topMargin: root.isTextArea ? 8 : 0
             anchors.bottomMargin: root.isTextArea ? 8 : 0
-            contentWidth: root.isTextArea ? flickableArea.width : inputField.paintedWidth
-            contentHeight: root.isTextArea ? inputField.paintedHeight : flickableArea.height
+            contentWidth: root.isTextArea ? flickableArea.width : Math.max(flickableArea.width, inputField.paintedWidth + 12)
+            contentHeight: root.isTextArea ? Math.max(flickableArea.height, inputField.paintedHeight) : flickableArea.height
             clip: true
             interactive: root.isTextArea
             boundsBehavior: Flickable.StopAtBounds
 
+            ScrollBar.vertical: AppScrollBar {
+                visible: root.isTextArea && flickableArea.contentHeight > flickableArea.height
+            }
+
+            function ensureVisible(rect) {
+                var margin = 16
+                if (!root.isTextArea) {
+                    if (contentX > rect.x - margin) {
+                        contentX = Math.max(0, rect.x - margin)
+                    } else if (contentX + width < rect.x + rect.width + margin) {
+                        contentX = Math.min(Math.max(0, contentWidth - width), rect.x + rect.width + margin - width)
+                    }
+                } else {
+                    if (contentY > rect.y - margin) {
+                        contentY = Math.max(0, rect.y - margin)
+                    } else if (contentY + height < rect.y + rect.height + margin) {
+                        contentY = Math.min(Math.max(0, contentHeight - height), rect.y + rect.height + margin - height)
+                    }
+                }
+            }
+
+            WheelHandler {
+                enabled: !root.isTextArea && (flickableArea.contentWidth > flickableArea.width)
+                orientation: Qt.Horizontal | Qt.Vertical
+                onWheel: function(event) {
+                    var delta = (event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x)
+                    flickableArea.contentX = Math.max(0, Math.min(flickableArea.contentWidth - flickableArea.width, flickableArea.contentX - delta))
+                }
+            }
+
             TextEdit {
                 id: inputField
-                width: flickableArea.width
+                width: root.isTextArea ? flickableArea.width : Math.max(flickableArea.width, paintedWidth + 12)
                 height: root.isTextArea ? Math.max(flickableArea.height, paintedHeight) : flickableArea.height
                 verticalAlignment: root.isTextArea ? TextEdit.AlignTop : TextEdit.AlignVCenter
                 font.pixelSize: 13
@@ -60,6 +90,16 @@ Column {
                 readOnly: root.readOnly
                 selectByMouse: true
                 wrapMode: root.isTextArea ? TextEdit.Wrap : TextEdit.NoWrap
+
+                onCursorRectangleChanged: {
+                    flickableArea.ensureVisible(cursorRectangle)
+                }
+
+                onActiveFocusChanged: {
+                    if (!activeFocus && !root.isTextArea) {
+                        flickableArea.contentX = 0
+                    }
+                }
 
                 Keys.onReturnPressed: function(event) {
                     if (!root.isTextArea) {
@@ -85,6 +125,17 @@ Column {
                     visible: !inputField.text && !inputField.activeFocus
                 }
             }
+        }
+
+        MouseArea {
+            id: hoverTooltipArea
+            anchors.fill: flickableArea
+            hoverEnabled: true
+            acceptedButtons: Qt.NoButton
+
+            ToolTip.visible: hoverTooltipArea.containsMouse && !inputField.activeFocus && (inputField.paintedWidth > flickableArea.width)
+            ToolTip.text: inputField.text
+            ToolTip.delay: 450
         }
 
         VoiceInputButton {

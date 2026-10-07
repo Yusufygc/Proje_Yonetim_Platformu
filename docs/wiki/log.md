@@ -1,5 +1,26 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] FEATURE+FIX | QML Notlar Çizim/Akış Şeması, Görevler Çoğaltma/Scroll, Header Sadeleştirme ve Analitik Listesi
+QML modernizasyonu ve kullanıcı deneyimi odaklı kapsamlı özellik ve arayüz geliştirmeleri tamamlandı:
+- **[NOTLAR & ÇİZİM] Zengin Çizim ve Algoritma Akış Şeması Araçları:**
+  - `DrawingCanvas.qml` içine geometrik şekiller (dikdörtgen, yuvarlak dikdörtgen, daire, elips, eşkenar dörtgen/baklava, yıldız, üçgen) eklendi.
+  - Algoritma/Akış Şeması blokları (Başla/Bitir terminali, İşlem kutusu, Karar/Koşul, Girdi/Çıktı paralelkenarı, Bağlayıcı çemberi ve Yön okları) eklendi.
+  - Notlara ve çizim tuvaline resim ekleme desteği (`MemoViewModel.insertImage`, QML `FileDialog` ve tuval üzerine `drawImage` renderlama) entegre edildi.
+  - Tuval araç çubuğu çift sıralı `Flickable` düzenine dönüştürülerek küçük pencere boyutlarında taşma ve buton ezilmeleri önlendi.
+  - Metin düzenleme modalı (`textEditModal`) ekranın ortasına sabitlendi, "Tamam/İptal" butonlarının ekran dışına taşması engellendi.
+- **[GÖREVLER] Kopyalama, Akıllı Daraltma ve Kaydırma Konumu:**
+  - `TaskViewModel.copyTaskToClipboard` ve `duplicateTask` metodları ile Görev kartı butonları ve sağ tık menüsüne panoya kopyalama ve anında çoğaltma özellikleri eklendi.
+  - `TaskListModel`: Alt görevleri bulunan ve alt görevleri dahil tamamlanmış (`DONE`) olan görev dallarının varsayılan olarak kapalı (collapsed) kalması sağlandı.
+  - `TasksView.qml`: Durum değiştirme, silme ve kopyalama işlemlerinde model resetlendiğinde kullanıcının sayfa başına fırlatılmasını engelleyen `savedScrollY` kaydırma konumu koruyucusu eklendi.
+- **[ERİŞİLEBİLİRLİK & METİN GİRİŞİ] AppTextInput ve Tooltipler:**
+  - Tek satırlı metin alanlarında (`AppTextInput.qml`) yazı uzadığında metnin görünmez kalması sorunu `ensureVisible(cursorPosition)`, yatay fare tekerleği kaydırması ve hover tooltip ile çözüldü.
+  - `TaskDialog`, `TaskItemDelegate` ve `ProjectListItem` bileşenlerindeki kırpılan uzun başlıklara `ToolTip` eklendi.
+- **[ARAYÜZ TEMİZLİĞİ] Header Kaldırma & "Yeni Proje" Konsolidasyonu:**
+  - `main.qml` içerisindeki gereksiz `TopHeader` bileşeni tamamen kaldırılarak sayfa kullanım alanı genişletildi.
+  - `DashboardView`'e sayfa başlığı eklendi; ekranlardaki yinelenen "Yeni Proje" butonları temizlenerek sadece ana akışa bırakıldı.
+- **[ANALİTİK] Proje Seçici Açılır Liste Görünümü:**
+  - `AnalyticsView.qml` içindeki proje seçici açılır menüsünün Qt varsayılan stilinden kaynaklanan düşük kontrastlı yazı ve zifiri siyah hover sorunu giderildi; özel `contentItem`, `background`, seçili onay işareti (✓) ve genişletilmiş popup tasarımı uygulandı.
+
 ## [2026-07-02] PERF+FIX | Üretim öncesi denetim: lazy sayfa inşası, sessiz not hatası, Worker tutarlılığı
 EXE paketlemeden önce başlangıç performansı + mimari/kod kalitesi denetimi yapıldı (3 paralel
 keşif ajanı: başlangıç, mimari/kod kalitesi, algoritma/sorgu — algoritma tarafında gerçek sorun

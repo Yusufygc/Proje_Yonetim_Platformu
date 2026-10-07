@@ -197,6 +197,21 @@ AppCard {
                         onClicked: insertFormatting("`", "`")
                     }
 
+                    AppButton {
+                        text: "🖼️"
+                        btnVariant: "secondary"
+                        implicitWidth: 32
+                        implicitHeight: 28
+                        onClicked: {
+                            if (memoViewModel) {
+                                var imgUrl = memoViewModel.pickAndSaveImage()
+                                if (imgUrl && imgUrl.length > 0) {
+                                    root.insertFormatting("\n![Görsel](" + imgUrl + ")\n", "")
+                                }
+                            }
+                        }
+                    }
+
                     VoiceInputButton {
                         target: bodyInput
                         width: 28
@@ -232,6 +247,19 @@ AppCard {
                         rightPadding: 16
                         background: Rectangle {
                             color: "transparent"
+                        }
+
+                        Keys.onPressed: function(event) {
+                            if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_V) {
+                                if (memoViewModel && memoViewModel.hasClipboardImage()) {
+                                    var imgUrl = memoViewModel.saveClipboardImage()
+                                    if (imgUrl && imgUrl.length > 0) {
+                                        root.insertFormatting("\n![Görsel](" + imgUrl + ")\n", "")
+                                        event.accepted = true
+                                        return
+                                    }
+                                }
+                            }
                         }
                     }
                 }

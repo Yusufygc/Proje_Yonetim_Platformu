@@ -56,7 +56,7 @@ class TaskListModel(QAbstractListModel):
         super().__init__(parent=parent)
         self._raw_tasks: list[Task] = []
         self._flattened: list[TaskItemData] = []
-        self._collapsed_ids: set[int] = set()
+        self._expanded_overrides: dict[int, bool] = {}
         self._search_query: str = ""
         self._status_filter: str = "ALL"
         self._priority_filter: str = "ALL"
@@ -142,11 +142,30 @@ class TaskListModel(QAbstractListModel):
     @Slot(int)
     def toggleExpanded(self, task_id: int) -> None:
         """Belirtilen görevin alt dalını açar veya kapatır."""
-        if task_id in self._collapsed_ids:
-            self._collapsed_ids.remove(task_id)
-        else:
-            self._collapsed_ids.add(task_id)
+        current_state = self.is_node_expanded(task_id)
+        self._expanded_overrides[task_id] = not current_state
         self._rebuild_tree()
+
+    def is_node_expanded(self, task_id: int) -> bool:
+        """Belirtilen görevin açık mı kapalı mı olduğunu döndürür."""
+        if task_id in self._expanded_overrides:
+            return self._expanded_overrides[task_id]
+        for item in self._flattened:
+            if item.task.id == task_id:
+                return item.is_expanded
+        node = next((t for t in self._raw_tasks if t.id == task_id), None)
+        if not node:
+            return False
+        children_map: dict[Optional[int], list[Task]] = {}
+        for t in self._raw_tasks:
+            children_map.setdefault(t.parent_task_id, []).append(t)
+        if children_map.get(node.id) and self._is_subtree_all_done(node, children_map):
+            return False
+        return True
+
+    def clear_overrides(self) -> None:
+        """Kullanıcının açık/kapalı tercihlerini sıfırlar."""
+        self._expanded_overrides.clear()
 
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:
@@ -179,6 +198,18 @@ class TaskListModel(QAbstractListModel):
             return False
         return True
 
+    def _is_subtree_all_done(
+        self, node: Task, children_map: dict[Optional[int], list[Task]]
+    ) -> bool:
+        """Düğümün kendisi ve tüm alt görevlerinin 'DONE' olup olmadığını kontrol eder."""
+        if node.status != "DONE":
+            return False
+        children = children_map.get(node.id, [])
+        for child in children:
+            if not self._is_subtree_all_done(child, children_map):
+                return False
+        return True
+
     def _rebuild_tree(self) -> None:
         self.beginResetModel()
         self._flattened.clear()
@@ -208,7 +239,20 @@ class TaskListModel(QAbstractListModel):
     ) -> None:
         children = children_map.get(node.id, [])
         has_children = len(children) > 0
-        is_expanded = node.id not in self._collapsed_ids
+
+        # Genişletilme durumu
+        if node.id in self._expanded_overrides:
+            is_expanded = self._expanded_overrides[node.id]
+        else:
+            # Alt görevleri olup da kendisi dahil tüm alt görevler bittiyse varsayılan olarak kapalı kalsın
+            if has_children and self._is_subtree_all_done(node, children_map):
+                is_expanded = False
+            else:
+                is_expanded = True
+
+        # Arama sorgusu varsa ve alt görevlerden biri eşleşiyorsa görünür olması için zorunlu aç
+        if self._search_query and has_children and self._any_child_matches(node, children_map):
+            is_expanded = True
 
         # Filtreye uyuyorsa veya alt görevlerinden biri filtreye uyuyorsa ekle
         if self._matches_filters(node) or self._any_child_matches(node, children_map):

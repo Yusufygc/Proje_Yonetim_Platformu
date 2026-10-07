@@ -15,6 +15,27 @@ ScrollView {
         padding: 24
         spacing: 20
 
+        // ── Sayfa Başlığı ────────────────────────────────────────────────────
+        Row {
+            width: parent.width - 48
+            spacing: 12
+
+            Column {
+                spacing: 4
+                Text {
+                    text: i18nBridge.tr("nav_dashboard", "Ana Panel")
+                    font.pixelSize: 22
+                    font.weight: Font.Bold
+                    color: themeBridge.textPrimary
+                }
+                Text {
+                    text: i18nBridge.tr("dash_welcome_desc", "Projelerinizi, görevlerinizi ve fikirlerinizi merkezi olarak yönetmeye başlayın.")
+                    font.pixelSize: 13
+                    color: themeBridge.textSecondary
+                }
+            }
+        }
+
         // Üst İstatistik Kartları Izgarası (Grid)
         Grid {
             width: parent.width - 48

@@ -102,6 +102,7 @@ Rectangle {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     if (taskViewModel) {
+                        taskViewModel.selectTask(model.taskId)
                         taskViewModel.toggleTaskStatus(model.taskId)
                     }
                 }
@@ -119,12 +120,24 @@ Rectangle {
 
         // Görev Başlığı
         Text {
+            id: titleTextItem
             text: model.title
             font.pixelSize: Theme.typography.sizeBody
             font.strikeout: model.status === "DONE"
             color: model.status === "DONE" ? themeBridge.color("text_muted") : themeBridge.color("text_primary")
             Layout.fillWidth: true
             elide: Text.ElideRight
+
+            ToolTip.visible: titleHoverArea.containsMouse && titleTextItem.truncated
+            ToolTip.text: model.title
+            ToolTip.delay: 400
+
+            MouseArea {
+                id: titleHoverArea
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.NoButton
+            }
         }
 
         // Checklist İlerleme Rozeti
@@ -216,6 +229,18 @@ Rectangle {
             }
 
             AppButton {
+                iconName: "copy"
+                btnVariant: "secondary"
+                implicitWidth: 26
+                implicitHeight: 26
+                onClicked: {
+                    if (taskViewModel) {
+                        taskViewModel.copyTaskToClipboard(model.taskId)
+                    }
+                }
+            }
+
+            AppButton {
                 iconName: "settings"
                 btnVariant: "secondary"
                 implicitWidth: 26
@@ -244,6 +269,22 @@ Rectangle {
             text: i18nBridge.tr("action_edit", "Düzenle")
             onTriggered: {
                 if (taskViewModel) taskViewModel.openEditDialog(model.taskId)
+            }
+        }
+
+        MenuSeparator {}
+
+        MenuItem {
+            text: i18nBridge.tr("action_copy_task", "Panoya Kopyala")
+            onTriggered: {
+                if (taskViewModel) taskViewModel.copyTaskToClipboard(model.taskId)
+            }
+        }
+
+        MenuItem {
+            text: i18nBridge.tr("action_duplicate_task", "Görevi Çoğalt")
+            onTriggered: {
+                if (taskViewModel) taskViewModel.duplicateTask(model.taskId)
             }
         }
 

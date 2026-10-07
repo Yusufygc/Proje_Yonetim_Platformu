@@ -20,7 +20,15 @@ kullanılamaz.
 ## Veri akışı
 `TaskController.load_tasks` (Worker, async — [[worker-altyapisi]]) → `tasks_loaded` → sayfa `_on_tasks_loaded` → filtre + render. Görev değişiminde controller `task.*` olayını [[event-bus]]'a yayınlar; sayfa kendi sinyal bağlantısıyla listeyi yeniler.
 
+## QML Sunum Katmanı ve Gelişmiş Özellikler (2026-10)
+
+`presentation/viewmodels/task_viewmodel.py`, `presentation/viewmodels/task_list_model.py` ve `presentation/qml/views/TasksView.qml`:
+- **Panoya Kopyalama ve Çoğaltma (Duplicate):** `TaskViewModel.copyTaskToClipboard(task_id)` ile görev detayları panoya kopyalanabilir; `TaskViewModel.duplicateTask(task_id)` ile alt görevleriyle birlikte klonlanarak listeye anında eklenebilir. UI'da sağ tık menüsü ve butonlar üzerinden erişilir.
+- **Akıllı Ağaç Daraltma (Auto-Collapse):** `TaskListModel` hiyerarşi oluştururken, alt görevleri bulunan ve kendisi dahil tüm alt görevleri `DONE` (tamamlandı) durumunda olan görev dallarını varsayılan olarak kapalı tutar. Kullanıcı tamamlanan işlerin kalabalığı yerine açık kalan işlere odaklanır.
+- **Kaydırma Konumunun Korunması (Scroll Preservation):** Görev durumu değiştirildiğinde veya silme/çoğaltma yapıldığında liste modeli resetlenirken `TasksView.qml` içerisindeki `savedScrollY` değişkeni mevcut kaydırma pozisyonunu saklar ve model yüklendiğinde otomatik olarak eski konuma geri döndürür.
+
 ## Import
 `from presentation.pages.tasks import TasksPage` (eski `tasks_page` modülü silindi).
+`from presentation.viewmodels.task_viewmodel import TaskViewModel` (QML ViewModel).
 
-İlgili: [[mimari-genel-bakis]], [[l10n-string-yonetimi]]
+İlgili: [[mimari-genel-bakis]], [[l10n-string-yonetimi]], [[notlar-modulu]]

@@ -235,11 +235,23 @@ Rectangle {
                                     }
 
                                     Text {
+                                        id: chkItemText
                                         text: modelData
                                         font.pixelSize: Theme.typography.sizeSmall
                                         color: themeBridge.color("text_primary")
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
+
+                                        ToolTip.visible: chkHoverArea.containsMouse && chkItemText.truncated
+                                        ToolTip.text: modelData
+                                        ToolTip.delay: 400
+
+                                        MouseArea {
+                                            id: chkHoverArea
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            acceptedButtons: Qt.NoButton
+                                        }
                                     }
 
                                     AppButton {

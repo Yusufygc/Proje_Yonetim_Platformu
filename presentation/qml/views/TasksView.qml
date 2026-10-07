@@ -10,6 +10,14 @@ Item {
     id: tasksViewRoot
     anchors.fill: parent
 
+    Shortcut {
+        sequence: StandardKey.Copy
+        enabled: tasksViewRoot.visible && taskViewModel && taskViewModel.selectedTaskId > 0
+        onActivated: {
+            taskViewModel.copyTaskToClipboard(taskViewModel.selectedTaskId)
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Theme.spacing.xl
@@ -163,8 +171,47 @@ Item {
 
         // Ana Görev Ağacı (WBS)
         AppCard {
+            id: taskTreeCard
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            property real savedScrollY: 0
+
+            Connections {
+                target: taskViewModel ? taskViewModel.taskModel : null
+
+                function onModelAboutToBeReset() {
+                    if (taskListView.contentY > 0) {
+                        taskTreeCard.savedScrollY = taskListView.contentY
+                    } else {
+                        taskTreeCard.savedScrollY = 0
+                    }
+                }
+
+                function onModelReset() {
+                    if (taskTreeCard.savedScrollY > 0) {
+                        var maxY = Math.max(0, taskListView.contentHeight - taskListView.height)
+                        taskListView.contentY = Math.min(taskTreeCard.savedScrollY, maxY)
+                        Qt.callLater(function() {
+                            if (taskListView && taskListView.contentHeight > 0) {
+                                var limitY = Math.max(0, taskListView.contentHeight - taskListView.height)
+                                taskListView.contentY = Math.min(taskTreeCard.savedScrollY, limitY)
+                            }
+                        })
+                    }
+                }
+            }
+
+            Connections {
+                target: taskViewModel
+
+                function onSelectedProjectChanged(projectId) {
+                    taskTreeCard.savedScrollY = 0
+                    if (taskListView) {
+                        taskListView.contentY = 0
+                    }
+                }
+            }
 
             ColumnLayout {
                 anchors.fill: parent
@@ -210,7 +257,7 @@ Item {
                         Layout.preferredWidth: 100
                     }
 
-                    Item { Layout.preferredWidth: 60 }
+                    Item { Layout.preferredWidth: 88 }
                 }
 
                 Rectangle {

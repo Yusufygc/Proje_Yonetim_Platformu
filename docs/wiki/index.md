@@ -16,7 +16,8 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[tema-sistemi]] — JSON palet + token'lı modüler QSS yapısı; 6 küratörlü tema paketi (Slate/Indigo/Emerald/Ocean/Rose/Violet) × 2 mod. Font boyutu sabit (`FontFamily.DEFAULT_SIZE`) — QSS'teki 56+ sabit `font-size` kuralı zaten `QApplication.setFont()` boyutunu eziyordu, kullanıcı sadece aile seçer.
 - [[l10n-string-yonetimi]] — StringManager, `tr()` yardımcısı, `language_changed` → MainWindow UI yeniden kurulum, ratchet testi.
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve planlanan iyileştirmeler.
-- [[gorevler-modulu]] — WBS görev sayfası paketi (`pages/tasks/`): filter bar + ağaç + sayfa kompozisyonu.
+- [[gorevler-modulu]] — WBS görev sayfası paketi ve QML Görev Ağacı: filtreler, kopyalama/çoğaltma, akıllı daraltma ve scroll koruma.
+- [[notlar-modulu]] — Markdown notlar, zengin serbest çizim tuvali, geometrik şekiller, algoritma akış şemaları ve resim ekleme.
 - [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton` + `TranscriptionWorker` + `SpeechToTextService`.
 - [[liste-siralama]] — Notlar/Fikirler/Projeler listelerinde sürükle-bırak sıralama; `DragReorderController` + `sort_order`/`display_order` kolonları.
 

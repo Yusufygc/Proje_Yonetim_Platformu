@@ -2,10 +2,16 @@
 from __future__ import annotations
 
 import logging
+import shutil
+import uuid
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QFileDialog
 
+from app import config
 from domain.models.memo import Memo
 from presentation.viewmodels.memo_list_model import MemoListModel, _clean_body_markdown
 
@@ -140,3 +146,60 @@ class MemoViewModel(QObject):
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:
         self._memo_model.setSearchQuery(query)
+
+    # ── Resim İşlemleri (Görsel Yükleme & Pano) ──────────────────────────
+
+    @Slot(result=str)
+    def pickAndSaveImage(self) -> str:
+        """Kullanıcının diskten bir görsel seçmesini sağlar, kopyalar ve dosya URL'si döndürür."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            None,
+            "Görsel Seç",  # l10n: data
+            "",
+            "Görseller (*.png *.jpg *.jpeg *.webp *.bmp *.gif);;Tüm Dosyalar (*.*)",  # l10n: data
+        )
+        if not file_path:
+            return ""
+        return self._save_image_file(Path(file_path))
+
+    @Slot(result=str)
+    def saveClipboardImage(self) -> str:
+        """Panoda (clipboard) bir görsel varsa bunu dosyaya kaydeder ve dosya URL'sini döndürür."""
+        clipboard = QGuiApplication.clipboard()
+        if not clipboard:
+            return ""
+        image = clipboard.image()
+        if image.isNull():
+            return ""
+
+        config.MEMO_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+        filename = f"memo_img_{uuid.uuid4().hex[:12]}.png"
+        target_path = config.MEMO_IMAGES_DIR / filename
+        saved = image.save(str(target_path), "PNG")
+        if not saved:
+            return ""
+        return target_path.as_uri()
+
+    @Slot(result=bool)
+    def hasClipboardImage(self) -> bool:
+        """Panoda görsel bulunup bulunmadığını kontrol eder."""
+        clipboard = QGuiApplication.clipboard()
+        if not clipboard:
+            return False
+        mime_data = clipboard.mimeData()
+        return mime_data.hasImage() if mime_data else False
+
+    def _save_image_file(self, src_path: Path) -> str:
+        if not src_path.exists():
+            return ""
+        config.MEMO_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+        ext = src_path.suffix.lower() or ".png"
+        filename = f"memo_img_{uuid.uuid4().hex[:12]}{ext}"
+        target_path = config.MEMO_IMAGES_DIR / filename
+        try:
+            shutil.copy2(src_path, target_path)
+            return target_path.as_uri()
+        except Exception as exc:
+            logger.error("Görsel kopyalanamadı: %s", exc)  # l10n: log
+            return ""
+

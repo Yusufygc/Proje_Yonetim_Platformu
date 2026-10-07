@@ -51,6 +51,7 @@ Rectangle {
             spacing: 8
 
             Text {
+                id: projTitleText
                 width: parent.width - (priorityBadge.visible ? priorityBadge.width + 8 : 0)
                 text: root.title
                 font.pixelSize: 13
@@ -58,6 +59,17 @@ Rectangle {
                 color: root.isSelected ? themeBridge.accentStart : themeBridge.textPrimary
                 elide: Text.ElideRight
                 anchors.verticalCenter: parent.verticalCenter
+
+                ToolTip.visible: titleHoverArea.containsMouse && projTitleText.truncated
+                ToolTip.text: root.title
+                ToolTip.delay: 400
+
+                MouseArea {
+                    id: titleHoverArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                }
             }
 
             AppBadge {

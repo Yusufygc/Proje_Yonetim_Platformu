@@ -41,6 +41,7 @@ DATA_DIR = _resolve_data_dir()
 DATABASE_PATH = DATA_DIR / "proje_takip.db"
 BACKUPS_DIR = DATA_DIR / ".backups"
 LOGS_DIR = DATA_DIR / "logs"
+MEMO_IMAGES_DIR = DATA_DIR / "memo_images"
 
 # --- Kaynak Dizinleri ---
 RESOURCES_DIR = APP_DIR / "resources"
@@ -74,7 +75,7 @@ ANIMATION_DURATION_SHORT_MS = 150
 
 def ensure_data_dirs() -> None:
     """Uygulama başlangıcında gerekli veri dizinlerini oluşturur."""
-    for directory in (DATA_DIR, BACKUPS_DIR, LOGS_DIR):
+    for directory in (DATA_DIR, BACKUPS_DIR, LOGS_DIR, MEMO_IMAGES_DIR):
         directory.mkdir(parents=True, exist_ok=True)
 
 

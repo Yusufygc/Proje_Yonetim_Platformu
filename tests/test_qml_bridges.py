@@ -232,6 +232,22 @@ def test_task_list_model_wbs_hierarchy_and_collapse(qapp: QApplication) -> None:
     model.setSearchQuery("")
     assert model.rowCount() == 4
 
+    # Tamamlanmış alt görev ağacı testi: kendisi dahil tüm alt görevler DONE ise kapalı kalmalı
+    t1_done = Task(id=10, project_id=1, parent_task_id=None, order_index=0, title="Biten Ana Görev", status="DONE", priority="HIGH", task_type="TASK")
+    t11_done = Task(id=11, project_id=1, parent_task_id=10, order_index=0, title="Biten Alt Görev 1", status="DONE", priority="MEDIUM", task_type="TASK")
+    t12_done = Task(id=12, project_id=1, parent_task_id=10, order_index=1, title="Biten Alt Görev 2", status="DONE", priority="LOW", task_type="TASK")
+    t20_active = Task(id=20, project_id=1, parent_task_id=None, order_index=1, title="Aktif Ana Görev", status="IN_PROGRESS", priority="MEDIUM", task_type="TASK")
+
+    model.set_tasks([t1_done, t11_done, t12_done, t20_active])
+    # Biten dal varsayılan olarak kapalı olmalı: t1_done ve t20_active görünür (2 satır)
+    assert model.rowCount() == 2
+    # Kullanıcı elle açmak isterse açılabilmeli
+    model.toggleExpanded(10)
+    assert model.rowCount() == 4
+    # Tekrar basarsa kapanmalı
+    model.toggleExpanded(10)
+    assert model.rowCount() == 2
+
 
 def test_task_viewmodel_crud_and_dialog_state(qapp: QApplication, container: DIContainer) -> None:
     from PySide6.QtCore import QThreadPool
@@ -275,10 +291,27 @@ def test_task_viewmodel_crud_and_dialog_state(qapp: QApplication, container: DIC
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
 
+    # Panoya kopyalama testi
+    tvm.copyTaskToClipboard(created_task.id)
+    clipboard_text = qapp.clipboard().text()
+    assert task_title in clipboard_text
+    assert "Adım 1" in clipboard_text
+
+    # Görevi çoğaltma (Duplicate) testi
+    tvm.duplicateTask(created_task.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    tasks_after_dup = container.task_controller._service.get_tasks(proj.id)
+    duplicated_task = next((t for t in tasks_after_dup if t.title == f"{task_title} (Kopya)"), None)
+    assert duplicated_task is not None
+    assert len(duplicated_task.checklist_items) == 2
+
     tvm.deleteTask(created_task.id)
+    tvm.deleteTask(duplicated_task.id)
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
     assert container.task_controller.get_task_sync(created_task.id) is None
+    assert container.task_controller.get_task_sync(duplicated_task.id) is None
 
 
 def test_idea_list_model_and_filters(qapp: QApplication) -> None:
@@ -382,6 +415,17 @@ def test_memo_viewmodel_crud(qapp: QApplication, container: DIContainer) -> None
     qapp.processEvents()
 
     assert mvm.selectedMemo.get("body") == "Not gövdesi"
+
+    # Görsel metodları testi
+    from PySide6.QtGui import QImage  # noqa: PLC0415
+    assert isinstance(mvm.hasClipboardImage(), bool)
+    dummy_img = QImage(32, 32, QImage.Format.Format_RGB32)
+    dummy_img.fill(0xFF0000)
+    qapp.clipboard().setImage(dummy_img)
+    assert mvm.hasClipboardImage() is True
+    saved_url = mvm.saveClipboardImage()
+    assert saved_url.startswith("file://")
+    assert saved_url.endswith(".png")
 
     mvm.deleteMemo(memo_id)
     QThreadPool.globalInstance().waitForDone(2000)
@@ -702,5 +746,93 @@ def test_project_viewmodel_tasks_and_stage_progress(qapp: QApplication, containe
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
     assert len(pvm.selectedTasks) == 0
+
+
+def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContainer) -> None:
+    import json
+    from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent
+    from presentation.viewmodels.theme_bridge import ThemeBridge
+    from presentation.viewmodels.i18n_bridge import I18nBridge
+
+    engine = QQmlApplicationEngine(parent=qapp)
+    tb = ThemeBridge(container.theme, container.prefs, parent=qapp)
+    ib = I18nBridge(container.strings, parent=qapp)
+    engine.rootContext().setContextProperty("themeBridge", tb)
+    engine.rootContext().setContextProperty("i18nBridge", ib)
+
+    comp = QQmlComponent(engine, "presentation/qml/views/memo/DrawingCanvas.qml")
+    assert comp.isReady(), f"DrawingCanvas yüklenemedi: {[e.toString() for e in comp.errors()]}"
+    canvas = comp.create()
+    assert canvas is not None
+
+    # 1. Eski format yükleme geriye dönük uyumluluk testi
+    legacy_json = json.dumps([{"points": [{"x": 10, "y": 10}, {"x": 20, "y": 20}], "color": "#EF4444", "width": 3}])
+    canvas.loadDrawingJson(legacy_json)
+    items = json.loads(canvas.getDrawingJson())
+    assert len(items) == 1
+    assert items[0]["type"] == "pen"
+    assert items[0]["color"] == "#EF4444"
+
+    # 2. Yeni şekiller yükleme ve getDrawingJson testi
+    shapes = [
+        {"type": "line", "x1": 0, "y1": 0, "x2": 50, "y2": 50, "color": "#3B82F6", "width": 2},
+        {"type": "arrow", "x1": 10, "y1": 20, "x2": 80, "y2": 90, "color": "#10B981", "width": 4},
+        {"type": "rect", "x": 10, "y": 20, "w": 100, "h": 50, "color": "#F59E0B", "width": 2, "fill": ""},
+        {"type": "round_rect", "x": 15, "y": 25, "w": 90, "h": 40, "r": 8, "color": "#8B5CF6", "width": 2, "fill": ""},
+        {"type": "circle", "cx": 100, "cy": 100, "rx": 30, "ry": 20, "color": "#EF4444", "width": 3, "fill": ""}
+    ]
+    canvas.loadDrawingJson(json.dumps(shapes))
+    loaded = json.loads(canvas.getDrawingJson())
+    assert len(loaded) == 5
+    assert loaded[1]["type"] == "arrow"
+    assert loaded[2]["type"] == "rect"
+
+    # 3. Temizle ve Geri Al (Undo/Redo) testi
+    canvas.clearCanvas()
+    assert len(json.loads(canvas.getDrawingJson())) == 0
+    assert canvas.property("canUndo") is True
+
+    canvas.undo()
+    assert len(json.loads(canvas.getDrawingJson())) == 5
+    assert canvas.property("canRedo") is True
+
+    canvas.redo()
+    assert len(json.loads(canvas.getDrawingJson())) == 0
+
+    # 4. Akış şeması şablonu (Flowchart Template) ve blok metinleri testi
+    canvas.insertFlowchartTemplate()
+    template_items = json.loads(canvas.getDrawingJson())
+    assert len(template_items) >= 10
+    types = [it["type"] for it in template_items]
+    assert "flow_start" in types
+    assert "flow_process" in types
+    assert "flow_decision" in types
+    assert "flow_io" in types
+    assert "arrow" in types
+
+    # 5. Blok metni güncelleme ve etiket testi
+    canvas.openTextEditor(0)
+    canvas.applyBlockText("Program Başlangıcı")
+    updated = json.loads(canvas.getDrawingJson())
+    assert updated[0]["text"] == "Program Başlangıcı"
+
+    # 6. Arka plan görseli testi
+    test_img_url = "file:///C:/path/to/test.png"
+    canvas.setBackgroundImage(test_img_url)
+    assert canvas.property("backgroundImage") == test_img_url
+    data_with_img = json.loads(canvas.getDrawingJson())
+    assert isinstance(data_with_img, dict)
+    assert data_with_img.get("backgroundImage") == test_img_url
+
+    # Geri alma ile görselin temizlenmesi
+    canvas.undo()
+    assert canvas.property("backgroundImage") == ""
+
+    # Yükleme ile görselin geri gelmesi
+    canvas.loadDrawingJson(json.dumps(data_with_img))
+    assert canvas.property("backgroundImage") == test_img_url
+
+
+
 
 
