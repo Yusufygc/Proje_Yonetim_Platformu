@@ -697,7 +697,6 @@ def test_search_viewmodel(qapp: QApplication, container: DIContainer) -> None:
 
 def test_voice_bridge(qapp: QApplication, container: DIContainer) -> None:
     vb = VoiceBridge(container, parent=qapp)
-    uv = UpdateViewModel(container, parent=qapp)
     assert vb.isListening is False
     assert vb.partialText == ""
 
@@ -732,6 +731,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     stv = SettingsViewModel(container, parent=qapp)
     scv = SearchViewModel(container, nb, parent=qapp)
     vb = VoiceBridge(container, parent=qapp)
+    uv = UpdateViewModel(container, parent=qapp)
 
     qapp._test_tb = tb  # type: ignore[attr-defined]
     qapp._test_ib = ib  # type: ignore[attr-defined]
