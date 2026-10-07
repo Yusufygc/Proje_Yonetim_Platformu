@@ -106,7 +106,7 @@ class DIContainer:
         self._prefs = PreferenceManager.instance()
         _migrate_legacy_theme_slots(self._prefs)
         self._secrets = SecretManager.instance()
-        self._theme = ThemeManager.instance(config.THEMES_DIR, config.STYLES_DIR)
+        self._theme = ThemeManager.instance(config.THEMES_DIR)
         saved_theme = self._prefs.load_theme()
         if saved_theme != self._theme.current_theme:
             self._theme.switch_theme(saved_theme)

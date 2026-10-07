@@ -42,7 +42,7 @@ def test_all_theme_palettes_json_completeness() -> None:
 
 def test_theme_manager_fallback_and_derivation() -> None:
     """Eksik token'lar için akıllı yedek değerlerin üretildiğini test eder."""
-    mgr = ThemeManager(Path("resources/themes"), Path("resources/styles"))
+    mgr = ThemeManager(Path("resources/themes"))
     mgr._palette = {"background": "#0B0F17", "surface": "#151C28"}
     assert mgr.color("surface_alt").startswith("#")
     assert mgr.color("surface_alt") != "#FFFFFF"
@@ -51,7 +51,7 @@ def test_theme_manager_fallback_and_derivation() -> None:
 
 def test_theme_bridge_all_theme_switches(qapp: QApplication) -> None:
     """ThemeBridge üzerinden farklı temalara geçildiğinde token'ların doğruluğunu test eder."""
-    mgr = ThemeManager(Path("resources/themes"), Path("resources/styles"))
+    mgr = ThemeManager(Path("resources/themes"))
     bridge = ThemeBridge(mgr, None, parent=qapp)  # type: ignore[arg-type]
 
     themes = ["dark", "light", "emerald_dark", "indigo_dark", "ocean_dark", "rose_dark", "violet_dark"]

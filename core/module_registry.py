@@ -1,30 +1,20 @@
 """
 Tak-Çıkar modül altyapısı: FeaturePlugin tanımı ve ModuleRegistry singleton'ı.
-Presentation katmanından bağımsızdır; yalnızca tip denetiminde QWidget kullanılır.
+Presentation katmanından bağımsızdır; yalnızca navigasyon meta-verisini taşır.
 """
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from PySide6.QtWidgets import QWidget
 
 
 @dataclass
 class FeaturePlugin:
-    """
-    Tek bir uygulama modülünün tüm meta-verisini taşır.
-
-    factory: parent QWidget alıp sayfa widget'ını döndüren fabrika fonksiyonu.
-    """
+    """Tek bir uygulama modülünün navigasyon meta-verisi."""
 
     page_key: str
     nav_label_key: str
     nav_label_default: str
     nav_icon: str
-    factory: Callable[[QWidget], QWidget]
 
 
 class ModuleRegistry:
