@@ -32,31 +32,37 @@ ColumnLayout {
             Repeater {
                 model: projectSubitemsViewModel.selectedActivity
                 delegate: Rectangle {
+                    id: activityItem
                     Layout.fillWidth: true
-                    implicitHeight: activityRow.implicitHeight + 14
+                    // Sarmalanan metnin yüksekliği RowLayout'ta güvenilir hesaplanmadığından
+                    // metin genişliği açıkça verilir ve satır yüksekliği ondan türetilir.
+                    implicitHeight: Math.max(summaryText.implicitHeight, dateText.implicitHeight) + 2 * activityItem.pad
                     radius: 8
                     color: themeBridge.color("surface_alt")
                     border.color: themeBridge.color("border")
                     border.width: 1
 
-                    RowLayout {
-                        id: activityRow
-                        anchors.margins: 7
-                        spacing: 10
+                    readonly property int pad: 8
 
-                        Text {
-                            text: modelData.summary
-                            font.pixelSize: 12
-                            color: themeBridge.color("text_primary")
-                            Layout.fillWidth: true
-                            wrapMode: Text.Wrap
-                        }
+                    Text {
+                        id: summaryText
+                        x: activityItem.pad
+                        y: activityItem.pad
+                        width: activityItem.width - dateText.implicitWidth - 3 * activityItem.pad
+                        text: modelData.summary
+                        font.pixelSize: 12
+                        color: themeBridge.color("text_primary")
+                        wrapMode: Text.Wrap
+                    }
 
-                        Text {
-                            text: modelData.created_at
-                            font.pixelSize: 11
-                            color: themeBridge.color("text_muted")
-                        }
+                    Text {
+                        id: dateText
+                        anchors.right: parent.right
+                        anchors.rightMargin: activityItem.pad
+                        y: activityItem.pad
+                        text: modelData.created_at
+                        font.pixelSize: 11
+                        color: themeBridge.color("text_muted")
                     }
                 }
             }

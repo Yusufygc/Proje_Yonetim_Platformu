@@ -54,6 +54,7 @@ ColumnLayout {
 
                     ColumnLayout {
                         id: outputContentCol
+                        anchors.fill: parent
                         anchors.margins: 8
                         spacing: 6
 

@@ -90,6 +90,7 @@ ColumnLayout {
             border.width: 1
 
             RowLayout {
+                anchors.fill: parent
                 anchors.leftMargin: (modelData.parent_id > 0 ? 24 : 10)
                 anchors.rightMargin: 10
                 spacing: 8
@@ -112,6 +113,7 @@ ColumnLayout {
                     }
 
                     MouseArea {
+                        anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: projectViewModel.toggleTaskStatus(modelData.id)
                     }

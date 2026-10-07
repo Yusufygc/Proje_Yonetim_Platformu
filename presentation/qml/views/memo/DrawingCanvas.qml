@@ -61,19 +61,19 @@ Rectangle {
 
     // Klavye kısayolları
     Shortcut {
-        sequence: StandardKey.Undo
+        sequences: [StandardKey.Undo]
         enabled: root.visible && root.canUndo && root.editingItemIndex < 0
         onActivated: root.undo()
     }
 
     Shortcut {
-        sequence: StandardKey.Redo
+        sequences: [StandardKey.Redo]
         enabled: root.visible && root.canRedo && root.editingItemIndex < 0
         onActivated: root.redo()
     }
 
     Shortcut {
-        sequence: StandardKey.Paste
+        sequences: [StandardKey.Paste]
         enabled: root.visible && root.editingItemIndex < 0
         onActivated: root.pasteImageFromClipboard()
     }

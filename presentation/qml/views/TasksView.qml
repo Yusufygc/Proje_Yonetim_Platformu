@@ -11,7 +11,7 @@ Item {
     anchors.fill: parent
 
     Shortcut {
-        sequence: StandardKey.Copy
+        sequences: [StandardKey.Copy]
         enabled: tasksViewRoot.visible && taskViewModel && taskViewModel.selectedTaskId > 0
         onActivated: {
             taskViewModel.copyTaskToClipboard(taskViewModel.selectedTaskId)
