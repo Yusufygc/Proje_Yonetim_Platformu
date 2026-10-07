@@ -7,9 +7,7 @@ from typing import Any, Optional
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from controllers.dashboard_controller import DashboardController
-from domain.models.idea import Idea
-from domain.models.project import Project
-from domain.models.task import Task
+from presentation.viewmodels.qt_properties import variant_list_property
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +58,8 @@ class DashboardViewModel(QObject):
 
     @Property(int, notify=statsChanged)
     def completedTasks(self) -> int:
-        total = self.totalTasks
-        opened = self.openTasks
+        total = int(self._stats.get("total_tasks", 0))
+        opened = int(self._stats.get("open_tasks", 0))
         return max(0, total - opened)
 
     @Property(int, notify=statsChanged)
@@ -76,37 +74,19 @@ class DashboardViewModel(QObject):
     def blockedCount(self) -> int:
         return int(self._stats.get("blocked_count", 0))
 
-    @Property("QVariantList", notify=statsChanged)
+    @variant_list_property(notify=statsChanged)
     def recentTasks(self) -> list[dict[str, Any]]:
-        raw_list = self._stats.get("recent_tasks", [])
-        return [self._task_to_dict(t) for t in raw_list]
+        return list(self._stats.get("recent_tasks", []))
 
-    @Property("QVariantList", notify=statsChanged)
+    @variant_list_property(notify=statsChanged)
     def highPriorityTasks(self) -> list[dict[str, Any]]:
-        raw_list = self._stats.get("high_priority_tasks", [])
-        return [self._task_to_dict(t) for t in raw_list]
+        return list(self._stats.get("high_priority_tasks", []))
 
-    @Property("QVariantList", notify=statsChanged)
+    @variant_list_property(notify=statsChanged)
     def recentIdeas(self) -> list[dict[str, Any]]:
         raw_list = self._stats.get("recent_ideas", [])
         return [
-            {
-                "id": i.id,
-                "title": i.title,
-                "status": str(i.status.value if hasattr(i.status, "value") else i.status),
-                "created_at": i.created_at.strftime("%d.%m.%Y") if i.created_at else "",
-            }
-            for i in raw_list
-            if isinstance(i, Idea)
+            {**idea, "created_at": idea["created_at"].strftime("%d.%m.%Y") if idea.get("created_at") else ""}
+            for idea in raw_list
         ]
 
-    def _task_to_dict(self, t: Any) -> dict[str, Any]:
-        if not isinstance(t, Task):
-            return {}
-        return {
-            "id": t.id,
-            "title": t.title,
-            "status": str(t.status.value if hasattr(t.status, "value") else t.status),
-            "priority": str(t.priority.value if hasattr(t.priority, "value") else t.priority),
-            "progress": int(t.progress or 0),
-        }

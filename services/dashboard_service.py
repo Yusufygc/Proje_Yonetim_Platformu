@@ -26,7 +26,7 @@ class DashboardService:
 
     def get_dashboard_stats(self) -> dict[str, Any]:
         """Dashboard'da gösterilecek metrikleri ve listeleri hazırlar."""
-        stats = {
+        stats: dict[str, Any] = {
             "total_projects": 0,
             "total_ideas": 0,
             "total_tasks": 0,
@@ -127,6 +127,7 @@ class DashboardService:
                     "id": idea.id,
                     "title": idea.title,
                     "status": idea.status,
+                    "created_at": idea.created_at,
                 })
 
         return stats

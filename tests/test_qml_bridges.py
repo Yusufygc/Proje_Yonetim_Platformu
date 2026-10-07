@@ -4,7 +4,6 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Any
 
 if sys.platform == "win32":
     _python_base = Path(sys.executable).parent
@@ -23,7 +22,6 @@ if sys.platform == "win32":
                     pass
 
 import pytest
-from PySide6.QtCore import QObject
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtWidgets import QApplication
 
@@ -198,6 +196,26 @@ def test_dashboard_viewmodel_stats(qapp: QApplication, container: DIContainer) -
     assert isinstance(dvm.totalTasks, int)
     assert isinstance(dvm.openTasks, int)
     assert isinstance(dvm.recentTasks, list)
+
+
+def test_dashboard_viewmodel_when_data_exists_should_expose_task_and_idea_titles(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    project = container.services.project.create_project(title="Pano projesi")
+    container.services.task.create_task(project.id, "Acil görev", priority="CRITICAL")
+    container.services.idea.create_idea("Pano fikri", problem="Sorun")
+
+    dvm = DashboardViewModel(container.dashboard_controller, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(3000)
+    qapp.processEvents()
+
+    assert [t["title"] for t in dvm.highPriorityTasks] == ["Acil görev"]
+    assert [t["title"] for t in dvm.recentTasks] == ["Acil görev"]
+    idea = dvm.recentIdeas[0]
+    assert idea["title"] == "Pano fikri"
+    assert idea["created_at"] != ""
 
 
 def test_task_list_model_wbs_hierarchy_and_collapse(qapp: QApplication) -> None:
