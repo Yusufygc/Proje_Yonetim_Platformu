@@ -2,14 +2,12 @@
 Dashboard Service - Ana ekran istatistiklerini hesaplar ve döner.
 """
 import logging
-from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
-from domain.enums.idea_status import IdeaStatus
 from domain.enums.priority import Priority
-from domain.enums.project_health import ProjectHealth
 from domain.enums.project_status import ProjectStatus
 from domain.enums.task_status import TaskStatus
 from domain.models.idea import Idea
@@ -19,115 +17,58 @@ from infrastructure.database.db_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
+_LIST_LIMIT = 10
+_CLOSED_TASK_STATUSES = [TaskStatus.DONE.value, TaskStatus.CANCELLED.value]
+
+
+def _count(sess: Session, model: type[Any], *conditions: Any) -> int:
+    statement = select(func.count()).select_from(model)
+    for condition in conditions:
+        statement = statement.where(condition)
+    return sess.scalar(statement) or 0
+
 
 class DashboardService:
     def __init__(self, db: DatabaseManager) -> None:
         self._db = db
 
     def get_dashboard_stats(self) -> dict[str, Any]:
-        """Dashboard'da gösterilecek metrikleri ve listeleri hazırlar."""
-        stats: dict[str, Any] = {
-            "total_projects": 0,
-            "total_ideas": 0,
-            "total_tasks": 0,
-            "open_tasks": 0,
-            "active_projects": 0,
-            "completed_projects": 0,
-            "updated_this_week": 0,
-            "blocked_count": 0,
-            "raw_ideas": 0,
-            "blocked_projects": [],
-            "recent_tasks": [],
-            "high_priority_tasks": [],
-            "recent_ideas": [],
-        }
-
+        """Dashboard'da gösterilecek sayaçları ve listeleri hazırlar."""
         with self._db.session() as sess:
-            # Counts
-            stats["total_projects"] = sess.scalar(select(func.count()).select_from(Project)) or 0
-            stats["total_ideas"] = sess.scalar(select(func.count()).select_from(Idea)) or 0
-            stats["total_tasks"] = sess.scalar(select(func.count()).select_from(Task)) or 0
-            stats["active_projects"] = sess.scalar(
-                select(func.count()).select_from(Project).where(Project.status == ProjectStatus.ACTIVE.value)
-            ) or 0
-            stats["completed_projects"] = sess.scalar(
-                select(func.count()).select_from(Project).where(Project.status == ProjectStatus.COMPLETED.value)
-            ) or 0
-            week_start = datetime.now(timezone.utc) - timedelta(days=7)
-            stats["updated_this_week"] = sess.scalar(
-                select(func.count()).select_from(Project).where(Project.updated_at >= week_start)
-            ) or 0
-            stats["open_tasks"] = sess.scalar(
-                select(func.count()).select_from(Task).where(
-                    Task.status.not_in([TaskStatus.DONE.value, TaskStatus.CANCELLED.value])
-                )
-            ) or 0
-            stats["raw_ideas"] = sess.scalar(
-                select(func.count()).select_from(Idea).where(
-                    Idea.status == IdeaStatus.RAW.value
-                )
-            ) or 0
+            return {
+                "total_ideas": _count(sess, Idea),
+                "total_tasks": _count(sess, Task),
+                "open_tasks": _count(sess, Task, Task.status.not_in(_CLOSED_TASK_STATUSES)),
+                "active_projects": _count(sess, Project, Project.status == ProjectStatus.ACTIVE.value),
+                "high_priority_tasks": self._high_priority_tasks(sess),
+                "recent_ideas": self._recent_ideas(sess),
+            }
 
-            _blocked_where = (
-                (Project.status == ProjectStatus.BLOCKED.value)
-                | (Project.health == ProjectHealth.AT_RISK.value)
-                | (Project.health == ProjectHealth.BLOCKED.value)
-            )
-            stats["blocked_count"] = sess.scalar(
-                select(func.count()).select_from(Project).where(_blocked_where)
-            ) or 0
+    @staticmethod
+    def _high_priority_tasks(sess: Session) -> list[dict[str, Any]]:
+        statement = (
+            select(Task, Project.title)
+            .join(Project, Task.project_id == Project.id)
+            .where(Task.priority.in_([Priority.HIGH.value, Priority.CRITICAL.value]))
+            .where(Task.status.not_in(_CLOSED_TASK_STATUSES))
+            .order_by(Task.priority.desc(), Task.updated_at.desc())
+            .limit(_LIST_LIMIT)
+        )
+        return [
+            {
+                "id": task.id,
+                "title": task.title,
+                "project_name": project_name,
+                "priority": task.priority,
+                "status": task.status,
+            }
+            for task, project_name in sess.execute(statement)
+        ]
 
-            # Blocked / At Risk Projects
-            stmt_p = select(Project).where(
-                (Project.status == ProjectStatus.BLOCKED.value)
-                | (Project.health == ProjectHealth.AT_RISK.value)
-                | (Project.health == ProjectHealth.BLOCKED.value)
-            ).limit(5)
-            for p in sess.scalars(stmt_p):
-                stats["blocked_projects"].append({
-                    "id": p.id,
-                    "name": p.title,
-                    "status": p.status,
-                    "health": p.health,
-                })
-
-            # Recent Tasks (Son güncellenen görevler)
-            stmt_t = select(Task, Project.title).join(Project, Task.project_id == Project.id).order_by(Task.updated_at.desc()).limit(10)
-            for row in sess.execute(stmt_t):
-                task = row[0]
-                project_name = row[1]
-                stats["recent_tasks"].append({
-                    "id": task.id,
-                    "title": task.title,
-                    "project_name": project_name,
-                    "status": task.status,
-                    "updated_at": task.updated_at
-                })
-
-            stmt_hp = (
-                select(Task, Project.title)
-                .join(Project, Task.project_id == Project.id)
-                .where(Task.priority.in_([Priority.HIGH.value, Priority.CRITICAL.value]))
-                .where(Task.status.not_in([TaskStatus.DONE.value, TaskStatus.CANCELLED.value]))
-                .order_by(Task.priority.desc(), Task.updated_at.desc())
-                .limit(10)
-            )
-            for task, project_name in sess.execute(stmt_hp):
-                stats["high_priority_tasks"].append({
-                    "id": task.id,
-                    "title": task.title,
-                    "project_name": project_name,
-                    "priority": task.priority,
-                    "status": task.status,
-                })
-
-            stmt_i = select(Idea).order_by(Idea.created_at.desc()).limit(10)
-            for idea in sess.scalars(stmt_i):
-                stats["recent_ideas"].append({
-                    "id": idea.id,
-                    "title": idea.title,
-                    "status": idea.status,
-                    "created_at": idea.created_at,
-                })
-
-        return stats
+    @staticmethod
+    def _recent_ideas(sess: Session) -> list[dict[str, Any]]:
+        statement = select(Idea).order_by(Idea.created_at.desc()).limit(_LIST_LIMIT)
+        return [
+            {"id": idea.id, "title": idea.title, "status": idea.status, "created_at": idea.created_at}
+            for idea in sess.scalars(statement)
+        ]

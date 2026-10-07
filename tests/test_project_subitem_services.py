@@ -92,11 +92,9 @@ def test_get_dashboard_stats_when_data_exists_should_count_and_list_entries(stac
 
     stats = DashboardService(stack["db"]).get_dashboard_stats()
 
-    assert stats["total_projects"] == 1
     assert stats["total_tasks"] == 2
     assert stats["open_tasks"] == 2
     assert [t["title"] for t in stats["high_priority_tasks"]] == ["Acil"]
-    assert {t["title"] for t in stats["recent_tasks"]} == {"Acil", "Sıradan"}
 
 
 def test_note_controller_when_body_blank_should_emit_error_instead_of_creating(stack):

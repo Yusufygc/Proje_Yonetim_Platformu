@@ -57,10 +57,6 @@ class TaskDialogViewModel(QObject):
     def dialogTaskId(self) -> int:
         return self._task_id
 
-    @Property(int, notify=dialogStateChanged)
-    def dialogParentTaskId(self) -> int:
-        return self._parent_task_id
-
     @variant_map_property(notify=dialogStateChanged)
     def dialogInitialData(self) -> dict[str, Any]:
         return self._initial_data

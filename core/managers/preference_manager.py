@@ -5,9 +5,8 @@ kullanıcı tercihlerini kalıcı olarak saklayan Singleton.
 from __future__ import annotations
 
 import logging
-from typing import cast
 
-from PySide6.QtCore import QByteArray, QSettings
+from PySide6.QtCore import QSettings
 
 from app import config
 
@@ -30,12 +29,6 @@ class PreferenceManager:
             cls._instance = cls()
         return cls._instance
 
-    def save_window_geometry(self, geometry: QByteArray) -> None:
-        self._settings.setValue("window/geometry", geometry)
-
-    def load_window_geometry(self) -> QByteArray | None:
-        return cast(QByteArray | None, self._settings.value("window/geometry"))
-
     def save_window_rect(
         self, x: int, y: int, width: int, height: int, is_maximized: bool = False
     ) -> None:
@@ -56,13 +49,6 @@ class PreferenceManager:
             except (ValueError, TypeError):
                 return None
         return None
-
-    def save_last_project_id(self, project_id: int) -> None:
-        self._settings.setValue("session/last_project_id", project_id)
-
-    def load_last_project_id(self) -> int | None:
-        value = self._settings.value("session/last_project_id")
-        return int(value) if value is not None else None
 
     def save_theme(self, theme_name: str) -> None:
         self._settings.setValue("ui/theme", theme_name)

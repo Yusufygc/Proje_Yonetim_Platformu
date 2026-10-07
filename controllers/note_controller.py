@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from PySide6.QtCore import QObject, Signal
 
@@ -64,9 +64,6 @@ class NoteController(QObject):
         except Exception as exc:
             logger.error("Not silinemedi: %s", exc)
             self.error_occurred.emit("Not silinirken hata oluştu.")
-
-    def get_note_sync(self, note_id: int) -> Optional[Note]:
-        return self._service.get_note(note_id)
 
     def reorder(self, ordered_ids: list[int]) -> None:
         try:

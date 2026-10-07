@@ -1,5 +1,13 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] LINT | Ölü Kod Temizliği (Denetim Bulgusu 15) ve Arayüz Düzeltmeleri
+- **Silinen modüller:** `core/workers/async_worker.py`, `domain/dtos/base_dto.py`, kökteki `quality.py` (kopya; `scripts/quality.py` kaldı), `presentation/qml/shell/TopHeader.qml`, `core/managers/secret_manager.py` + `keyring` bağımlılığı (DI kaydı, test, spec hiddenimport dahil; `uv.lock` yeniden üretilmeli: `uv lock`).
+- **Silinen üyeler:** kullanılmayan controller senkron sarmalayıcıları, `load_all_tasks`/`all_tasks_loaded`, `TaskService.get_all_tasks`, `TaskRepository.get_all`, `IconManager.get_icon/Icons/try_instance`, `PreferenceManager` pencere-geometri ve son-proje metotları, `FontManager.loaded_families/mono_font`, `ThemeBridge.colors/accentHover/switchTheme`, kullanılmayan ViewModel property'leri, `config` UI sabitleri, `download_fonts.ensure_fonts`.
+- **Dashboard:** `DashboardService` yedi gereksiz sorguyu (kullanılmayan sayaçlar ve listeler) artık çalıştırmıyor; sayaçlar tek `_count` yardımcısıyla hesaplanıyor.
+- **Yerelleştirme:** Hiçbir yerde kullanılmayan 215 anahtar (eski Widgets arayüzü kalıntısı) iki dil dosyasından silindi; 221 anahtar kaldı, parite korunuyor.
+- **Arayüz düzeltmeleri:** Geçmiş sekmesi metin taşması ve bölme sırasında kaybolan `anchors.fill` satırları; eksik `chevron-right.svg`; `StandardKey` kısayol uyarıları; büyütülen pencerede başlık çubuğunun ekran dışında kalması (`presentation/window_geometry.py`).
+- **Bilinçli bırakılanlar:** `TaskViewModel.deleteChecklistItem`, `toggleChecklistItem`, `NavigationBridge.showToast`, `VoiceBridge.partialText` (özellik adayı API'ler); `resources/fonts` içindeki JetBrains Mono dosyaları (artık kullanılmıyor, indirme manifestinde duruyor).
+
 ## [2026-10-07] REFACTOR | Denetim Bulgusu 9'un Kalanı: Proje Detay Paneli ve Görev ViewModel'i Bölündü
 - **`ProjectDetailPanel.qml`** 1786 → 126 satır. Bileşenler `presentation/qml/views/projects/detail/` altında: `ProjectHeader`, `ProjectStagesCard`, `ProjectTabBar`, yedi sekme (`ProjectSummaryTab`, `ProjectTasksTab`, `ProjectDecisionsTab`, `ProjectNotesTab`, `ProjectResourcesTab`, `ProjectOutputsTab`, `ProjectActivityTab`) ve dört modal (`ProjectDecisionDialog`, `ProjectNoteDialog`, `ProjectResourceDialog`, `ProjectOutputDialog`). Sekmeler `addRequested`/`editRequested` sinyalleriyle diyalogları panelden açar.
 - **`TaskViewModel`** 448 → 296 satır: diyalog durumu ve kaydetme `TaskDialogViewModel`'e, panoya kopyalama metni `task_clipboard.collect_task_copy_lines` saf fonksiyonuna taşındı. QML'de `taskDialogViewModel` bağlamı eklendi.

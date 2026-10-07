@@ -47,8 +47,6 @@ MEMO_IMAGES_DIR = DATA_DIR / "memo_images"
 RESOURCES_DIR = APP_DIR / "resources"
 THEMES_DIR = RESOURCES_DIR / "themes"
 FONTS_DIR = RESOURCES_DIR / "fonts"
-ICONS_DIR = RESOURCES_DIR / "icons"
-LOCALES_DIR = RESOURCES_DIR / "locales"
 
 # --- Sesli Komut Modeli ---
 # Model repoya commit edilmez (~50 MB). resources/models/ .gitignore kapsamında.
@@ -64,12 +62,6 @@ ALEMBIC_MIGRATIONS_DIR = APP_DIR / "infrastructure" / "migrations"
 LOG_FILE = LOGS_DIR / "app.log"
 LOG_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
 LOG_BACKUP_COUNT = 3
-
-# --- UI Sabitleri ---
-SIDEBAR_EXPANDED_WIDTH = 240
-SIDEBAR_COLLAPSED_WIDTH = 60
-ANIMATION_DURATION_MS = 300
-ANIMATION_DURATION_SHORT_MS = 150
 
 
 def ensure_data_dirs() -> None:

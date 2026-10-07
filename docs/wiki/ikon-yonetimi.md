@@ -1,17 +1,15 @@
 # İkon Yönetimi
 
 ## IconManager (`core/managers/icon_manager.py`)
-- Singleton; `resources/icons/*.svg` okur.
-- `get_icon(name, color)` — SVG içinde `fill/stroke="currentColor"` → verilen hex; `QPixmap.loadFromData` ile QIcon üretir; `name_color` anahtarıyla cache'ler.
-- `get_svg_content(name, color)` — renklendirilmiş ham SVG metni.
+- Singleton; `resources/icons/*.svg` dosyalarını okur.
+- `get_svg_content(name, color)` — SVG içinde `fill/stroke="currentColor"` değerlerini verilen hex ile değiştirip ham SVG metnini döndürür; dosya yoksa boş string ve uyarı logu.
 
 ## QML entegrasyonu
-`presentation/viewmodels/icon_provider.py::IconImageProvider` (`image://icons/<ad>?color=<hex>`) ikonları `IconManager` üzerinden renklendirip QML `AppIcon` bileşenine sunar ([[tema-sistemi]]).
+`presentation/viewmodels/icon_provider.py::IconImageProvider` (`image://icons/<ad>?color=<hex>`) ikonları `IconManager` üzerinden renklendirip QML `AppIcon` bileşenine sunar. Küçük ikonlar (`plus`, `x`, `eye` vb.) sağlayıcı içinde gömülü SVG olarak tanımlıdır; `edit`, `trash-2`, `home` gibi takma adlar `_ICON_ALIASES` ile dosya adlarına çevrilir ([[tema-sistemi]]).
 
-## 2026-06-12 iyileştirmeleri (P3)
-- `get_icon` renklendirmeyi `get_svg_content` üzerinden yapar (tek renklendirme yolu, DRY).
-- Render `QSvgRenderer` ile 64×64 şeffaf pixmap'e yapılır (`_render_svg`) — yüksek DPI'da keskin; render başarısızsa renksiz dosya ikonuna düşer.
-- `Icons` sabit sınıfı eklendi (`Icons.MENU`, `Icons.CHEVRON_DOWN`...); UI kodunda çıplak ikon string'i yazılmaz.
-- `IconManager.try_instance()` public API'si: bootstrap edilmemiş ortamda `None` döner.
+Yeni ikon eklemek: `resources/icons/<ad>.svg` dosyası ekle (tek renkli, `currentColor` kullanan çizgi/dolgu). Eksik ikon QML'de görünmez ve log'a `İkon bulunamadı` uyarısı düşer.
+
+## Geçmiş
+- 2026-10-07: Eski Widgets arayüzünün `get_icon` (QIcon üretimi), `Icons` sabit sınıfı, `try_instance()` ve QSS ok ikonu üretimi kaldırıldı; yalnızca QML'in kullandığı `get_svg_content` kaldı. `chevron-right.svg` eklendi (aşama kartı).
 
 İlgili: [[mimari-genel-bakis]], [[di-container]]

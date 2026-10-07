@@ -37,9 +37,6 @@ class TaskService:
         self._project_service = project_service
         self._activity_logs = activity_log_repository
 
-    def get_all_tasks(self) -> list[Task]:
-        return self._repo.get_all()
-
     def get_tasks(self, project_id: int) -> list[Task]:
         return self._repo.get_by_project(project_id)
 

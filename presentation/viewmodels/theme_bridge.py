@@ -2,13 +2,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Optional
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from core.managers.preference_manager import PreferenceManager
 from core.managers.theme_manager import ThemeManager
-from presentation.viewmodels.qt_properties import variant_map_property
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +42,6 @@ class ThemeBridge(QObject):
     @Property(bool, notify=themeChanged)
     def isDark(self) -> bool:
         return self._prefs.load_active_mode() == "dark"
-
-    @variant_map_property(notify=themeChanged)
-    def colors(self) -> dict[str, Any]:
-        """Tüm tema token'larını sözlük olarak döndürür."""
-        palette: dict[str, Any] = getattr(self._theme_mgr, "_palette", {})
-        return dict(palette)
 
     @Property(str, notify=themeChanged)
     def background(self) -> str:
@@ -135,10 +128,6 @@ class ThemeBridge(QObject):
         return self._theme_mgr.color("surface_raised")
 
     @Property(str, notify=themeChanged)
-    def accentHover(self) -> str:
-        return self._theme_mgr.color("accent_end")
-
-    @Property(str, notify=themeChanged)
     def hoverOverlay(self) -> str:
         return self._theme_mgr.color("hover_overlay")
 
@@ -161,9 +150,3 @@ class ThemeBridge(QObject):
         self._prefs.save_active_mode(next_mode)
         self._prefs.save_theme(next_theme)
         self._theme_mgr.switch_theme(next_theme)
-
-    @Slot(str)
-    def switchTheme(self, theme_name: str) -> None:
-        """Belirtilen temayı aktif yapar."""
-        self._theme_mgr.switch_theme(theme_name)
-        self._prefs.save_theme(theme_name)

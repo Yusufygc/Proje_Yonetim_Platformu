@@ -53,10 +53,6 @@ class FontManager:
             logger.debug("Font yüklendi: %s → %s", font_file.name, families)
 
     @property
-    def loaded_families(self) -> list[str]:
-        return list(self._loaded_families)
-
-    @property
     def ui_font(self) -> str:
         """Birincil UI font ailesi; yüklü değilse Inter ardından sistem fontuna döner."""
         for fam in self._loaded_families:
@@ -66,11 +62,3 @@ class FontManager:
             if "Inter" in fam:
                 return "Inter"
         return FontFamily.FALLBACK_UI
-
-    @property
-    def mono_font(self) -> str:
-        """Monospace font ailesi; yüklü değilse sistem monospace fontuna döner."""
-        for fam in self._loaded_families:
-            if FontFamily.MONO in fam:
-                return FontFamily.MONO
-        return FontFamily.FALLBACK_MONO

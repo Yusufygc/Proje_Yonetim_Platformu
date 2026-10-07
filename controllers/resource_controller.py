@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from PySide6.QtCore import QObject, Signal
 
-from domain.models.resource import Resource
 from services.resource_service import ResourceService
 
 logger = logging.getLogger(__name__)
@@ -57,6 +56,3 @@ class ResourceController(QObject):
         except Exception as exc:
             logger.error("Kaynak silinemedi: %s", exc)
             self.error_occurred.emit("Kaynak silinirken hata oluştu.")
-
-    def get_resource_sync(self, resource_id: int) -> Optional[Resource]:
-        return self._service.get_resource(resource_id)

@@ -9,7 +9,7 @@ from PySide6.QtGui import QGuiApplication
 
 from domain.models.task import Task
 from presentation.viewmodels.error_reporting import forward_errors_to_toast
-from presentation.viewmodels.qt_properties import variant_list_property, variant_map_property
+from presentation.viewmodels.qt_properties import variant_list_property
 from presentation.viewmodels.task_clipboard import collect_task_copy_lines
 from presentation.viewmodels.task_list_model import TaskListModel
 
@@ -37,7 +37,6 @@ class TaskViewModel(QObject):
         self._projects: list[dict[str, Any]] = []
         self._selected_project_id: int = 0
         self._selected_task_id: int = 0
-        self._selected_task_data: dict[str, Any] = {}
 
         self._tasks_cache: list[Task] = []
         self._connect_signals()
@@ -76,10 +75,6 @@ class TaskViewModel(QObject):
     @Property(int, notify=selectedTaskChanged)
     def selectedTaskId(self) -> int:
         return self._selected_task_id
-
-    @variant_map_property(notify=selectedTaskChanged)
-    def selectedTask(self) -> dict[str, Any]:
-        return self._selected_task_data
 
     @Property(int, notify=statsChanged)
     def totalTasks(self) -> int:
@@ -168,26 +163,6 @@ class TaskViewModel(QObject):
         self._refresh_selected_task()
 
     def _refresh_selected_task(self) -> None:
-        t = next((x for x in self._tasks_cache if x.id == self._selected_task_id), None)
-        if not t:
-            self._selected_task_data = {}
-        else:
-            chk_list = [
-                {"id": c.id, "text": c.text, "isDone": c.is_done}
-                for c in (t.checklist_items or [])
-            ]
-            self._selected_task_data = {
-                "id": t.id,
-                "projectId": t.project_id,
-                "parentId": t.parent_task_id or 0,
-                "title": t.title,
-                "description": t.description or "",
-                "status": t.status,
-                "priority": t.priority,
-                "taskType": t.task_type,
-                "dueDate": t.due_date.isoformat() if t.due_date else "",
-                "checklist": chk_list,
-            }
         self.selectedTaskChanged.emit()
 
     @Slot(int)
@@ -223,11 +198,6 @@ class TaskViewModel(QObject):
     def deleteTask(self, task_id: int) -> None:
         self._task_controller.delete_task(task_id)
         self._event_bus.publish("toast.show", message="Görev silindi", type_="info")  # l10n: data
-
-    @Slot(int, int, int)
-    def moveTask(self, task_id: int, new_parent_id: int, new_order_index: int) -> None:
-        pid = new_parent_id if new_parent_id != 0 else None
-        self._task_controller.move_task(task_id, pid, new_order_index)
 
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:

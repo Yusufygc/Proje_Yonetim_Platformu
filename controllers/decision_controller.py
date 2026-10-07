@@ -93,6 +93,3 @@ class DecisionController(QObject):
         except Exception as exc:
             logger.error("Decision could not be deleted: %s", exc)
             self.error_occurred.emit("Karar silinirken hata olustu.")
-
-    def get_decision_sync(self, decision_id: int) -> DecisionRecord | None:
-        return self._service.get_decision(decision_id)

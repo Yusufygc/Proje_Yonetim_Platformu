@@ -11,7 +11,7 @@ Kaynak analiz: `Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu 
 
 ## P3 — Tamamlandı (2026-06-12)
 1. ✅ **DIContainer bölünmesi**: `di_registries.py` (Repository/Service/Controller registry) + facade `__getattr__` delegasyonu ([[di-container]]).
-2. ✅ **IconManager**: `QSvgRenderer`, `Icons` sabitleri, DRY, `try_instance()` ([[ikon-yonetimi]]).
+2. ✅ **IconManager**: (tarihsel; 2026-10-07 sadeleştirildi) ([[ikon-yonetimi]]).
 3. ✅ **Script taşıma**: `commit_all.py`, `download_assets.py` → `scripts/`.
 
 ## P4 — Tamamlandı (2026-06-26 / 2026-06-27)

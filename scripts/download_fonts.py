@@ -76,26 +76,6 @@ def download_all(force: bool = False) -> dict[str, bool]:
     return results
 
 
-def _premium_fonts_present() -> bool:
-    """Manifest'teki her dosya diskte mevcutsa True döner (ilk yükleme kontrolü için).
-
-    Sadece PJS+JBM kontrol edilseydi, bunlar zaten kurulu olan mevcut bir
-    kurulumda yeni eklenen fontlar (örn. Roboto/Open Sans) hiç indirilmezdi.
-    """
-    return all((FONTS_DIR / filename).exists() for filename in FONT_MANIFEST)
-
-
-def ensure_fonts() -> None:
-    """
-    main.py tarafından çağrılır. Eksik premium fontlar varsa sessizce indirir.
-    İndirme başarısız olursa uygulama fallback fontlarla devam eder.
-    """
-    if _premium_fonts_present():
-        return
-    print("Premium fontlar eksik, indiriliyor...")
-    download_all()
-
-
 if __name__ == "__main__":
     force = "--force" in sys.argv
     print(f"Font dizini: {FONTS_DIR}")

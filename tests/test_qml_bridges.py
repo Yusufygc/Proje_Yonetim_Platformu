@@ -237,11 +237,9 @@ def test_project_viewmodel_update_note_when_edited_should_reload_notes(
 
 def test_dashboard_viewmodel_stats(qapp: QApplication, container: DIContainer) -> None:
     dvm = DashboardViewModel(container.dashboard_controller, parent=qapp)
-    assert isinstance(dvm.totalProjects, int)
     assert isinstance(dvm.activeProjects, int)
     assert isinstance(dvm.totalTasks, int)
     assert isinstance(dvm.openTasks, int)
-    assert isinstance(dvm.recentTasks, list)
 
 
 def test_dashboard_viewmodel_when_data_exists_should_expose_task_and_idea_titles(
@@ -258,7 +256,6 @@ def test_dashboard_viewmodel_when_data_exists_should_expose_task_and_idea_titles
     qapp.processEvents()
 
     assert [t["title"] for t in dvm.highPriorityTasks] == ["Acil görev"]
-    assert [t["title"] for t in dvm.recentTasks] == ["Acil görev"]
     idea = dvm.recentIdeas[0]
     assert idea["title"] == "Pano fikri"
     assert idea["created_at"] != ""

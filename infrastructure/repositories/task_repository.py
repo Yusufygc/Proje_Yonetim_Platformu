@@ -58,15 +58,6 @@ class TaskRepository(ProjectScopedRepository[Task]):
             )
             return int(sess.scalar(stmt) or 0)
 
-    def get_all(self) -> list[Task]:
-        with self._db.session() as sess:
-            stmt = (
-                select(Task)
-                .options(*self._query_options())
-                .order_by(Task.project_id, Task.order_index, Task.id)
-            )
-            return list(sess.scalars(stmt).all())
-
     # ── Checklist işlemleri ──────────────────────────────────────────────────
 
     def add_checklist_item(self, item: ChecklistItem) -> ChecklistItem:

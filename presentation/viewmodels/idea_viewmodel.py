@@ -93,18 +93,6 @@ class IdeaViewModel(QObject):
     def totalIdeas(self) -> int:
         return len(self._ideas_cache)
 
-    @Property(int, notify=statsChanged)
-    def rawIdeas(self) -> int:
-        return sum(1 for i in self._ideas_cache if i.status == "RAW")
-
-    @Property(int, notify=statsChanged)
-    def reviewingIdeas(self) -> int:
-        return sum(1 for i in self._ideas_cache if i.status == "REVIEWING")
-
-    @Property(int, notify=statsChanged)
-    def convertedIdeas(self) -> int:
-        return sum(1 for i in self._ideas_cache if i.status == "CONVERTED")
-
     # ── Controller & Event Callbacks ────────────────────────────────────────
 
     def _on_ideas_loaded(self, ideas: list[Idea]) -> None:

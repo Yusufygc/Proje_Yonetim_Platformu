@@ -110,10 +110,6 @@ class ProjectViewModel(QObject):
     def dialogMode(self) -> str:
         return self._dialog_mode
 
-    @Property(int, notify=dialogStateChanged)
-    def dialogProjectId(self) -> int:
-        return self._dialog_project_id
-
     @Slot()
     def loadProjects(self) -> None:
         self._controller.load_projects(include_archived=False)

@@ -37,16 +37,8 @@ class DashboardViewModel(QObject):
         self.statsChanged.emit()
 
     @Property(int, notify=statsChanged)
-    def totalProjects(self) -> int:
-        return int(self._stats.get("total_projects", 0))
-
-    @Property(int, notify=statsChanged)
     def activeProjects(self) -> int:
         return int(self._stats.get("active_projects", 0))
-
-    @Property(int, notify=statsChanged)
-    def completedProjects(self) -> int:
-        return int(self._stats.get("completed_projects", 0))
 
     @Property(int, notify=statsChanged)
     def totalTasks(self) -> int:
@@ -65,18 +57,6 @@ class DashboardViewModel(QObject):
     @Property(int, notify=statsChanged)
     def totalIdeas(self) -> int:
         return int(self._stats.get("total_ideas", 0))
-
-    @Property(int, notify=statsChanged)
-    def rawIdeas(self) -> int:
-        return int(self._stats.get("raw_ideas", 0))
-
-    @Property(int, notify=statsChanged)
-    def blockedCount(self) -> int:
-        return int(self._stats.get("blocked_count", 0))
-
-    @variant_list_property(notify=statsChanged)
-    def recentTasks(self) -> list[dict[str, Any]]:
-        return list(self._stats.get("recent_tasks", []))
 
     @variant_list_property(notify=statsChanged)
     def highPriorityTasks(self) -> list[dict[str, Any]]:

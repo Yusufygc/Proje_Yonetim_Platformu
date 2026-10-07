@@ -14,7 +14,6 @@ from core.events.event_bus import EventBus
 from core.exceptions.base_exception import AppBaseException
 from core.workers.worker import Worker
 from domain.dtos.forms import ProjectCreateDTO, ProjectUpdateDTO
-from domain.models.activity_log import ActivityLog
 from domain.models.attachment import Attachment
 from domain.models.project import Project
 from services.project_service import ProjectService
@@ -119,15 +118,6 @@ class ProjectController(QObject):
         worker.signals.result.connect(on_result)
         worker.signals.error.connect(_on_error)
         worker.start()
-
-    def get_activity_logs_sync(self, project_id: int) -> list[ActivityLog]:
-        return self._service.get_activity_logs(project_id)
-
-    def get_attachments_sync(self, project_id: int) -> list[Attachment]:
-        return self._service.get_attachments(project_id)
-
-    def create_attachment_sync(self, attachment: Attachment) -> None:
-        self._service.create_attachment(attachment)
 
     def create_project(self, title: str, **kwargs: Any) -> None:
         try:
