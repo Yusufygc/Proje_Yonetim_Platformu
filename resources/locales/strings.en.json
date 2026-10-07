@@ -22,6 +22,7 @@
   "task_add_child": "Add Subtask",
   "task_quick_add_placeholder": "Quickly add a task under the selected one...",
   "task_quick_add_button": "Quick Add",
+  "task_quick_add_root_placeholder": "Quickly add a root task to the project...",
   "tasks_empty": "No tasks in this project yet.\nUse the Add Task button to build the WBS.",
   "action_edit": "Edit",
   "action_delete": "Delete",

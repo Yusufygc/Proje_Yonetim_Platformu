@@ -28,6 +28,11 @@ Item {
             Layout.fillWidth: true
         }
 
+        // Hızlı görev ekleme (yazı veya sesli dikte)
+        TaskQuickAdd {
+            Layout.fillWidth: true
+        }
+
         // Görev İstatistikleri Rozet Çubuğu
         RowLayout {
             Layout.fillWidth: true

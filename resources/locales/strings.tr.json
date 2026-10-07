@@ -22,6 +22,7 @@
   "task_add_child": "Alt Görev Ekle",
   "task_quick_add_placeholder": "Seçili görevin altına hızlı görev ekle...",
   "task_quick_add_button": "Hızlı Ekle",
+  "task_quick_add_root_placeholder": "Projeye hızlıca ana görev ekle...",
   "tasks_empty": "Bu projede henüz görev bulunmuyor.\nYeni Görev Ekle butonuyla WBS oluşturabilirsiniz.",
   "action_edit": "Düzenle",
   "action_delete": "Sil",

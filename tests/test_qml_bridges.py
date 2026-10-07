@@ -417,6 +417,34 @@ def test_task_dialog_viewmodel_when_parent_saved_with_auto_status_should_keep_de
     assert not dialog.isDialogOpen
 
 
+def test_task_viewmodel_when_quick_add_should_create_root_then_subtask_and_ignore_blank(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    project = container.services.project.create_project(title="Hızlı ekleme projesi")
+    tvm = TaskViewModel(container, parent=qapp)
+    tvm.selectProject(project.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    tvm.quickAddTask("   ")
+    tvm.quickAddTask("Sesle eklenen ana görev")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    root = next(t for t in container.services.task.get_tasks(project.id) if t.title == "Sesle eklenen ana görev")
+    assert root.parent_task_id is None
+
+    tvm.selectTask(root.id)
+    tvm.quickAddTask("Alt görev")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    tasks = container.services.task.get_tasks(project.id)
+    child = next(t for t in tasks if t.title == "Alt görev")
+    assert child.parent_task_id == root.id
+    assert len(tasks) == 2
+
+
 def test_idea_list_model_and_filters(qapp: QApplication) -> None:
     model = IdeaListModel(parent=qapp)
     i1 = Idea(id=1, title="Yapay Zeka Asistanı", problem="Zaman kaybı", status="RAW", priority="HIGH")

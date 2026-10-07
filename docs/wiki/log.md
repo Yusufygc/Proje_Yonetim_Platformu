@@ -1,5 +1,10 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] FEATURE | Hızlı Görev Ekleme (Sesli)
+- Backend'de duran `TaskViewModel.quickAddTask` arayüze bağlandı: Görevler ekranında `TaskQuickAdd.qml` (alan + mikrofon + "Hızlı Ekle"). Seçili görev varsa alt görev, yoksa ana görev oluşturur; başarıda toast.
+- Yerelleştirme: `task_quick_add_root_placeholder` (tr/en). Test: `test_task_viewmodel_when_quick_add_should_create_root_then_subtask_and_ignore_blank`.
+- Sesli dikte gerçek mikrofon ve Vosk modeliyle denenmedi (testler yalnızca ViewModel'i kapsıyor).
+
 ## [2026-10-08] FIX | Rozet (AppBadge) Görünümü
 - Açık zeminde turuncu/sarı rozet yazısı okunmuyordu: yazı rengi artık temaya göre koyulaşıyor (açık tema) veya açılıyor (koyu tema); zemin ve çerçeve saydamlığı temaya göre ayarlandı.
 - Durum rozetlerine (öncelik, proje sağlığı) renkli nokta eklendi (`showDot`); proje tipi nötr, noktasız kaldı, böylece üç rozet aynı görünmüyor.

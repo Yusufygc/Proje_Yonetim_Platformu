@@ -188,11 +188,13 @@ class TaskViewModel(QObject):
         if not t or self._selected_project_id == 0:
             return
         parent_id = self._selected_task_id if self._selected_task_id != 0 else None
-        self._task_controller.create_task(
+        created = self._task_controller.create_task(
             self._selected_project_id,
             t,
             parent_task_id=parent_id,
         )
+        if created is not None:
+            self._event_bus.publish("toast.show", message="Görev oluşturuldu", type_="success")  # l10n: data
 
     @Slot(int)
     def deleteTask(self, task_id: int) -> None:

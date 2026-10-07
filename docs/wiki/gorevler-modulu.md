@@ -32,6 +32,9 @@ Alt görevi olan görevin durumu alt görevlerinden türetilir (`TaskService.rec
 - **Akıllı Ağaç Daraltma (Auto-Collapse):** `TaskListModel` hiyerarşi oluştururken, alt görevleri bulunan ve kendisi dahil tüm alt görevleri `DONE` (tamamlandı) durumunda olan görev dallarını varsayılan olarak kapalı tutar. Kullanıcı tamamlanan işlerin kalabalığı yerine açık kalan işlere odaklanır.
 - **Kaydırma Konumunun Korunması (Scroll Preservation):** Görev durumu değiştirildiğinde veya silme/çoğaltma yapıldığında liste modeli resetlenirken `TasksView.qml` içerisindeki `savedScrollY` değişkeni mevcut kaydırma pozisyonunu saklar ve model yüklendiğinde otomatik olarak eski konuma geri döndürür.
 
+## Hızlı görev ekleme
+Görevler ekranında araç çubuğunun altında `TaskQuickAdd.qml`: tek satırlık alan + mikrofon (`showVoiceInput`) + "Hızlı Ekle" düğmesi. Enter veya düğme `TaskViewModel.quickAddTask(title)` çağırır; bir görev seçiliyse yeni görev onun altına (alt görev), seçili değilse proje köküne eklenir; boş metin yok sayılır, başarıda toast gösterilir. Sesle dikte metni alana yazar, görevi kullanıcı onaylayarak ekler ([[sesli-komut]]).
+
 ## Import
 `from presentation.viewmodels.task_viewmodel import TaskViewModel` (QML ViewModel).
 
