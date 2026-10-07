@@ -1,7 +1,7 @@
 # Wiki Kayıt Defteri
 
 ## [2026-10-08] REFACTOR | Emoji Yerine SVG İkon
-- Çizim araç çubukları, Notlar'daki görsel düğmesi, Çıktılar'daki ataç, arama modalı, toast bildirimleri, analitik proje filtresindeki tik ve Ayarlar'daki dışa aktarma düğmesi emoji/metin sembolü yerine SVG ikon kullanıyor (22 yeni ikon dosyası). Yerelleştirme metinlerinden 📤/✅/❌ kaldırıldı.
+- Çizim araç çubukları, Notlar'daki görsel düğmesi, Çıktılar'daki ataç, arama modalı, toast bildirimleri, analitik proje filtresindeki tik ve Ayarlar'daki dışa aktarma düğmesi emoji/metin sembolü yerine SVG ikon kullanıyor (21 yeni ikon dosyası). Yerelleştirme metinlerinden 📤/✅/❌ kaldırıldı.
 - Bırakılanlar: tema düğmelerindeki 🌙/☀️ (istek), açılır liste ve ağaç oklarındaki `▼`/`▶`, `↳`, `◈`, `↵` metin sembolleri.
 - **Hata düzeltmesi:** DrawingCanvas bölünürken "Çizim/Akış Şeması" mod düğmeleri sinyal yerine çubuğun kendi özelliğini değiştiriyordu; mod değişimi tuvale ulaşmıyordu. `modeSelected` sinyaline bağlandı, düğmeye tıklayan test eklendi. Pikselli karşılaştırma bu etkileşimi kapsamadığı için kaçmıştı.
 
