@@ -8,8 +8,6 @@
 
 # --- DIŞ BAĞIMLILIKLAR VE SAKLAMA ALANLARI (GRAFİK DIŞI) ---
 # Üçüncü parti kütüphanelerin mimari şemaya dahil edilmesi grafiği tamamen çökertir.
-.conda/
-conda-meta/
 envs/
 env/
 .venv/

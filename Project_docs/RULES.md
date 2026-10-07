@@ -2,7 +2,7 @@
 
 Bu doküman, **Proje Yönetim ve Takip Platformu** projesinde geliştirilecek tüm kodların mimari kalitesini, sürdürülebilirliğini, güvenliğini ve ekip/kod bütünlüğünü korumak adına uyulması zorunlu olan kuralları tanımlar. Projede çalışacak tüm geliştiriciler (ve yapay zeka asistanları/ajanları) bu kurallara kayıtsız şartsız uymakla yükümlüdür.
 
-çalışma ortamı : C:\Users\ysfygc\anaconda3\envs\projeTakip kurulumlar ve testler bu ortamda yapılacak 
+çalışma ortamı : proje kökündeki `.venv` sanal ortamı; kurulumlar ve testler bu ortamda yapılacak
 ---
 
 ## 1. Kodlama ve Temiz Kod (Clean Code) Prensipleri

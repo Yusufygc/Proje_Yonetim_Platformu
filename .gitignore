@@ -2,14 +2,11 @@
 # PROJE YÖNETİM VE TAKİP PLATFORMU - RESMİ .GITIGNORE DOSYASI
 # ==============================================================================
 # Bu dosya RULES.md, 15_ALTYAPI_VE_DAGITIM_PLANI.md ve 16_SENIOR_MIMARI_STANDARTLAR.md
-# standartlarına uygun olarak, Anaconda ortamları, Poetry/uv bağımlılıkları,
+# standartlarına uygun olarak, Sanal ortamlar,Poetry/uv bağımlılıkları,
 # yerel veritabanları, PySide6 derleme çıktıları ve IDE konfigürasyonlarının
 # Git sürüm kontrol sistemine sızmasını engellemek için yapılandırılmıştır.
 
-# --- ANACONDA / CONDA ORTAM KISITLAMALARI ---
-# Projenin çalıştırıldığı yerel Conda ortam klasörleri ve meta verileri
-.conda/
-conda-meta/
+# --- SANAL ORTAM KLASÖRLERİ ---
 envs/
 env/
 lib/
@@ -17,7 +14,6 @@ lib64/
 share/
 include/
 bin/
-condarc
 kubernetes/
 
 # --- PYTHON DERLEME VE ÖNBELLEK ÇIKTILARI (CLEAN CODE) ---

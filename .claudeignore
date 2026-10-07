@@ -19,10 +19,8 @@
 logs/
 *.err
 
-# --- ANACONDA VE SANAL ORTAM BAĞIMLILIKLARI ---
+# --- SANAL ORTAM BAĞIMLILIKLARI ---
 # Binlerce kütüphane dosyasının ajan tarafından taranması sistem kilitlenmelerine yol açar.
-.conda/
-conda-meta/
 envs/
 env/
 .venv/

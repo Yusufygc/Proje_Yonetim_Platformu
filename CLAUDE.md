@@ -6,7 +6,7 @@ Bu dosya, **Proje Yönetim ve Takip Platformu** deposunda çalışacak tüm yapa
 
 ## 0. Çalışma Ortamı
 
-- **Conda env:** `C:\Users\ysfygc\anaconda3\envs\projeTakip`
+- **Sanal ortam:** Proje kökündeki `.venv` (`python -m venv .venv`).
 - Tüm kurulum, test ve çalıştırma komutları bu ortamda yapılacak.
 - Bağımlılık değişikliklerinde `requirements.txt` veya `pyproject.toml` güncellenecek; ortama elle paket kurulmayacak.
 
@@ -79,7 +79,7 @@ def process(item):
 - **Test isimlendirme:** `test_<method>_when_<durum>_should_<beklenen>` formatı.
 - **Fixture'lar:** `conftest.py`'de paylaşılan fixture'lar tanımlanacak; her test kendi verisini oluşturacak, birbirine bağımlı testler yasak.
 - SQLAlchemy testleri in-memory SQLite (`sqlite:///:memory:`) kullanacak; production DB'ye dokunulmayacak.
-- **Değişiklik sonrası test çalıştırma ZORUNLU:** Kod üzerinde herhangi bir değişiklik (bugfix, refactor, yeni özellik) yapıldıktan sonra, teslim/commit öncesi `python -m pytest tests/ -q` `projeTakip` conda ortamında çalıştırılacak. Testler kırmızıysa (fail) değişiklik tamamlanmış sayılmayacak; ya kod ya da test düzeltilecek.
+- **Değişiklik sonrası test çalıştırma ZORUNLU:** Kod üzerinde herhangi bir değişiklik (bugfix, refactor, yeni özellik) yapıldıktan sonra, teslim/commit öncesi `python -m pytest tests/ -q` `.venv` ortamında çalıştırılacak. Testler kırmızıysa (fail) değişiklik tamamlanmış sayılmayacak; ya kod ya da test düzeltilecek.
 
 ---
 

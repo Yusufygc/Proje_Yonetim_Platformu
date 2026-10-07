@@ -5,25 +5,10 @@ from pathlib import Path
 # SPECPATH = packaging/ dizini; bir üst = proje kökü
 ROOT = Path(SPECPATH).parent
 
-# Conda environment içindeki sistem DLL'leri — .venv bunları PATH'te bulamıyor,
-# EXE'ye elle eklenerek conda bağımlılığı ortadan kaldırılır.
-CONDA_BIN = r"C:\Users\ysfygc\anaconda3\envs\projeTakip\Library\bin"
-
 a = Analysis(
     [str(ROOT / "main.py")],
     pathex=[str(ROOT)],
-    binaries=[
-        # Python stdlib C uzantıları için gereken sistem DLL'leri.
-        (f"{CONDA_BIN}\\sqlite3.dll",         "."),
-        (f"{CONDA_BIN}\\zstd.dll",            "."),
-        (f"{CONDA_BIN}\\liblzma.dll",         "."),
-        (f"{CONDA_BIN}\\libbz2.dll",          "."),
-        (f"{CONDA_BIN}\\libmpdec-4.dll",      "."),
-        (f"{CONDA_BIN}\\libexpat.dll",        "."),
-        (f"{CONDA_BIN}\\ffi-8.dll",           "."),
-        (f"{CONDA_BIN}\\libcrypto-3-x64.dll", "."),
-        (f"{CONDA_BIN}\\libssl-3-x64.dll",    "."),
-    ],
+    binaries=[],
     datas=[
         (str(ROOT / "resources"), "resources"),
         (str(ROOT / "icons"), "icons"),
