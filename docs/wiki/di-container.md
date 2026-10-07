@@ -21,6 +21,6 @@
 ViewModel ve köprü sınıfları (`presentation/viewmodels/`) bağımlılıklarını `DIContainer`'dan constructor parametresiyle alır (`ProjectViewModel(di)`, `SettingsViewModel(container)`); `main_qml.py` bunları oluşturup QML bağlamına (`setContextProperty`) kaydeder. Controller/servis/manager erişimi `di.<ad>` üzerinden yapılır; ViewModel'ler servislere doğrudan değil controller'lar üzerinden gider.
 
 ## Public erişimciler
-`db`, `theme`, `fonts`, `prefs`, `secrets`, `icons` (2026-06-13'te eklendi), `strings` (2026-06-13'te eklendi), `event_bus`, `repos`, `services`, `controllers`.
+`db`, `theme`, `fonts`, `prefs`, `icons` (2026-06-13'te eklendi), `strings` (2026-06-13'te eklendi), `event_bus`, `repos`, `services`, `controllers`.
 
 İlgili: [[mimari-genel-bakis]], [[event-bus]]

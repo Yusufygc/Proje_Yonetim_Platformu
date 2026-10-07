@@ -23,7 +23,6 @@ from core.managers.font_manager import FontManager
 from core.managers.icon_manager import IconManager
 from core.managers.log_manager import install_global_exception_hook, setup_logging
 from core.managers.preference_manager import PreferenceManager
-from core.managers.secret_manager import SecretManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
 from app.di_registries import ControllerRegistry, RepositoryRegistry, ServiceRegistry
@@ -70,7 +69,6 @@ class DIContainer:
         # Infrastructure referansları bootstrap() tarafından doldurulur.
         self._db: DatabaseManager | None = None
         self._prefs: PreferenceManager | None = None
-        self._secrets: SecretManager | None = None
         self._theme: ThemeManager | None = None
         self._fonts: FontManager | None = None
         self._icons: IconManager | None = None
@@ -105,7 +103,6 @@ class DIContainer:
 
         self._prefs = PreferenceManager.instance()
         _migrate_legacy_theme_slots(self._prefs)
-        self._secrets = SecretManager.instance()
         self._theme = ThemeManager.instance(config.THEMES_DIR)
         saved_theme = self._prefs.load_theme()
         if saved_theme != self._theme.current_theme:
@@ -152,11 +149,6 @@ class DIContainer:
     def prefs(self) -> PreferenceManager:
         assert self._prefs is not None, "bootstrap() henüz çağrılmadı"
         return self._prefs
-
-    @property
-    def secrets(self) -> SecretManager:
-        assert self._secrets is not None, "bootstrap() henüz çağrılmadı"
-        return self._secrets
 
     @property
     def icons(self) -> IconManager:

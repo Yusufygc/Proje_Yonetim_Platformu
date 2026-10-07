@@ -18,11 +18,9 @@ def main() -> int:
             "-m",
             "mypy",
             "--ignore-missing-imports",
-            "--follow-imports=silent",
-            str(root / "core" / "managers" / "backup_manager.py"),
-            str(root / "core" / "managers" / "secret_manager.py"),
-            str(root / "infrastructure" / "database" / "alembic_runner.py"),
-            str(root / "domain" / "dtos" / "forms.py"),
+            *(str(root / package) for package in (
+                "app", "controllers", "core", "domain", "infrastructure", "services", "presentation/viewmodels",
+            )),
         ],
     ]
     for command in checks:

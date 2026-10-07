@@ -69,7 +69,6 @@ Bileşenler arası iletişim `EventBus` üzerinden sağlanır; bağımlılıklar
 | Veritabanı | SQLite | — |
 | Python | CPython | 3.10+ |
 | EXE paketleme | PyInstaller | 6.0+ |
-| Kimlik bilgisi depolama | keyring | 25.0+ |
 | Sesli komut (STT) | Vosk (çevrimdışı) | 0.3+ |
 | Ses yakalama | sounddevice | 0.4+ |
 | Linting | ruff | 0.6+ |
@@ -226,7 +225,7 @@ mypy .
 pytest
 
 # Tüm kontroller
-python quality.py
+python scripts/quality.py
 ```
 
 ### Yeni migrasyon oluşturma

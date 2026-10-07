@@ -9,7 +9,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.managers.backup_manager import BackupManager
 from core.managers.log_manager import install_global_exception_hook, setup_logging
-from core.managers.secret_manager import SecretManager
 from core.workers.worker import Worker
 from infrastructure.database.alembic_runner import HEAD_REVISION
 
@@ -110,31 +109,6 @@ def test_startup_backup_when_data_only_in_wal_should_include_it(tmp_path):
     with sqlite3.connect(backup) as restored:
         assert restored.execute("SELECT label FROM sample").fetchall() == [("wal-only",)]
     live.close()
-
-
-def test_secret_manager_uses_keyring(monkeypatch):
-    store: dict[tuple[str, str], str] = {}
-
-    class FakeKeyring:
-        @staticmethod
-        def set_password(service, key, value):
-            store[(service, key)] = value
-
-        @staticmethod
-        def get_password(service, key):
-            return store.get((service, key))
-
-        @staticmethod
-        def delete_password(service, key):
-            store.pop((service, key), None)
-
-    monkeypatch.setitem(sys.modules, "keyring", FakeKeyring)
-    manager = SecretManager(service_name="test-service")
-
-    manager.set_secret("token", "abc")
-    assert manager.get_secret("token") == "abc"
-    manager.delete_secret("token")
-    assert manager.get_secret("token") is None
 
 
 def test_memory_migration_stamps_alembic_head(test_db):

@@ -32,7 +32,6 @@ a = Analysis(
         "alembic.runtime.migration",
         "alembic.operations",
         "alembic.script",
-        "keyring.backends.Windows",
         "sqlalchemy.dialects.sqlite",
         "sqlalchemy.sql.default_comparator",
         "logging.config",
