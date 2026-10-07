@@ -189,6 +189,42 @@ def test_project_viewmodel_crud_and_dialog_state(qapp: QApplication, container: 
     QThreadPool.globalInstance().waitForDone(2000)
 
 
+def test_project_viewmodel_add_output_when_title_given_should_list_it_by_caption(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    project = container.services.project.create_project(title="Çıktı projesi")
+    pvm = ProjectViewModel(container, parent=qapp)
+    pvm.selectProject(project.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+
+    pvm.addOutput("Sürüm notları", "C:/docs/notes.md")
+
+    assert [o["title"] for o in pvm.selectedOutputs] == ["Sürüm notları"]
+    assert pvm.selectedOutputs[0]["file_path"] == "C:/docs/notes.md"
+
+
+def test_project_viewmodel_update_note_when_edited_should_reload_notes(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    project = container.services.project.create_project(title="Not projesi")
+    pvm = ProjectViewModel(container, parent=qapp)
+    pvm.selectProject(project.id)
+    pvm.createNote("Eski başlık", "İçerik")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    note_id = pvm.selectedNotes[0]["id"]
+
+    pvm.updateNote(note_id, "Yeni başlık", "Yeni içerik")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert [(n["title"], n["body"]) for n in pvm.selectedNotes] == [("Yeni başlık", "Yeni içerik")]
+
+
 def test_dashboard_viewmodel_stats(qapp: QApplication, container: DIContainer) -> None:
     dvm = DashboardViewModel(container.dashboard_controller, parent=qapp)
     assert isinstance(dvm.totalProjects, int)
