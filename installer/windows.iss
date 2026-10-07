@@ -1,5 +1,5 @@
 #define MyAppName "Proje Takip Platformu"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "0.1.1"
 #define MyAppExeName "ProjeTakipPlatformu.exe"
 
 [Setup]

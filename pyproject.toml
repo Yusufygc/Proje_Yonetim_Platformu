@@ -1,6 +1,6 @@
 [project]
 name = "proje-takip-platformu"
-version = "0.1.0"
+version = "0.1.1"
 description = "Proje Yönetim ve Takip Platformu V2"
 authors = [
     { name = "ProjeTakip Team" }
