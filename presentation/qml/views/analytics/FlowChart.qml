@@ -36,12 +36,16 @@ AppCard {
         function onThemeChanged() { chart.requestPaint() }
     }
 
+    // Uçlardaki noktalar ve çizgi kalınlığı kırpılmasın diye çizim alanının iki yanında pay bırakılır.
+    readonly property int plotPad: 10
+
     function xAt(index, width) {
-        return series.length <= 1 ? width / 2 : index * width / (series.length - 1)
+        if (series.length <= 1) return width / 2
+        return plotPad + index * (width - 2 * plotPad) / (series.length - 1)
     }
 
     function yAt(value, height) {
-        return height - 4 - (value / maxValue) * (height - 8)
+        return height - 6 - (value / maxValue) * (height - 12)
     }
 
     Column {
@@ -116,7 +120,8 @@ AppCard {
             Canvas {
                 id: chart
                 x: 28
-                width: parent.width - 28 - 8
+                // Sağda son etiketin (56 px, ortalı) sığacağı boşluk kalır.
+                width: parent.width - 28 - 28
                 height: parent.height - 20
                 visible: root.hasData
 
@@ -129,7 +134,7 @@ AppCard {
                     ctx.lineWidth = 1
                     ctx.strokeStyle = themeBridge.border
                     for (var g = 0; g <= 2; g++) {
-                        var gy = Math.round(4 + g * (height - 8) / 2) + 0.5
+                        var gy = Math.round(6 + g * (height - 12) / 2) + 0.5
                         ctx.beginPath()
                         ctx.moveTo(0, gy)
                         ctx.lineTo(width, gy)

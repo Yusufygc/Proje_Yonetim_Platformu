@@ -70,6 +70,8 @@ import "../../components"
             id: projMenu
             y: projSelectBox.height + 4
             width: Math.max(projSelectBox.width, 280)
+            // Filtre sağ kenarda durur; menü kutunun sağ kenarına hizalanıp sola açılır, pencereden taşmaz.
+            x: projSelectBox.width - width
             padding: 6
 
             background: Rectangle {

@@ -24,7 +24,8 @@ AppCard {
 
     function colorOf(count) {
         var level = levelOf(count)
-        if (level === 0) return themeBridge.surfaceRaised
+        // Boş gün: kart zeminiyle aynı renk olmasın (açık temada surfaceRaised beyaza yakındır).
+        if (level === 0) return themeBridge.border
         var c = Qt.color(themeBridge.accentStart)
         return Qt.rgba(c.r, c.g, c.b, 0.25 + 0.19 * level)
     }
