@@ -54,7 +54,7 @@ Rectangle {
                     }
                     font.pixelSize: Theme.typography.sizeH3
                     font.weight: Theme.typography.weightBold
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                     Layout.fillWidth: true
                 }
 
@@ -70,7 +70,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // Form Kaydırma Alanı
@@ -205,7 +205,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // Alt Butonlar

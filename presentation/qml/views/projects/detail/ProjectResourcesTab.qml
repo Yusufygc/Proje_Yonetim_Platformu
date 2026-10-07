@@ -18,7 +18,7 @@ ColumnLayout {
         Text {
             text: i18nBridge.tr("tab_resources", "Proje Kaynakları:")
             font.pixelSize: 13
-            color: themeBridge.color("text_secondary")
+            color: themeBridge.textSecondary
             Layout.fillWidth: true
         }
 
@@ -49,8 +49,8 @@ ColumnLayout {
                     Layout.fillWidth: true
                     implicitHeight: resourceContentCol.implicitHeight + 16
                     radius: 8
-                    color: themeBridge.color("surface_alt")
-                    border.color: themeBridge.color("border")
+                    color: themeBridge.surfaceAlt
+                    border.color: themeBridge.border
                     border.width: 1
 
                     ColumnLayout {
@@ -86,7 +86,7 @@ ColumnLayout {
                                 text: modelData.title || ""
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
-                                color: themeBridge.color("text_primary")
+                                color: themeBridge.textPrimary
                                 Layout.fillWidth: true
                                 wrapMode: Text.Wrap
                             }
@@ -132,7 +132,7 @@ ColumnLayout {
                 visible: !projectSubitemsViewModel.selectedResources || projectSubitemsViewModel.selectedResources.length === 0
                 text: i18nBridge.tr("no_resources", "Henüz kayıtlı kaynak yok.")
                 font.pixelSize: 12
-                color: themeBridge.color("text_muted")
+                color: themeBridge.textMuted
             }
         }
     }

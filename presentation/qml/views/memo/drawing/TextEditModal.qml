@@ -55,7 +55,7 @@ Item {
                 text: i18nBridge.tr("title_edit_block_text", "Blok Metnini Düzenle")
                 font.pixelSize: Theme.typography.sizeBody
                 font.weight: Font.Medium
-                color: themeBridge.color("text_primary")
+                color: themeBridge.textPrimary
             }
 
             AppTextInput {

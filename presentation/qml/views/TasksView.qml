@@ -37,8 +37,8 @@ Item {
                 Layout.fillWidth: true
                 height: 38
                 radius: Theme.radius.small
-                color: themeBridge.color("surface")
-                border.color: themeBridge.color("border")
+                color: themeBridge.surface
+                border.color: themeBridge.border
 
                 RowLayout {
                     anchors.fill: parent
@@ -51,13 +51,13 @@ Item {
                         Text {
                             text: i18nBridge.tr("stat_total_tasks", "Toplam:")
                             font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
                         Text {
                             text: taskViewModel ? taskViewModel.totalTasks.toString() : "0"
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightBold
-                            color: themeBridge.color("text_primary")
+                            color: themeBridge.textPrimary
                         }
                     }
 
@@ -66,13 +66,13 @@ Item {
                         Text {
                             text: i18nBridge.tr("stat_completed_tasks", "Tamamlanan:")
                             font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
                         Text {
                             text: taskViewModel ? taskViewModel.completedTasks.toString() : "0"
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightBold
-                            color: themeBridge.color("success")
+                            color: themeBridge.success
                         }
                     }
 
@@ -81,7 +81,7 @@ Item {
                         Text {
                             text: i18nBridge.tr("stat_in_progress_tasks", "Devam Eden:")
                             font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
                         Text {
                             text: taskViewModel ? taskViewModel.inProgressTasks.toString() : "0"
@@ -96,13 +96,13 @@ Item {
                         Text {
                             text: i18nBridge.tr("stat_blocked_tasks", "Engellenen:")
                             font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
                         Text {
                             text: taskViewModel ? taskViewModel.blockedTasks.toString() : "0"
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightBold
-                            color: themeBridge.color("danger")
+                            color: themeBridge.danger
                         }
                     }
                 }
@@ -169,7 +169,7 @@ Item {
                         text: i18nBridge.tr("column_wbs_code", "Kod")
                         font.pixelSize: Theme.typography.sizeSmall
                         font.weight: Theme.typography.weightSemiBold
-                        color: themeBridge.color("text_muted")
+                        color: themeBridge.textMuted
                         Layout.preferredWidth: 60
                     }
 
@@ -177,7 +177,7 @@ Item {
                         text: i18nBridge.tr("column_task_title", "Görev Adı")
                         font.pixelSize: Theme.typography.sizeSmall
                         font.weight: Theme.typography.weightSemiBold
-                        color: themeBridge.color("text_muted")
+                        color: themeBridge.textMuted
                         Layout.fillWidth: true
                     }
 
@@ -185,7 +185,7 @@ Item {
                         text: i18nBridge.tr("column_priority", "Öncelik")
                         font.pixelSize: Theme.typography.sizeSmall
                         font.weight: Theme.typography.weightSemiBold
-                        color: themeBridge.color("text_muted")
+                        color: themeBridge.textMuted
                         Layout.preferredWidth: 80
                     }
 
@@ -193,7 +193,7 @@ Item {
                         text: i18nBridge.tr("column_status", "Durum")
                         font.pixelSize: Theme.typography.sizeSmall
                         font.weight: Theme.typography.weightSemiBold
-                        color: themeBridge.color("text_muted")
+                        color: themeBridge.textMuted
                         Layout.preferredWidth: 100
                     }
 
@@ -203,7 +203,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
-                    color: themeBridge.color("border")
+                    color: themeBridge.border
                 }
 
                 // WBS Görev Listesi
@@ -236,7 +236,7 @@ Item {
                             AppIcon {
                                 name: "tasks"
                                 size: 48
-                                color: themeBridge.color("text_muted")
+                                color: themeBridge.textMuted
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
@@ -244,14 +244,14 @@ Item {
                                 text: i18nBridge.tr("tasks_empty_title", "WBS Ağacı Boş")
                                 font.pixelSize: Theme.typography.sizeH3
                                 font.weight: Theme.typography.weightSemiBold
-                                color: themeBridge.color("text_primary")
+                                color: themeBridge.textPrimary
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
                             Text {
                                 text: i18nBridge.tr("tasks_empty_message", "İlk ana görevi ekleyerek WBS hiyerarşisini oluşturun.")
                                 font.pixelSize: Theme.typography.sizeBody
-                                color: themeBridge.color("text_secondary")
+                                color: themeBridge.textSecondary
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
@@ -271,7 +271,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
-                    color: themeBridge.color("border")
+                    color: themeBridge.border
                 }
 
                 // Hızlı Görev Ekleme Satırı

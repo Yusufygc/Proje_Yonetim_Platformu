@@ -80,6 +80,8 @@ Rectangle {
             color: searchMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.12)
             border.width: 1
             border.color: Qt.rgba(1, 1, 1, 0.2)
+            // Kenar çubuğu daralırken genişlik animasyonlu değişir; taşan yazı kutunun dışına çıkmasın.
+            clip: true
 
             Row {
                 anchors.centerIn: parent
@@ -97,7 +99,10 @@ Rectangle {
                     font.pixelSize: 12
                     color: "#FFFFFF"
                     opacity: 0.85
-                    visible: !sidebarRoot.isCollapsed
+                    // Simge (16) + boşluk (8) + iç kenar payı (24) düşülür; sığmayan yazı kısaltılır.
+                    width: Math.min(implicitWidth, Math.max(0, searchBtn.width - 48))
+                    elide: Text.ElideRight
+                    visible: !sidebarRoot.isCollapsed && width > 24
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -277,7 +282,7 @@ Rectangle {
         // Sürüm etiketi
         Text {
             width: parent.width
-            text: "v0.1.0"
+            text: "v" + settingsViewModel.appVersion
             font.pixelSize: 11
             color: themeBridge.textMuted
             horizontalAlignment: Text.AlignHCenter

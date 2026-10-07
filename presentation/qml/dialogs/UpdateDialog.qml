@@ -49,7 +49,7 @@ Rectangle {
                     text: i18nBridge.tr("update_dialog_title", "Yeni güncelleme var")
                     font.pixelSize: Theme.typography.sizeH3
                     font.weight: Theme.typography.weightBold
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                     Layout.fillWidth: true
                 }
             }
@@ -57,7 +57,7 @@ Rectangle {
             Text {
                 text: i18nBridge.tr("update_dialog_message", "Yeni bir sürüm yayınlandı. Şimdi güncellemek ister misiniz?")
                 font.pixelSize: Theme.typography.sizeBody
-                color: themeBridge.color("text_secondary")
+                color: themeBridge.textSecondary
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -67,7 +67,7 @@ Rectangle {
                       + "   →   " + i18nBridge.tr("update_dialog_latest", "Yeni sürüm") + ": v" + updateViewModel.latestVersion
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
-                color: themeBridge.color("text_primary")
+                color: themeBridge.textPrimary
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -84,7 +84,7 @@ Rectangle {
                     width: parent.width
                     text: updateViewModel.releaseNotes
                     font.pixelSize: 12
-                    color: themeBridge.color("text_muted")
+                    color: themeBridge.textMuted
                     wrapMode: Text.Wrap
                 }
             }
@@ -97,7 +97,7 @@ Rectangle {
                 Text {
                     text: i18nBridge.tr("update_downloading", "İndiriliyor... Kurulum sırasında uygulama kapanıp yeniden açılır.")
                     font.pixelSize: 12
-                    color: themeBridge.color("text_muted")
+                    color: themeBridge.textMuted
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }

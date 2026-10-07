@@ -28,14 +28,14 @@ AppCard {
                 AppIcon {
                     name: "ideas"
                     size: 48
-                    color: themeBridge.color("text_muted")
+                    color: themeBridge.textMuted
                     Layout.alignment: Qt.AlignHCenter
                 }
 
                 Text {
                     text: i18nBridge.tr("idea_detail_select_prompt", "Detayları görüntülemek için bir fikir seçin")
                     font.pixelSize: Theme.typography.sizeH3
-                    color: themeBridge.color("text_secondary")
+                    color: themeBridge.textSecondary
                     Layout.alignment: Qt.AlignHCenter
                 }
             }
@@ -57,7 +57,7 @@ AppCard {
                     text: root.idea.title || ""
                     font.pixelSize: Theme.typography.sizeH2
                     font.weight: Theme.typography.weightBold
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
@@ -87,7 +87,7 @@ AppCard {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // İçerik Kaydırma Alanı
@@ -115,13 +115,13 @@ AppCard {
                             text: i18nBridge.tr("label_target_user", "Hedef Kullanıcı")
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightSemiBold
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
 
                         Text {
                             text: root.idea.targetUser || ""
                             font.pixelSize: Theme.typography.sizeBody
-                            color: themeBridge.color("text_primary")
+                            color: themeBridge.textPrimary
                             wrapMode: Text.Wrap
                             Layout.fillWidth: true
                         }
@@ -137,15 +137,15 @@ AppCard {
                             text: i18nBridge.tr("idea_dialog_problem_label", "Çözülen Problem")
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightSemiBold
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
                             implicitHeight: probText.implicitHeight + 20
                             radius: Theme.radius.small
-                            color: themeBridge.color("surface_alt")
-                            border.color: themeBridge.color("border")
+                            color: themeBridge.surfaceAlt
+                            border.color: themeBridge.border
                             border.width: 1
 
                             Text {
@@ -156,7 +156,7 @@ AppCard {
                                 anchors.margins: 10
                                 text: root.idea.problem || ""
                                 font.pixelSize: Theme.typography.sizeBody
-                                color: themeBridge.color("text_primary")
+                                color: themeBridge.textPrimary
                                 wrapMode: Text.Wrap
                             }
                         }
@@ -172,15 +172,15 @@ AppCard {
                             text: i18nBridge.tr("idea_dialog_solution_label", "Önerilen Çözüm")
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightSemiBold
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
                             implicitHeight: solText.implicitHeight + 20
                             radius: Theme.radius.small
-                            color: themeBridge.color("surface_alt")
-                            border.color: themeBridge.color("border")
+                            color: themeBridge.surfaceAlt
+                            border.color: themeBridge.border
                             border.width: 1
 
                             Text {
@@ -191,7 +191,7 @@ AppCard {
                                 anchors.margins: 10
                                 text: root.idea.solution || ""
                                 font.pixelSize: Theme.typography.sizeBody
-                                color: themeBridge.color("text_primary")
+                                color: themeBridge.textPrimary
                                 wrapMode: Text.Wrap
                             }
                         }
@@ -207,13 +207,13 @@ AppCard {
                             text: i18nBridge.tr("label_notes", "Notlar")
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightSemiBold
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
 
                         Text {
                             text: root.idea.notes || ""
                             font.pixelSize: Theme.typography.sizeBody
-                            color: themeBridge.color("text_primary")
+                            color: themeBridge.textPrimary
                             wrapMode: Text.Wrap
                             Layout.fillWidth: true
                         }
@@ -229,7 +229,7 @@ AppCard {
                             text: i18nBridge.tr("label_source_url", "Kaynak URL")
                             font.pixelSize: Theme.typography.sizeSmall
                             font.weight: Theme.typography.weightSemiBold
-                            color: themeBridge.color("text_secondary")
+                            color: themeBridge.textSecondary
                         }
 
                         Text {
@@ -246,7 +246,7 @@ AppCard {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // Alt Eylem Butonları

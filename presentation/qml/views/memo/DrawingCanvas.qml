@@ -15,7 +15,7 @@ Rectangle {
 
     radius: Theme.radius.medium
     color: themeBridge.isDark ? "#1E1E22" : "#FFFFFF"
-    border.color: themeBridge.color("border")
+    border.color: themeBridge.border
     border.width: 1
     clip: true
 

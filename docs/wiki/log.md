@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] FIX | Koyu Tema Renk Hataları
+- **Sarı satır:** Palet alfa değerleri CSS sırasıyla (`#RRGGBBAA`), Qt ise `#AARRGGBB` okuyor; `hover_overlay` (`#FFFFFF0D`) opak sarı çiziliyordu. `ThemeManager.color()` artık çıkışta çeviriyor (`*_alpha` tokenları da düzeldi).
+- **Beyaz çubuk, okunmayan başlık:** `themeBridge.color("...")` slot çağrısı tema değişimini izlemiyordu; açıktan koyuya geçince bu alanlar eski renkte kalıyordu. 147 kullanım bildirimli property'ye çevrildi, tekrarını engelleyen test eklendi.
+- **Kenar çubuğu:** Arama düğmesindeki emoji (yerelleştirme metninden) kaldırıldı; daralırken taşan yazı kısaltılıyor/kırpılıyor. Sürüm etiketi sabit `v0.1.1` yerine `appVersion`'dan okunuyor (`set_version.py` onu güncellemiyordu).
+- **Arayüz:** Ayarlar'daki açık/koyu düğmeleri yalnızca emoji (ipucu metniyle); panodaki son fikirlerde emoji yerine SVG ikon.
+
 ## [2026-10-08] DOCS | Sürüm Yayınlama Süreci ve Kuralı
 - `surum-yayinlama` wiki sayfası eklendi (sürüm numarası, yayın adımları, kontrol listesi, hata/geri alma tablosu, güvenlik).
 - `Project_docs/RULES.md` §8 "Sürüm Yayınlama ve Güncelleme Kuralları" ve `CLAUDE.md` §11 eklendi: tek sürüm kaynağı, yalnızca etiketle yayın, yayınlanmış etiket değişmez, asistan açık istek olmadan etiket/push yapmaz.

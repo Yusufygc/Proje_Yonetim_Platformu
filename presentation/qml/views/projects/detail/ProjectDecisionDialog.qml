@@ -72,7 +72,7 @@ Rectangle {
                           : i18nBridge.tr("decision_dialog_new_title", "Yeni Karar Ekle")
                     font.pixelSize: Theme.typography.sizeH3
                     font.weight: Theme.typography.weightBold
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                     Layout.fillWidth: true
                 }
 
@@ -88,7 +88,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             AppTextInput {
@@ -124,7 +124,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // Alt Butonlar

@@ -35,7 +35,7 @@ Item {
                     text: i18nBridge.tr("ideas_title", "Fikir Havuzu")
                     font.pixelSize: Theme.typography.sizeH2
                     font.weight: Theme.typography.weightBold
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                 }
             }
 
@@ -85,8 +85,8 @@ Item {
 
                     property bool isActive: ideasViewRoot.currentStatusFilter === modelData.value
 
-                    color: isActive ? Theme.accent(themeBridge.currentTheme) : themeBridge.color("surface")
-                    border.color: isActive ? Theme.accent(themeBridge.currentTheme) : themeBridge.color("border")
+                    color: isActive ? Theme.accent(themeBridge.currentTheme) : themeBridge.surface
+                    border.color: isActive ? Theme.accent(themeBridge.currentTheme) : themeBridge.border
                     border.width: 1
 
                     Behavior on color { ColorAnimation { duration: Theme.animation.fast } }
@@ -97,7 +97,7 @@ Item {
                         text: modelData.text
                         font.pixelSize: Theme.typography.sizeSmall
                         font.weight: pill.isActive ? Theme.typography.weightSemiBold : Theme.typography.weightNormal
-                        color: pill.isActive ? "#FFFFFF" : themeBridge.color("text_secondary")
+                        color: pill.isActive ? "#FFFFFF" : themeBridge.textSecondary
                     }
 
                     MouseArea {
@@ -126,7 +126,7 @@ Item {
                     width: 2
                     height: parent.height
                     radius: 1
-                    color: SplitHandle.hovered || SplitHandle.pressed ? Theme.accent(themeBridge.currentTheme) : themeBridge.color("border")
+                    color: SplitHandle.hovered || SplitHandle.pressed ? Theme.accent(themeBridge.currentTheme) : themeBridge.border
                 }
             }
 
@@ -170,7 +170,7 @@ Item {
                                 AppIcon {
                                     name: "ideas"
                                     size: 40
-                                    color: themeBridge.color("text_muted")
+                                    color: themeBridge.textMuted
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 
@@ -178,7 +178,7 @@ Item {
                                     text: i18nBridge.tr("ideas_empty", "Henüz fikir yok")
                                     font.pixelSize: Theme.typography.sizeH3
                                     font.weight: Theme.typography.weightSemiBold
-                                    color: themeBridge.color("text_primary")
+                                    color: themeBridge.textPrimary
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 

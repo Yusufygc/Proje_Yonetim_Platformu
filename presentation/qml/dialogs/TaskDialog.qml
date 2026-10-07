@@ -97,7 +97,7 @@ Rectangle {
                     }
                     font.pixelSize: Theme.typography.sizeH3
                     font.weight: Theme.typography.weightBold
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                     Layout.fillWidth: true
                 }
 
@@ -113,7 +113,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // Form Kaydırılabilir Alan
@@ -210,7 +210,7 @@ Rectangle {
                         text: i18nBridge.tr("label_checklist", "Kontrol Listesi (Checklist)")
                         font.pixelSize: Theme.typography.sizeSmall
                         font.weight: Theme.typography.weightMedium
-                        color: themeBridge.color("text_secondary")
+                        color: themeBridge.textSecondary
                         Layout.topMargin: Theme.spacing.xs
                     }
 
@@ -246,7 +246,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 height: 32
                                 radius: Theme.radius.small
-                                color: themeBridge.color("surface_alt")
+                                color: themeBridge.surfaceAlt
 
                                 RowLayout {
                                     anchors.fill: parent
@@ -264,7 +264,7 @@ Rectangle {
                                         id: chkItemText
                                         text: modelData
                                         font.pixelSize: Theme.typography.sizeSmall
-                                        color: themeBridge.color("text_primary")
+                                        color: themeBridge.textPrimary
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
 
@@ -301,7 +301,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // Alt Buton Çubuğu

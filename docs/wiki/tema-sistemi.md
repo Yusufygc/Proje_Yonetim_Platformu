@@ -4,7 +4,7 @@ Arayüz yalnızca QML'dir; eski Qt Widgets arayüzü ve QSS altyapısı kaldır�
 
 ## Mekanizma
 1. Palet: `resources/themes/*.json` (27+ anahtar: background, surface, accent_*, *_alpha, stage_*, sidebar_* ...). `ThemeManager(themes_dir)` aktif paleti yükler; eksik alpha ve türetilmiş token'lar `derive_alpha_tokens` ile üretilir.
-2. `ThemeBridge` (`presentation/viewmodels/theme_bridge.py`) paleti QML'e açar: `themeBridge.color("key")` ve `themeBridge.surface`, `accentStart`, `textPrimary` gibi property'ler. Tema değişince `theme_changed` sinyali QML bağlamalarını yeniler.
+2. `ThemeBridge` (`presentation/viewmodels/theme_bridge.py`) paleti QML'e açar: `themeBridge.surface`, `accentStart`, `textPrimary`, `border` gibi bildirimli property'ler. Tema değişince `theme_changed` sinyali bu property'leri kullanan QML bağlamalarını yeniler.
 3. QML tarafında renk **asla sabit yazılmaz**; `themeBridge` veya `Theme.qml` yardımcıları kullanılır.
 4. Tema kalıcılığı: bootstrap'te `prefs.load_theme()` → `switch_theme` ([[di-container]]).
 
@@ -24,6 +24,10 @@ Aktif vurgu deseni: **transparent bg + sol border + opak metin rengi**. Alpha ka
 `presentation/viewmodels/settings_viewmodel.py` içindeki `_THEME_PACKAGES` listesi `(id, name, color, dark_stem, light_stem)` sözlükleridir; paket seçimi `PreferenceManager.save_dark_slot/save_light_slot` + `ThemeManager.switch_theme` çağırır, dosya oluşturmaz.
 
 **Geçiş (migration):** `app/di_container.py::_migrate_legacy_theme_slots()` bootstrap'ta çalışır; eski `dark_vurgu_kopya`/`light_vurgu_kopya`/`old_dark`/`old_light`/`yedek_light` tercihlerini yeni paket stem'lerine çevirir (`_LEGACY_THEME_MAP`). Kullanıcı temaları `resources/themes/user/` altında aranır ve otomatik senkronlanmaz.
+
+## QML'de renk kullanımı: iki tuzak
+- **`themeBridge.color("key")` kullanılmaz.** Slot çağrısıdır; QML bağlaması tema değişimini izleyemez. Açık temadan koyu temaya geçince bu çağrıyla boyanan alanlar eski renkte kalır (beyaz zemin, koyu yazı, okunmayan başlık). Bildirimli property kullanılır (`themeBridge.textPrimary` vb.); testi `tests/test_theme_palette.py` içindedir.
+- **Alfa sırası:** Palet CSS sırasıyla (`#RRGGBBAA`) yazılır; Qt `#AARRGGBB` okur. `ThemeManager.color()` çıkışta çevirir (`to_qt_color`). Çevrilmeseydi `hover_overlay` (`#FFFFFF0D`) opak sarı görünürdü.
 
 ## Font
 Font **boyutu** ayarı kaldırıldı: `presentation/dimensions.py::FontFamily.DEFAULT_SIZE = 10` tek doğruluk kaynağı. Kullanıcı yalnızca aileyi seçer; liste 5 küratörlü isimdir (Plus Jakarta Sans, Inter, Roboto, Open Sans, Segoe UI). `FontManager` aile sabitlerini `FontFamily`'den okur. Roboto/Open Sans `scripts/download_fonts.py` ile google/fonts deposundaki tek dosyalık **değişken TTF**'lerden indirilir (woff2 dosyaları Qt'nin Windows DirectWrite arka ucunda reddedildi).

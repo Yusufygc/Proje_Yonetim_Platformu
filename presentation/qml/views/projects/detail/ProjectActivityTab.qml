@@ -13,7 +13,7 @@ ColumnLayout {
     Text {
         text: i18nBridge.tr("tab_activity_title", "Son Etkinlikler:")
         font.pixelSize: 13
-        color: themeBridge.color("text_secondary")
+        color: themeBridge.textSecondary
         Layout.fillWidth: true
     }
 
@@ -38,8 +38,8 @@ ColumnLayout {
                     // metin genişliği açıkça verilir ve satır yüksekliği ondan türetilir.
                     implicitHeight: Math.max(summaryText.implicitHeight, dateText.implicitHeight) + 2 * activityItem.pad
                     radius: 8
-                    color: themeBridge.color("surface_alt")
-                    border.color: themeBridge.color("border")
+                    color: themeBridge.surfaceAlt
+                    border.color: themeBridge.border
                     border.width: 1
 
                     readonly property int pad: 8
@@ -51,7 +51,7 @@ ColumnLayout {
                         width: activityItem.width - dateText.implicitWidth - 3 * activityItem.pad
                         text: modelData.summary
                         font.pixelSize: 12
-                        color: themeBridge.color("text_primary")
+                        color: themeBridge.textPrimary
                         wrapMode: Text.Wrap
                     }
 
@@ -62,7 +62,7 @@ ColumnLayout {
                         y: activityItem.pad
                         text: modelData.created_at
                         font.pixelSize: 11
-                        color: themeBridge.color("text_muted")
+                        color: themeBridge.textMuted
                     }
                 }
             }
@@ -71,7 +71,7 @@ ColumnLayout {
                 visible: !projectSubitemsViewModel.selectedActivity || projectSubitemsViewModel.selectedActivity.length === 0
                 text: i18nBridge.tr("no_activity", "Henüz kayıtlı etkinlik yok.")
                 font.pixelSize: 12
-                color: themeBridge.color("text_muted")
+                color: themeBridge.textMuted
             }
         }
     }

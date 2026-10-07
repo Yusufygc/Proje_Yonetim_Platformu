@@ -40,14 +40,14 @@ AppCard {
                 AppIcon {
                     name: "note-sticky"
                     size: 48
-                    color: themeBridge.color("text_muted")
+                    color: themeBridge.textMuted
                     Layout.alignment: Qt.AlignHCenter
                 }
 
                 Text {
                     text: i18nBridge.tr("memo_select_prompt", "Düzenlemek için bir not seçin veya yeni oluşturun")
                     font.pixelSize: Theme.typography.sizeH3
-                    color: themeBridge.color("text_secondary")
+                    color: themeBridge.textSecondary
                     Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -108,7 +108,7 @@ AppCard {
                     }
                 }
 
-                Rectangle { width: 1; height: 24; color: themeBridge.color("border") }
+                Rectangle { width: 1; height: 24; color: themeBridge.border }
 
                 // Kaydet Butonu
                 AppButton {
@@ -134,7 +134,7 @@ AppCard {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: themeBridge.color("border")
+                color: themeBridge.border
             }
 
             // Sekme 0: Markdown Düzenleyici
@@ -223,7 +223,7 @@ AppCard {
                     Text {
                         text: root.memo.updatedAt ? (i18nBridge.tr("label_last_modified", "Son Değişiklik:") + " " + root.memo.updatedAt) : ""
                         font.pixelSize: Theme.typography.sizeSmall
-                        color: themeBridge.color("text_muted")
+                        color: themeBridge.textMuted
                     }
                 }
 
@@ -238,7 +238,7 @@ AppCard {
                     TextArea {
                         id: bodyInput
                         placeholderText: i18nBridge.tr("memo_markdown_placeholder", "Notlarınızı Markdown formatında buraya yazın (örn: # Başlık, **kalın**, - liste)...")
-                        color: themeBridge.color("text_primary")
+                        color: themeBridge.textPrimary
                         font.pixelSize: Theme.typography.sizeBody
                         font.family: Theme.typography.fontFamily
                         textFormat: TextEdit.PlainText
@@ -282,7 +282,7 @@ AppCard {
                     textFormat: Text.MarkdownText
                     font.pixelSize: Theme.typography.sizeBody
                     font.family: Theme.typography.fontFamily
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                     wrapMode: Text.Wrap
                     lineHeight: 1.4
                 }

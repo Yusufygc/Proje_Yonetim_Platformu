@@ -18,7 +18,7 @@ ColumnLayout {
         Text {
             text: i18nBridge.tr("tab_notes", "Proje Notları:")
             font.pixelSize: 13
-            color: themeBridge.color("text_secondary")
+            color: themeBridge.textSecondary
             Layout.fillWidth: true
         }
 

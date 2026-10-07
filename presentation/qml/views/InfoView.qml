@@ -364,7 +364,7 @@ ScrollView {
                         }
 
                         Text {
-                            text: "• " + i18nBridge.tr("info_tip_2", "Tüm verileriniz SQLite ile yerel bilgisayarınızda güvendedir; internet bağlantısı gerekmez.")
+                            text: "• " + i18nBridge.tr("info_tip_2", "Tüm verileriniz yerel bilgisayarınızda güvendedir; internet bağlantısı gerekmez.")
                             font.pixelSize: 12
                             color: themeBridge.textSecondary
                             wrapMode: Text.WordWrap

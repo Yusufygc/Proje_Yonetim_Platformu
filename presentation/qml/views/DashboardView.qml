@@ -313,9 +313,10 @@ ScrollView {
                             height: 28
                             spacing: 8
 
-                            Text {
-                                text: "💡"
-                                font.pixelSize: 12
+                            AppIcon {
+                                name: "lightbulb"
+                                size: 14
+                                color: themeBridge.accentStart
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 

@@ -61,3 +61,35 @@ def test_theme_bridge_all_theme_switches(qapp: QApplication) -> None:
         assert bridge.surfaceAlt.startswith("#")
         assert bridge.hoverOverlay.startswith("#")
         assert bridge.background.startswith("#")
+
+
+@pytest.mark.parametrize(
+    ("css_value", "qt_value"),
+    [("#FFFFFF0D", "#0DFFFFFF"), ("#10B98122", "#2210B981"), ("#00000008", "#08000000"), ("#FFF1F2", "#FFF1F2")],
+)
+def test_to_qt_color_when_css_alpha_order_should_convert_to_argb(css_value: str, qt_value: str) -> None:
+    assert ThemeManager.to_qt_color(css_value) == qt_value
+
+
+def test_color_when_dark_theme_hover_overlay_should_not_be_opaque() -> None:
+    mgr = ThemeManager(Path("resources/themes"))
+    mgr.switch_theme("dark")
+
+    # Qt #AARRGGBB okur: ilk iki hane alfa. Opak (FF) olursa üstüne gelinen satır sarı dolar.
+    assert mgr.color("hover_overlay").startswith("#0D")
+
+
+def test_qml_files_when_scanned_should_not_call_non_reactive_theme_color_slot() -> None:
+    """`themeBridge.color("x")` bir slot çağrısıdır; tema değişince QML bağlaması yenilenmez.
+
+    Açık temadan koyu temaya geçince bu çağrılarla boyanan alanlar eski renkte (beyaz zemin,
+    koyu yazı) kalır. Bildirimli özellikler (`themeBridge.surface`, `.textPrimary` ...) kullanılmalı.
+    """
+    qml_root = Path(__file__).parent.parent / "presentation" / "qml"
+    offenders = [
+        str(path.relative_to(qml_root))
+        for path in qml_root.rglob("*.qml")
+        if "themeBridge.color(" in path.read_text(encoding="utf-8")
+    ]
+
+    assert offenders == []

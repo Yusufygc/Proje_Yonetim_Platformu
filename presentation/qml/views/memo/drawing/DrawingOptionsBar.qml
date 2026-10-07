@@ -38,7 +38,7 @@ Flickable {
         Text {
             text: i18nBridge.tr("label_color", "Renk:")
             font.pixelSize: 12
-            color: themeBridge.color("text_muted")
+            color: themeBridge.textMuted
         }
 
         Repeater {
@@ -67,7 +67,7 @@ Flickable {
             }
         }
 
-        Rectangle { width: 1; height: 18; color: themeBridge.color("border") }
+        Rectangle { width: 1; height: 18; color: themeBridge.border }
 
         // Kalınlık Seçimi
         RowLayout {
@@ -98,7 +98,7 @@ Flickable {
             onClicked: bar.fillToggled()
         }
 
-        Rectangle { width: 1; height: 18; color: themeBridge.color("border") }
+        Rectangle { width: 1; height: 18; color: themeBridge.border }
 
         // Görsel Ekle / Arka Planı Kaldır
         AppButton {
@@ -122,7 +122,7 @@ Flickable {
         Text {
             text: bar.helpText()
             font.pixelSize: 11
-            color: themeBridge.color("text_muted")
+            color: themeBridge.textMuted
         }
     }
     function helpText() {

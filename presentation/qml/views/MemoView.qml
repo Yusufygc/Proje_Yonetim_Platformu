@@ -31,7 +31,7 @@ Item {
                     text: i18nBridge.tr("memo_title", "Notlarım")
                     font.pixelSize: Theme.typography.sizeH2
                     font.weight: Theme.typography.weightBold
-                    color: themeBridge.color("text_primary")
+                    color: themeBridge.textPrimary
                 }
             }
 
@@ -72,7 +72,7 @@ Item {
                     width: 2
                     height: parent.height
                     radius: 1
-                    color: SplitHandle.hovered || SplitHandle.pressed ? Theme.accent(themeBridge.currentTheme) : themeBridge.color("border")
+                    color: SplitHandle.hovered || SplitHandle.pressed ? Theme.accent(themeBridge.currentTheme) : themeBridge.border
                 }
             }
 
@@ -116,7 +116,7 @@ Item {
                                 AppIcon {
                                     name: "note-sticky"
                                     size: 40
-                                    color: themeBridge.color("text_muted")
+                                    color: themeBridge.textMuted
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 
@@ -124,7 +124,7 @@ Item {
                                     text: i18nBridge.tr("memo_empty_title", "Henüz not yok")
                                     font.pixelSize: Theme.typography.sizeH3
                                     font.weight: Theme.typography.weightSemiBold
-                                    color: themeBridge.color("text_primary")
+                                    color: themeBridge.textPrimary
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 

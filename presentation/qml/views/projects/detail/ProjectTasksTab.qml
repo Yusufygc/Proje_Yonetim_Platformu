@@ -18,13 +18,13 @@ ColumnLayout {
             text: i18nBridge.tr("tab_tasks_title", "Proje Görevleri:")
             font.pixelSize: 13
             font.weight: Font.DemiBold
-            color: themeBridge.color("text_secondary")
+            color: themeBridge.textSecondary
         }
 
         Text {
             text: "(" + (projectViewModel.selectedTasks ? projectViewModel.selectedTasks.length : 0) + ")"
             font.pixelSize: 12
-            color: themeBridge.color("text_muted")
+            color: themeBridge.textMuted
         }
 
         Item { Layout.fillWidth: true }
@@ -100,8 +100,8 @@ ColumnLayout {
                     width: 18
                     height: 18
                     radius: 4
-                    color: modelData.is_done ? themeBridge.color("success") : "transparent"
-                    border.color: modelData.is_done ? themeBridge.color("success") : themeBridge.color("border")
+                    color: modelData.is_done ? themeBridge.success : "transparent"
+                    border.color: modelData.is_done ? themeBridge.success : themeBridge.border
                     border.width: 1.5
 
                     AppIcon {
@@ -124,7 +124,7 @@ ColumnLayout {
                     visible: modelData.parent_id > 0
                     text: "↳"
                     font.pixelSize: 12
-                    color: themeBridge.color("text_muted")
+                    color: themeBridge.textMuted
                 }
 
                 // Görev Başlığı
@@ -133,7 +133,7 @@ ColumnLayout {
                     font.pixelSize: 12
                     font.strikeout: modelData.is_done
                     font.weight: Font.Medium
-                    color: modelData.is_done ? themeBridge.color("text_muted") : themeBridge.color("text_primary")
+                    color: modelData.is_done ? themeBridge.textMuted : themeBridge.textPrimary
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                 }
@@ -181,7 +181,7 @@ ColumnLayout {
                     visible: !!modelData.due_date
                     text: modelData.due_date || ""
                     font.pixelSize: 11
-                    color: themeBridge.color("text_muted")
+                    color: themeBridge.textMuted
                 }
 
                 // Silme Butonu
@@ -201,7 +201,7 @@ ColumnLayout {
             visible: !projectViewModel.selectedTasks || projectViewModel.selectedTasks.length === 0
             text: i18nBridge.tr("no_tasks", "Bu projede henüz kayıtlı görev yok.")
             font.pixelSize: 12
-            color: themeBridge.color("text_muted")
+            color: themeBridge.textMuted
         }
     }
 }

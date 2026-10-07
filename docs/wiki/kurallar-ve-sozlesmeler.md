@@ -12,7 +12,7 @@
 Sürüm tek kaynaktan (`APP_VERSION`) `scripts/set_version.py` ile değişir; yayın yalnızca `vX.Y.Z` etiketiyle olur ve etiket sürümle birebir aynı olmalıdır. Yayınlanmış etiket taşınmaz; asistanlar açık istek olmadan etiket oluşturmaz/push etmez. RULES.md §8. Detay: [[surum-yayinlama]].
 
 ## Tema sözleşmesi
-Renk yalnızca `ThemeManager`/`ThemeBridge` paletinden gelir (`themeBridge.color("key")`); QML dosyalarına sabit renk yazılmaz. Detay: [[tema-sistemi]].
+Renk yalnızca `ThemeManager`/`ThemeBridge` paletinden gelir (`themeBridge.textPrimary`, `themeBridge.surface` gibi bildirimli property'ler; `themeBridge.color("key")` slotu tema değişince yenilenmediği için kullanılmaz); QML dosyalarına sabit renk yazılmaz. Detay: [[tema-sistemi]].
 
 ## L10N sözleşmesi
 UI metni `presentation.utils.i18n.tr(key, default)` ile. Hardcoded Türkçe literal ratchet testiyle engellenir; bilinçli veri sabiti `# l10n: data`. Detay: [[l10n-string-yonetimi]].

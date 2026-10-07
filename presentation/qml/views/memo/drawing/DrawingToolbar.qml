@@ -68,7 +68,7 @@ Flickable {
             }
         }
 
-        Rectangle { width: 1; height: 18; color: themeBridge.color("border") }
+        Rectangle { width: 1; height: 18; color: themeBridge.border }
 
         // ── Çizim Araçları Grubu ──
         RowLayout {
@@ -175,7 +175,7 @@ Flickable {
 
         Item { Layout.fillWidth: true }
 
-        Rectangle { width: 1; height: 18; color: themeBridge.color("border") }
+        Rectangle { width: 1; height: 18; color: themeBridge.border }
 
         // Geri Al / İleri Al
         AppButton {

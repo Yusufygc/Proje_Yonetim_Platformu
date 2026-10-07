@@ -69,7 +69,10 @@ class ThemeManager(QObject):
         return self._current_theme
 
     def color(self, key: str) -> str:
-        """Palet sözlüğünden renk kodu döndürür."""
+        """Palet sözlüğünden Qt'nin anladığı biçimde renk kodu döndürür."""
+        return self.to_qt_color(self._raw_color(key))
+
+    def _raw_color(self, key: str) -> str:
         if key in self._palette:
             return str(self._palette[key])
         if key == "surface_alt":
@@ -78,6 +81,17 @@ class ThemeManager(QObject):
             bg = str(self._palette.get("background", "#000000"))
             return "#FFFFFF12" if bg[:2] in ["#0", "#1", "#2"] else "#0000000A"
         return str(self._palette.get(key, "#FFFFFF"))
+
+    @staticmethod
+    def to_qt_color(value: str) -> str:
+        """Paletteki CSS sırası `#RRGGBBAA` değerini Qt'nin `#AARRGGBB` sırasına çevirir.
+
+        Çevrilmezse QML `#FFFFFF0D` değerini opak sarı okur (alfa=FF, mavi=0D); yarı saydam
+        üstü-gelince ve `*_alpha` tokenları yanlış renkte görünür.
+        """
+        if len(value) == 9 and value.startswith("#"):
+            return "#" + value[7:9] + value[1:7]
+        return value
 
     @staticmethod
     def derive_alpha_tokens(palette: dict[str, str]) -> dict[str, str]:

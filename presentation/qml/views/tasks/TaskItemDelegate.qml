@@ -17,7 +17,7 @@ Rectangle {
 
     color: {
         if (isSelected) return Theme.accentAlpha(themeBridge.currentTheme, 0.15)
-        if (isHovered) return themeBridge.color("hover_overlay")
+        if (isHovered) return themeBridge.hoverOverlay
         return "transparent"
     }
 
@@ -65,7 +65,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: model.isExpanded ? "▼" : "▶"
                 font.pixelSize: 10
-                color: themeBridge.color("text_secondary")
+                color: themeBridge.textSecondary
             }
 
             MouseArea {
@@ -89,8 +89,8 @@ Rectangle {
             width: 18
             height: 18
             radius: 4
-            color: model.status === "DONE" ? themeBridge.color("success") : "transparent"
-            border.color: model.status === "DONE" ? themeBridge.color("success") : themeBridge.color("border")
+            color: model.status === "DONE" ? themeBridge.success : "transparent"
+            border.color: model.status === "DONE" ? themeBridge.success : themeBridge.border
             border.width: 1.5
 
             AppIcon {
@@ -130,7 +130,7 @@ Rectangle {
             text: model.title
             font.pixelSize: Theme.typography.sizeBody
             font.strikeout: model.status === "DONE"
-            color: model.status === "DONE" ? themeBridge.color("text_muted") : themeBridge.color("text_primary")
+            color: model.status === "DONE" ? themeBridge.textMuted : themeBridge.textPrimary
             Layout.fillWidth: true
             elide: Text.ElideRight
 
@@ -152,8 +152,8 @@ Rectangle {
             implicitWidth: chkLayout.implicitWidth + 10
             implicitHeight: 20
             radius: 10
-            color: themeBridge.color("surface_alt")
-            border.color: themeBridge.color("border")
+            color: themeBridge.surfaceAlt
+            border.color: themeBridge.border
 
             RowLayout {
                 id: chkLayout
@@ -163,14 +163,14 @@ Rectangle {
                 AppIcon {
                     name: "check"
                     size: 10
-                    color: model.checklistDone === model.checklistTotal ? themeBridge.color("success") : themeBridge.color("text_secondary")
+                    color: model.checklistDone === model.checklistTotal ? themeBridge.success : themeBridge.textSecondary
                 }
 
                 Text {
                     text: model.checklistDone + "/" + model.checklistTotal
                     font.pixelSize: 10
                     font.weight: Theme.typography.weightMedium
-                    color: themeBridge.color("text_secondary")
+                    color: themeBridge.textSecondary
                 }
             }
         }

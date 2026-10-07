@@ -35,7 +35,7 @@ Rectangle {
         return palette[idx]
     }
 
-    border.color: isSelected ? Theme.accent(themeBridge.currentTheme) : (isHovered ? themeBridge.color("border") : "transparent")
+    border.color: isSelected ? Theme.accent(themeBridge.currentTheme) : (isHovered ? themeBridge.border : "transparent")
     border.width: isSelected ? 2 : 1
 
     Behavior on border.color { ColorAnimation { duration: Theme.animation.fast } }
@@ -63,7 +63,7 @@ Rectangle {
                 text: model.title || i18nBridge.tr("untitled_note", "İsimsiz Not")
                 font.pixelSize: Theme.typography.sizeBody
                 font.weight: Theme.typography.weightSemiBold
-                color: themeBridge.color("text_primary")
+                color: themeBridge.textPrimary
                 Layout.fillWidth: true
                 elide: Text.ElideRight
             }
@@ -92,7 +92,7 @@ Rectangle {
         Text {
             text: root.getCleanSummary(model.body)
             font.pixelSize: Theme.typography.sizeSmall
-            color: themeBridge.color("text_secondary")
+            color: themeBridge.textSecondary
             Layout.fillWidth: true
             wrapMode: Text.Wrap
             elide: Text.ElideRight
@@ -105,7 +105,7 @@ Rectangle {
         Text {
             text: model.updatedAt || ""
             font.pixelSize: 11
-            color: themeBridge.color("text_muted")
+            color: themeBridge.textMuted
             Layout.fillWidth: true
         }
     }

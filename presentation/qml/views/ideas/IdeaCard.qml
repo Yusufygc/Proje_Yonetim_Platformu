@@ -16,11 +16,11 @@ Rectangle {
 
     color: {
         if (isSelected) return Theme.accentAlpha(themeBridge.currentTheme, 0.15)
-        if (isHovered) return themeBridge.color("surface_alt")
-        return themeBridge.color("surface")
+        if (isHovered) return themeBridge.surfaceAlt
+        return themeBridge.surface
     }
 
-    border.color: isSelected ? Theme.accent(themeBridge.currentTheme) : themeBridge.color("border")
+    border.color: isSelected ? Theme.accent(themeBridge.currentTheme) : themeBridge.border
     border.width: isSelected ? 1.5 : 1
 
     Behavior on color { ColorAnimation { duration: Theme.animation.fast } }
@@ -85,7 +85,7 @@ Rectangle {
             font.pixelSize: Theme.typography.sizeBody
             font.weight: Theme.typography.weightSemiBold
             font.strikeout: model.status === "CONVERTED"
-            color: model.status === "CONVERTED" ? themeBridge.color("text_muted") : themeBridge.color("text_primary")
+            color: model.status === "CONVERTED" ? themeBridge.textMuted : themeBridge.textPrimary
             Layout.fillWidth: true
             elide: Text.ElideRight
         }
@@ -94,7 +94,7 @@ Rectangle {
         Text {
             text: model.targetUser ? (i18nBridge.tr("label_target_user", "Hedef:") + " " + model.targetUser) : (model.problem || "")
             font.pixelSize: Theme.typography.sizeSmall
-            color: themeBridge.color("text_secondary")
+            color: themeBridge.textSecondary
             Layout.fillWidth: true
             elide: Text.ElideRight
         }
