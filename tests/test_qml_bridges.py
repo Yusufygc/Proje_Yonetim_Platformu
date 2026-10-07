@@ -37,8 +37,8 @@ from presentation.viewmodels.archive_viewmodel import ArchiveViewModel
 from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel
 from presentation.viewmodels.i18n_bridge import I18nBridge
 from presentation.viewmodels.icon_provider import IconImageProvider
-from presentation.viewmodels.idea_list_model import IdeaListModel
 from presentation.viewmodels.idea_dialog_viewmodel import IdeaDialogViewModel
+from presentation.viewmodels.idea_list_model import IdeaListModel
 from presentation.viewmodels.idea_viewmodel import IdeaViewModel
 from presentation.viewmodels.memo_list_model import MemoListModel
 from presentation.viewmodels.memo_viewmodel import MemoViewModel
@@ -48,8 +48,8 @@ from presentation.viewmodels.project_subitems_viewmodel import ProjectSubitemsVi
 from presentation.viewmodels.project_viewmodel import ProjectViewModel
 from presentation.viewmodels.search_viewmodel import SearchViewModel
 from presentation.viewmodels.settings_viewmodel import SettingsViewModel
-from presentation.viewmodels.task_list_model import TaskListModel
 from presentation.viewmodels.task_dialog_viewmodel import TaskDialogViewModel
+from presentation.viewmodels.task_list_model import TaskListModel
 from presentation.viewmodels.task_viewmodel import TaskViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
 from presentation.viewmodels.voice_bridge import VoiceBridge
@@ -801,6 +801,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
 
 def test_window_geometry_persistence_and_centering(qapp: QApplication, container: DIContainer) -> None:
     from PySide6.QtQuick import QQuickWindow  # noqa: PLC0415
+
     from presentation.window_geometry import setup_window_geometry  # noqa: PLC0415
 
     prefs = container.prefs
@@ -831,6 +832,7 @@ def test_window_geometry_persistence_and_centering(qapp: QApplication, container
 
 def test_fit_rect_to_screen_when_saved_at_screen_top_should_leave_room_for_title_bar() -> None:
     from PySide6.QtCore import QRect  # noqa: PLC0415
+
     from presentation.window_geometry import fit_rect_to_screen  # noqa: PLC0415
 
     avail = QRect(0, 0, 1920, 1040)
@@ -844,6 +846,7 @@ def test_fit_rect_to_screen_when_saved_at_screen_top_should_leave_room_for_title
 
 def test_fit_rect_to_screen_when_saved_below_screen_should_pull_back_inside() -> None:
     from PySide6.QtCore import QRect  # noqa: PLC0415
+
     from presentation.window_geometry import fit_rect_to_screen  # noqa: PLC0415
 
     avail = QRect(0, 0, 1366, 728)
@@ -885,9 +888,11 @@ def test_project_viewmodel_tasks_and_stage_progress(qapp: QApplication, containe
 
 def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContainer) -> None:
     import json
+
     from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent
-    from presentation.viewmodels.theme_bridge import ThemeBridge
+
     from presentation.viewmodels.i18n_bridge import I18nBridge
+    from presentation.viewmodels.theme_bridge import ThemeBridge
 
     engine = QQmlApplicationEngine(parent=qapp)
     tb = ThemeBridge(container.theme, container.prefs, parent=qapp)

@@ -10,9 +10,9 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 
 from app import config
-from presentation.viewmodels.qt_properties import variant_list_property
 from presentation.dimensions import FontFamily
 from presentation.utils.i18n import tr
+from presentation.viewmodels.qt_properties import variant_list_property
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer

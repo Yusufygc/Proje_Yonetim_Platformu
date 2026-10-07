@@ -1,7 +1,7 @@
 """Görev ve checklist öğesi veri erişim katmanı."""
 from __future__ import annotations
 
-from typing import Optional, Any
+from typing import Any, Optional
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload

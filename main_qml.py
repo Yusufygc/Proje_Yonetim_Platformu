@@ -25,11 +25,11 @@ if getattr(sys, "frozen", False) and sys.platform == "win32":
         if _d.exists():
             os.add_dll_directory(str(_d))
 
+from PySide6.QtQuick import QQuickWindow  # noqa: E402
+
 from app import config  # noqa: E402
 from app.di_container import DIContainer, OnboardingService  # noqa: E402
 from core.logger import setup_global_exception_handler, setup_logging  # noqa: E402
-from PySide6.QtQuick import QQuickWindow  # noqa: E402
-
 from presentation.window_geometry import setup_window_geometry  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -96,7 +96,9 @@ def run_qml_app() -> int:
     from presentation.viewmodels.idea_dialog_viewmodel import IdeaDialogViewModel  # noqa: PLC0415
     from presentation.viewmodels.idea_viewmodel import IdeaViewModel  # noqa: PLC0415
     from presentation.viewmodels.memo_viewmodel import MemoViewModel  # noqa: PLC0415
-    from presentation.viewmodels.project_subitems_viewmodel import ProjectSubitemsViewModel  # noqa: PLC0415
+    from presentation.viewmodels.project_subitems_viewmodel import (
+        ProjectSubitemsViewModel,  # noqa: PLC0415
+    )
     from presentation.viewmodels.project_viewmodel import ProjectViewModel  # noqa: PLC0415
     from presentation.viewmodels.search_viewmodel import SearchViewModel  # noqa: PLC0415
     from presentation.viewmodels.settings_viewmodel import SettingsViewModel  # noqa: PLC0415

@@ -7,7 +7,12 @@ from typing import Any
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
-from core.text_normalization import LIKE_ESCAPE, SQL_FOLD_FUNCTION, escape_like, normalize_search_text
+from core.text_normalization import (
+    LIKE_ESCAPE,
+    SQL_FOLD_FUNCTION,
+    escape_like,
+    normalize_search_text,
+)
 from domain.models.idea import Idea
 from domain.models.project import Project
 from domain.models.task import Task

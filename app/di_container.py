@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from services.speech.speech_to_text_service import SpeechToTextService
 
 from app import config
+from app.di_registries import ControllerRegistry, RepositoryRegistry, ServiceRegistry
 from core.events.event_bus import EventBus
 from core.managers.backup_manager import BackupManager
 from core.managers.font_manager import FontManager
@@ -25,7 +26,6 @@ from core.managers.log_manager import install_global_exception_hook, setup_loggi
 from core.managers.preference_manager import PreferenceManager
 from core.managers.string_manager import StringManager
 from core.managers.theme_manager import ThemeManager
-from app.di_registries import ControllerRegistry, RepositoryRegistry, ServiceRegistry
 from infrastructure.database.db_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)

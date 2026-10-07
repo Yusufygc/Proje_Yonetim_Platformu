@@ -14,11 +14,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from controllers.analytics_controller import AnalyticsController
     from controllers.dashboard_controller import DashboardController
-    from controllers.memo_controller import MemoController
-    from infrastructure.repositories.memo_repository import MemoRepository
-    from services.memo_service import MemoService
     from controllers.decision_controller import DecisionController
     from controllers.idea_controller import IdeaController
+    from controllers.memo_controller import MemoController
     from controllers.note_controller import NoteController
     from controllers.project_controller import ProjectController
     from controllers.resource_controller import ResourceController
@@ -32,6 +30,7 @@ if TYPE_CHECKING:
     from infrastructure.repositories.attachment_repository import AttachmentRepository
     from infrastructure.repositories.decision_repository import DecisionRepository
     from infrastructure.repositories.idea_repository import IdeaRepository
+    from infrastructure.repositories.memo_repository import MemoRepository
     from infrastructure.repositories.note_repository import NoteRepository
     from infrastructure.repositories.project_idea_repository import ProjectIdeaRepository
     from infrastructure.repositories.project_repository import ProjectRepository
@@ -40,18 +39,19 @@ if TYPE_CHECKING:
     from infrastructure.repositories.stage_repository import StageRepository
     from infrastructure.repositories.task_repository import TaskRepository
     from infrastructure.repositories.workflow_stage_repository import WorkflowStageRepository
+    from services.analytics_service import AnalyticsService
     from services.dashboard_service import DashboardService
     from services.decision_service import DecisionService
     from services.export_service import ExportService
     from services.idea_service import IdeaService
+    from services.memo_service import MemoService
     from services.note_service import NoteService
     from services.project_service import ProjectService
     from services.resource_service import ResourceService
     from services.search_service import SearchService
-    from services.stage_service import StageService
-    from services.analytics_service import AnalyticsService
-    from services.task_service import TaskService
     from services.speech.speech_to_text_service import SpeechToTextService
+    from services.stage_service import StageService
+    from services.task_service import TaskService
 
 
 class RepositoryRegistry:
@@ -216,8 +216,8 @@ class ServiceRegistry:
 
     @cached_property
     def speech_to_text(self) -> SpeechToTextService:
-        from services.speech.speech_to_text_service import SpeechToTextService
         from app.config import VOSK_TR_MODEL_DIR
+        from services.speech.speech_to_text_service import SpeechToTextService
         return SpeechToTextService(model_dir=VOSK_TR_MODEL_DIR)
 
 

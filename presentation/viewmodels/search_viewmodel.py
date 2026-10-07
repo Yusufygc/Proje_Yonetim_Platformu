@@ -8,8 +8,8 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from core.events.app_events import PROJECT_DETAIL_REQUESTED
 from presentation.utils.i18n import tr
-from presentation.viewmodels.qt_properties import variant_list_property
 from presentation.viewmodels.navigation_bridge import NavigationBridge
+from presentation.viewmodels.qt_properties import variant_list_property
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer

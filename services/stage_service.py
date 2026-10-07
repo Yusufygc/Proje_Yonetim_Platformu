@@ -8,9 +8,9 @@ import logging
 from datetime import datetime, timezone
 
 from core.exceptions.stage_exceptions import StageNotFoundError, StageValidationError
+from domain.enums.project_status import ProjectStatus
 from domain.enums.stage_status import StageStatus
 from domain.models.project_stage import ProjectStage
-from domain.enums.project_status import ProjectStatus
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.project_repository import ProjectRepository
 from infrastructure.repositories.stage_repository import StageRepository

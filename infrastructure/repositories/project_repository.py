@@ -4,9 +4,8 @@ Ham SQL yasaktır; tüm sorgular SQLAlchemy ORM ile yapılır (RULES.md).
 """
 from __future__ import annotations
 
-from typing import Any
-
 import logging
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload

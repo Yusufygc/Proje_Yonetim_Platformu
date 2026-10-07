@@ -4,8 +4,8 @@ Revision ID: 0005
 Revises: 0004
 Create Date: 2026-06-30
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "0005_add_memo_drawing_data"
 down_revision = "0004_create_memos_table"

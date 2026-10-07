@@ -13,11 +13,10 @@ from PySide6.QtCore import (
     Signal,
     Slot,
 )
+from PySide6.QtGui import QTextDocument
 
 from core.text_normalization import normalize_search_text
 from domain.models.memo import Memo
-
-from PySide6.QtGui import QTextDocument
 
 logger = logging.getLogger(__name__)
 

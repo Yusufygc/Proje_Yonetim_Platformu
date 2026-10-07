@@ -4,8 +4,8 @@ Revision ID: 0004
 Revises: 0003
 Create Date: 2026-06-30
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "0004_create_memos_table"
 down_revision = "0003_drop_project_unused_fields"

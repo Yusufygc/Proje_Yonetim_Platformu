@@ -17,6 +17,7 @@ from domain.enums.task_type import TaskType
 from infrastructure.database.db_manager import DatabaseManager
 from infrastructure.repositories.activity_log_repository import ActivityLogRepository
 from infrastructure.repositories.idea_repository import IdeaRepository
+from infrastructure.repositories.memo_repository import MemoRepository
 from infrastructure.repositories.note_repository import NoteRepository
 from infrastructure.repositories.project_idea_repository import ProjectIdeaRepository
 from infrastructure.repositories.project_repository import ProjectRepository
@@ -24,7 +25,6 @@ from infrastructure.repositories.project_tag_repository import ProjectTagReposit
 from infrastructure.repositories.stage_repository import StageRepository
 from infrastructure.repositories.task_repository import TaskRepository
 from infrastructure.repositories.workflow_stage_repository import WorkflowStageRepository
-from infrastructure.repositories.memo_repository import MemoRepository
 from services.analytics_service import AnalyticsService
 from services.export_service import ExportService
 from services.idea_service import IdeaService
