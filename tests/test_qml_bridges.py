@@ -927,6 +927,16 @@ def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContaine
     assert len(json.loads(canvas.getDrawingJson())) == 0
     assert canvas.property("canUndo") is True
 
+    # 4. Mod ve renk seçimi: mod değişince uyumsuz araç sıfırlanır, renk seçmek silgiden çıkarır
+    canvas.selectMode("flowchart")
+    assert canvas.property("activeTool") == "flow_process"
+    canvas.selectMode("draw")
+    assert canvas.property("activeTool") == "pen"
+    canvas.setProperty("activeTool", "eraser")
+    canvas.selectColor("#3B82F6")
+    assert canvas.property("activeTool") == "pen"
+    assert canvas.property("currentColor") == "#3B82F6"
+
     canvas.undo()
     assert len(json.loads(canvas.getDrawingJson())) == 5
     assert canvas.property("canRedo") is True

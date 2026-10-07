@@ -1,9 +1,14 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] REFACTOR | DrawingCanvas Bölündü
+- **`DrawingCanvas.qml`** 1325 → 399 satır. Araç çubukları, metin düzenleme penceresi ve çizim mantığı `presentation/qml/views/memo/drawing/` altına taşındı (ayrıntı: `notlar-modulu`).
+- Dışa açık API (`loadDrawingJson`, `getDrawingJson`, `undo`, `redo`, `clearCanvas`, `setBackgroundImage`) değişmedi; kullanılmayan `isEraser`, `lines`, `currentLine` takma adları kaldırıldı.
+- **Doğrulama:** Bölmeden önce ve sonra 11 öğe türü, 11 canlı önizleme, şablon ve geri al/yinele sahneleri yazılım çizicisiyle piksel piksel karşılaştırıldı; özetler özdeş çıktı. Bu karşılaştırma geçici betikle yapıldı, depoya eklenmedi (font/platform farkıyla kırılgan olur). Kalıcı testler saf JS yardımcılarını kapsıyor.
+- Fare ile gerçek sürükleme ve çift tıklama etkileşimi otomatik denenmedi; elle kontrol gerekir.
+
 ## [2026-10-07] REFACTOR | AnalyticsView Bölündü
 - **`AnalyticsView.qml`** 640 → 274 satır. Bileşenler `presentation/qml/views/analytics/` altında: `KpiCard` (beş kopya KPI kartının yerine), `ProjectFilter` (proje açılır menüsü), `TimeSeriesChart` (zaman serisi çubuk grafiği).
 - Dönem düğmeleri ve iki dağılım kartı yapıları farklı olduğundan (öncelik: renk noktası + toplam payı; proje: en büyüğe göre) ortak bileşene çevrilmedi.
-- Açık kalan: `DrawingCanvas.qml` (1325).
 
 ## [2026-10-07] REFACTOR | IdeaViewModel Bölündü
 - **`IdeaViewModel`** 250 → 151 satır, public üye 21 → 10: diyalog durumu ve kaydetme `IdeaDialogViewModel`'e (`ideaDialogViewModel` QML bağlamı) taşındı; `TaskDialogViewModel` ile aynı desen. Fikir önbelleğine `cached_idea()` ile erişilir.

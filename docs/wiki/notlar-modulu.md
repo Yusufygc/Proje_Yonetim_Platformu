@@ -7,7 +7,9 @@ Platform içerisindeki zengin not alma, serbest çizim, şekil ekleme ve algorit
 ## Bileşenler
 - **`MemoViewModel`**: Notlar ve çizim verilerinin yönetimi, kaydedilmesi, sıralanması ve dışa/içe aktarımı. `insertImage(file_path)` metodu ile yerel sistemden resim seçilerek not içeriğine veya çizim tuvaline aktarılmasını sağlar.
 - **`MemoEditor.qml`**: Markdown destekli metin düzenleyici, önizleme ve resim yerleştirme butonları.
-- **`DrawingCanvas.qml`**: HTML5 Canvas tabanlı serbest el çizim, şekil araçları ve algoritma şeması motoru.
+- **`DrawingCanvas.qml`**: HTML5 Canvas tabanlı serbest el çizim, şekil araçları ve algoritma şeması motoru. Durumu (araç, renk, öğeler, geri al/yinele) tutar; dışa yalnızca `loadDrawingJson`/`getDrawingJson` sunar. Parçaları `views/memo/drawing/` altındadır:
+  - `DrawingToolbar.qml`, `DrawingOptionsBar.qml`, `TextEditModal.qml`: durum tutmaz, seçimleri sinyalle bildirir.
+  - `ShapeRenderer.js` (öğe ve canlı önizleme çizimi), `ShapeFactory.js` (sürüklemeden öğe üretimi), `HitTest.js` (çift tıklama isabeti), `FlowchartTemplate.js`, `DrawingSerializer.js`: `.pragma library` saf fonksiyonlardır; testleri `tests/test_drawing_logic.py` içindedir.
 
 ## Çizim ve Şema Yetenekleri
 1. **Temel Çizim Araçları:**
