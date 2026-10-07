@@ -51,8 +51,8 @@ from presentation.viewmodels.settings_viewmodel import SettingsViewModel
 from presentation.viewmodels.task_dialog_viewmodel import TaskDialogViewModel
 from presentation.viewmodels.task_list_model import TaskListModel
 from presentation.viewmodels.task_viewmodel import TaskViewModel
-from presentation.viewmodels.update_viewmodel import UpdateViewModel
 from presentation.viewmodels.theme_bridge import ThemeBridge
+from presentation.viewmodels.update_viewmodel import UpdateViewModel
 from presentation.viewmodels.voice_bridge import VoiceBridge
 
 
