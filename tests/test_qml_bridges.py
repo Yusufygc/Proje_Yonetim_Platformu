@@ -43,6 +43,7 @@ from presentation.viewmodels.memo_list_model import MemoListModel
 from presentation.viewmodels.memo_viewmodel import MemoViewModel
 from presentation.viewmodels.navigation_bridge import NavigationBridge
 from presentation.viewmodels.project_list_model import ProjectListModel
+from presentation.viewmodels.project_subitems_viewmodel import ProjectSubitemsViewModel
 from presentation.viewmodels.project_viewmodel import ProjectViewModel
 from presentation.viewmodels.search_viewmodel import SearchViewModel
 from presentation.viewmodels.settings_viewmodel import SettingsViewModel
@@ -196,13 +197,18 @@ def test_project_viewmodel_add_output_when_title_given_should_list_it_by_caption
 
     project = container.services.project.create_project(title="Çıktı projesi")
     pvm = ProjectViewModel(container, parent=qapp)
+    subitems = ProjectSubitemsViewModel(container, pvm, parent=qapp)
     pvm.selectProject(project.id)
     QThreadPool.globalInstance().waitForDone(2000)
 
-    pvm.addOutput("Sürüm notları", "C:/docs/notes.md")
+    subitems.addOutput("Sürüm notları", "C:/docs/notes.md")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
 
-    assert [o["title"] for o in pvm.selectedOutputs] == ["Sürüm notları"]
-    assert pvm.selectedOutputs[0]["file_path"] == "C:/docs/notes.md"
+    assert [o["title"] for o in subitems.selectedOutputs] == ["Sürüm notları"]
+    assert subitems.selectedOutputs[0]["file_path"] == "C:/docs/notes.md"
 
 
 def test_project_viewmodel_update_note_when_edited_should_reload_notes(
@@ -212,17 +218,20 @@ def test_project_viewmodel_update_note_when_edited_should_reload_notes(
 
     project = container.services.project.create_project(title="Not projesi")
     pvm = ProjectViewModel(container, parent=qapp)
+    subitems = ProjectSubitemsViewModel(container, pvm, parent=qapp)
     pvm.selectProject(project.id)
-    pvm.createNote("Eski başlık", "İçerik")
-    QThreadPool.globalInstance().waitForDone(2000)
-    qapp.processEvents()
-    note_id = pvm.selectedNotes[0]["id"]
+    subitems.createNote("Eski başlık", "İçerik")
+    for _ in range(2):
+        QThreadPool.globalInstance().waitForDone(2000)
+        qapp.processEvents()
+    note_id = subitems.selectedNotes[0]["id"]
 
-    pvm.updateNote(note_id, "Yeni başlık", "Yeni içerik")
-    QThreadPool.globalInstance().waitForDone(2000)
-    qapp.processEvents()
+    subitems.updateNote(note_id, "Yeni başlık", "Yeni içerik")
+    for _ in range(2):
+        QThreadPool.globalInstance().waitForDone(2000)
+        qapp.processEvents()
 
-    assert [(n["title"], n["body"]) for n in pvm.selectedNotes] == [("Yeni başlık", "Yeni içerik")]
+    assert [(n["title"], n["body"]) for n in subitems.selectedNotes] == [("Yeni başlık", "Yeni içerik")]
 
 
 def test_dashboard_viewmodel_stats(qapp: QApplication, container: DIContainer) -> None:
@@ -487,11 +496,12 @@ def test_memo_viewmodel_crud(qapp: QApplication, container: DIContainer) -> None
     assert container.memo_controller.get_sync(memo_id) is None
 
 
-def test_project_viewmodel_decisions_notes_resources(qapp: QApplication, container: DIContainer) -> None:
+def test_project_subitems_viewmodel_decisions_notes_resources(qapp: QApplication, container: DIContainer) -> None:
     from PySide6.QtCore import QThreadPool
 
     proj = container.project_controller._service.create_project("Alt Öğeler Test Projesi")
     pvm = ProjectViewModel(container, parent=qapp)
+    subitems = ProjectSubitemsViewModel(container, pvm, parent=qapp)
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
 
@@ -500,38 +510,38 @@ def test_project_viewmodel_decisions_notes_resources(qapp: QApplication, contain
     qapp.processEvents()
 
     # Karar Ekleme
-    pvm.createDecision("Mimari Karar", "QML Kullanımı", "APPROVED")
+    subitems.createDecision("Mimari Karar", "QML Kullanımı", "ACCEPTED")
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
-    assert len(pvm.selectedDecisions) >= 1
+    assert len(subitems.selectedDecisions) >= 1
 
     # Not Ekleme
-    pvm.createNote("Teknik Not", "Test not içeriği")
+    subitems.createNote("Teknik Not", "Test not içeriği")
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
-    assert len(pvm.selectedNotes) >= 1
+    assert len(subitems.selectedNotes) >= 1
 
     # Kaynak Ekleme
-    pvm.createResource("Qt Docs", "https://doc.qt.io", "DOCUMENT")
+    subitems.createResource("Qt Docs", "https://doc.qt.io", "DOCUMENT")
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
-    assert len(pvm.selectedResources) >= 1
+    assert len(subitems.selectedResources) >= 1
 
     # Karar Silme
-    dec_id = pvm.selectedDecisions[0]["id"]
-    pvm.deleteDecision(dec_id)
+    dec_id = subitems.selectedDecisions[0]["id"]
+    subitems.deleteDecision(dec_id)
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
 
     # Not Silme
-    note_id = pvm.selectedNotes[0]["id"]
-    pvm.deleteNote(note_id)
+    note_id = subitems.selectedNotes[0]["id"]
+    subitems.deleteNote(note_id)
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
 
     # Kaynak Silme
-    res_id = pvm.selectedResources[0]["id"]
-    pvm.deleteResource(res_id)
+    res_id = subitems.selectedResources[0]["id"]
+    subitems.deleteResource(res_id)
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
 
@@ -668,6 +678,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     ib = I18nBridge(container.strings, parent=qapp)
     nb = NavigationBridge(container.prefs, container.event_bus, parent=qapp)
     pv = ProjectViewModel(container, parent=qapp)
+    psv = ProjectSubitemsViewModel(container, pv, parent=qapp)
     dv = DashboardViewModel(container.dashboard_controller, parent=qapp)
     tv = TaskViewModel(container, parent=qapp)
     iv = IdeaViewModel(container, parent=qapp)
@@ -682,6 +693,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     qapp._test_ib = ib  # type: ignore[attr-defined]
     qapp._test_nb = nb  # type: ignore[attr-defined]
     qapp._test_pv = pv  # type: ignore[attr-defined]
+    qapp._test_psv = psv  # type: ignore[attr-defined]
     qapp._test_dv = dv  # type: ignore[attr-defined]
     qapp._test_tv = tv  # type: ignore[attr-defined]
     qapp._test_iv = iv  # type: ignore[attr-defined]
@@ -696,6 +708,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     engine.rootContext().setContextProperty("i18nBridge", ib)
     engine.rootContext().setContextProperty("navBridge", nb)
     engine.rootContext().setContextProperty("projectViewModel", pv)
+    engine.rootContext().setContextProperty("projectSubitemsViewModel", psv)
     engine.rootContext().setContextProperty("dashboardViewModel", dv)
     engine.rootContext().setContextProperty("taskViewModel", tv)
     engine.rootContext().setContextProperty("ideaViewModel", iv)

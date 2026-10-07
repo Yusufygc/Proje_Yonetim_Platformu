@@ -219,7 +219,7 @@ Item {
                     variant: "secondary"
                     text: "GitHub Deposu"
                     iconName: "external-link"
-                    onClicked: projectViewModel.openUrlOrPath(detailRoot.p.github_repo)
+                    onClicked: projectSubitemsViewModel.openUrlOrPath(detailRoot.p.github_repo)
                 }
 
                 AppButton {
@@ -227,7 +227,7 @@ Item {
                     variant: "secondary"
                     text: "Yerel Klasör"
                     iconName: "folder"
-                    onClicked: projectViewModel.openUrlOrPath(detailRoot.p.local_path)
+                    onClicked: projectSubitemsViewModel.openUrlOrPath(detailRoot.p.local_path)
                 }
             }
 
@@ -700,7 +700,7 @@ Item {
                             spacing: 8
 
                             Repeater {
-                                model: projectViewModel.selectedDecisions
+                                model: projectSubitemsViewModel.selectedDecisions
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
                                     implicitHeight: decisionContentCol.implicitHeight + 16
@@ -766,7 +766,7 @@ Item {
                                                 implicitHeight: 22
                                                 visible: modelData.status !== "CANCELLED"
                                                 Layout.alignment: Qt.AlignTop
-                                                onClicked: projectViewModel.deleteDecision(modelData.id)
+                                                onClicked: projectSubitemsViewModel.deleteDecision(modelData.id)
                                             }
                                         }
 
@@ -783,7 +783,7 @@ Item {
                             }
 
                             Text {
-                                visible: !projectViewModel.selectedDecisions || projectViewModel.selectedDecisions.length === 0
+                                visible: !projectSubitemsViewModel.selectedDecisions || projectSubitemsViewModel.selectedDecisions.length === 0
                                 text: i18nBridge.tr("no_decisions", "Henüz kayıtlı karar yok.")
                                 font.pixelSize: 12
                                 color: themeBridge.color("text_muted")
@@ -822,7 +822,7 @@ Item {
                         Layout.fillHeight: true
                         clip: true
                         spacing: 8
-                        model: projectViewModel.selectedNotes
+                        model: projectSubitemsViewModel.selectedNotes
 
                         ScrollBar.vertical: AppScrollBar { }
 
@@ -880,7 +880,7 @@ Item {
                                         implicitHeight: 24
                                         anchors.right: parent.right
                                         anchors.top: parent.top
-                                        onClicked: projectViewModel.deleteNote(modelData.id)
+                                        onClicked: projectSubitemsViewModel.deleteNote(modelData.id)
                                     }
                                 }
 
@@ -897,7 +897,7 @@ Item {
 
                         Text {
                             anchors.centerIn: parent
-                            visible: !projectViewModel.selectedNotes || projectViewModel.selectedNotes.length === 0
+                            visible: !projectSubitemsViewModel.selectedNotes || projectSubitemsViewModel.selectedNotes.length === 0
                             text: i18nBridge.tr("no_notes", "Henüz kayıtlı proje notu yok.")
                             font.pixelSize: 12
                             color: themeBridge.textMuted
@@ -942,7 +942,7 @@ Item {
                             spacing: 8
 
                             Repeater {
-                                model: projectViewModel.selectedResources
+                                model: projectSubitemsViewModel.selectedResources
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
                                     implicitHeight: resourceContentCol.implicitHeight + 16
@@ -994,7 +994,7 @@ Item {
                                                 btnVariant: "secondary"
                                                 implicitWidth: 22
                                                 implicitHeight: 22
-                                                onClicked: projectViewModel.openUrlOrPath(modelData.url)
+                                                onClicked: projectSubitemsViewModel.openUrlOrPath(modelData.url)
                                             }
 
                                             AppButton {
@@ -1010,7 +1010,7 @@ Item {
                                                 btnVariant: "secondary"
                                                 implicitWidth: 22
                                                 implicitHeight: 22
-                                                onClicked: projectViewModel.deleteResource(modelData.id)
+                                                onClicked: projectSubitemsViewModel.deleteResource(modelData.id)
                                             }
                                         }
 
@@ -1027,7 +1027,7 @@ Item {
                             }
 
                             Text {
-                                visible: !projectViewModel.selectedResources || projectViewModel.selectedResources.length === 0
+                                visible: !projectSubitemsViewModel.selectedResources || projectSubitemsViewModel.selectedResources.length === 0
                                 text: i18nBridge.tr("no_resources", "Henüz kayıtlı kaynak yok.")
                                 font.pixelSize: 12
                                 color: themeBridge.color("text_muted")
@@ -1062,7 +1062,7 @@ Item {
                             spacing: 6
 
                             Repeater {
-                                model: projectViewModel.selectedActivity
+                                model: projectSubitemsViewModel.selectedActivity
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
                                     implicitHeight: activityRow.implicitHeight + 14
@@ -1095,7 +1095,7 @@ Item {
                             }
 
                             Text {
-                                visible: !projectViewModel.selectedActivity || projectViewModel.selectedActivity.length === 0
+                                visible: !projectSubitemsViewModel.selectedActivity || projectSubitemsViewModel.selectedActivity.length === 0
                                 text: i18nBridge.tr("no_activity", "Henüz kayıtlı etkinlik yok.")
                                 font.pixelSize: 12
                                 color: themeBridge.color("text_muted")
@@ -1141,7 +1141,7 @@ Item {
                             spacing: 8
 
                             Repeater {
-                                model: projectViewModel.selectedOutputs
+                                model: projectSubitemsViewModel.selectedOutputs
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
                                     implicitHeight: outputContentCol.implicitHeight + 16
@@ -1174,7 +1174,7 @@ Item {
                                                 btnVariant: "secondary"
                                                 implicitWidth: 22
                                                 implicitHeight: 22
-                                                onClicked: projectViewModel.openUrlOrPath(modelData.file_path)
+                                                onClicked: projectSubitemsViewModel.openUrlOrPath(modelData.file_path)
                                             }
                                         }
 
@@ -1191,7 +1191,7 @@ Item {
                             }
 
                             Text {
-                                visible: !projectViewModel.selectedOutputs || projectViewModel.selectedOutputs.length === 0
+                                visible: !projectSubitemsViewModel.selectedOutputs || projectSubitemsViewModel.selectedOutputs.length === 0
                                 text: i18nBridge.tr("no_outputs", "Henüz kayıtlı çıktı yok.")
                                 font.pixelSize: 12
                                 color: themeBridge.color("text_muted")
@@ -1325,7 +1325,7 @@ Item {
                         implicitHeight: 40
                         onClicked: {
                             if (outputTitleInput.text.trim()) {
-                                projectViewModel.addOutput(outputTitleInput.text.trim(), outputPathInput.text.trim());
+                                projectSubitemsViewModel.addOutput(outputTitleInput.text.trim(), outputPathInput.text.trim());
                                 addOutputDialog.close();
                             }
                         }
@@ -1477,9 +1477,9 @@ Item {
                             if (decisionTitleInput.text.trim() && decisionTextInput.text.trim()) {
                                 var st = decisionStatusCombo.selectedValue || "ACCEPTED";
                                 if (addDecisionDialog.editId !== 0)
-                                    projectViewModel.updateDecision(addDecisionDialog.editId, decisionTitleInput.text, decisionTextInput.text, st);
+                                    projectSubitemsViewModel.updateDecision(addDecisionDialog.editId, decisionTitleInput.text, decisionTextInput.text, st);
                                 else
-                                    projectViewModel.createDecision(decisionTitleInput.text.trim(), decisionTextInput.text.trim(), st);
+                                    projectSubitemsViewModel.createDecision(decisionTitleInput.text.trim(), decisionTextInput.text.trim(), st);
                                 addDecisionDialog.close();
                             }
                         }
@@ -1617,9 +1617,9 @@ Item {
                         onClicked: {
                             if (noteTitleInput.text.trim() && noteBodyInput.text.trim()) {
                                 if (addNoteDialog.editId !== 0)
-                                    projectViewModel.updateNote(addNoteDialog.editId, noteTitleInput.text, noteBodyInput.text.trim());
+                                    projectSubitemsViewModel.updateNote(addNoteDialog.editId, noteTitleInput.text, noteBodyInput.text.trim());
                                 else
-                                    projectViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
+                                    projectSubitemsViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
                                 addNoteDialog.close();
                             }
                         }
@@ -1772,9 +1772,9 @@ Item {
                             if (resourceTitleInput.text.trim() && resourceUrlInput.text.trim()) {
                                 var rType = resourceTypeCombo.selectedValue || "DOCUMENT";
                                 if (addResourceDialog.editId !== 0)
-                                    projectViewModel.updateResource(addResourceDialog.editId, resourceTitleInput.text, resourceUrlInput.text, rType);
+                                    projectSubitemsViewModel.updateResource(addResourceDialog.editId, resourceTitleInput.text, resourceUrlInput.text, rType);
                                 else
-                                    projectViewModel.createResource(resourceTitleInput.text.trim(), resourceUrlInput.text.trim(), rType);
+                                    projectSubitemsViewModel.createResource(resourceTitleInput.text.trim(), resourceUrlInput.text.trim(), rType);
                                 addResourceDialog.close();
                             }
                         }

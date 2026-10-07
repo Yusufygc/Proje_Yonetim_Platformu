@@ -157,6 +157,7 @@ def run_qml_app() -> int:
     from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel  # noqa: PLC0415
     from presentation.viewmodels.idea_viewmodel import IdeaViewModel  # noqa: PLC0415
     from presentation.viewmodels.memo_viewmodel import MemoViewModel  # noqa: PLC0415
+    from presentation.viewmodels.project_subitems_viewmodel import ProjectSubitemsViewModel  # noqa: PLC0415
     from presentation.viewmodels.project_viewmodel import ProjectViewModel  # noqa: PLC0415
     from presentation.viewmodels.search_viewmodel import SearchViewModel  # noqa: PLC0415
     from presentation.viewmodels.settings_viewmodel import SettingsViewModel  # noqa: PLC0415
@@ -167,6 +168,7 @@ def run_qml_app() -> int:
     i18n_bridge = I18nBridge(container.strings, parent=app)
     nav_bridge = NavigationBridge(container.prefs, container.event_bus, parent=app)
     project_viewmodel = ProjectViewModel(container, parent=app)
+    project_subitems_viewmodel = ProjectSubitemsViewModel(container, project_viewmodel, parent=app)
     dashboard_viewmodel = DashboardViewModel(container.dashboard_controller, parent=app)
     task_viewmodel = TaskViewModel(container, parent=app)
     idea_viewmodel = IdeaViewModel(container, parent=app)
@@ -183,6 +185,7 @@ def run_qml_app() -> int:
     app._i18n_bridge = i18n_bridge  # type: ignore[attr-defined]
     app._nav_bridge = nav_bridge  # type: ignore[attr-defined]
     app._project_viewmodel = project_viewmodel  # type: ignore[attr-defined]
+    app._project_subitems_viewmodel = project_subitems_viewmodel  # type: ignore[attr-defined]
     app._dashboard_viewmodel = dashboard_viewmodel  # type: ignore[attr-defined]
     app._task_viewmodel = task_viewmodel  # type: ignore[attr-defined]
     app._idea_viewmodel = idea_viewmodel  # type: ignore[attr-defined]
@@ -199,6 +202,7 @@ def run_qml_app() -> int:
     context.setContextProperty("i18nBridge", i18n_bridge)
     context.setContextProperty("navBridge", nav_bridge)
     context.setContextProperty("projectViewModel", project_viewmodel)
+    context.setContextProperty("projectSubitemsViewModel", project_subitems_viewmodel)
     context.setContextProperty("dashboardViewModel", dashboard_viewmodel)
     context.setContextProperty("taskViewModel", task_viewmodel)
     context.setContextProperty("ideaViewModel", idea_viewmodel)

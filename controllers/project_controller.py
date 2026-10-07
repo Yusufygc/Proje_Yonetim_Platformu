@@ -5,6 +5,7 @@ UI katmanı ile servis katmanı arasındaki iletişimi Signal/Slot mekanizmasıy
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Signal
@@ -31,6 +32,9 @@ class ProjectController(QObject):
     project_deleted = Signal(int)
     project_archived = Signal(int)
     project_restored = Signal(int)
+    activity_loaded = Signal(int, list)  # (project_id, logs) — stale sonuçları ayırt etmek için
+    attachments_loaded = Signal(int, list)  # (project_id, attachments)
+    attachment_created = Signal(object)
     error_occurred = Signal(str)
 
     def __init__(
@@ -84,6 +88,37 @@ class ProjectController(QObject):
             return self._service.get_project(project_id)
         except AppBaseException:
             return None
+
+    def load_activity_logs(self, project_id: int) -> None:
+        self._run_in_background(
+            lambda: self._service.get_activity_logs(project_id),
+            lambda logs: self.activity_loaded.emit(project_id, logs),
+            "Etkinlik geçmişi yüklenemedi",
+        )
+
+    def load_attachments(self, project_id: int) -> None:
+        self._run_in_background(
+            lambda: self._service.get_attachments(project_id),
+            lambda items: self.attachments_loaded.emit(project_id, items),
+            "Ekler yüklenemedi",
+        )
+
+    def create_attachment(self, attachment: Attachment) -> None:
+        def _create() -> Attachment:
+            self._service.create_attachment(attachment)
+            return attachment
+
+        self._run_in_background(_create, self.attachment_created.emit, "Çıktı eklenemedi")
+
+    def _run_in_background(self, fetch: Callable[[], Any], on_result: Callable[[Any], None], error_prefix: str) -> None:
+        def _on_error(err: str) -> None:
+            logger.error("%s: %s", error_prefix, err)
+            self.error_occurred.emit(f"{error_prefix}.")
+
+        worker = Worker(fetch)
+        worker.signals.result.connect(on_result)
+        worker.signals.error.connect(_on_error)
+        worker.start()
 
     def get_activity_logs_sync(self, project_id: int) -> list[ActivityLog]:
         return self._service.get_activity_logs(project_id)
