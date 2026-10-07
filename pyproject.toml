@@ -48,3 +48,7 @@ exclude = [
     ".venv",
     "tests",
 ]
+
+[tool.pytest.ini_options]
+# Takılan bir test sessizce beklemesin: 120 sn sonra tüm iş parçacıklarının yığınını yazar.
+faulthandler_timeout = 120

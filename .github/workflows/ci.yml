@@ -9,6 +9,7 @@ jobs:
   quality:
     # Proje Windows hedefli (PyInstaller, WinAPI çağrıları); testler de aynı platformda koşar.
     runs-on: windows-latest
+    timeout-minutes: 15
     env:
       QT_QPA_PLATFORM: offscreen
     steps:
