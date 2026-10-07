@@ -14,7 +14,7 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 
 - 📊 **Ana Panel** — İstatistik kartları, tıkanan projeler, son aktiviteler ve yüksek öncelikli açık görevler tek ekranda
 - 📁 **Proje Yönetimi** — Durum takibi (Planlandı, Aktif, Beklemede, Tamamlandı…), sağlık durumu, öncelik, karar kayıtları, notlar ve kaynak bağlantıları
-- 🗂️ **WBS Görev Ağacı** — Sürükle-bırak destekli hiyerarşik iş kırılım yapısı; durum, öncelik ve türe göre filtreleme; checklist ve alt görev desteği
+- 🗂️ **WBS Görev Ağacı** — Hiyerarşik iş kırılım yapısı; durum, öncelik ve türe göre filtreleme; checklist ve alt görev desteği
 - 💡 **Fikir Yönetimi** — Ham fikirden projeye dönüşüm akışını izleme; fikir puanlama ve kategorilendirme
 - 🎨 **Tema Desteği** — Koyu ve açık tema; Federal Blue/Altın ile Sapphire/Quicksand renk paletleri; özel tema oluşturma ve dışa aktarma
 - 🌐 **Yerelleştirme** — Türkçe ve İngilizce arayüz; tüm metinler çeviri anahtarları üzerinden yönetilir
@@ -24,7 +24,6 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 - 📝 **Notlar ve Zengin Çizim Tuvali** — Markdown destekli notlar, geometrik şekiller, algoritma/akış şeması sembolleri, resim ekleme ve çift sıralı dinamik tuval araç çubuğu
 - 📋 **Görev Kopyalama & Akıllı Ağaç** — Panoya kopyalama ve anında çoğaltma (duplicate), tamamlanan alt görevlerin otomatik daraltılması ve kaydırma konumu koruması
 - 📈 **Gelişmiş Metrikler ve Analitik** — KPI kartları, zaman serileri, proje bazlı filtreleme ve performans istatistikleri
-- 🖱️ **Sürükle-Bırak Sıralama** — Notlar, Fikirler ve Projeler listelerinde elemanları sürükleyerek istediğiniz sırayı belirleme; sıra kalıcı olarak saklanır
 
 ---
 
@@ -40,8 +39,8 @@ Uygulama, katı bir katmanlı mimariye sahiptir; katmanlar arası doğrudan atla
 
 ```
 ┌─────────────────────────────────────────────────┐
-│            Sunum Katmanı  (PySide6)             │
-│   Pages · Dialogs · Widgets · Shell             │
+│            Sunum Katmanı  (PySide6 + QML)       │
+│   QML Görünümler · ViewModel'ler · Köprüler     │
 ├─────────────────────────────────────────────────┤
 │            Controller Katmanı                   │
 │   ProjectController · TaskController · …        │
@@ -190,23 +189,22 @@ proje_takip_platformu/
 │   ├── migrations/           # Alembic migrasyon scriptleri
 │   └── repositories/         # Veritabanı erişim katmanı
 ├── presentation/
-│   ├── dialogs/              # Görev, proje, fikir oluşturma/düzenleme iletişim kutuları
-│   ├── pages/                # Ana Panel, Projeler, Görevler (WBS), Fikirler, Ayarlar…
-│   ├── shell/                # Ana pencere ve kenar çubuğu
-│   ├── utils/                # i18n (tr()), stil yardımcıları, filtreler
-│   └── widgets/              # Toast, proje kartı, detay paneli, skeleton loader, VoiceInputButton…
+│   ├── qml/                  # QML arayüzü: main.qml, shell/, views/, dialogs/, components/, theme/
+│   ├── viewmodels/           # QML'e açılan ViewModel, liste modeli ve köprü sınıfları
+│   ├── utils/                # i18n (tr()) yardımcıları
+│   ├── modules.py            # Kenar çubuğu modül kayıtları (ModuleRegistry)
+│   └── dimensions.py         # Font ailesi sabitleri
 ├── resources/
 │   ├── fonts/                # JetBrains Mono, Plus Jakarta Sans
 │   ├── locales/              # strings.tr.json, strings.en.json
 │   ├── models/               # Vosk STT modeli (depoya dahil değil — bkz. "Başlarken")
-│   ├── styles/               # QSS tema dosyaları (18 dosya)
 │   └── themes/               # Renk paleti JSON dosyaları
 ├── services/                 # İş mantığı katmanı (10 servis + speech/ — sesli komut)
 ├── tests/                    # pytest test paketi
 ├── icons/                    # Uygulama ikonu
 ├── packaging/                # PyInstaller spec ve EXE meta verisi
-├── scripts/                  # Yardımcı scriptler (font indirme vb.)
-├── main.py                   # Uygulama giriş noktası
+├── scripts/                  # Yardımcı scriptler (font indirme, derleme, kalite)
+├── main.py                   # Uygulama giriş noktası (QML arayüzünü başlatır)
 ├── pyproject.toml            # Proje meta verisi ve bağımlılıklar
 └── alembic.ini               # Alembic yapılandırması
 ```
@@ -248,9 +246,9 @@ Yeni arayüz metni eklenirken her iki dosyaya da ilgili anahtar eklenmelidir.
 ## Geliştirme Notları
 
 - Doğrudan SQLite sorgusu yazılmaz; tüm veri erişimi repository katmanı üzerinden yapılır.
-- Tema renkleri `ThemeManager.color(key)` ile çözülür; QSS dosyalarına sabit renk yazılmaz.
+- Tema renkleri `ThemeManager.color(key)` ve `ThemeBridge` üzerinden çözülür; QML dosyalarına sabit renk yazılmaz.
 - Tüm kullanıcıya görünen metinler `tr(key, varsayılan)` ile sarmalanır.
-- Widget'lar `parent=` parametresi ile oluşturulur (bellek sızıntısını önlemek için).
+- Python tarafında oluşturulan her `QObject`'e `parent=` verilir (bellek sızıntısını önlemek için).
 - Bileşenler arası iletişim `EventBus.publish()` / `EventBus.subscribe()` ile sağlanır.
 - Bir dosya 400 satırı veya bir sınıf 15 public metodu aşıyorsa alt modüllere bölünmesi gerekir.
 - UI thread'i bloke eden işlemler (DB sorgusu, dosya okuma) `QThread` veya `QTimer` ile asenkrona alınır.

@@ -19,11 +19,11 @@
 - `presentation/` altındaki TÜM dosyalar StringManager'a taşındı; **ALLOWLIST boş** ve boş kalmak zorunda — yeni dosyada hardcoded Türkçe metin testi anında kırar.
 - Enum etiketleri paylaşımlı: `status_*`, `priority_*`, `task_status_*`, `task_type_*`, `idea_status_*`, `stage_status_*`, `health_*`; genel: `action_*`, `label_*`, `tab_*`, `search_type_*`.
 - Desen notu: enum etiket sözlükleri modül seviyesinde sabit DEĞİL, fonksiyon olarak tanımlanır (`_status_labels()` vb.) — dil değişimi dialog/panel her açılışta yansır.
-- SearchDialog `item_selected` artık dilden bağımsız tip kodu yayar ("project"|"task"|"idea") — eski hali Türkçe etiketle eşleşiyordu (kırılgan veri bağı giderildi, `main_window._on_search_item_selected` buna göre güncellendi).
+- Genel arama (`SearchViewModel.selectItem`) dilden bağımsız tip kodu kullanır ("project"|"task"|"idea") — Türkçe etiketle eşleştirme yapılmaz.
 ## Dil seçici (2026-06-13)
 - `strings.en.json` eklendi (TR ile birebir 249 anahtar). Parite testi `test_locale_files_have_matching_keys_and_placeholders`: tüm dil dosyalarında anahtar seti VE `{placeholder}` alanları eşleşmek zorunda — yeni anahtar eklerken her iki dosyaya da yaz.
 - Ayarlar sayfasında dil combobox'ı (`_LANGUAGES` sabiti; dil adı kendi dilinde, `# l10n: data`). Seçim: `PreferenceManager.save_language` + `StringManager.set_language` + "yeniden başlatın" bilgisi.
 - Kalıcılık: `di_container.bootstrap` UI kurulmadan ÖNCE `prefs.load_language()` uygular — açılışta tüm `tr()` çağrıları doğru sözlükle çözülür (tema kalıcılığıyla aynı desen).
-- Bilinçli karar: canlı retranslate YOK. Statik metin kuran 30+ widget'a retranslate makinesi yazmak yerine değişiklik yeniden başlatmada etkinleşir; `language_changed` sinyali yine yayınlanır, ileride isteyen widget abone olabilir.
+- QML tarafında `I18nBridge.tr(key, default)` kullanılır; `languageChanged` sinyali bağlamaları yeniler.
 
 İlgili: [[kurallar-ve-sozlesmeler]], [[yol-haritasi]]

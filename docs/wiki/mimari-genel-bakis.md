@@ -1,9 +1,9 @@
 # Mimari Genel Bakış
 
-PySide6 masaüstü uygulaması; katı katmanlı mimari:
+PySide6 + QML masaüstü uygulaması; katı katmanlı mimari (eski Qt Widgets arayüzü 2026-10-07'de kaldırıldı):
 
 ```
-presentation/ (pages, dialogs, widgets, shell)   ← Qt UI
+presentation/qml/ + presentation/viewmodels/      ← QML arayüzü + ViewModel/köprüler
     ↓ sinyal/slot
 controllers/  (QObject köprüleri)                ← hata→sinyal dönüşümü, EventBus yayını
     ↓
@@ -24,7 +24,7 @@ infrastructure/database/ (DatabaseManager)       ← engine, scoped_session, WAL
 - Modüller arası gevşek bağ: [[event-bus]] (`core/events/event_bus.py`).
 - UI kilitlenmesini önleme: [[worker-altyapisi]] (`core/workers/`).
 - Görsel katman: [[tema-sistemi]], [[ikon-yonetimi]], [[l10n-string-yonetimi]].
-- Sayfa kaydı: `presentation/modules.py` + `core/module_registry.py` — sayfalar factory lambda'larıyla kaydedilir. `MainWindow._navigate_to` sayfayı yalnızca İLK ziyarette inşa eder (2026-07-02 düzeltmesi — önceden `_setup_ui` tüm 9 sayfayı `window.show()`'dan önce eager kuruyordu, her biri kendi DB sorgusunu tetikliyordu; artık kullanıcı hangi sayfaya giderse sadece o inşa edilir).
+- Navigasyon kaydı: `presentation/modules.py` + `core/module_registry.py` yalnızca sayfa anahtarı, etiket ve ikon meta-verisini tutar (`FeaturePlugin`); `NavigationBridge.modules` bunu QML kenar çubuğuna açar. Sayfaların kendisi `presentation/qml/main.qml` içinde yüklenir.
 
 ## Boyut metrikleri (2026-06-12)
 ~142 .py dosyası, ~11.400 satır. RULES.md limitleri: dosya ≤400 satır, sınıf ≤15 metod ([[kurallar-ve-sozlesmeler]]). Bilinen istisna: `DIContainer` (factory yoğun, P3'te bölünecek — [[yol-haritasi]]).

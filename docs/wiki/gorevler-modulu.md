@@ -1,10 +1,11 @@
 # Görevler Modülü (WBS)
 
-`presentation/pages/tasks/` paketi (2026-06-12'de 493 satırlık `tasks_page.py`'den bölündü):
+QML arayüzü (eski Widgets `presentation/pages/tasks/` paketi 2026-10-07'de kaldırıldı):
 
-- **`page.py` — TasksPage**: kompozisyon + controller köprüsü + CRUD dialog akışları. Test API'leri korunur: `_tree`, `_quick_add_edit`, `_on_quick_add_task` (bkz. `tests/test_ui_smoke.py`).
-- **`filter_bar.py` — TaskFilterBar**: proje combo + durum/öncelik/tür/aşama filtreleri. Filtre mantığının tek sahibi: `apply(tasks)`, `filter_values()` (hızlı eklemede yeni göreve uygulanır), `reload_stage_filter(tasks)`. Sinyaller: `project_changed(object)`, `filters_changed()`, `add_root_requested()`.
-- **`wbs_tree.py` — WBSTreeWidget**: render + sürükle-bırak + fade animasyonu. `task_moved = Signal(int, object, int)` (id, yeni parent|None, yeni sıra). `render_tasks()` renkleri döngü dışında bir kez çözer, `setUpdatesEnabled(False/True)` sarmalı kullanır; tema sözleşmesi gereği sayfa `theme_changed`'de yeniden render eder ([[tema-sistemi]]).
+- **`presentation/qml/views/TasksView.qml`** — proje seçici, arama, durum/öncelik/tip filtreleri, görev ağacı ve hızlı ekleme.
+- **`presentation/qml/views/tasks/TaskItemDelegate.qml`** — ağaç satırı: durum kutusu, WBS kodu, başlık, checklist rozeti, tip/öncelik/durum rozetleri ve hover'da beliren hızlı butonlar (`HoverHandler` ile satırın tamamını izler).
+- **`presentation/qml/dialogs/TaskDialog.qml`** — oluşturma/düzenleme: başlık, açıklama, durum, öncelik, tip, engel nedeni (yalnızca Engellendi'de) ve checklist. Alt görevi olan görevlerde durum seçenekleri "Otomatik / Engellendi / İptal"dir.
+- **`presentation/viewmodels/task_viewmodel.py` + `task_list_model.py`** — filtre ve seçim durumu, ağaç düzleştirme, WBS kodu üretimi.
 
 ## Sıralama davranışı
 `TaskService.create_task` yeni görevi `TaskRepository.first_order_index()` ile kardeş
@@ -18,7 +19,10 @@ ayrı tutulur: aynı `order_index` hesaplayıcısı hem "başa ekle" hem "sona e
 kullanılamaz.
 
 ## Veri akışı
-`TaskController.load_tasks` (Worker, async — [[worker-altyapisi]]) → `tasks_loaded` → sayfa `_on_tasks_loaded` → filtre + render. Görev değişiminde controller `task.*` olayını [[event-bus]]'a yayınlar; sayfa kendi sinyal bağlantısıyla listeyi yeniler.
+`TaskController.load_tasks` (Worker, async — [[worker-altyapisi]]) → `tasks_loaded(project_id, tasks)` → `TaskViewModel._on_tasks_loaded` → `TaskListModel`. Görev değişiminde controller `task.*` olayını [[event-bus]]'a yayınlar; ViewModel'ler kendi sinyal/olay bağlantılarıyla listeyi yeniler.
+
+## Durum kuralı
+Alt görevi olan görevin durumu alt görevlerinden türetilir (`TaskService.recalculate_hierarchy`); `TaskService._assert_status_editable` türetilen duruma elle geçişi `TaskValidationError` ile reddeder, yalnızca Engellendi ve İptal elle verilebilir. Controller hataları `forward_errors_to_toast` ile kullanıcıya gösterilir.
 
 ## QML Sunum Katmanı ve Gelişmiş Özellikler (2026-10)
 
@@ -28,7 +32,6 @@ kullanılamaz.
 - **Kaydırma Konumunun Korunması (Scroll Preservation):** Görev durumu değiştirildiğinde veya silme/çoğaltma yapıldığında liste modeli resetlenirken `TasksView.qml` içerisindeki `savedScrollY` değişkeni mevcut kaydırma pozisyonunu saklar ve model yüklendiğinde otomatik olarak eski konuma geri döndürür.
 
 ## Import
-`from presentation.pages.tasks import TasksPage` (eski `tasks_page` modülü silindi).
 `from presentation.viewmodels.task_viewmodel import TaskViewModel` (QML ViewModel).
 
 İlgili: [[mimari-genel-bakis]], [[l10n-string-yonetimi]], [[notlar-modulu]]

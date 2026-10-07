@@ -13,13 +13,13 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[veritabani-katmani]] — DatabaseManager, scoped_session, WAL modu ve `BaseRepository[T]` / `ProjectScopedRepository[T]` desenleri.
 
 ## Sunum Katmanı
-- [[tema-sistemi]] — JSON palet + token'lı modüler QSS yapısı; 6 küratörlü tema paketi (Slate/Indigo/Emerald/Ocean/Rose/Violet) × 2 mod. Font boyutu sabit (`FontFamily.DEFAULT_SIZE`) — QSS'teki 56+ sabit `font-size` kuralı zaten `QApplication.setFont()` boyutunu eziyordu, kullanıcı sadece aile seçer.
-- [[l10n-string-yonetimi]] — StringManager, `tr()` yardımcısı, `language_changed` → MainWindow UI yeniden kurulum, ratchet testi.
-- [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve planlanan iyileştirmeler.
-- [[gorevler-modulu]] — WBS görev sayfası paketi ve QML Görev Ağacı: filtreler, kopyalama/çoğaltma, akıllı daraltma ve scroll koruma.
+- [[tema-sistemi]] — JSON palet + `ThemeBridge` ile QML'e açılan tokenlar; 6 küratörlü tema paketi (Slate/Indigo/Emerald/Ocean/Rose/Violet) × 2 mod. Font boyutu sabit (`FontFamily.DEFAULT_SIZE`), kullanıcı sadece aile seçer.
+- [[l10n-string-yonetimi]] — StringManager, `tr()` / `I18nBridge.tr()`, dil değişimi ve ratchet testi.
+- [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve QML `IconImageProvider`.
+- [[gorevler-modulu]] — QML Görev Ağacı (WBS): filtreler, kopyalama/çoğaltma, akıllı daraltma, scroll koruma ve üst görev durum kuralı.
 - [[notlar-modulu]] — Markdown notlar, zengin serbest çizim tuvali, geometrik şekiller, algoritma akış şemaları ve resim ekleme.
-- [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton` + `TranscriptionWorker` + `SpeechToTextService`.
-- [[liste-siralama]] — Notlar/Fikirler/Projeler listelerinde sürükle-bırak sıralama; `DragReorderController` + `sort_order`/`display_order` kolonları.
+- [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton.qml` + `VoiceBridge` + `TranscriptionWorker` + `SpeechToTextService`.
+- [[liste-siralama]] — Liste sıralama altyapısı (`sort_order`/`display_order`, `reorder` zinciri); QML'de sürükle-bırak arayüzü şu an yok.
 
 ## Kurallar ve Süreç
 - [[kurallar-ve-sozlesmeler]] — RULES.md limitleri, bellek yönetimi, tema/L10N sözleşmeleri ve commit kuralları.

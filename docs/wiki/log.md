@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] REVIEW+REFACTOR | Eski Qt Widgets Arayüzü ve QSS Altyapısı Kaldırıldı (Denetim Bulgusu 5)
+- **Silindi:** `presentation/pages`, `widgets`, `dialogs`, `shell` (45 dosya, ~8,8 bin satır), `presentation/utils/{scroll_filter,ui_utils}.py`, `tests/test_ui_smoke.py`, `scripts/commit_all.py`, `resources/styles` (QSS), `resources/illustrations`, `resources/templates` (yalnızca eski sayfalar kullanıyordu).
+- **Sadeleşti:** `main.py` yalnızca QML'i başlatır (`--legacy`/`--widgets` kolu yok); `FeaturePlugin` artık `factory` taşımaz, yalnızca navigasyon meta-verisi (`presentation/modules.py` veri tabanlı); `ThemeManager(themes_dir)` QSS üretimi, ikon token'ları ve `styles_dir` olmadan; `presentation/dimensions.py` yalnızca `FontFamily`; `config.STYLES_DIR` kalktı.
+- **Dokümantasyon:** README, `tema-sistemi`, `gorevler-modulu`, `liste-siralama`, `sesli-komut`, `ikon-yonetimi`, `di-container`, `kurallar-ve-sozlesmeler`, `l10n-string-yonetimi`, `mimari-genel-bakis`, `index` güncellendi. `Project_docs/` altındaki tarihsel tasarım belgelerine dokunulmadı.
+- **Bilinçli işlev kaybı:** Notlar/Fikirler/Projeler/Notlarım listelerindeki sürükle-bırak sıralama yalnızca eski arayüzdeydi; QML'de karşılığı yok. `reorder` altyapısı (kolonlar, servis/controller zinciri) korundu.
+
 ## [2026-10-07] REVIEW+FIX | Denetim Raporu Bulguları 6-10: Türkçe Arama, Kalite Kapıları, Testler, ViewModel Bölme
 - **[6] Arama:** `core/text_normalization` (İ/I/ı/i katlama, LIKE joker kaçırma); SQLite bağlantısına `tr_fold` fonksiyonu; liste modelleri aynı yardımcıyı kullanıyor.
 - **[7] Kalite:** mypy 87 hatadan 0'a; ruff F401/F821 açık; 20 kullanılmayan import temizlendi; `.github/workflows/ci.yml` (ruff, mypy, pytest); pre-commit mypy tüm paketlerde. `ruff.exe` bu makinede Uygulama Denetimi tarafından engelli olduğundan ruff ilk kez CI'da koşacak.

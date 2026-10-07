@@ -1,20 +1,17 @@
 # Sesli Komut (Speech-to-Text)
 
-QLineEdit/QTextEdit alanlarına mikrofonla dikte. Tamamen çevrimdışı — [Vosk](https://alphacephei.com/vosk/models) Türkçe modeli, internet/API anahtarı gerektirmez.
+QML metin alanlarına (`AppTextInput`) mikrofonla dikte. Tamamen çevrimdışı — [Vosk](https://alphacephei.com/vosk/models) Türkçe modeli, internet/API anahtarı gerektirmez.
 
 ## Mimari (katman sırası)
 
 ```
-VoiceInputButton (UI)
+VoiceInputButton.qml + VoiceBridge (UI)
   → TranscriptionWorker (QThreadPool, [[worker-altyapisi]] deseni)
     → SpeechToTextService (Vosk model yaşam döngüsü)
       → vosk + sounddevice
 ```
 
-- `presentation/widgets/voice_input_button.py` — `VoiceInputButton(IconActionButton)` toggle
-  buton + `attach_voice_button(target, parent)` yardımcı fonksiyonu. `target`
-  `QLineEdit | QTextEdit` olabilir (`VoiceTarget` union tipi); her ikisi de aynı butonla
-  sarmalanır, container `QHBoxLayout` döndürür.
+- `presentation/qml/components/VoiceInputButton.qml` — mikrofon butonu; `AppTextInput` içinde `showVoiceInput: true` ile görünür. `presentation/viewmodels/voice_bridge.py::VoiceBridge` (`isListening`, `partialText`, `toggleListening()`, `textTranscribed`) worker'ı yönetir.
 - `core/workers/transcription_worker.py` — `TranscriptionWorker(QRunnable)` +
   `TranscriptionSignals(QObject)` (`started`, `partial`, `final`, `error`, `finished`).
   `Worker` (genel amaçlı, tek atış) yerine ayrı sınıf: bu worker `stop()` çağrılana kadar
@@ -27,17 +24,15 @@ VoiceInputButton (UI)
 
 ## Akış
 
-1. Kullanıcı 🎤 butona tıklar → `VoiceInputButton._start_recording()` →
-   `DIContainer.instance().speech_service` çekilir → `TranscriptionWorker` oluşturulup
+1. Kullanıcı 🎤 butona tıklar → `VoiceBridge.startListening()` →
+   `container.speech_service` çekilir → `TranscriptionWorker` oluşturulup
    `start()` ile `QThreadPool`'a verilir.
 2. Worker `run()` içinde `service.ensure_loaded()` (ilk çağrıda model diskten yüklenir) →
    `sounddevice.RawInputStream(samplerate=16000, blocksize=8000, dtype="int16", channels=1)`
    açılır; callback ses çerçevelerini `queue.Queue`'ya yazar.
 3. Kuyruk döngüsü `recognizer.AcceptWaveform(data)` ile beslenir: tam cümlede `final`,
    ara sonuçta `partial` sinyali atılır (partial şu an UI'da kullanılmıyor — bkz. Kapsam Dışı).
-4. `VoiceInputButton._on_final_text` hedefin tipine göre dallanır:
-   `QLineEdit.insert()` (cursor konumuna) veya `QTextEdit` cursor-insert; her ikisinde de
-   önceki metin boşlukla bitmiyorsa otomatik boşluk eklenir.
+4. `VoiceBridge` `final` sinyalinde `textTranscribed` yayar; QML buton hedef metin alanının imleç konumuna ekler, önceki metin boşlukla bitmiyorsa boşluk koyar.
 5. Tekrar tıklama → `worker.stop()` → `_stop_flag` set edilir → döngü çıkar →
    `FinalResult()` ile kalan parça da işlenir → `finished` sinyali.
 
@@ -55,8 +50,8 @@ VoiceInputButton (UI)
 - `core/exceptions/speech_exceptions.py`: `SpeechRecognitionError` (taban),
   `SpeechModelNotFoundError` (model klasörü yok/`vosk` kurulu değil),
   `MicrophoneUnavailableError` (cihaz açılamadı — `sounddevice.PortAudioError`).
-- Her ikisi de Worker içinde yakalanır → `error` sinyali → `VoiceInputButton._on_error` →
-  `EventBus.publish("toast.show", type_="warning")`; stack trace kullanıcıya gösterilmez,
+- Her ikisi de Worker içinde yakalanır → `error` sinyali → `VoiceBridge._on_error` →
+  `EventBus.publish("toast.show", ...)`; stack trace kullanıcıya gösterilmez,
   UI thread bloklanmaz.
 
 ## Bağımlılıklar
@@ -65,11 +60,7 @@ VoiceInputButton (UI)
 
 ## Kapsam
 
-Mikrofon butonu eklenen alanlar:
-- **QLineEdit:** görev başlığı (`task_dialog.py`), fikir başlığı (`idea_dialog.py`),
-  hızlı görev ekle (`pages/tasks/page.py`).
-- **QTextEdit:** tüm çok satırlı açıklama/not/gerekçe/çözüm alanları (idea, decision, note,
-  resource, task, project dialogları + `memo_page.py` editörü).
+Mikrofon butonu `AppTextInput`'ta `showVoiceInput: true` olan alanlarda görünür (görev/fikir/not/karar/kaynak başlık ve açıklama alanları, memo editörü).
 
 ## Kapsam Dışı (sonraki iterasyon)
 

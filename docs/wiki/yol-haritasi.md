@@ -1,5 +1,7 @@
 # Yol Haritası
 
+> **Not (2026-10-07):** Aşağıdaki geçmiş kayıtlar eski Qt Widgets arayüzünü (`presentation/pages|widgets|dialogs|shell`, QSS) anar; bu arayüz kaldırıldı. Güncel arayüz yalnızca QML'dir ([[mimari-genel-bakis]]).
+
 Kaynak analiz: `Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu §9).
 
 ## Tamamlandı (2026-06-12)
