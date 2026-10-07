@@ -271,8 +271,8 @@ AppCard {
                     iconName: "pencil"
                     btnVariant: "secondary"
                     onClicked: {
-                        if (ideaViewModel && root.hasIdea) {
-                            ideaViewModel.openEditDialog(root.idea.id)
+                        if (ideaDialogViewModel && root.hasIdea) {
+                            ideaDialogViewModel.openEditDialog(root.idea.id)
                         }
                     }
                 }

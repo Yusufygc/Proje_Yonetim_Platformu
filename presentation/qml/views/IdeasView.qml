@@ -57,7 +57,7 @@ Item {
                 iconName: "plus"
                 btnVariant: "primary"
                 onClicked: {
-                    if (ideaViewModel) ideaViewModel.openCreateDialog()
+                    if (ideaDialogViewModel) ideaDialogViewModel.openCreateDialog()
                 }
             }
         }
@@ -187,7 +187,7 @@ Item {
                                     btnVariant: "primary"
                                     Layout.alignment: Qt.AlignHCenter
                                     onClicked: {
-                                        if (ideaViewModel) ideaViewModel.openCreateDialog()
+                                        if (ideaDialogViewModel) ideaDialogViewModel.openCreateDialog()
                                     }
                                 }
                             }

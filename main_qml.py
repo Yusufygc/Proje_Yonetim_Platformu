@@ -93,6 +93,7 @@ def run_qml_app() -> int:
     from presentation.viewmodels.analytics_viewmodel import AnalyticsViewModel  # noqa: PLC0415
     from presentation.viewmodels.archive_viewmodel import ArchiveViewModel  # noqa: PLC0415
     from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel  # noqa: PLC0415
+    from presentation.viewmodels.idea_dialog_viewmodel import IdeaDialogViewModel  # noqa: PLC0415
     from presentation.viewmodels.idea_viewmodel import IdeaViewModel  # noqa: PLC0415
     from presentation.viewmodels.memo_viewmodel import MemoViewModel  # noqa: PLC0415
     from presentation.viewmodels.project_subitems_viewmodel import ProjectSubitemsViewModel  # noqa: PLC0415
@@ -112,6 +113,7 @@ def run_qml_app() -> int:
     task_viewmodel = TaskViewModel(container, parent=app)
     task_dialog_viewmodel = TaskDialogViewModel(container, task_viewmodel, parent=app)
     idea_viewmodel = IdeaViewModel(container, parent=app)
+    idea_dialog_viewmodel = IdeaDialogViewModel(container, idea_viewmodel, parent=app)
     memo_viewmodel = MemoViewModel(container, parent=app)
     analytics_viewmodel = AnalyticsViewModel(container, parent=app)
     archive_viewmodel = ArchiveViewModel(container, parent=app)
@@ -130,6 +132,7 @@ def run_qml_app() -> int:
     app._task_viewmodel = task_viewmodel  # type: ignore[attr-defined]
     app._task_dialog_viewmodel = task_dialog_viewmodel  # type: ignore[attr-defined]
     app._idea_viewmodel = idea_viewmodel  # type: ignore[attr-defined]
+    app._idea_dialog_viewmodel = idea_dialog_viewmodel  # type: ignore[attr-defined]
     app._memo_viewmodel = memo_viewmodel  # type: ignore[attr-defined]
     app._analytics_viewmodel = analytics_viewmodel  # type: ignore[attr-defined]
     app._archive_viewmodel = archive_viewmodel  # type: ignore[attr-defined]
@@ -148,6 +151,7 @@ def run_qml_app() -> int:
     context.setContextProperty("taskViewModel", task_viewmodel)
     context.setContextProperty("taskDialogViewModel", task_dialog_viewmodel)
     context.setContextProperty("ideaViewModel", idea_viewmodel)
+    context.setContextProperty("ideaDialogViewModel", idea_dialog_viewmodel)
     context.setContextProperty("memoViewModel", memo_viewmodel)
     context.setContextProperty("analyticsViewModel", analytics_viewmodel)
     context.setContextProperty("archiveViewModel", archive_viewmodel)

@@ -7,7 +7,7 @@ import "../theme"
 Rectangle {
     id: root
 
-    visible: ideaViewModel ? ideaViewModel.isDialogOpen : false
+    visible: ideaDialogViewModel ? ideaDialogViewModel.isDialogOpen : false
     anchors.fill: parent
     color: "#80000000"
     z: 999
@@ -20,14 +20,14 @@ Rectangle {
     Shortcut {
         sequence: "Escape"
         enabled: root.visible
-        onActivated: ideaViewModel.closeDialog()
+        onActivated: ideaDialogViewModel.closeDialog()
     }
 
     Connections {
-        target: ideaViewModel
+        target: ideaDialogViewModel
         function onDialogStateChanged() {
-            if (ideaViewModel && ideaViewModel.isDialogOpen) {
-                var init = ideaViewModel.dialogInitialData
+            if (ideaDialogViewModel && ideaDialogViewModel.isDialogOpen) {
+                var init = ideaDialogViewModel.dialogInitialData
                 titleInput.text = init.title || ""
                 problemInput.text = init.problem || ""
                 solutionInput.text = init.solution || ""
@@ -64,8 +64,8 @@ Rectangle {
 
                 Text {
                     text: {
-                        if (!ideaViewModel) return ""
-                        return ideaViewModel.dialogMode === "edit"
+                        if (!ideaDialogViewModel) return ""
+                        return ideaDialogViewModel.dialogMode === "edit"
                             ? i18nBridge.tr("idea_dialog_edit_title", "Fikri Düzenle")
                             : i18nBridge.tr("idea_dialog_new_title", "Yeni Fikir Ekle")
                     }
@@ -80,7 +80,7 @@ Rectangle {
                     btnVariant: "secondary"
                     implicitWidth: 32
                     implicitHeight: 32
-                    onClicked: ideaViewModel.closeDialog()
+                    onClicked: ideaDialogViewModel.closeDialog()
                 }
             }
 
@@ -211,11 +211,11 @@ Rectangle {
                     btnVariant: "danger"
                     implicitWidth: 120
                     implicitHeight: 40
-                    visible: ideaViewModel ? ideaViewModel.dialogMode === "edit" : false
+                    visible: ideaDialogViewModel ? ideaDialogViewModel.dialogMode === "edit" : false
                     onClicked: {
-                        if (ideaViewModel) {
-                            ideaViewModel.deleteIdea(ideaViewModel.dialogIdeaId)
-                            ideaViewModel.closeDialog()
+                        if (ideaViewModel && ideaDialogViewModel) {
+                            ideaViewModel.deleteIdea(ideaDialogViewModel.dialogIdeaId)
+                            ideaDialogViewModel.closeDialog()
                         }
                     }
                 }
@@ -225,7 +225,7 @@ Rectangle {
                     btnVariant: "secondary"
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: ideaViewModel.closeDialog()
+                    onClicked: ideaDialogViewModel.closeDialog()
                 }
 
                 AppButton {
@@ -234,8 +234,8 @@ Rectangle {
                     implicitWidth: 120
                     implicitHeight: 40
                     onClicked: {
-                        if (ideaViewModel) {
-                            ideaViewModel.saveIdea({
+                        if (ideaDialogViewModel) {
+                            ideaDialogViewModel.saveIdea({
                                 "title": titleInput.text,
                                 "problem": problemInput.text,
                                 "solution": solutionInput.text,

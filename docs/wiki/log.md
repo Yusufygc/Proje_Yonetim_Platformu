@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] REFACTOR | IdeaViewModel Bölündü
+- **`IdeaViewModel`** 250 → 151 satır, public üye 21 → 10: diyalog durumu ve kaydetme `IdeaDialogViewModel`'e (`ideaDialogViewModel` QML bağlamı) taşındı; `TaskDialogViewModel` ile aynı desen. Fikir önbelleğine `cached_idea()` ile erişilir.
+- **Davranış:** Kayıttan sonraki fazladan `loadIdeas()` çağrısı kaldırıldı; liste zaten controller sinyalleri ve olay veri yoluyla yenileniyor.
+- `IdeaDialog`, `IdeasView`, `IdeaDetailPanel` yeni bağlamı kullanıyor.
+- Açık kalanlar: `DrawingCanvas.qml` (1325), `AnalyticsView.qml` (640).
+
 ## [2026-10-07] LINT | Ölü Kod Temizliği (Denetim Bulgusu 15) ve Arayüz Düzeltmeleri
 - **Silinen modüller:** `core/workers/async_worker.py`, `domain/dtos/base_dto.py`, kökteki `quality.py` (kopya; `scripts/quality.py` kaldı), `presentation/qml/shell/TopHeader.qml`, `core/managers/secret_manager.py` + `keyring` bağımlılığı (DI kaydı, test, spec hiddenimport dahil; `uv.lock` yeniden üretilmeli: `uv lock`).
 - **Silinen üyeler:** kullanılmayan controller senkron sarmalayıcıları, `load_all_tasks`/`all_tasks_loaded`, `TaskService.get_all_tasks`, `TaskRepository.get_all`, `IconManager.get_icon/Icons/try_instance`, `PreferenceManager` pencere-geometri ve son-proje metotları, `FontManager.loaded_families/mono_font`, `ThemeBridge.colors/accentHover/switchTheme`, kullanılmayan ViewModel property'leri, `config` UI sabitleri, `download_fonts.ensure_fonts`.

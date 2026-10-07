@@ -21,7 +21,6 @@ class IdeaViewModel(QObject):
     """Fikir Havuzu modülünün QML kullanıcı arayüzü ile iş katmanı arasındaki köprüsü."""
 
     selectedIdeaChanged = Signal()
-    dialogStateChanged = Signal()
     statsChanged = Signal()
 
     def __init__(self, container: DIContainer, parent: Optional[QObject] = None) -> None:
@@ -33,12 +32,6 @@ class IdeaViewModel(QObject):
         self._idea_model = IdeaListModel(parent=self)
         self._selected_idea_id: int = 0
         self._selected_idea_data: dict[str, Any] = {}
-
-        # Dialog state
-        self._is_dialog_open: bool = False
-        self._dialog_mode: str = "create"  # "create" | "edit"
-        self._dialog_idea_id: int = 0
-        self._dialog_initial_data: dict[str, Any] = {}
 
         self._ideas_cache: list[Idea] = []
         self._connect_signals()
@@ -72,22 +65,6 @@ class IdeaViewModel(QObject):
     @variant_map_property(notify=selectedIdeaChanged)
     def selectedIdea(self) -> dict[str, Any]:
         return self._selected_idea_data
-
-    @Property(bool, notify=dialogStateChanged)
-    def isDialogOpen(self) -> bool:
-        return self._is_dialog_open
-
-    @Property(str, notify=dialogStateChanged)
-    def dialogMode(self) -> str:
-        return self._dialog_mode
-
-    @Property(int, notify=dialogStateChanged)
-    def dialogIdeaId(self) -> int:
-        return self._dialog_idea_id
-
-    @variant_map_property(notify=dialogStateChanged)
-    def dialogInitialData(self) -> dict[str, Any]:
-        return self._dialog_initial_data
 
     @Property(int, notify=statsChanged)
     def totalIdeas(self) -> int:
@@ -132,8 +109,12 @@ class IdeaViewModel(QObject):
         self._selected_idea_id = idea_id
         self._refresh_selected_idea()
 
+    def cached_idea(self, idea_id: int) -> Idea | None:
+        """Yüklü listedeki fikri döndürür; diyalog ViewModel'i form verisi için kullanır."""
+        return next((x for x in self._ideas_cache if x.id == idea_id), None)
+
     def _refresh_selected_idea(self) -> None:
-        idea = next((x for x in self._ideas_cache if x.id == self._selected_idea_id), None)
+        idea = self.cached_idea(self._selected_idea_id)
         if not idea:
             self._selected_idea_data = {}
         else:
@@ -150,77 +131,6 @@ class IdeaViewModel(QObject):
                 "convertedProjectId": idea.converted_project_id or 0,
             }
         self.selectedIdeaChanged.emit()
-
-    # ── Dialog Slots ────────────────────────────────────────────────────────
-
-    @Slot()
-    def openCreateDialog(self) -> None:
-        self._dialog_mode = "create"
-        self._dialog_idea_id = 0
-        self._dialog_initial_data = {
-            "title": "",
-            "problem": "",
-            "solution": "",
-            "target_user": "",
-            "status": "RAW",
-            "priority": "MEDIUM",
-            "notes": "",
-            "source_link": "",
-        }
-        self._is_dialog_open = True
-        self.dialogStateChanged.emit()
-
-    @Slot(int)
-    def openEditDialog(self, idea_id: int) -> None:
-        idea = next((x for x in self._ideas_cache if x.id == idea_id), None)
-        if not idea:
-            return
-        self._dialog_mode = "edit"
-        self._dialog_idea_id = idea_id
-        self._dialog_initial_data = {
-            "title": idea.title,
-            "problem": idea.problem or "",
-            "solution": idea.solution or "",
-            "target_user": idea.target_user or "",
-            "status": idea.status,
-            "priority": idea.priority,
-            "notes": idea.notes or "",
-            "source_link": idea.source_link or "",
-        }
-        self._is_dialog_open = True
-        self.dialogStateChanged.emit()
-
-    @Slot()
-    def closeDialog(self) -> None:
-        self._is_dialog_open = False
-        self.dialogStateChanged.emit()
-
-    @Slot("QVariantMap")
-    def saveIdea(self, data: dict[str, Any]) -> None:
-        title = str(data.get("title", "")).strip()
-        if not title:
-            self._event_bus.publish("toast.show", message="Fikir başlığı boş olamaz", type_="danger")  # l10n: data
-            return
-
-        kwargs = {
-            "problem": str(data.get("problem", "")),
-            "solution": str(data.get("solution", "")),
-            "target_user": str(data.get("target_user", "")),
-            "status": str(data.get("status", "RAW")),
-            "priority": str(data.get("priority", "MEDIUM")),
-            "notes": str(data.get("notes", "")),
-            "source_link": str(data.get("source_link", "")),
-        }
-
-        if self._dialog_mode == "edit" and self._dialog_idea_id != 0:
-            self._controller.update_idea(self._dialog_idea_id, title=title, **kwargs)
-            self._event_bus.publish("toast.show", message="Fikir güncellendi", type_="success")  # l10n: data
-        else:
-            self._controller.create_idea(title=title, **kwargs)
-            self._event_bus.publish("toast.show", message="Fikir oluşturuldu", type_="success")  # l10n: data
-
-        self.closeDialog()
-        self.loadIdeas()
 
     @Slot(int)
     def deleteIdea(self, idea_id: int) -> None:

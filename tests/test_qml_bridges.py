@@ -38,6 +38,7 @@ from presentation.viewmodels.dashboard_viewmodel import DashboardViewModel
 from presentation.viewmodels.i18n_bridge import I18nBridge
 from presentation.viewmodels.icon_provider import IconImageProvider
 from presentation.viewmodels.idea_list_model import IdeaListModel
+from presentation.viewmodels.idea_dialog_viewmodel import IdeaDialogViewModel
 from presentation.viewmodels.idea_viewmodel import IdeaViewModel
 from presentation.viewmodels.memo_list_model import MemoListModel
 from presentation.viewmodels.memo_viewmodel import MemoViewModel
@@ -440,15 +441,16 @@ def test_idea_viewmodel_crud_and_convert(qapp: QApplication, container: DIContai
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
 
-    assert not ivm.isDialogOpen
-    ivm.openCreateDialog()
-    assert ivm.isDialogOpen
-    assert ivm.dialogMode == "create"
-    ivm.closeDialog()
-    assert not ivm.isDialogOpen
+    dialog = IdeaDialogViewModel(container, ivm, parent=qapp)
+    assert not dialog.isDialogOpen
+    dialog.openCreateDialog()
+    assert dialog.isDialogOpen
+    assert dialog.dialogMode == "create"
+    dialog.closeDialog()
+    assert not dialog.isDialogOpen
 
     idea_title = f"Test Fikir {os.getpid()}"
-    ivm.saveIdea({
+    dialog.saveIdea({
         "title": idea_title,
         "problem": "Otomasyon eksikliği",
         "solution": "QML arayüzü",
@@ -721,6 +723,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     tv = TaskViewModel(container, parent=qapp)
     tdv = TaskDialogViewModel(container, tv, parent=qapp)
     iv = IdeaViewModel(container, parent=qapp)
+    idv = IdeaDialogViewModel(container, iv, parent=qapp)
     mv = MemoViewModel(container, parent=qapp)
     anv = AnalyticsViewModel(container, parent=qapp)
     arv = ArchiveViewModel(container, parent=qapp)
@@ -737,6 +740,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     qapp._test_tv = tv  # type: ignore[attr-defined]
     qapp._test_tdv = tdv  # type: ignore[attr-defined]
     qapp._test_iv = iv  # type: ignore[attr-defined]
+    qapp._test_idv = idv  # type: ignore[attr-defined]
     qapp._test_mv = mv  # type: ignore[attr-defined]
     qapp._test_anv = anv  # type: ignore[attr-defined]
     qapp._test_arv = arv  # type: ignore[attr-defined]
@@ -753,6 +757,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
     engine.rootContext().setContextProperty("taskViewModel", tv)
     engine.rootContext().setContextProperty("taskDialogViewModel", tdv)
     engine.rootContext().setContextProperty("ideaViewModel", iv)
+    engine.rootContext().setContextProperty("ideaDialogViewModel", idv)
     engine.rootContext().setContextProperty("memoViewModel", mv)
     engine.rootContext().setContextProperty("analyticsViewModel", anv)
     engine.rootContext().setContextProperty("archiveViewModel", arv)
