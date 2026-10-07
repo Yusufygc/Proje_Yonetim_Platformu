@@ -78,9 +78,8 @@ Bu doküman, **Proje Yönetim ve Takip Platformu** projesinde geliştirilecek t�
 
 ---
 
-## 7. Süreç Takip ve Dosya Entegrasyon Kuralları (Graphify & Claude/Agents)
+## 7. Süreç Takip ve Dosya Entegrasyon Kuralları (Claude/Agents)
 
-* **Graphify Güncellemesi:** Projenin modül bağımlılıklarını, mimari şemasını veya süreç akışını etkileyen herhangi bir yapısal değişiklik, veritabanı şema güncellemesi (migration) ya da yeni katman eklemesi sonrasında projeye ait bağımlılık grafikleri ve `graphify` mimari haritası anında güncellenecektir. Mimari şema ile mevcut kod tabanı asla çelişmemelidir.
 * **CLAUDE.md ve AGENTS.md Protokolü:** Proje dizininde yer alan `CLAUDE.md` veya `AGENTS.md` dosyalarındaki geliştirme ortamı komutlarına, test çalıştırma protokollerine ve otomatik ajan kurallarına mutlak suretle uyulacaktır. Ajanlar veya asistanlar kod üretmeden önce bu dosyalardaki güncel state'i, bağımlılıkları ve kısıtlamaları okumak ve harfiyen işletmekle yükümlüdür.
 * **Dokümantasyon Güncelleme Zorunluluğu:** Yeni bir özellik eklendiğinde veya mevcut davranış değiştirildiğinde aşağıdaki belgeler aynı commit kapsamında güncellenmelidir; güncellenmemişse commit kabul edilmez:
     * `README.md` — Özellikler, kullanım talimatları veya ekran görüntüleri bölümü.

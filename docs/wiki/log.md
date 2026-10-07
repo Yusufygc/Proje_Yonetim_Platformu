@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-08] CLEANUP | Graphify Projeden Kaldırıldı
+- Silindi: `.graphifyignore`, `graphify-out/` (üretilmiş harita çıktıları, 2,4 MB), `.gitignore` içindeki Graphify bloğu.
+- Güncellendi: `Project_docs/RULES.md` §7 (Graphify güncelleme maddesi çıkarıldı), `AGENTS.md` (graphify adımları wiki okuma/güncelleme ile değiştirildi), `Project_docs/18_PROJE_INSA_SURECI_PIPELINE.md`, `scripts/quality.py` (derleme taramasından `graphify-out` hariç tutması çıkarıldı).
+- Dokunulmadı: tarihî raporlar (`SENIOR_ANALIZ_RAPORU_2026-06-12.md`, `DENETIM_RAPORU_2026-10-07.md`) ve bu günlüğün eski kayıtları; geçmişi anlatıyorlar.
+- Bağımlılık, git hook veya CI adımı yoktu; başka dosya etkilenmedi.
+
 ## [2026-10-08] FEATURE | Analitik Sayfası Yeni Grafikler
 - Eklendi: aktivite ısı haritası (son 12 hafta), görev durum halkası, açılan/tamamlanan akış çizgisi (net birikim), ortalama tamamlanma süresi kartı. Ayrıntı: `analitik-sayfasi`.
 - "Zamanında %" kartı kaldırıldı (bitiş tarihi alanı olmadığı için anlamsızdı); haftalık etiket `H40/26` yerine `40.Hafta`; proje filtresi dönem düğmeleriyle aynı satırda en sağa alındı.

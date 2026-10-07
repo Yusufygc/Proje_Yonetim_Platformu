@@ -3,7 +3,7 @@
 Bu doküman, projede görev alacak otonom yazılım ajanları, CI/CD pipeline scriptleri ve otomatik kod üreticileri için kesin davranış sınırlarını belirler. Otonom ajanlar, bu repository üzerinde işlem yaparken aşağıdaki yaşam döngüsüne ve `RULES.md` kurallarına uymak zorundadır.
 
 ## 1. İşlem Öncesi Durum (State) Kontrolü
-- Kod yazmaya başlamadan önce mevcut mimariyi anlamak için `graphify` çıktılarını ve `RULES.md` dosyasını analiz et.
+- Kod yazmaya başlamadan önce mevcut mimariyi anlamak için `docs/wiki/index.md` ve `RULES.md` dosyalarını oku.
 - Ortam bağımlılıklarının (`requirements.txt` / sanal ortam) tam yüklendiğinden ve `pytest` testlerinin mevcut durumda başarılı olduğundan emin ol. Hatalı (failing) bir state üzerine yeni özellik inşa etme.
 
 ## 2. Geliştirme Sınırları ve Kuralları
@@ -15,8 +15,8 @@ Bu doküman, projede görev alacak otonom yazılım ajanları, CI/CD pipeline sc
 - Yaptığın değişiklikler sonrasında sistemi kendi kendine test et. Service katmanında yaptığın mantıksal değişiklikler için `pytest` kullanarak unit testler yaz veya mevcut testleri güncelle.
 - PySide6 UI testlerinde uygulamanın çökmediğini (crash) doğrulamak için Global Exception Hook'un tetiklenip tetiklenmediğini kontrol et.
 
-## 4. Otonom Graphify ve Dokümantasyon Güncellemesi
-- Bir sınıf silindiğinde, eklendiğinde veya bir SQLAlchemy modeli değiştiğinde, otonom olarak projenin `graphify` şemalarını güncelleyen betiği çalıştır.
+## 4. Dokümantasyon Güncellemesi
+- Bir sınıf silindiğinde, eklendiğinde veya bir SQLAlchemy modeli değiştiğinde ilgili `docs/wiki/` sayfasını ve `docs/wiki/log.md` kaydını güncelle.
 - Yapılan değişiklikleri projenin mimari Markdown belgelerine (gerekiyorsa) yansıt.
 
 ## 5. Güvenli Otonom Commit

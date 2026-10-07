@@ -10,7 +10,7 @@ def main() -> int:
     # Bu dosya scripts/ altında; proje kökü bir üst dizindedir.
     root = Path(__file__).resolve().parent.parent
     checks = [
-        [sys.executable, "-m", "compileall", "-q", "-x", r".*(\.venv|\.git|graphify-out).*", str(root)],
+        [sys.executable, "-m", "compileall", "-q", "-x", r".*(\.venv|\.git).*", str(root)],
         [sys.executable, "-m", "pytest", str(root / "tests"), "-q"],
         [sys.executable, "-m", "ruff", "check", str(root)],
         [

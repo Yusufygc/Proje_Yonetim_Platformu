@@ -12,7 +12,7 @@ Geliştiriciler ve otonom sistemler kodlamaya bu sırayı takip ederek başlamal
 1. **Klasör Ağacının Oluşturulması:** `RULES.md` belgesinde belirtilen tüm dizinlerin (`core/`, `domain/`, `infrastructure/`, `services/`, `controllers/`, `presentation/`, `resources/`) yaratılması.
 2. **Bağımlılıkların Yüklenmesi:** `pyproject.toml` üzerinden `poetry install` veya `uv pip install` komutu ile kilitli paketlerin (PySide6, SQLAlchemy, Alembic, vb.) sanal ortama kurulması.
 3. **Alembic Başlangıcı:** Terminalden `alembic init infrastructure/migrations` komutu çalıştırılarak veritabanı göç (migration) iskeletinin oluşturulması. `alembic.ini` dosyasının SQLite kullanacak şekilde ayarlanması.
-4. **Git İlklemesi:** `.gitignore`, `.claudeignore` ve `.graphifyignore` dosyaları eklenerek `git init` yapılması ve `Initial commit`'in atılması.
+4. **Git İlklemesi:** `.gitignore` ve `.claudeignore` dosyaları eklenerek `git init` yapılması ve `Initial commit`'in atılması.
 
 ---
 
