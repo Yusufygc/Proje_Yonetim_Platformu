@@ -19,6 +19,9 @@ from services.project_service import ProjectService
 
 logger = logging.getLogger(__name__)
 
+# recalculate_hierarchy bu iki durumdaki üst görevlere dokunmaz, bu yüzden elle verilebilirler.
+_MANUAL_PARENT_STATUSES = {TaskStatus.BLOCKED.value, TaskStatus.CANCELLED.value}
+
 
 class TaskService:
     """Manage task CRUD, checklist updates, and hierarchical WBS side effects."""
@@ -61,9 +64,23 @@ class TaskService:
         logger.info("Gorev olusturuldu: id=%d title='%s'", created.id, created.title)
         return created
 
+    def _assert_status_editable(self, task: Task, new_status: str) -> None:
+        """Alt görevi olan görevin durumu türetilir; yalnızca engel/iptal elle verilebilir."""
+        if new_status == task.status:
+            return
+        if new_status in _MANUAL_PARENT_STATUSES or task.status in _MANUAL_PARENT_STATUSES:
+            return
+        if any(item.parent_task_id == task.id for item in self._repo.get_by_project(task.project_id)):
+            raise TaskValidationError(
+                "Alt görevi olan görevin durumu alt görevlerinden otomatik hesaplanır; "
+                "yalnızca Engellendi veya İptal seçilebilir."
+            )
+
     def update_task(self, task_id: int, **kwargs: object) -> Task:
         task = self.get_task(task_id)
         old_status = task.status
+        if "status" in kwargs:
+            self._assert_status_editable(task, str(kwargs["status"]))
         if "parent_task_id" in kwargs and kwargs["parent_task_id"] is not None:
             self._validate_parent(task.project_id, int(kwargs["parent_task_id"]), task_id=task_id)
         for key, value in kwargs.items():
@@ -86,7 +103,9 @@ class TaskService:
     def toggle_status(self, task_id: int) -> Task:
         task = self.get_task(task_id)
         old_status = task.status
-        task.status = TaskStatus.TODO.value if task.status == TaskStatus.DONE.value else TaskStatus.DONE.value
+        next_status = TaskStatus.TODO.value if task.status == TaskStatus.DONE.value else TaskStatus.DONE.value
+        self._assert_status_editable(task, next_status)
+        task.status = next_status
         self._apply_status_side_effects(task, old_status=old_status)
         updated = self._repo.update(task)
         self._log(

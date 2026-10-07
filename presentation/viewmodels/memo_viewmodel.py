@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QFileDialog
 
 from app import config
 from domain.models.memo import Memo
+from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.memo_list_model import MemoListModel, _clean_body_markdown
 
 if TYPE_CHECKING:
@@ -42,6 +43,7 @@ class MemoViewModel(QObject):
         self.loadMemos()
 
     def _connect_signals(self) -> None:
+        forward_errors_to_toast(self._event_bus, self._controller)
         self._controller.memos_loaded.connect(self._on_memos_loaded)
         self._controller.memo_created.connect(self._on_memo_created)
         self._controller.memo_updated.connect(self._on_memo_updated)

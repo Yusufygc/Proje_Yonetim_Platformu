@@ -1,5 +1,13 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-07] REVIEW+FIX | Denetim Raporu Bulguları 1, 2, 4, 3: Yedek Bütünlüğü, Tam Dışa Aktarım, Hata Bildirimi, Üst Görev Durumu
+`DENETIM_RAPORU_2026-10-07.md` bulgularından ilk dördü uygulandı:
+- **[1] Yedek:** `BackupManager` artık `sqlite3.Connection.backup` kullanıyor; WAL modunda `-wal` dosyasındaki veri yedeğe giriyor (regresyon testi: `test_startup_backup_when_data_only_in_wal_should_include_it`). Ayarlar'daki "Veritabanını Yedekle" butonu ve `ExportService.backup_database`, `SettingsController.backup_database`, `SettingsViewModel.backupDatabase` kaldırıldı; otomatik açılış yedeği sürüyor.
+- **[Ayarlar]** Veri Yönetimi kartındaki dosya yolu bilgi satırları (veritabanı, yedek, JSON konumu) ve `dbPath`/`getDefaultBackupPath` kaldırıldı.
+- **[2] Dışa aktarım:** `ExportService.export_to_json` tüm kolonları yazıyor (`format_version: 2`): projeler (aşama, görev + checklist, karar, not, kaynak, ek, etiket, etkinlik), fikirler, proje-fikir bağları, memolar. Yeni kolonlar otomatik dışa aktarılır.
+- **[4] Hata bildirimi:** `presentation/viewmodels/error_reporting.forward_errors_to_toast` ile görev, aşama, karar, not, kaynak, fikir ve memo controller hataları toast olarak gösteriliyor. Görev oluşturma başarısızsa "oluşturuldu" mesajı ve diyalog kapanışı artık yok.
+- **[3] Üst görev durumu:** Alt görevi olan görevin durumu alt görevlerden türetilir; `TaskService` türetilen duruma elle geçişi `TaskValidationError` ile reddeder (yalnızca Engellendi/İptal elle verilebilir). Diyalogda üst görevler için "Otomatik / Engellendi / İptal" seçenekleri, satırda onay kutusu salt gösterge.
+
 ## [2026-10-07] FIX+FEATURE | QML Backend Uyumu: Görev Tipleri, Karar Durumları, Çıktılar, Düzenleme ve Geçmiş
 Backend'de olup QML'de eksik ya da uyumsuz kalan alanlar giderildi:
 - **[GÖREVLER]** Satır rozeti ve diyalog `TaskType` enum'u ile hizalandı (`GROUP`, `DOCUMENTATION`, `DESIGN`, `TEST`, `REVIEW` eklendi; enum'da olmayan `MILESTONE/EPIC/PHASE/SUBTASK` kaldırıldı). "Engellendi" durumunda `blocked_reason` alanı eklendi; öncelik ve tip filtreleri `TasksView`'a bağlandı. Hover butonları artık `HoverHandler` ile satırın tamamını izliyor.

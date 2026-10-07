@@ -9,7 +9,7 @@ from sqlalchemy import inspect, text
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core.exceptions.task_exceptions import TaskHierarchyError
+from core.exceptions.task_exceptions import TaskHierarchyError, TaskValidationError
 from domain.enums.idea_status import IdeaStatus
 from domain.enums.stage_status import StageStatus
 from domain.enums.task_status import TaskStatus
@@ -158,6 +158,59 @@ def test_export_uses_existing_idea_fields(service_stack, tmp_path):
     assert idea["solution"] == "Çözüm"
     assert idea["notes"] == "Not"
     assert "description" not in idea
+
+
+def test_export_to_json_when_project_has_children_should_include_all_content(service_stack, tmp_path):
+    project = service_stack["project_service"].create_project(title="Export projesi")
+    task_service = service_stack["task_service"]
+    task = task_service.create_task(project.id, "Görev", description="Açıklama", priority="HIGH")
+    task_service.add_checklist_item(task.id, "Madde")
+    target = tmp_path / "export.json"
+
+    ExportService(service_stack["db"]).export_to_json(str(target))
+
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    exported = next(item for item in payload["projects"] if item["id"] == project.id)
+    exported_task = exported["tasks"][0]
+    assert exported_task["description"] == "Açıklama"
+    assert exported_task["priority"] == "HIGH"
+    assert [item["text"] for item in exported_task["checklist_items"]] == ["Madde"]
+    assert exported["stages"]
+    assert exported["activity_logs"]
+    assert payload["format_version"] >= 2
+
+
+def test_update_task_when_parent_gets_derived_status_should_raise_validation_error(service_stack):
+    project = service_stack["project_service"].create_project("WBS")
+    tasks = service_stack["task_service"]
+    parent = tasks.create_task(project.id, "Ekran")
+    tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
+
+    with pytest.raises(TaskValidationError):
+        tasks.update_task(parent.id, status=TaskStatus.DONE.value)
+
+    assert tasks.get_task(parent.id).status == TaskStatus.TODO.value
+
+
+def test_update_task_when_parent_is_blocked_manually_should_keep_blocked(service_stack):
+    project = service_stack["project_service"].create_project("WBS")
+    tasks = service_stack["task_service"]
+    parent = tasks.create_task(project.id, "Ekran")
+    tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
+
+    tasks.update_task(parent.id, status=TaskStatus.BLOCKED.value)
+
+    assert tasks.get_task(parent.id).status == TaskStatus.BLOCKED.value
+
+
+def test_toggle_status_when_task_has_children_should_raise_validation_error(service_stack):
+    project = service_stack["project_service"].create_project("WBS")
+    tasks = service_stack["task_service"]
+    parent = tasks.create_task(project.id, "Ekran")
+    tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
+
+    with pytest.raises(TaskValidationError):
+        tasks.toggle_status(parent.id)
 
 
 def test_old_database_migration_adds_parent_task_id_column():

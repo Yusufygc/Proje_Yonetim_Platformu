@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from domain.models.idea import Idea
+from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.idea_list_model import IdeaListModel
 
 if TYPE_CHECKING:
@@ -44,6 +45,7 @@ class IdeaViewModel(QObject):
         self.loadIdeas()
 
     def _connect_signals(self) -> None:
+        forward_errors_to_toast(self._event_bus, self._controller)
         self._controller.ideas_loaded.connect(self._on_ideas_loaded)
         self._controller.idea_created.connect(self._on_idea_modified)
         self._controller.idea_updated.connect(self._on_idea_modified)

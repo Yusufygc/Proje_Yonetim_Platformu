@@ -101,8 +101,10 @@ Rectangle {
                 visible: model.status === "DONE"
             }
 
+            // Alt görevi olan görevin durumu alt görevlerinden hesaplanır; kutu salt gösterge.
             MouseArea {
                 anchors.fill: parent
+                enabled: !model.hasChildren
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     if (taskViewModel) {

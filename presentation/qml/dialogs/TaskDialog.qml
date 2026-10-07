@@ -24,6 +24,21 @@ Rectangle {
     }
 
     property var checklistItems: []
+    property bool hasChildren: false
+
+    readonly property var leafStatusModel: [
+        { "text": i18nBridge.tr("task_status_todo", "Yapılacak"), "value": "TODO" },
+        { "text": i18nBridge.tr("task_status_in_progress", "Devam Ediyor"), "value": "IN_PROGRESS" },
+        { "text": i18nBridge.tr("task_status_waiting", "Bekliyor"), "value": "WAITING" },
+        { "text": i18nBridge.tr("task_status_blocked", "Engellendi"), "value": "BLOCKED" },
+        { "text": i18nBridge.tr("task_status_done", "Tamamlandı"), "value": "DONE" },
+        { "text": i18nBridge.tr("task_status_cancelled", "İptal Edildi"), "value": "CANCELLED" }
+    ]
+    readonly property var parentStatusModel: [
+        { "text": i18nBridge.tr("task_status_auto", "Otomatik (alt görevlerden)"), "value": "AUTO" },
+        { "text": i18nBridge.tr("task_status_blocked", "Engellendi"), "value": "BLOCKED" },
+        { "text": i18nBridge.tr("task_status_cancelled", "İptal Edildi"), "value": "CANCELLED" }
+    ]
 
     Connections {
         target: taskViewModel
@@ -32,7 +47,9 @@ Rectangle {
                 var init = taskViewModel.dialogInitialData
                 titleInput.text = init.title || ""
                 descInput.text = init.description || ""
-                statusCombo.selectedValue = init.status || "TODO"
+                root.hasChildren = init.has_children === true
+                var manualParent = init.status === "BLOCKED" || init.status === "CANCELLED"
+                statusCombo.selectedValue = root.hasChildren && !manualParent ? "AUTO" : (init.status || "TODO")
                 priorityCombo.selectedValue = init.priority || "MEDIUM"
                 typeCombo.selectedValue = init.task_type || "TASK"
                 blockedReasonInput.text = init.blocked_reason || ""
@@ -142,14 +159,8 @@ Rectangle {
                             label: i18nBridge.tr("label_status", "Durum")
                             Layout.fillWidth: true
                             Layout.preferredWidth: 1
-                            model: [
-                                { "text": i18nBridge.tr("task_status_todo", "Yapılacak"), "value": "TODO" },
-                                { "text": i18nBridge.tr("task_status_in_progress", "Devam Ediyor"), "value": "IN_PROGRESS" },
-                                { "text": i18nBridge.tr("task_status_waiting", "Bekliyor"), "value": "WAITING" },
-                                { "text": i18nBridge.tr("task_status_blocked", "Engellendi"), "value": "BLOCKED" },
-                                { "text": i18nBridge.tr("task_status_done", "Tamamlandı"), "value": "DONE" },
-                                { "text": i18nBridge.tr("task_status_cancelled", "İptal Edildi"), "value": "CANCELLED" }
-                            ]
+                            // Alt görevi olan görevin durumu alt görevlerinden hesaplanır; elle yalnızca engel/iptal verilebilir.
+                            model: root.hasChildren ? root.parentStatusModel : root.leafStatusModel
                         }
 
                         AppComboBox {

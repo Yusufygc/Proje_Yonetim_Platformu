@@ -17,6 +17,7 @@ from core.events.event_bus import EventBus
 from domain.models.attachment import Attachment
 from domain.models.project import Project
 from domain.models.project_stage import ProjectStage
+from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.project_list_model import ProjectListModel
 
 logger = logging.getLogger(__name__)
@@ -76,6 +77,14 @@ class ProjectViewModel(QObject):
         self._controller.project_created.connect(lambda _p: self.loadProjects())
         self._controller.project_updated.connect(self._on_project_updated)
         self._controller.project_deleted.connect(lambda _id: self.loadProjects())
+        # project_controller hatalarını ArchiveViewModel zaten toast'a çeviriyor; çift bildirim olmasın.
+        forward_errors_to_toast(
+            self._event_bus,
+            self._stage_controller,
+            self._decision_controller,
+            self._note_controller,
+            self._resource_controller,
+        )
         self._stage_controller.stages_loaded.connect(self._on_stages_loaded)
         self._stage_controller.stage_updated.connect(self._on_stage_updated)
         self._decision_controller.decisions_loaded.connect(self._on_decisions_loaded)

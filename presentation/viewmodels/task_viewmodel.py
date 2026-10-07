@@ -8,12 +8,16 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 from PySide6.QtGui import QGuiApplication
 
 from domain.models.task import Task
+from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.task_list_model import TaskListModel
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer
 
 logger = logging.getLogger(__name__)
+
+# Diyalogdaki "Otomatik" durum seçeneği; alt görevi olan görevler için kullanılır.
+_AUTO_STATUS = "AUTO"
 
 
 class TaskViewModel(QObject):
@@ -51,6 +55,7 @@ class TaskViewModel(QObject):
         self.loadProjects()
 
     def _connect_signals(self) -> None:
+        forward_errors_to_toast(self._event_bus, self._task_controller)
         self._task_controller.tasks_loaded.connect(self._on_tasks_loaded)
         self._task_controller.task_created.connect(self._on_task_modified)
         self._task_controller.task_updated.connect(self._on_task_modified)
@@ -274,6 +279,7 @@ class TaskViewModel(QObject):
             "priority": t.priority,
             "task_type": t.task_type,
             "blocked_reason": t.blocked_reason or "",
+            "has_children": any(x.parent_task_id == task_id for x in self._tasks_cache),
             "checklist": chk_list,
         }
         self._is_dialog_open = True
@@ -292,6 +298,8 @@ class TaskViewModel(QObject):
             return
 
         kwargs = self._build_task_fields(data)
+        if kwargs["status"] == _AUTO_STATUS:
+            self._resolve_auto_status(kwargs)
 
         if self._dialog_mode == "edit" and self._dialog_task_id != 0:
             self._task_controller.update_task(self._dialog_task_id, title=title, **kwargs)
@@ -304,14 +312,23 @@ class TaskViewModel(QObject):
                 parent_task_id=parent_id,
                 **kwargs,
             )
-            checklist_items = data.get("checklist_items", [])
-            if created and checklist_items:
-                for item_text in checklist_items:
-                    if str(item_text).strip():
-                        self._task_controller.add_checklist_item(created.id, str(item_text).strip())
+            if created is None:
+                # Hata toast'ı controller sinyalinden geldi; diyalog açık kalsın ki girilen veri kaybolmasın.
+                return
+            for item_text in data.get("checklist_items", []):
+                if str(item_text).strip():
+                    self._task_controller.add_checklist_item(created.id, str(item_text).strip())
             self._event_bus.publish("toast.show", message="Görev oluşturuldu", type_="success")  # l10n: data
 
         self.closeDialog()
+
+    def _resolve_auto_status(self, kwargs: dict[str, Any]) -> None:
+        """"Otomatik" seçimi: durum alt görevlerden türetilir, engelli/iptal ise önce kilit açılır."""
+        task = next((x for x in self._tasks_cache if x.id == self._dialog_task_id), None)
+        if task is not None and task.status in ("BLOCKED", "CANCELLED"):
+            kwargs["status"] = "TODO"
+            return
+        kwargs.pop("status")
 
     def _build_task_fields(self, data: dict[str, Any]) -> dict[str, Any]:
         """Form verisini servis alanlarına çevirir."""
