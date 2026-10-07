@@ -5,7 +5,9 @@
 - **Kod:** `UpdateService`, `UpdateController`, `UpdateViewModel`, `UpdateDialog.qml`, Ayarlar'da "Güncellemeleri Denetle"; yerelleştirme anahtarları (tr/en) eklendi.
 - **Yayın:** `scripts/set_version.py` (dört dosyada sürüm), `.github/workflows/release.yml` (etiketle derle ve yayınla), `installer/windows.iss` (kapatma ve sessiz kurulum sonrası yeniden açma).
 - **CI:** `ruff` I001/F401/F811 bulguları giderildi (28 import bloğu); `uv.lock` `keyring` kaldırılınca yeniden üretildi.
-- **Doğrulanmadı:** Release iş akışı ve gerçek güncelleme (installer'ın uygulamayı kapatıp yeniden açması) henüz hiç koşmadı.
+- **İlk yayın:** `v0.1.1` GitHub Releases'te (161 MB installer, API SHA-256 özeti veriyor). İlk denemede PyInstaller spec'i vosk DLL'lerini sabit `.venv` yolunda arıyordu; yol kurulu paketten hesaplanır hale geldi. Etiket, yayın oluşmadan önce yeni commit'e taşındı.
+- **Doğrulanmadı:** Gerçek güncelleme (installer'ın uygulamayı kapatıp yeniden açması) için eski sürümden yeniye geçiş denenmedi; bunun için `v0.1.1` kurulu iken `v0.1.2` yayınlanmalı.
+- **Test takılması:** Çizim tuvali testi motoru silmeden bittiği için pytest kapanışta takılıyordu (CI'ı 15 dk kilitliyordu); test nesneleri açıkça siliyor, `faulthandler_timeout` ve CI zaman aşımı eklendi.
 
 ## [2026-10-07] REFACTOR | DrawingCanvas Bölündü
 - **`DrawingCanvas.qml`** 1325 → 399 satır. Araç çubukları, metin düzenleme penceresi ve çizim mantığı `presentation/qml/views/memo/drawing/` altına taşındı (ayrıntı: `notlar-modulu`).
