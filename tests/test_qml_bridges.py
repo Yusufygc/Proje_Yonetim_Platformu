@@ -986,6 +986,14 @@ def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContaine
     canvas.loadDrawingJson(json.dumps(data_with_img))
     assert canvas.property("backgroundImage") == test_img_url
 
+    # Asenkron Image bir görsel okuyucu iş parçacığı başlatır; motor süreç çıkışına kadar yaşarsa
+    # kapanış sonsuza dek takılır. Bu yüzden nesneleri açıkça, olay döngüsü olmadan silerek bitir.
+    from PySide6.QtCore import QCoreApplication, QEvent  # noqa: PLC0415
+    canvas.clearBackgroundImage()
+    canvas.deleteLater()
+    engine.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
 
 
 
