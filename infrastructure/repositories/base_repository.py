@@ -8,7 +8,7 @@ ile detached olarak döndürülür (UI thread'e güvenli aktarım).
 """
 from __future__ import annotations
 
-from typing import Any, ClassVar, Generic, Optional, TypeVar, cast, Any
+from typing import Any, ClassVar, Generic, Optional, TypeVar, cast
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session

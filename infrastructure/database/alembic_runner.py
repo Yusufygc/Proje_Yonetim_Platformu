@@ -28,7 +28,6 @@ def run_alembic_migrations(engine: Engine, database_url: str) -> None:
 
     try:
         from alembic import command
-        from alembic.config import Config
     except ImportError:
         logger.warning("Alembic is not installed; falling back to legacy migration runner.")
         run_legacy_migrations(engine)
