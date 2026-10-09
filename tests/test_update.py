@@ -263,3 +263,21 @@ def test_set_version_when_version_invalid_should_exit(tmp_path: Path) -> None:
 
     with pytest.raises(SystemExit):
         set_version(tmp_path, "1.4")
+
+
+def test_launch_installer_when_called_should_run_silent_with_log_next_to_installer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[list[str]] = []
+    monkeypatch.setattr("services.update_service.os.name", "nt")
+    monkeypatch.setattr(
+        "services.update_service.subprocess.Popen", lambda args, **_kwargs: calls.append(args)
+    )
+    monkeypatch.setattr("services.update_service.subprocess.DETACHED_PROCESS", 8, raising=False)
+    monkeypatch.setattr("services.update_service.subprocess.CREATE_NEW_PROCESS_GROUP", 512, raising=False)
+    installer = tmp_path / ASSET
+
+    UpdateService.launch_installer(installer)
+
+    assert calls[0][:4] == [str(installer), "/SILENT", "/SUPPRESSMSGBOXES", "/CLOSEAPPLICATIONS"]
+    assert calls[0][4] == f"/LOG={tmp_path / 'install.log'}"

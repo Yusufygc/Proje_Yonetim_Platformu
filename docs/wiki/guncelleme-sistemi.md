@@ -8,7 +8,7 @@ Paketlenmiş uygulama açılışta GitHub Releases'te yeni sürüm arar; varsa "
 2. **Denetim:** `UpdateViewModel.checkOnStartup()` açılıştan 3 sn sonra çağrılır (`main_qml.py`). Yalnızca paketlenmiş uygulamada çalışır; kaynak koddan denemek için `PROJE_TAKIP_UPDATE_CHECK=1`. Ağ yoksa sessiz geçer.
 3. **Karşılaştırma:** `UpdateService.check_for_update()` `releases/latest` yanıtındaki etiketi `app/config.py` `APP_VERSION` ile sayısal olarak (`0.10.0 > 0.9.0`) karşılaştırır. Ön sürüm ve taslaklar `latest` sonucunda yoktur.
 4. **İndirme:** Arka planda (`Worker`), ilerleme çubuğuyla. Boyut ve (GitHub'ın verdiği) SHA-256 özeti doğrulanır; uyuşmazsa dosya silinir.
-5. **Kurulum:** `/SILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS` ile bağımsız süreç başlatılır, `quitRequested` ile uygulama kapanır. `installer/windows.iss` içindeki `Check: WizardSilent` satırı kurulumdan sonra uygulamayı yeniden açar.
+5. **Kurulum:** `/SILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /LOG=<indirme klasörü>\install.log` ile bağımsız süreç başlatılır (sessiz kurulum hata göstermez; neden `%TEMP%\ProjeTakipUpdate\install.log` içinde), `quitRequested` ile uygulama kapanır. `installer/windows.iss` içindeki `Check: WizardSilent` satırı kurulumdan sonra uygulamayı yeniden açar.
 
 ## Katmanlar
 

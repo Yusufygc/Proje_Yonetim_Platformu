@@ -1,5 +1,12 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-09] FIX | Uygulama Her Kapanışta Çöküyordu, Güncelleme Kurulmadı
+- Belirti: v0.1.1'den v0.1.2'ye uygulama içi güncelleme indirildi (özet doğru), uygulama kapandı ama kurulum gerçekleşmedi ve uygulama yeniden açılmadı; kayıtlı sürüm 0.1.1 kaldı, tekrar denetimde aynı güncelleme çıktı.
+- Windows olay günlüğünde her kapanışta `ProjeTakipPlatformu.exe` çökmesi (`0xc0000409`, `ucrtbase.dll`) vardı. Kaynaktan yeniden üretildi: `main_qml.py` aynı `IconImageProvider` nesnesini `"icons"` ve `"icon"` adlarıyla iki kez ekliyordu; motor sağlayıcıyı sahiplenip kapanışta iki kez siliyordu. QML yalnızca `"icons"` kullanıyor, ikinci kayıt kaldırıldı. Kapanışta arka plan işleri beklenip motor `QApplication`'dan önce yıkılıyor.
+- Kurulumun neden yapılmadığı kesinleşmedi: en olası neden, çöken süreç Windows hata raporu sırasında açık kaldığı için sessiz kurulumun dosyaları değiştirememesi. Sessiz kurulum artık `/LOG` ile `%TEMP%\ProjeTakipUpdate\install.log` yazar.
+- Eski sürümlerin (0.1.1, 0.1.2) kapanışı hâlâ çöker; bu düzeltmeyi içeren sürüme ilk geçiş kurulum dosyasıyla elle yapılmalı olabilir.
+- Testler: kurulum argümanları, sağlayıcının tek kez eklenmesi.
+
 ## [2026-10-09] FIX | Üst Görev Alt Görevler Bitince Kendiliğinden Kapanmıyor
 - `recalculate_hierarchy` tüm alt görevler `DONE` olunca üst görevi de `DONE` yapıp kök listenin sonuna taşıyordu. Artık üst görev yalnızca kullanıcı onay kutusunu işaretleyince (veya diyalogdan Tamamlandı seçince) kapanır; alt görevler bitince Devam Ediyor görünür.
 - Biten alt görev yalnızca kendi kardeş grubunun sonuna geçer, üst görev yerinde kalır. Üst görev kapatılınca kök listenin sonuna iner.

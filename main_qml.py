@@ -52,7 +52,7 @@ def run_qml_app() -> int:
     container.bootstrap()
     OnboardingService(container).run_if_needed()
 
-    from PySide6.QtCore import QTimer  # noqa: PLC0415
+    from PySide6.QtCore import QThreadPool, QTimer  # noqa: PLC0415
     from PySide6.QtGui import QFont, QIcon  # noqa: PLC0415
     from PySide6.QtQml import QQmlApplicationEngine  # noqa: PLC0415
     from PySide6.QtQuickControls2 import QQuickStyle  # noqa: PLC0415
@@ -87,8 +87,9 @@ def run_qml_app() -> int:
     # QML Engine ve Köprü Nesneleri
     engine = QQmlApplicationEngine()
     icon_provider = IconImageProvider(container.icons)
+    # Motor eklenen sağlayıcıyı sahiplenip kapanışta siler; aynı nesne iki adla eklenince iki kez
+    # silinip süreç çöküyordu. QML yalnızca "icons" adını kullanıyor.
     engine.addImageProvider("icons", icon_provider)
-    engine.addImageProvider("icon", icon_provider)
 
     from presentation.viewmodels.analytics_viewmodel import AnalyticsViewModel  # noqa: PLC0415
     from presentation.viewmodels.archive_viewmodel import ArchiveViewModel  # noqa: PLC0415
@@ -180,7 +181,12 @@ def run_qml_app() -> int:
     QTimer.singleShot(200, container.run_deferred_startup_tasks)
     # Açılış yavaşlamasın diye arayüz yerleştikten sonra denetlenir.
     QTimer.singleShot(3000, update_viewmodel.checkOnStartup)
-    return app.exec()
+    exit_code = app.exec()
+    # Fonksiyon dönerken Python yerel nesneleri belirsiz sırayla siler; motorun QApplication'dan önce,
+    # arka plan işleri bittikten sonra yıkılması kapanışı belirli hale getirir.
+    QThreadPool.globalInstance().waitForDone(3000)
+    del engine
+    return exit_code
 
 
 if __name__ == "__main__":

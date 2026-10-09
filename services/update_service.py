@@ -101,8 +101,10 @@ class UpdateService:
             raise UpdateError("Otomatik kurulum yalnızca Windows'ta desteklenir.")
         flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
         # SILENT: sihirbaz sormadan ilerleme penceresiyle kurar; kurulum sonrası uygulama kendiliğinden açılır.
+        # Sessiz kurulum hata penceresi göstermez; başarısız olursa nedenini bu log anlatır.
+        log_path = installer.with_name("install.log")
         subprocess.Popen(
-            [str(installer), "/SILENT", "/SUPPRESSMSGBOXES", "/CLOSEAPPLICATIONS"],
+            [str(installer), "/SILENT", "/SUPPRESSMSGBOXES", "/CLOSEAPPLICATIONS", f"/LOG={log_path}"],
             close_fds=True,
             creationflags=flags,
         )

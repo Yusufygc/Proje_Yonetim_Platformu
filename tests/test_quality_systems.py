@@ -128,3 +128,11 @@ def test_data_paths_when_running_tests_should_not_point_to_real_user_data() -> N
     for path in (config.DATA_DIR, config.LOG_FILE, config.MEMO_IMAGES_DIR, config.BACKUPS_DIR):
         resolved = Path(path).resolve()
         assert not any(resolved == real or real in resolved.parents for real in real_dirs)
+
+
+def test_main_qml_when_registering_image_providers_should_add_each_instance_once() -> None:
+    # Motor sağlayıcıyı sahiplenir; aynı nesne iki kez eklenirse kapanışta iki kez silinip süreç çöker.
+    source = (Path(__file__).resolve().parents[1] / "main_qml.py").read_text(encoding="utf-8")
+    registered = [line.split(",")[1].strip(" )") for line in source.splitlines() if "addImageProvider(" in line]
+    assert registered
+    assert len(registered) == len(set(registered))
