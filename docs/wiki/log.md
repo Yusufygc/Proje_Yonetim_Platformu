@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-09] FIX | Üst Görev Alt Görevler Bitince Kendiliğinden Kapanmıyor
+- `recalculate_hierarchy` tüm alt görevler `DONE` olunca üst görevi de `DONE` yapıp kök listenin sonuna taşıyordu. Artık üst görev yalnızca kullanıcı onay kutusunu işaretleyince (veya diyalogdan Tamamlandı seçince) kapanır; alt görevler bitince Devam Ediyor görünür.
+- Biten alt görev yalnızca kendi kardeş grubunun sonuna geçer, üst görev yerinde kalır. Üst görev kapatılınca kök listenin sonuna iner.
+- `TaskItemDelegate.qml` onay kutusu üst görevlerde de tıklanabilir; `TaskDialog.qml` üst görev durum listesine "Tamamlandı" eklendi. Daha önce otomatik kapanmış üst görevler kapalı kalır, istenirse onay kutusundan açılır.
+- Testler: üst görevin kapanmaması, alt görev ve üst görev sıralaması, diyalogdan elle kapatma.
+
 ## [2026-10-08] FIX | Testler Gerçek Veri Klasörüne Yazıyordu
 - Ayar denetiminin devamında bulundu: `DIContainer.bootstrap()` log dosyasını `%LOCALAPPDATA%\ProjeTakip\logs` altında açıyor, `test_memo_viewmodel_crud` panodaki görseli `memo_images` altına kaydediyordu. Her test çalışması kullanıcının log geçmişini DEBUG gürültüsüyle döndürüyor (3 yedek x 5 MB) ve klasöre 118 baytlık test görseli ekliyordu (103 adet birikmişti, veritabanından hiçbiri referanslı değil).
 - `tests/conftest.py` artık `config.DATA_DIR`, veritabanı, log, yedek ve görsel yollarını geçici dizine yönlendiriyor; `test_data_paths_when_running_tests_should_not_point_to_real_user_data` bunu doğruluyor. Test sonrası gerçek klasörün değişmediği elle doğrulandı.

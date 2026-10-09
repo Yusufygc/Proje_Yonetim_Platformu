@@ -187,7 +187,7 @@ def test_update_task_when_parent_gets_derived_status_should_raise_validation_err
     tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
 
     with pytest.raises(TaskValidationError):
-        tasks.update_task(parent.id, status=TaskStatus.DONE.value)
+        tasks.update_task(parent.id, status=TaskStatus.IN_PROGRESS.value)
 
     assert tasks.get_task(parent.id).status == TaskStatus.TODO.value
 
@@ -203,14 +203,58 @@ def test_update_task_when_parent_is_blocked_manually_should_keep_blocked(service
     assert tasks.get_task(parent.id).status == TaskStatus.BLOCKED.value
 
 
-def test_toggle_status_when_task_has_children_should_raise_validation_error(service_stack):
+def test_toggle_status_when_task_has_children_should_close_and_reopen_parent(service_stack):
     project = service_stack["project_service"].create_project("WBS")
     tasks = service_stack["task_service"]
     parent = tasks.create_task(project.id, "Ekran")
     tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
 
-    with pytest.raises(TaskValidationError):
-        tasks.toggle_status(parent.id)
+    assert tasks.toggle_status(parent.id).status == TaskStatus.DONE.value
+    assert tasks.toggle_status(parent.id).status == TaskStatus.TODO.value
+
+
+def test_update_child_when_all_children_done_should_not_close_parent(service_stack):
+    project = service_stack["project_service"].create_project("WBS")
+    tasks = service_stack["task_service"]
+    parent = tasks.create_task(project.id, "Ekran")
+    first = tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
+    second = tasks.create_task(project.id, "Menü", parent_task_id=parent.id)
+
+    tasks.toggle_status(first.id)
+    tasks.toggle_status(second.id)
+
+    refreshed = tasks.get_task(parent.id)
+    assert refreshed.status == TaskStatus.IN_PROGRESS.value
+    assert refreshed.completed_at is None
+
+
+def test_toggle_child_when_done_should_move_to_end_of_sibling_group_only(service_stack):
+    project = service_stack["project_service"].create_project("WBS")
+    tasks = service_stack["task_service"]
+    parent = tasks.create_task(project.id, "Ekran")
+    other = tasks.create_task(project.id, "Başka görev")
+    first = tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
+    second = tasks.create_task(project.id, "Menü", parent_task_id=parent.id)
+    parent_order = tasks.get_task(parent.id).order_index
+    other_order = tasks.get_task(other.id).order_index
+
+    tasks.toggle_status(first.id)
+
+    assert tasks.get_task(first.id).order_index > tasks.get_task(second.id).order_index
+    assert tasks.get_task(parent.id).order_index == parent_order
+    assert tasks.get_task(other.id).order_index == other_order
+
+
+def test_toggle_parent_when_closed_manually_should_move_to_end_of_root_list(service_stack):
+    project = service_stack["project_service"].create_project("WBS")
+    tasks = service_stack["task_service"]
+    parent = tasks.create_task(project.id, "Ekran")
+    tasks.create_task(project.id, "Buton", parent_task_id=parent.id)
+    other = tasks.create_task(project.id, "Başka görev")
+
+    tasks.toggle_status(parent.id)
+
+    assert tasks.get_task(parent.id).order_index > tasks.get_task(other.id).order_index
 
 
 def test_old_database_migration_adds_parent_task_id_column():
@@ -252,7 +296,7 @@ def test_hierarchy_rollup_sets_parent_status_and_project_progress(service_stack)
     updated_parent = service_stack["task_service"].get_task(parent.id)
     updated_project = service_stack["project_service"].get_project(project.id)
 
-    assert updated_parent.status == TaskStatus.DONE.value
+    assert updated_parent.status == TaskStatus.IN_PROGRESS.value
     assert updated_project.progress_percent == 100
 
     service_stack["task_service"].update_task(child.id, status=TaskStatus.TODO.value)

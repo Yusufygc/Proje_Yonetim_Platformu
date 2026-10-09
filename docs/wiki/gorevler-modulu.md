@@ -23,7 +23,7 @@ kullanılamaz.
 `TaskController.load_tasks` (Worker, async — [[worker-altyapisi]]) → `tasks_loaded(project_id, tasks)` → `TaskViewModel._on_tasks_loaded` → `TaskListModel`. Görev değişiminde controller `task.*` olayını [[event-bus]]'a yayınlar; ViewModel'ler kendi sinyal/olay bağlantılarıyla listeyi yeniler.
 
 ## Durum kuralı
-Alt görevi olan görevin durumu alt görevlerinden türetilir (`TaskService.recalculate_hierarchy`); `TaskService._assert_status_editable` türetilen duruma elle geçişi `TaskValidationError` ile reddeder, yalnızca Engellendi ve İptal elle verilebilir. Controller hataları `forward_errors_to_toast` ile kullanıcıya gösterilir.
+Alt görevi olan görevin durumu alt görevlerinden türetilir (`TaskService.recalculate_hierarchy`): hiçbiri başlamadıysa Yapılacak, biri bile ilerlediyse Devam Ediyor. **Tüm alt görevler bitse bile üst görev kendiliğinden Tamamlandı olmaz**; onay kutusuyla (ya da diyalogdan Tamamlandı seçerek) kullanıcı kapatır, ancak o zaman kök listenin sonuna iner. Biten alt görev yalnızca kendi kardeş grubunun sonuna geçer. `TaskService._assert_status_editable` türetilen duruma (Yapılacak/Devam Ediyor/Bekliyor) elle geçişi `TaskValidationError` ile reddeder; elle yalnızca Tamamlandı, Engellendi ve İptal verilebilir ve bu üç durum yeniden hesaplamada korunur. Controller hataları `forward_errors_to_toast` ile kullanıcıya gösterilir.
 
 ## QML Sunum Katmanı ve Gelişmiş Özellikler (2026-10)
 

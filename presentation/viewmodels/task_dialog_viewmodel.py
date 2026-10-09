@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 # Diyalogdaki "Otomatik" durum seçeneği; alt görevi olan görevler için kullanılır.
 _AUTO_STATUS = "AUTO"
-_MANUAL_PARENT_STATUSES = ("BLOCKED", "CANCELLED")
+_MANUAL_PARENT_STATUSES = ("BLOCKED", "CANCELLED", "DONE")
 
 
 def checklist_payload(task: Task) -> list[dict[str, Any]]:

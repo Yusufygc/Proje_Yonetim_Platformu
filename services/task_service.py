@@ -20,8 +20,14 @@ from services.project_service import ProjectService
 
 logger = logging.getLogger(__name__)
 
-# recalculate_hierarchy bu iki durumdaki üst görevlere dokunmaz, bu yüzden elle verilebilirler.
-_MANUAL_PARENT_STATUSES = {TaskStatus.BLOCKED.value, TaskStatus.CANCELLED.value}
+# recalculate_hierarchy bu durumlardaki üst görevlere dokunmaz, bu yüzden elle verilebilirler.
+# Tamamlandı da burada: alt görevler bitse bile üst görevi kullanıcı onaylamadıkça kapatmak,
+# kullanıcının henüz eklemediği işleri atlamış olur.
+_MANUAL_PARENT_STATUSES = {
+    TaskStatus.BLOCKED.value,
+    TaskStatus.CANCELLED.value,
+    TaskStatus.DONE.value,
+}
 
 
 class TaskService:
@@ -63,7 +69,7 @@ class TaskService:
         return created
 
     def _assert_status_editable(self, task: Task, new_status: str) -> None:
-        """Alt görevi olan görevin durumu türetilir; yalnızca engel/iptal elle verilebilir."""
+        """Alt görevi olan görevin durumu türetilir; yalnızca tamamlandı, engel ve iptal elle verilebilir."""
         if new_status == task.status:
             return
         if new_status in _MANUAL_PARENT_STATUSES or task.status in _MANUAL_PARENT_STATUSES:
@@ -71,7 +77,7 @@ class TaskService:
         if any(item.parent_task_id == task.id for item in self._repo.get_by_project(task.project_id)):
             raise TaskValidationError(
                 "Alt görevi olan görevin durumu alt görevlerinden otomatik hesaplanır; "
-                "yalnızca Engellendi veya İptal seçilebilir."
+                "yalnızca Tamamlandı, Engellendi veya İptal seçilebilir."
             )
 
     def update_task(self, task_id: int, **kwargs: Any) -> Task:
@@ -158,12 +164,12 @@ class TaskService:
         changed: list[Task] = []
         for task in sorted(tasks, key=lambda item: self._depth(item, by_id), reverse=True):
             child_tasks = children.get(task.id, [])
-            if not child_tasks or task.status in {TaskStatus.BLOCKED.value, TaskStatus.CANCELLED.value}:
+            if not child_tasks or task.status in _MANUAL_PARENT_STATUSES:
                 continue
             old_status = task.status
-            if all(child.status == TaskStatus.DONE.value for child in child_tasks):
-                task.status = TaskStatus.DONE.value
-            elif any(self._task_score(child, children) > 0 for child in child_tasks):
+            # Tüm alt görevler bitse bile üst görev DONE'a geçmez; devam ediyor görünür,
+            # kapatmak kullanıcının işi.
+            if any(self._task_score(child, children) > 0 for child in child_tasks):
                 task.status = TaskStatus.IN_PROGRESS.value
             else:
                 task.status = TaskStatus.TODO.value

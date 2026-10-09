@@ -417,6 +417,27 @@ def test_task_dialog_viewmodel_when_parent_saved_with_auto_status_should_keep_de
     assert not dialog.isDialogOpen
 
 
+def test_task_dialog_viewmodel_when_closed_parent_saved_with_done_should_stay_done(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    project = container.services.project.create_project(title="Kapalı üst görev projesi")
+    parent = container.services.task.create_task(project.id, "Üst görev")
+    container.services.task.create_task(project.id, "Alt görev", parent_task_id=parent.id)
+    tvm = TaskViewModel(container, parent=qapp)
+    dialog = TaskDialogViewModel(container, tvm, parent=qapp)
+    tvm.selectProject(project.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    dialog.openEditDialog(parent.id)
+    dialog.saveTask({"title": "Üst görev", "status": "DONE", "priority": "MEDIUM", "task_type": "TASK"})
+    QThreadPool.globalInstance().waitForDone(2000)
+
+    assert container.services.task.get_task(parent.id).status == "DONE"
+
+
 def test_task_viewmodel_when_quick_add_should_create_root_then_subtask_and_ignore_blank(
     qapp: QApplication, container: DIContainer
 ) -> None:
