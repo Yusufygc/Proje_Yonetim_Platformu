@@ -8,29 +8,56 @@ Rectangle {
     readonly property bool isCollapsed: navBridge.sidebarCollapsed
     readonly property int expandedWidth: 240
     readonly property int collapsedWidth: 64
+    readonly property string activePackage: themeBridge.activePackage
     readonly property bool isRoseTheme: themeBridge.isRose
     readonly property bool isOceanTheme: themeBridge.isOcean
-    readonly property bool hasPatternTheme: isRoseTheme || isOceanTheme
+    readonly property bool isVioletTheme: themeBridge.isViolet
+    readonly property bool isEmeraldTheme: themeBridge.isEmerald
+    readonly property bool isSlateTheme: themeBridge.isSlate
+    readonly property bool hasPatternTheme: activePackage !== "indigo"
 
     // Tema paketi arka plan deseni görsel kaynağı
     readonly property string patternImageSource: {
-        if (isRoseTheme) return Qt.resolvedUrl("../../../resources/images/rose_sidebar.jpg");
-        if (isOceanTheme) return Qt.resolvedUrl("../../../resources/images/ocean_sidebar.jpg");
-        return "";
+        switch (activePackage) {
+            case "rose": return Qt.resolvedUrl("../../../resources/images/rose_sidebar.jpg");
+            case "ocean": return Qt.resolvedUrl("../../../resources/images/ocean_sidebar.jpg");
+            case "violet": return Qt.resolvedUrl("../../../resources/images/violet_sidebar.jpg");
+            case "emerald": return Qt.resolvedUrl("../../../resources/images/emerald_sidebar.jpg");
+            case "slate": return Qt.resolvedUrl("../../../resources/images/slate_sidebar.jpg");
+            default: return "";
+        }
     }
 
     // Desenli temalarda yüksek kontrastlı metin rengi
-    readonly property color patternTextColor: isRoseTheme ? "#FFF0F3" : "#F0F9FF"
+    readonly property color patternTextColor: {
+        switch (activePackage) {
+            case "rose": return "#FFF0F3";
+            case "ocean": return "#F0F9FF";
+            case "violet": return "#FAF5FF";
+            case "emerald": return "#F0FDF4";
+            case "slate": return "#F8FAFC";
+            default: return themeBridge.sidebarText;
+        }
+    }
 
     // Desenli temalarda karartma katmanı rengi
     readonly property color patternOverlayColor: {
-        if (isRoseTheme) {
-            return themeBridge.isDark ? Qt.rgba(0.08, 0.02, 0.05, 0.55) : Qt.rgba(0.18, 0.03, 0.10, 0.48);
+        if (!hasPatternTheme) return "transparent";
+        var isDark = themeBridge.isDark;
+        switch (activePackage) {
+            case "rose":
+                return isDark ? Qt.rgba(0.08, 0.02, 0.05, 0.55) : Qt.rgba(0.18, 0.03, 0.10, 0.48);
+            case "ocean":
+                return isDark ? Qt.rgba(0.03, 0.08, 0.14, 0.52) : Qt.rgba(0.03, 0.12, 0.22, 0.46);
+            case "violet":
+                return isDark ? Qt.rgba(0.07, 0.04, 0.13, 0.52) : Qt.rgba(0.11, 0.04, 0.22, 0.46);
+            case "emerald":
+                return isDark ? Qt.rgba(0.04, 0.09, 0.07, 0.52) : Qt.rgba(0.03, 0.16, 0.12, 0.46);
+            case "slate":
+                return isDark ? Qt.rgba(0.05, 0.07, 0.10, 0.52) : Qt.rgba(0.06, 0.09, 0.16, 0.46);
+            default:
+                return "transparent";
         }
-        if (isOceanTheme) {
-            return themeBridge.isDark ? Qt.rgba(0.03, 0.08, 0.14, 0.52) : Qt.rgba(0.03, 0.12, 0.22, 0.46);
-        }
-        return "transparent";
     }
 
     width: isCollapsed ? collapsedWidth : expandedWidth

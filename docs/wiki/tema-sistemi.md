@@ -18,10 +18,14 @@ Sidebar arka planı genel paletten **bağımsız** olduğu için ayrı token set
 
 Aktif vurgu deseni: **transparent bg + sol border + opak metin rengi**. Alpha karışım koyu zemin altında kırmızımsı tonlar üretiyordu; bu desen sorunu kaldırır. Kural: sidebar dışında `text_secondary`, sidebar **içinde** `sidebar_text`.
 
-### Desenli kenar çubuğu paketleri (Rose ve Ocean)
-Rose (`rose_dark`, `rose_light`) ve Ocean (`ocean_dark`, `ocean_light`) tema paketleri seçildiğinde, `Sidebar.qml` kenar çubuğuna özel damask desenli arka plan görselleri dinamik olarak uygulanır:
-- **Rose Teması:** `resources/images/rose_sidebar.jpg` damask gül deseni + koyu şarap/bordo karartma overlay'i + `#FFF0F3` yüksek kontrastlı metin rengi.
-- **Ocean Teması:** `resources/images/ocean_sidebar.jpg` okyanus mavisi damask çiçek deseni + derin lacivert karartma overlay'i + `#F0F9FF` yüksek kontrastlı buz beyazı metin rengi.
+### Desenli kenar çubuğu paketleri
+Rose, Ocean, Violet, Emerald ve Slate tema paketleri seçildiğinde, `Sidebar.qml` kenar çubuğuna özel damask desenli arka plan görselleri dinamik olarak uygulanır (yalnızca Indigo tema paketi desensiz düz kenar çubuğunu korur):
+- **Rose Teması:** `resources/images/rose_sidebar.jpg` damask kırmızı gül deseni + şarap/bordo karartma overlay'i + `#FFF0F3` metin rengi.
+- **Ocean Teması:** `resources/images/ocean_sidebar.jpg` okyanus mavisi damask çiçek deseni + derin lacivert karartma overlay'i + `#F0F9FF` metin rengi.
+- **Violet Teması:** `resources/images/violet_sidebar.jpg` mor damask gül deseni + derin patlıcan/mor karartma overlay'i + `#FAF5FF` metin rengi.
+- **Emerald Teması:** `resources/images/emerald_sidebar.jpg` zümrüt yeşili damask gül deseni + derin orman yeşili karartma overlay'i + `#F0FDF4` metin rengi.
+- **Slate Teması:** `resources/images/slate_sidebar.jpg` antrasit/gümüş barok desen + füme/karbon karartma overlay'i + `#F8FAFC` metin rengi.
+- **Indigo Teması:** Görsel uygulanmaz (`hasPatternTheme = false`), standart sade kenar çubuğu görünümü geçerlidir.
 - Sayfa navigasyon butonları (`navItem`) hafif yarı saydam koyu kapsül zemin (`Qt.rgba(0, 0, 0, 0.22)`) ve ince çerçeveyle render edilerek desen üzerinde kusursuz okunabilirlik sağlanır.
 
 ## Küratörlü tema paketleri

@@ -1,5 +1,14 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-10] FEATURE | Violet, Emerald ve Slate Tema Paketlerinde Kenar Çubuğu Desenleri
+- **Kenar Çubuğu Arka Plan Görselleri:**
+  - Violet paketi için mor damask gül deseni (`resources/images/violet_sidebar.jpg`),
+  - Emerald paketi için zümrüt yeşili damask gül deseni (`resources/images/emerald_sidebar.jpg`),
+  - Slate paketi için antrasit/gümüş barok desen (`resources/images/slate_sidebar.jpg`) kenar çubuğuna entegre edildi.
+  - Kullanıcı tercihi doğrultusunda Indigo temasında arka plan deseni uygulanmayıp sade tema korundu.
+- **Renk ve Kontrast Uyarlamaları:** Her paketin koyu ve açık modlarına özel şeffaf karartma katmanı (`patternOverlayColor`) ve yüksek kontrastlı açık tonlu metin renkleri (`#FAF5FF`, `#F0FDF4`, `#F8FAFC`) tanımlandı.
+- **ThemeBridge & Testler:** `ThemeBridge` sınıfına `isViolet`, `isEmerald` ve `isSlate` özellikleri eklenerek `_resolve_package()` yardımcı metoduyla tip güvenliği pekiştirildi; `test_theme_bridge_pattern_and_package_properties` testi tüm paketleri kapsayacak şekilde genişletildi.
+
 ## [2026-10-10] FEATURE | Ocean Tema Paketinde Kenar Çubuğuna Arka Plan Deseni
 - **Kenar Çubuğu Arka Plan Görseli:** Ocean tema paketi (`ocean_dark`, `ocean_light`) seçildiğinde kenar çubuğuna (`Sidebar.qml`) okyanus mavisi damask çiçek desenli görsel (`resources/images/ocean_sidebar.jpg`) bind edildi.
 - **Şeffaflık ve Yüksek Okunabilirlik:** Ocean paletine özel derin lacivert yarı saydam karartma katmanı (`patternOverlay`), buz beyazı yüksek kontrastlı metin rengi (`#F0F9FF`) ve yarı saydam buton zeminleri uygulanarak navigasyon menüsünün okunabilirliği garanti altına alındı.

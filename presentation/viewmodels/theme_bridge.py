@@ -47,13 +47,28 @@ class ThemeBridge(QObject):
     def isOcean(self) -> bool:
         return "ocean" in self._theme_mgr.current_theme.lower()
 
-    @Property(str, notify=themeChanged)
-    def activePackage(self) -> str:
+    @Property(bool, notify=themeChanged)
+    def isViolet(self) -> bool:
+        return "violet" in self._theme_mgr.current_theme.lower()
+
+    @Property(bool, notify=themeChanged)
+    def isEmerald(self) -> bool:
+        return "emerald" in self._theme_mgr.current_theme.lower()
+
+    def _resolve_package(self) -> str:
         current = self._theme_mgr.current_theme.lower()
         for pkg in ("rose", "indigo", "emerald", "ocean", "violet", "slate"):
             if pkg in current:
                 return pkg
         return "slate"
+
+    @Property(bool, notify=themeChanged)
+    def isSlate(self) -> bool:
+        return self._resolve_package() == "slate"
+
+    @Property(str, notify=themeChanged)
+    def activePackage(self) -> str:
+        return self._resolve_package()
 
     @Property(bool, notify=themeChanged)
     def isDark(self) -> bool:
