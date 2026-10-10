@@ -15,7 +15,7 @@ PROJECT_ROOT = APP_DIR.parent
 
 # --- Uygulama Kimliği ---
 APP_NAME = "Proje Takip Platformu"
-APP_VERSION = "0.1.3"
+APP_VERSION = "0.1.4"
 APP_ORGANIZATION = "ProjeTakip"
 
 # --- Güncelleme ---
