@@ -16,7 +16,7 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 - 📁 **Proje Yönetimi** — Durum takibi (Planlandı, Aktif, Beklemede, Tamamlandı…), sağlık durumu, öncelik, karar kayıtları, notlar ve kaynak bağlantıları
 - 🗂️ **WBS Görev Ağacı** — Hiyerarşik iş kırılım yapısı; durum, öncelik ve türe göre filtreleme; checklist ve alt görev desteği
 - 💡 **Fikir Yönetimi** — Ham fikirden projeye dönüşüm akışını izleme; fikir puanlama ve kategorilendirme
-- 🎨 **Tema Desteği** — Koyu ve açık tema; Federal Blue/Altın ile Sapphire/Quicksand renk paletleri; özel tema oluşturma ve dışa aktarma
+- 🎨 **Tema Desteği** — Koyu ve açık tema; 6 küratörlü renk paleti (Slate, Indigo, Emerald, Ocean, Rose, Violet) ve Rose temasında özel desenli kenar çubuğu
 - 🌐 **Yerelleştirme** — Türkçe ve İngilizce arayüz; tüm metinler çeviri anahtarları üzerinden yönetilir
 - 🔔 **Toast Bildirimleri** — İşlem sonuçları için animasyonlu, otomatik kapanan bildirim sistemi
 - 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `~/.proje_takip/.backups/` altında saklanır

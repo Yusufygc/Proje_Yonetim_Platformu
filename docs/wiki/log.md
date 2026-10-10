@@ -1,5 +1,12 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-10] FEATURE | Rose Tema Paketinde Kenar Çubuğuna Arka Plan Deseni
+- **Kenar Çubuğu Arka Plan Görseli:** Rose tema paketi (`rose_dark`, `rose_light`) aktif olduğunda kenar çubuğuna (`Sidebar.qml`) damask gül desenli görsel (`resources/images/rose_sidebar.jpg`) uygulandı.
+- **Şeffaflık ve Yüksek Okunabilirlik:** Arka plan deseni üzerine temaya duyarlı yarı saydam karartma katmanı (`roseOverlay`), sayfa gezinme butonlarına (`navItem`) yarı saydam arka plan kapsülü (`Qt.rgba(0, 0, 0, 0.22)`) ve yüksek kontrastlı açık gül beyazı (`#FFF0F3`) metin rengi eklenerek sayfa listesinin görünürlüğü ve okunabilirliği korundu.
+- **ThemeBridge & Reaktif Özellikler:** `ThemeBridge` sınıfına `isRose` ve `activePackage` QML bildirimli (reactive) özellikleri eklenerek temalar arası geçiş anında kenar çubuğunun dinamik ve animasyonlu tepki vermesi sağlandı.
+- **L10N & Analitik Test İyileştirmeleri:** `archive_viewmodel.py` içindeki durum etiketine `# l10n: data` pragması eklenerek ratchet testi güvenceye alındı; `test_analytics_overview.py` içindeki saat dilimi bağımlılığı UTC saatiyle hizalanarak giderildi.
+- **Testler:** `tests/test_theme_palette.py::test_theme_bridge_rose_properties` testi eklenerek Rose teması tespit mantığı doğrulandı.
+
 ## [2026-10-10] FIX | Arşiv Senkronizasyonu ve Görev Öncelik Rozeti Çevirisi
 - **Arşiv Ekranı Senkronizasyonu:** `ArchiveViewModel` sınıfı `project_controller.project_archived` sinyalini ve EventBus üzerindeki `project.archived`, `project.restored`, `project.deleted` olaylarını dinleyecek şekilde güncellendi. `ArchiveView.qml` sayfasına `Component.onCompleted` kancası eklenerek sayfa her açıldığında arşiv listesi veritabanından taze şekilde sorgulanır hale getirildi.
 - **Veritabanı ve Servis Katmanı:** `ProjectRepository.get_archived()` ve `ProjectService.get_archived_projects()` metotları eklenerek yalnızca `is_archived=True` olan projelerin doğrudan sorgulanması sağlandı. `ArchiveViewModel._STATUS_LABELS` sözlüğüne `ACTIVE`, `BLOCKED` ve `ARCHIVED` durumları eklenerek arşivdeki projelerin durum rozetlerinin Türkçe gösterilmesi sağlandı.

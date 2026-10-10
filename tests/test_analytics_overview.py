@@ -107,10 +107,11 @@ def test_avg_completion_days_when_tasks_took_two_and_four_days_should_return_thr
 
 
 def test_get_analytics_when_tasks_created_and_done_should_report_flow_and_new_kpi(stack: dict[str, Any]) -> None:
-    today = datetime.now(timezone.utc).date()
+    now = datetime.now(timezone.utc)
+    today = now.date()
     done = stack["tasks"].create_task(stack["project"].id, "Biten")
     stack["tasks"].create_task(stack["project"].id, "Açık")
-    _finish(stack, done.id, _utc(today) - timedelta(days=1), _utc(today))
+    _finish(stack, done.id, now - timedelta(days=1), now)
 
     analytics = AnalyticsService(stack["db"]).get_analytics("daily", None)
 

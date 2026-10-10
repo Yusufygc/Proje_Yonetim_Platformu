@@ -8,15 +8,40 @@ Rectangle {
     readonly property bool isCollapsed: navBridge.sidebarCollapsed
     readonly property int expandedWidth: 240
     readonly property int collapsedWidth: 64
+    readonly property bool isRoseTheme: themeBridge.isRose
 
     width: isCollapsed ? collapsedWidth : expandedWidth
     color: themeBridge.sidebarBg
+    clip: true
 
     Behavior on width {
         NumberAnimation {
             duration: 250
             easing.type: Easing.InOutCubic
         }
+    }
+
+    // Rose Teması Arka Plan Görseli
+    Image {
+        id: roseBgImage
+        anchors.fill: parent
+        source: Qt.resolvedUrl("../../../resources/images/rose_sidebar.jpg")
+        fillMode: Image.PreserveAspectCrop
+        visible: sidebarRoot.isRoseTheme
+        opacity: sidebarRoot.isCollapsed ? 0.32 : 0.40
+        clip: true
+        asynchronous: true
+        smooth: true
+
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+    }
+
+    // Rose Teması Okunabilirlik ve Şeffaflık Karartma Katmanı
+    Rectangle {
+        id: roseOverlay
+        anchors.fill: parent
+        visible: sidebarRoot.isRoseTheme
+        color: themeBridge.isDark ? Qt.rgba(0.08, 0.02, 0.05, 0.55) : Qt.rgba(0.18, 0.03, 0.10, 0.48)
     }
 
     Column {
@@ -56,7 +81,7 @@ Rectangle {
                 AppIcon {
                     name: "menu"
                     size: 18
-                    color: toggleMouse.containsMouse ? themeBridge.sidebarTextActive : themeBridge.sidebarText
+                    color: toggleMouse.containsMouse ? themeBridge.sidebarTextActive : (sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText)
                     anchors.centerIn: parent
                 }
 
@@ -77,9 +102,9 @@ Rectangle {
             height: 36
             radius: 8
             anchors.horizontalCenter: sidebarRoot.isCollapsed ? parent.horizontalCenter : undefined
-            color: searchMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.12)
+            color: searchMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : (sidebarRoot.isRoseTheme ? Qt.rgba(0, 0, 0, 0.28) : Qt.rgba(1, 1, 1, 0.12))
             border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.2)
+            border.color: sidebarRoot.isRoseTheme ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.2)
             // Kenar çubuğu daralırken genişlik animasyonlu değişir; taşan yazı kutunun dışına çıkmasın.
             clip: true
 
@@ -144,11 +169,12 @@ Rectangle {
                 color: {
                     if (isActive) return themeBridge.sidebarActiveBg;
                     if (isHovered) return themeBridge.sidebarHoverBg;
+                    if (sidebarRoot.isRoseTheme) return Qt.rgba(0, 0, 0, 0.22);
                     return "transparent";
                 }
 
-                border.width: isActive ? 1 : 0
-                border.color: isActive ? themeBridge.sidebarActive : "transparent"
+                border.width: isActive ? 1 : (sidebarRoot.isRoseTheme ? 1 : 0)
+                border.color: isActive ? themeBridge.sidebarActive : (sidebarRoot.isRoseTheme ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
 
                 Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -167,7 +193,7 @@ Rectangle {
                             color: {
                                 if (navItem.isActive) return themeBridge.iconOnAccent;
                                 if (navItem.isHovered) return themeBridge.sidebarTextActive;
-                                return themeBridge.sidebarText;
+                                return sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText;
                             }
                             anchors.centerIn: parent
                         }
@@ -176,11 +202,11 @@ Rectangle {
                     Text {
                         text: i18nBridge.tr(modelData.label_key, modelData.default_label)
                         font.pixelSize: 13
-                        font.weight: navItem.isActive ? Font.Medium : Font.Normal
+                        font.weight: navItem.isActive ? Font.DemiBold : (sidebarRoot.isRoseTheme ? Font.Medium : Font.Normal)
                         color: {
                             if (navItem.isActive) return themeBridge.sidebarTextActive;
                             if (navItem.isHovered) return themeBridge.sidebarTextActive;
-                            return themeBridge.sidebarText;
+                            return sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText;
                         }
                         anchors.verticalCenter: parent.verticalCenter
                         visible: !sidebarRoot.isCollapsed
@@ -216,7 +242,7 @@ Rectangle {
                 Text {
                     text: themeBridge.isDark ? i18nBridge.tr("theme_dark", "Koyu Tema") : i18nBridge.tr("theme_light", "Açık Tema")
                     font.pixelSize: 12
-                    color: themeBridge.sidebarText
+                    color: sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - 50
                     elide: Text.ElideRight
@@ -285,7 +311,7 @@ Rectangle {
             width: parent.width
             text: "v" + settingsViewModel.appVersion
             font.pixelSize: 11
-            color: themeBridge.textMuted
+            color: sidebarRoot.isRoseTheme ? Qt.rgba(1, 1, 1, 0.65) : themeBridge.textMuted
             horizontalAlignment: Text.AlignHCenter
             visible: !sidebarRoot.isCollapsed
         }

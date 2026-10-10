@@ -18,6 +18,11 @@ Sidebar arka planı genel paletten **bağımsız** olduğu için ayrı token set
 
 Aktif vurgu deseni: **transparent bg + sol border + opak metin rengi**. Alpha karışım koyu zemin altında kırmızımsı tonlar üretiyordu; bu desen sorunu kaldırır. Kural: sidebar dışında `text_secondary`, sidebar **içinde** `sidebar_text`.
 
+### Rose tema paketi kenar çubuğu görseli
+Rose tema paketi (`rose_dark`, `rose_light`) seçildiğinde, `ThemeBridge.isRose` property'si aracılığıyla `Sidebar.qml` kenar çubuğuna damask gül desenli arka plan görseli (`resources/images/rose_sidebar.jpg`) bind edilir:
+- Arka plan görselinin üzerine koyu/yarı saydam overlay (`roseOverlay`) çekilir.
+- Sayfa navigasyon butonları (`navItem`) hafif yarı saydam kapsül zemin (`Qt.rgba(0, 0, 0, 0.22)`) ve açık gül beyazı (`#FFF0F3`) metin rengiyle render edilerek yüksek kontrast ve kusursuz okunabilirlik sağlanır.
+
 ## Küratörlü tema paketleri
 6 paket (Slate/Indigo/Emerald/Ocean/Rose/Violet) × 2 mod (Koyu/Açık) = 12 sabit builtin tema dosyası. Her paket nötr temanın (`dark.json`/`light.json`) birebir kopyası olup yalnızca `accent_start/accent_end` (+ sidebar alanları) değişir. Bilinçli tercih: dosyalar arası inheritance yok, her biri bağımsız flat JSON (küçük tekrar, "base+override" mekanizmasından daha az riskli). Renkler `success/warning/danger/stage_active/stage_done` ile çakışmayacak şekilde seçildi.
 

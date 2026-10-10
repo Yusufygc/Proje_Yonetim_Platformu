@@ -23,7 +23,7 @@ _STATUS_LABELS = {
     "COMPLETED": ("status_completed", "Tamamlandı"),  # l10n: data
     "ON_HOLD": ("status_on_hold", "Beklemede"),
     "BLOCKED": ("status_blocked", "Engellendi"),
-    "ARCHIVED": ("status_archived", "Arşivlendi"),
+    "ARCHIVED": ("status_archived", "Arşivlendi"),  # l10n: data
     "CANCELLED": ("status_cancelled", "İptal Edildi"),  # l10n: data
 }
 

@@ -40,6 +40,18 @@ class ThemeBridge(QObject):
         return self._theme_mgr.current_theme
 
     @Property(bool, notify=themeChanged)
+    def isRose(self) -> bool:
+        return "rose" in self._theme_mgr.current_theme.lower()
+
+    @Property(str, notify=themeChanged)
+    def activePackage(self) -> str:
+        current = self._theme_mgr.current_theme.lower()
+        for pkg in ("rose", "indigo", "emerald", "ocean", "violet", "slate"):
+            if pkg in current:
+                return pkg
+        return "slate"
+
+    @Property(bool, notify=themeChanged)
     def isDark(self) -> bool:
         return self._prefs.load_active_mode() == "dark"
 
