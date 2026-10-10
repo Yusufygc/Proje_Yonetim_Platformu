@@ -9,6 +9,29 @@ Rectangle {
     readonly property int expandedWidth: 240
     readonly property int collapsedWidth: 64
     readonly property bool isRoseTheme: themeBridge.isRose
+    readonly property bool isOceanTheme: themeBridge.isOcean
+    readonly property bool hasPatternTheme: isRoseTheme || isOceanTheme
+
+    // Tema paketi arka plan deseni görsel kaynağı
+    readonly property string patternImageSource: {
+        if (isRoseTheme) return Qt.resolvedUrl("../../../resources/images/rose_sidebar.jpg");
+        if (isOceanTheme) return Qt.resolvedUrl("../../../resources/images/ocean_sidebar.jpg");
+        return "";
+    }
+
+    // Desenli temalarda yüksek kontrastlı metin rengi
+    readonly property color patternTextColor: isRoseTheme ? "#FFF0F3" : "#F0F9FF"
+
+    // Desenli temalarda karartma katmanı rengi
+    readonly property color patternOverlayColor: {
+        if (isRoseTheme) {
+            return themeBridge.isDark ? Qt.rgba(0.08, 0.02, 0.05, 0.55) : Qt.rgba(0.18, 0.03, 0.10, 0.48);
+        }
+        if (isOceanTheme) {
+            return themeBridge.isDark ? Qt.rgba(0.03, 0.08, 0.14, 0.52) : Qt.rgba(0.03, 0.12, 0.22, 0.46);
+        }
+        return "transparent";
+    }
 
     width: isCollapsed ? collapsedWidth : expandedWidth
     color: themeBridge.sidebarBg
@@ -21,13 +44,13 @@ Rectangle {
         }
     }
 
-    // Rose Teması Arka Plan Görseli
+    // Desenli Tema Arka Plan Görseli (Rose, Ocean)
     Image {
-        id: roseBgImage
+        id: patternBgImage
         anchors.fill: parent
-        source: Qt.resolvedUrl("../../../resources/images/rose_sidebar.jpg")
+        source: sidebarRoot.patternImageSource
         fillMode: Image.PreserveAspectCrop
-        visible: sidebarRoot.isRoseTheme
+        visible: sidebarRoot.hasPatternTheme
         opacity: sidebarRoot.isCollapsed ? 0.32 : 0.40
         clip: true
         asynchronous: true
@@ -36,12 +59,12 @@ Rectangle {
         Behavior on opacity { NumberAnimation { duration: 200 } }
     }
 
-    // Rose Teması Okunabilirlik ve Şeffaflık Karartma Katmanı
+    // Desenli Tema Okunabilirlik ve Şeffaflık Karartma Katmanı
     Rectangle {
-        id: roseOverlay
+        id: patternOverlay
         anchors.fill: parent
-        visible: sidebarRoot.isRoseTheme
-        color: themeBridge.isDark ? Qt.rgba(0.08, 0.02, 0.05, 0.55) : Qt.rgba(0.18, 0.03, 0.10, 0.48)
+        visible: sidebarRoot.hasPatternTheme
+        color: sidebarRoot.patternOverlayColor
     }
 
     Column {
@@ -81,7 +104,7 @@ Rectangle {
                 AppIcon {
                     name: "menu"
                     size: 18
-                    color: toggleMouse.containsMouse ? themeBridge.sidebarTextActive : (sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText)
+                    color: toggleMouse.containsMouse ? themeBridge.sidebarTextActive : (sidebarRoot.hasPatternTheme ? sidebarRoot.patternTextColor : themeBridge.sidebarText)
                     anchors.centerIn: parent
                 }
 
@@ -102,9 +125,9 @@ Rectangle {
             height: 36
             radius: 8
             anchors.horizontalCenter: sidebarRoot.isCollapsed ? parent.horizontalCenter : undefined
-            color: searchMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : (sidebarRoot.isRoseTheme ? Qt.rgba(0, 0, 0, 0.28) : Qt.rgba(1, 1, 1, 0.12))
+            color: searchMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : (sidebarRoot.hasPatternTheme ? Qt.rgba(0, 0, 0, 0.28) : Qt.rgba(1, 1, 1, 0.12))
             border.width: 1
-            border.color: sidebarRoot.isRoseTheme ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.2)
+            border.color: sidebarRoot.hasPatternTheme ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.2)
             // Kenar çubuğu daralırken genişlik animasyonlu değişir; taşan yazı kutunun dışına çıkmasın.
             clip: true
 
@@ -169,12 +192,12 @@ Rectangle {
                 color: {
                     if (isActive) return themeBridge.sidebarActiveBg;
                     if (isHovered) return themeBridge.sidebarHoverBg;
-                    if (sidebarRoot.isRoseTheme) return Qt.rgba(0, 0, 0, 0.22);
+                    if (sidebarRoot.hasPatternTheme) return Qt.rgba(0, 0, 0, 0.22);
                     return "transparent";
                 }
 
-                border.width: isActive ? 1 : (sidebarRoot.isRoseTheme ? 1 : 0)
-                border.color: isActive ? themeBridge.sidebarActive : (sidebarRoot.isRoseTheme ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
+                border.width: isActive ? 1 : (sidebarRoot.hasPatternTheme ? 1 : 0)
+                border.color: isActive ? themeBridge.sidebarActive : (sidebarRoot.hasPatternTheme ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
 
                 Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -193,7 +216,7 @@ Rectangle {
                             color: {
                                 if (navItem.isActive) return themeBridge.iconOnAccent;
                                 if (navItem.isHovered) return themeBridge.sidebarTextActive;
-                                return sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText;
+                                return sidebarRoot.hasPatternTheme ? sidebarRoot.patternTextColor : themeBridge.sidebarText;
                             }
                             anchors.centerIn: parent
                         }
@@ -202,11 +225,11 @@ Rectangle {
                     Text {
                         text: i18nBridge.tr(modelData.label_key, modelData.default_label)
                         font.pixelSize: 13
-                        font.weight: navItem.isActive ? Font.DemiBold : (sidebarRoot.isRoseTheme ? Font.Medium : Font.Normal)
+                        font.weight: navItem.isActive ? Font.DemiBold : (sidebarRoot.hasPatternTheme ? Font.Medium : Font.Normal)
                         color: {
                             if (navItem.isActive) return themeBridge.sidebarTextActive;
                             if (navItem.isHovered) return themeBridge.sidebarTextActive;
-                            return sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText;
+                            return sidebarRoot.hasPatternTheme ? sidebarRoot.patternTextColor : themeBridge.sidebarText;
                         }
                         anchors.verticalCenter: parent.verticalCenter
                         visible: !sidebarRoot.isCollapsed
@@ -242,7 +265,7 @@ Rectangle {
                 Text {
                     text: themeBridge.isDark ? i18nBridge.tr("theme_dark", "Koyu Tema") : i18nBridge.tr("theme_light", "Açık Tema")
                     font.pixelSize: 12
-                    color: sidebarRoot.isRoseTheme ? "#FFF0F3" : themeBridge.sidebarText
+                    color: sidebarRoot.hasPatternTheme ? sidebarRoot.patternTextColor : themeBridge.sidebarText
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - 50
                     elide: Text.ElideRight
@@ -311,7 +334,7 @@ Rectangle {
             width: parent.width
             text: "v" + settingsViewModel.appVersion
             font.pixelSize: 11
-            color: sidebarRoot.isRoseTheme ? Qt.rgba(1, 1, 1, 0.65) : themeBridge.textMuted
+            color: sidebarRoot.hasPatternTheme ? Qt.rgba(1, 1, 1, 0.65) : themeBridge.textMuted
             horizontalAlignment: Text.AlignHCenter
             visible: !sidebarRoot.isCollapsed
         }

@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-10] FEATURE | Ocean Tema Paketinde Kenar Çubuğuna Arka Plan Deseni
+- **Kenar Çubuğu Arka Plan Görseli:** Ocean tema paketi (`ocean_dark`, `ocean_light`) seçildiğinde kenar çubuğuna (`Sidebar.qml`) okyanus mavisi damask çiçek desenli görsel (`resources/images/ocean_sidebar.jpg`) bind edildi.
+- **Şeffaflık ve Yüksek Okunabilirlik:** Ocean paletine özel derin lacivert yarı saydam karartma katmanı (`patternOverlay`), buz beyazı yüksek kontrastlı metin rengi (`#F0F9FF`) ve yarı saydam buton zeminleri uygulanarak navigasyon menüsünün okunabilirliği garanti altına alındı.
+- **Genelleştirilmiş Desen Mimarisi:** `Sidebar.qml` içerisindeki görsel ve renk yönetimi `hasPatternTheme`, `patternImageSource`, `patternTextColor` ve `patternOverlayColor` reaktif özellikleriyle modüler hale getirilerek Rose ve Ocean tema desenleri tek bir dinamik mimaride birleştirildi.
+- **ThemeBridge & Testler:** `ThemeBridge` sınıfına `isOcean` reaktif özelliği eklendi; `tests/test_theme_palette.py::test_theme_bridge_pattern_and_package_properties` birim testi ile doğrulandı.
+
 ## [2026-10-10] FEATURE | Rose Tema Paketinde Kenar Çubuğuna Arka Plan Deseni
 - **Kenar Çubuğu Arka Plan Görseli:** Rose tema paketi (`rose_dark`, `rose_light`) aktif olduğunda kenar çubuğuna (`Sidebar.qml`) damask gül desenli görsel (`resources/images/rose_sidebar.jpg`) uygulandı.
 - **Şeffaflık ve Yüksek Okunabilirlik:** Arka plan deseni üzerine temaya duyarlı yarı saydam karartma katmanı (`roseOverlay`), sayfa gezinme butonlarına (`navItem`) yarı saydam arka plan kapsülü (`Qt.rgba(0, 0, 0, 0.22)`) ve yüksek kontrastlı açık gül beyazı (`#FFF0F3`) metin rengi eklenerek sayfa listesinin görünürlüğü ve okunabilirliği korundu.

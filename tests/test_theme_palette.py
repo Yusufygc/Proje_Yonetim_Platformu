@@ -65,21 +65,34 @@ def test_theme_bridge_all_theme_switches(qapp: QApplication) -> None:
         assert bridge.background.startswith("#")
 
 
-def test_theme_bridge_rose_properties(qapp: QApplication) -> None:
-    """Rose teması seçildiğinde isRose ve activePackage özelliklerinin doğruluğunu test eder."""
+def test_theme_bridge_pattern_and_package_properties(qapp: QApplication) -> None:
+    """Rose ve Ocean temaları seçildiğinde isRose, isOcean ve activePackage özelliklerinin doğruluğunu test eder."""
     mgr = ThemeManager(Path("resources/themes"))
     bridge = ThemeBridge(mgr, None, parent=qapp)  # type: ignore[arg-type]
 
     mgr.switch_theme("rose_dark")
     assert bridge.isRose is True
+    assert bridge.isOcean is False
     assert bridge.activePackage == "rose"
 
     mgr.switch_theme("rose_light")
     assert bridge.isRose is True
+    assert bridge.isOcean is False
     assert bridge.activePackage == "rose"
+
+    mgr.switch_theme("ocean_dark")
+    assert bridge.isRose is False
+    assert bridge.isOcean is True
+    assert bridge.activePackage == "ocean"
+
+    mgr.switch_theme("ocean_light")
+    assert bridge.isRose is False
+    assert bridge.isOcean is True
+    assert bridge.activePackage == "ocean"
 
     mgr.switch_theme("dark")
     assert bridge.isRose is False
+    assert bridge.isOcean is False
     assert bridge.activePackage == "slate"
 
 

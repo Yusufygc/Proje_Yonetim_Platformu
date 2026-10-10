@@ -43,6 +43,10 @@ class ThemeBridge(QObject):
     def isRose(self) -> bool:
         return "rose" in self._theme_mgr.current_theme.lower()
 
+    @Property(bool, notify=themeChanged)
+    def isOcean(self) -> bool:
+        return "ocean" in self._theme_mgr.current_theme.lower()
+
     @Property(str, notify=themeChanged)
     def activePackage(self) -> str:
         current = self._theme_mgr.current_theme.lower()
