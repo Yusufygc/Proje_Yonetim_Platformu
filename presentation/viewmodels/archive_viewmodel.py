@@ -17,10 +17,13 @@ logger = logging.getLogger(__name__)
 
 _STATUS_LABELS = {
     "PLANNED": ("status_planned", "Planlandı"),  # l10n: data
+    "ACTIVE": ("status_active", "Aktif"),
     "DEVELOPMENT": ("status_development", "Geliştirme"),  # l10n: data
     "TEST": ("status_test", "Test"),
     "COMPLETED": ("status_completed", "Tamamlandı"),  # l10n: data
     "ON_HOLD": ("status_on_hold", "Beklemede"),
+    "BLOCKED": ("status_blocked", "Engellendi"),
+    "ARCHIVED": ("status_archived", "Arşivlendi"),
     "CANCELLED": ("status_cancelled", "İptal Edildi"),  # l10n: data
 }
 
@@ -44,9 +47,16 @@ class ArchiveViewModel(QObject):
 
     def _connect_signals(self) -> None:
         self._controller.archived_projects_loaded.connect(self._on_projects_loaded)
+        self._controller.project_archived.connect(self._on_project_changed)
         self._controller.project_restored.connect(self._on_project_changed)
         self._controller.project_deleted.connect(self._on_project_changed)
         self._controller.error_occurred.connect(self._on_error)
+        if self._event_bus:
+            for evt in ("project.archived", "project.restored", "project.deleted"):
+                self._event_bus.subscribe(evt, self._on_bus_project_changed)
+
+    def _on_bus_project_changed(self, **kwargs: Any) -> None:
+        self.loadArchivedProjects()
 
     @Slot()
     def loadArchivedProjects(self) -> None:

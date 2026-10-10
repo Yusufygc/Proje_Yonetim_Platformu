@@ -1,5 +1,11 @@
 # Wiki Kayıt Defteri
 
+## [2026-10-10] FIX | Arşiv Senkronizasyonu ve Görev Öncelik Rozeti Çevirisi
+- **Arşiv Ekranı Senkronizasyonu:** `ArchiveViewModel` sınıfı `project_controller.project_archived` sinyalini ve EventBus üzerindeki `project.archived`, `project.restored`, `project.deleted` olaylarını dinleyecek şekilde güncellendi. `ArchiveView.qml` sayfasına `Component.onCompleted` kancası eklenerek sayfa her açıldığında arşiv listesi veritabanından taze şekilde sorgulanır hale getirildi.
+- **Veritabanı ve Servis Katmanı:** `ProjectRepository.get_archived()` ve `ProjectService.get_archived_projects()` metotları eklenerek yalnızca `is_archived=True` olan projelerin doğrudan sorgulanması sağlandı. `ArchiveViewModel._STATUS_LABELS` sözlüğüne `ACTIVE`, `BLOCKED` ve `ARCHIVED` durumları eklenerek arşivdeki projelerin durum rozetlerinin Türkçe gösterilmesi sağlandı.
+- **Görev Öncelik Rozeti:** `ProjectTasksTab.qml` içerisindeki görev öncelik rozetinde `CRITICAL` durumu ve bilinmeyen değerler için Türkçe karşılık (`Kritik`, varsayılan `Orta`) ve uygun renk şeması (`danger`) eklendi.
+- **Testler:** `tests/test_qml_bridges.py::test_archive_viewmodel` canlı arşivleme, durum etiketi çevirisi ve geri yükleme senaryolarını doğrulayacak şekilde genişletildi.
+
 ## [2026-10-09] FIX | Uygulama Her Kapanışta Çöküyordu, Güncelleme Kurulmadı
 - Belirti: v0.1.1'den v0.1.2'ye uygulama içi güncelleme indirildi (özet doğru), uygulama kapandı ama kurulum gerçekleşmedi ve uygulama yeniden açılmadı; kayıtlı sürüm 0.1.1 kaldı, tekrar denetimde aynı güncelleme çıktı.
 - Windows olay günlüğünde her kapanışta `ProjeTakipPlatformu.exe` çökmesi (`0xc0000409`, `ucrtbase.dll`) vardı. Kaynaktan yeniden üretildi: `main_qml.py` aynı `IconImageProvider` nesnesini `"icons"` ve `"icon"` adlarıyla iki kez ekliyordu; motor sağlayıcıyı sahiplenip kapanışta iki kez siliyordu. QML yalnızca `"icons"` kullanıyor, ikinci kayıt kaldırıldı. Kapanışta arka plan işleri beklenip motor `QApplication`'dan önce yıkılıyor.

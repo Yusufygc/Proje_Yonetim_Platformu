@@ -144,17 +144,19 @@ ColumnLayout {
                     text: {
                         var p = (modelData.priority || "MEDIUM").toUpperCase();
                         switch (p) {
+                            case "CRITICAL": return i18nBridge.tr("priority_critical", "Kritik");
                             case "URGENT": return i18nBridge.tr("priority_urgent", "Acil");
                             case "HIGH": return i18nBridge.tr("priority_high", "Yüksek");
                             case "MEDIUM": return i18nBridge.tr("priority_medium", "Orta");
                             case "LOW": return i18nBridge.tr("priority_low", "Düşük");
-                            default: return p;
+                            default: return i18nBridge.tr("priority_medium", "Orta");
                         }
                     }
                     variant: {
                         var p = (modelData.priority || "MEDIUM").toUpperCase();
-                        if (p === "URGENT" || p === "HIGH") return "danger";
-                        if (p === "MEDIUM") return "warning";
+                        if (p === "CRITICAL" || p === "URGENT") return "danger";
+                        if (p === "HIGH") return "warning";
+                        if (p === "MEDIUM") return "info";
                         return "neutral";
                     }
                     size: "sm"

@@ -10,6 +10,10 @@ Item {
     property string pendingDeleteTitle: ""
     property bool confirmModalVisible: false
 
+    Component.onCompleted: {
+        archiveViewModel.loadArchivedProjects();
+    }
+
     Column {
         anchors.fill: parent
         padding: 24

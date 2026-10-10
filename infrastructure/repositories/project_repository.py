@@ -48,6 +48,17 @@ class ProjectRepository(BaseRepository[Project]):
                 stmt = stmt.limit(max(0, limit))
             return list(sess.scalars(stmt).all())
 
+    def get_archived(self) -> list[Project]:
+        """Yalnızca arşivlenmiş projeleri döndürür."""
+        with self._db.session() as sess:
+            stmt = (
+                select(Project)
+                .options(*self._query_options())
+                .where(Project.is_archived.is_(True))
+                .order_by(Project.display_order, Project.created_at.asc())
+            )
+            return list(sess.scalars(stmt).all())
+
     def set_archived(self, project_id: int, archived: bool) -> None:
         with self._db.session() as sess:
             project = sess.get(Project, project_id)

@@ -72,6 +72,11 @@ class ProjectService:
     ) -> list[Project]:
         return self._repo.get_all(include_archived=include_archived, limit=limit, offset=offset)
 
+    def get_archived_projects(self) -> list[Project]:
+        if hasattr(self._repo, "get_archived"):
+            return self._repo.get_archived()
+        return [p for p in self._repo.get_all(include_archived=True) if p.is_archived]
+
     def get_project(self, project_id: int) -> Project:
         project = self._repo.get_by_id(project_id)
         if project is None:

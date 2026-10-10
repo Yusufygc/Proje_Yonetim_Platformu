@@ -70,6 +70,8 @@ class ProjectController(QObject):
 
     def load_archived_projects(self) -> None:
         def _fetch() -> list[Project]:
+            if hasattr(self._service, "get_archived_projects"):
+                return self._service.get_archived_projects()
             return [p for p in self._service.get_all_projects(include_archived=True) if p.is_archived]
 
         def _on_error(err: str) -> None:

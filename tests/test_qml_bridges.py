@@ -668,24 +668,29 @@ def test_analytics_viewmodel(qapp: QApplication, container: DIContainer) -> None
 def test_archive_viewmodel(qapp: QApplication, container: DIContainer) -> None:
     from PySide6.QtCore import QThreadPool
 
-    proj = container.project_controller._service.create_project("Arşivlenecek Test Projesi")
-    container.project_controller.archive_project(proj.id)
-    QThreadPool.globalInstance().waitForDone(2000)
-    qapp.processEvents()
-
     arch_vm = ArchiveViewModel(container, parent=qapp)
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
 
-    assert arch_vm.count >= 1
+    initial_count = arch_vm.count
+
+    # Canlı arşivleme testi: VM zaten ayaktayken yeni bir proje arşivleniyor
+    proj = container.project_controller._service.create_project("Arşivlenecek Test Projesi", status="ACTIVE")
+    container.project_controller.archive_project(proj.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert arch_vm.count == initial_count + 1
     target = next((p for p in arch_vm.archivedProjects if p["id"] == proj.id), None)
     assert target is not None
     assert target["title"] == "Arşivlenecek Test Projesi"
+    assert target["statusLabel"] == "Aktif"
 
     # Geri yükleme
     arch_vm.restoreProject(proj.id)
     QThreadPool.globalInstance().waitForDone(2000)
     qapp.processEvents()
+    assert next((p for p in arch_vm.archivedProjects if p["id"] == proj.id), None) is None
 
     # Kalıcı silme testi
     container.project_controller.archive_project(proj.id)
