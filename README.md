@@ -1,5 +1,6 @@
 # Proje Yönetim ve Takip Platformu
 
+![Sürüm](https://img.shields.io/badge/s%C3%BCr%C3%BCm-0.1.4-38BDF8)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PySide6](https://img.shields.io/badge/PySide6-6.6+-41CD52?logo=qt&logoColor=white)](https://doc.qt.io/qtforpython/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-D71F00)](https://www.sqlalchemy.org/)
@@ -21,7 +22,7 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 - 🔔 **Toast Bildirimleri** — İşlem sonuçları için animasyonlu, otomatik kapanan bildirim sistemi
 - 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `~/.proje_takip/.backups/` altında saklanır
 - 🎤 **Sesli Komut (Çevrimdışı)** — Vosk Türkçe modeliyle mikrofondan görev/fikir başlığı, açıklama ve notları sese dönüştürerek girme; internet/API anahtarı gerektirmez
-- 📝 **Notlar ve Zengin Çizim Tuvali** — Markdown destekli notlar, geometrik şekiller, algoritma/akış şeması sembolleri, resim ekleme ve çift sıralı dinamik tuval araç çubuğu
+- 📝 **Notlar ve Çizim Tuvali** — Markdown destekli otomatik kaydedilen notlar, serbest çizim, geometrik şekiller, resim ekleme ve kaydırılabilir tuval araç çubuğu
 - 📋 **Görev Kopyalama & Akıllı Ağaç** — Panoya kopyalama ve anında çoğaltma (duplicate), tamamlanan alt görevlerin otomatik daraltılması ve kaydırma konumu koruması
 - 📈 **Gelişmiş Metrikler ve Analitik** — KPI kartları, zaman serileri, proje bazlı filtreleme ve performans istatistikleri
 
@@ -79,15 +80,16 @@ Bileşenler arası iletişim `EventBus` üzerinden sağlanır; bağımlılıklar
 
 ## Başlarken
 
-### A) EXE ile — Son kullanıcı (önerilen)
+### A) Kurulum Dosyası ile — Son kullanıcı (önerilen)
 
-`dist\ProjeTakipPlatformu.exe` dosyasını çift tıkla. Ek kurulum gerekmez.
+GitHub Releases'ten indirilen `ProjeTakipPlatformu-Setup-<sürüm>.exe` dosyasını çalıştırıp kurulumu tamamlayın (`%LOCALAPPDATA%\Programs\ProjeTakipPlatformu` altına UAC gerektirmeden kurulur).
 
-Uygulama verileri `%USERPROFILE%\.proje_takip\` altında otomatik oluşturulur:
+Uygulama verileri `%LOCALAPPDATA%\ProjeTakip\` altında otomatik oluşturulur:
 
 ```
-~/.proje_takip/
+%LOCALAPPDATA%\ProjeTakip\
 ├── proje_takip.db       # SQLite veritabanı
+├── updates.json         # Güncelleme tercihleri (açılış denetimi, atlanan sürüm)
 ├── .backups/            # Otomatik yedekler
 └── logs/app.log         # Uygulama günlüğü
 ```
@@ -154,30 +156,33 @@ Veritabanı ilk başlatmada otomatik oluşturulur; ayrıca `alembic upgrade head
 
 ---
 
-## EXE Derleme
+## EXE Derleme ve Sürüm Yayınlama
 
-Kaynak koddan tek dosya EXE üretmek için:
+Kurulum dosyasını ve kararlı `.exe`'yi tek komutla derlemek için:
 
 ```powershell
-.venv\Scripts\pyinstaller.exe packaging\proje_takip_platformu.spec --noconfirm --clean
+python build_installer.py
 ```
 
-Çıktı: `dist\ProjeTakipPlatformu.exe` (~57 MB, bağımsız tek dosya)
+Bu komut sırasıyla:
+1. PyInstaller (`--onedir --debug=noarchive`, sabit `packaging/launcher.py` ve sabit `packaging/launcher_version_info.txt` ile) `dist\ProjeTakipPlatformu\ProjeTakipPlatformu.exe` dosyasını derler.
+2. Derlenen `.exe`'nin SHA-256 özetini onaylı `packaging/launcher.sha256` kapısıyla doğrular.
+3. Yerelde çalıştırma denemesi yapar (`build_verify.launch_check`).
+4. Inno Setup (`packaging/ProjeTakipPlatformu.iss`) ile `dist\installer\ProjeTakipPlatformu-Setup-<sürüm>.exe` ve `.sha256` dosyasını üretip sessiz kurulum/kaldırma doğrulamasından geçirir.
 
-Build parametreleri `packaging\proje_takip_platformu.spec` içinde tanımlıdır.
+> **Not (Windows SmartScreen / Akıllı Uygulama Denetimi):** Kurulum dosyası imzasızdır. SmartScreen uyarısında **Ek bilgi → Yine de çalıştır** seçilebilir; Akıllı Uygulama Denetimi (SAC) engelinde dosya birkaç dakika sonra yeniden çalıştırılmalı veya güncel sürüm indirilmelidir.
 
 ### Sürüm yayınlama ve otomatik güncelleme
 
 Kurulu uygulama açılışta GitHub Releases'te yeni sürüm arar ve güncelleme teklif eder. Sürüm çıkarmak için:
 
 ```powershell
-python scripts/set_version.py 0.2.0
-git commit -am "chore(surum): v0.2.0 sürümü hazırlandı"
-git tag v0.2.0
-git push origin <dal> v0.2.0
+python tools/release.py 0.2.0
+git push origin main
+git push origin v0.2.0
 ```
 
-Etiket push edilince `.github/workflows/release.yml` installer'ı derleyip yayınlar. Kurallar: `Project_docs/RULES.md` §8; adımlar ve geri alma: `docs/wiki/surum-yayinlama.md`; güncelleme mekanizması: `docs/wiki/guncelleme-sistemi.md`.
+Etiket push edilince `.github/workflows/release.yml` kalite kapılarını koşar, kurulum dosyasını ve `.sha256` özetini yayınlar. Kurallar: `docs/Project_docs/RULES.md` §8; adımlar ve geri alma: `docs/wiki/surum-yayinlama.md`; kararlı exe tasarımı: `docs/wiki/exe-dagitim-rehberi.md`; güncelleme mekanizması: `docs/wiki/guncelleme-sistemi.md`.
 
 ---
 
@@ -214,8 +219,13 @@ proje_takip_platformu/
 ├── services/                 # İş mantığı katmanı (10 servis + speech/ — sesli komut)
 ├── tests/                    # pytest test paketi
 ├── icons/                    # Uygulama ikonu
-├── packaging/                # PyInstaller spec ve EXE meta verisi
-├── scripts/                  # Yardımcı scriptler (font indirme, derleme, kalite)
+├── packaging/                # Sabit launcher, sürüm kaynağı, onay hash'i ve Inno Setup betiği
+├── tools/                    # Sürüm yayınlama aracı (release.py)
+├── scripts/                  # Yardımcı scriptler (font indirme, kalite)
+├── build_exe.py              # Kararlı exe PyInstaller derleyicisi ve özet kapısı
+├── build_installer.py        # Tek komutla exe + kurulum + doğrulama aracı
+├── build_verify.py           # EXE ve sessiz kurulum/kaldırma doğrulayıcısı
+├── version.py                # Tek uygulama sürüm kaynağı
 ├── main.py                   # Uygulama giriş noktası (QML arayüzünü başlatır)
 ├── pyproject.toml            # Proje meta verisi ve bağımlılıklar
 └── alembic.ini               # Alembic yapılandırması

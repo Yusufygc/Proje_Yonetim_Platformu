@@ -23,6 +23,26 @@ Rectangle {
         onActivated: ideaDialogViewModel.closeDialog()
     }
 
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: root.visible && !problemInput.hasTextFocus && !solutionInput.hasTextFocus && !notesInput.hasTextFocus
+        onActivated: root.submitIdea()
+    }
+
+    function submitIdea() {
+        if (!ideaDialogViewModel) return
+        ideaDialogViewModel.saveIdea({
+            "title": titleInput.text,
+            "problem": problemInput.text,
+            "solution": solutionInput.text,
+            "target_user": targetUserInput.text,
+            "status": statusCombo.selectedValue,
+            "priority": priorityCombo.selectedValue,
+            "notes": notesInput.text,
+            "source_link": sourceLinkInput.text
+        })
+    }
+
     Connections {
         target: ideaDialogViewModel
         function onDialogStateChanged() {
@@ -36,6 +56,7 @@ Rectangle {
                 sourceLinkInput.text = init.source_link || ""
                 statusCombo.selectedValue = init.status || "RAW"
                 priorityCombo.selectedValue = init.priority || "MEDIUM"
+                titleInput.focusInput()
             }
         }
     }
@@ -111,6 +132,7 @@ Rectangle {
                         placeholder: i18nBridge.tr("idea_dialog_title_placeholder", "Örn: Yeni mobil uygulama fikri...")
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: root.submitIdea()
                     }
 
                     // Durum ve Öncelik Yan Yana
@@ -153,6 +175,7 @@ Rectangle {
                         label: i18nBridge.tr("label_target_user", "Hedef Kullanıcı")
                         placeholder: i18nBridge.tr("idea_dialog_target_user_placeholder", "Kim için?")
                         Layout.fillWidth: true
+                        onAccepted: root.submitIdea()
                     }
 
                     // Problem
@@ -163,6 +186,7 @@ Rectangle {
                         isTextArea: true
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: root.submitIdea()
                     }
 
                     // Çözüm
@@ -173,6 +197,7 @@ Rectangle {
                         isTextArea: true
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: root.submitIdea()
                     }
 
                     // Notlar
@@ -183,6 +208,7 @@ Rectangle {
                         isTextArea: true
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: root.submitIdea()
                     }
 
                     // Kaynak URL
@@ -191,6 +217,7 @@ Rectangle {
                         label: i18nBridge.tr("label_source_url", "Kaynak URL")
                         placeholder: "https://..."
                         Layout.fillWidth: true
+                        onAccepted: root.submitIdea()
                     }
                 }
             }
@@ -233,20 +260,7 @@ Rectangle {
                     btnVariant: "primary"
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: {
-                        if (ideaDialogViewModel) {
-                            ideaDialogViewModel.saveIdea({
-                                "title": titleInput.text,
-                                "problem": problemInput.text,
-                                "solution": solutionInput.text,
-                                "target_user": targetUserInput.text,
-                                "status": statusCombo.selectedValue,
-                                "priority": priorityCombo.selectedValue,
-                                "notes": notesInput.text,
-                                "source_link": sourceLinkInput.text
-                            })
-                        }
-                    }
+                    onClicked: root.submitIdea()
                 }
             }
         }

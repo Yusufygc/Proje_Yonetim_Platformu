@@ -7,7 +7,6 @@ import "drawing"
 import "drawing/ShapeRenderer.js" as Shapes
 import "drawing/ShapeFactory.js" as Factory
 import "drawing/HitTest.js" as HitTest
-import "drawing/FlowchartTemplate.js" as Template
 import "drawing/DrawingSerializer.js" as Serializer
 
 Rectangle {
@@ -19,12 +18,7 @@ Rectangle {
     border.width: 1
     clip: true
 
-    // Araç modu: "draw" (Çizim) veya "flowchart" (Akış Şeması)
-    property string toolMode: "draw"
-
-    // Aktif Araç:
-    // Çizim: "pen", "line", "arrow", "rect", "round_rect", "circle", "eraser"
-    // Akış Şeması: "flow_start", "flow_process", "flow_decision", "flow_io", "arrow"
+    // Aktif Araç: "pen", "line", "arrow", "rect", "round_rect", "circle", "eraser"
     property string activeTool: "pen"
     property string currentColor: themeBridge.isDark ? "#FFFFFF" : "#1E1E22"
     property int currentLineWidth: 3
@@ -52,6 +46,8 @@ Rectangle {
     // Metin düzenleme durumu (-1: kapalı, >= 0: düzenlenen öğe indeksi)
     property int editingItemIndex: -1
     property string backgroundImage: ""
+
+    signal drawingModified()
 
     // Zemin rengi tema ile değişir; tuval yeniden çizilmezse eski zeminle kalır.
     onColorChanged: canvas.requestPaint()
@@ -81,20 +77,16 @@ Rectangle {
         spacing: Theme.spacing.xs
 
         DrawingToolbar {
-            toolMode: root.toolMode
             activeTool: root.activeTool
             canUndo: root.canUndo
             canRedo: root.canRedo
-            onModeSelected: function(mode) { root.selectMode(mode) }
             onToolSelected: function(tool) { root.activeTool = tool }
-            onTemplateRequested: root.insertFlowchartTemplate()
             onUndoRequested: root.undo()
             onRedoRequested: root.redo()
             onClearRequested: root.clearCanvas()
         }
 
         DrawingOptionsBar {
-            toolMode: root.toolMode
             activeTool: root.activeTool
             currentColor: root.currentColor
             currentLineWidth: root.currentLineWidth
@@ -200,9 +192,7 @@ Rectangle {
                             root.pushSnapshot()
                             root.items.push(newItem)
                             root.syncHistoryCounts()
-                            if (newItem.type.startsWith("flow_")) {
-                                root.openTextEditor(root.items.length - 1)
-                            }
+                            root.drawingModified()
                         }
 
                         root.currentPoints = []
@@ -251,19 +241,10 @@ Rectangle {
         }
     }
 
-    function selectMode(mode) {
-        root.toolMode = mode
-        if (mode === "flowchart") {
-            root.activeTool = "flow_process"
-        } else if (root.activeTool.startsWith("flow_")) {
-            root.activeTool = "pen"
-        }
-    }
-
     // Renk seçmek silgiden çıkarır; silgi seçiliyken rengin bir anlamı olmaz.
     function selectColor(color) {
         if (root.activeTool === "eraser") {
-            root.activeTool = root.toolMode === "flowchart" ? "flow_process" : "pen"
+            root.activeTool = "pen"
         }
         root.currentColor = color
     }
@@ -289,22 +270,13 @@ Rectangle {
             it[it.type === "arrow" ? "label" : "text"] = newText ? newText.trim() : ""
             root.syncHistoryCounts()
             canvas.requestPaint()
+            root.drawingModified()
         }
         root.editingItemIndex = -1
     }
 
     function cancelTextEditor() {
         root.editingItemIndex = -1
-    }
-
-    function insertFlowchartTemplate() {
-        root.pushSnapshot()
-        var templateItems = Template.createItems(themeBridge.isDark, root.fillFor)
-        for (var i = 0; i < templateItems.length; i++) {
-            root.items.push(templateItems[i])
-        }
-        root.syncHistoryCounts()
-        canvas.requestPaint()
     }
 
     // ── Resim / Arka Plan İşlemleri ────────────────────────────────────
@@ -322,12 +294,14 @@ Rectangle {
         root.pushSnapshot()
         root.backgroundImage = url
         canvas.requestPaint()
+        root.drawingModified()
     }
 
     function clearBackgroundImage() {
         root.pushSnapshot()
         root.backgroundImage = ""
         canvas.requestPaint()
+        root.drawingModified()
     }
 
     // ── Geri Al / İleri Al / Durum Yönetimi ─────────────────────────────
@@ -362,12 +336,14 @@ Rectangle {
         if (root.undoStack.length === 0) return
         root.redoStack.push(snapshotJson())
         restoreSnapshot(root.undoStack.pop())
+        root.drawingModified()
     }
 
     function redo() {
         if (root.redoStack.length === 0) return
         root.undoStack.push(snapshotJson())
         restoreSnapshot(root.redoStack.pop())
+        root.drawingModified()
     }
 
     function clearCanvas() {
@@ -378,6 +354,7 @@ Rectangle {
         root.currentPoints = []
         root.syncHistoryCounts()
         canvas.requestPaint()
+        root.drawingModified()
     }
 
     function getDrawingJson() {

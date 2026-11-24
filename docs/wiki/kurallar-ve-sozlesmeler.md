@@ -9,7 +9,7 @@
 - Mimari bilgi bu wiki'de tutulur; Graphify aracı ve çıktıları projeden tamamen kaldırıldı ([[log]]).
 
 ## Sürüm yayınlama sözleşmesi
-Sürüm tek kaynaktan (`APP_VERSION`) `scripts/set_version.py` ile değişir; yayın yalnızca `vX.Y.Z` etiketiyle olur ve etiket sürümle birebir aynı olmalıdır. Yayınlanmış etiket taşınmaz; asistanlar açık istek olmadan etiket oluşturmaz/push etmez. RULES.md §8. Detay: [[surum-yayinlama]].
+Sürüm tek kaynaktan (`version.py` içindeki `__version__`) `tools/release.py` ile değişir; yayın yalnızca `vX.Y.Z` etiketiyle olur ve etiket sürümle birebir aynı olmalıdır. Kararlı exe (`packaging/launcher.sha256` kapısı) bozulmaz; yayınlanmış etiket taşınmaz; asistanlar açık istek olmadan etiket oluşturmaz/push etmez. `docs/Project_docs/RULES.md` §8. Detay: [[surum-yayinlama]], [[exe-dagitim-rehberi]].
 
 ## Tema sözleşmesi
 Renk yalnızca `ThemeManager`/`ThemeBridge` paletinden gelir (`themeBridge.textPrimary`, `themeBridge.surface` gibi bildirimli property'ler; `themeBridge.color("key")` slotu tema değişince yenilenmediği için kullanılmaz); QML dosyalarına sabit renk yazılmaz. Detay: [[tema-sistemi]].

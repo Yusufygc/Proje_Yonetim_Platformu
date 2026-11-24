@@ -158,8 +158,9 @@ feat(task_service): Görev tamamlanma yüzdesi hesaplama servise taşındı
 
 ## 11. Sürüm Yayınlama
 
-- Sürüm numarası yalnızca `python scripts/set_version.py X.Y.Z` ile değişir; yayın `vX.Y.Z` etiketinin push edilmesiyle olur (`Project_docs/RULES.md` §8, `docs/wiki/surum-yayinlama.md`).
+- Sürüm numarası yalnızca `python tools/release.py X.Y.Z` ile değişir (`version.py` tek kaynaktır); yayın `vX.Y.Z` etiketinin push edilmesiyle olur (`docs/Project_docs/RULES.md` §8, `docs/wiki/surum-yayinlama.md`, `docs/wiki/exe-dagitim-rehberi.md`).
 - **Kullanıcı açıkça istemeden etiket oluşturma, etiket push etme, `gh release` komutu çalıştırma.** Yayın tüm kurulu kullanıcılara güncelleme penceresi çıkarır; geri alınması zordur.
-- `git push --follow-tags` hafif etiketi göndermez; etiket `git push origin <dal> vX.Y.Z` ile gönderilir.
+- `git push --follow-tags` hafif etiketi göndermez; etiket `git push origin main` ardından `git push origin vX.Y.Z` ile gönderilir.
 - Yayınlanmış etiketi taşıma veya silme; hatalı sürüm için yeni PATCH sürümü çıkar.
+- Sabit exe (`packaging/launcher.py`, `packaging/launcher_version_info.txt`, `LAUNCHER_EPOCH`) ve `packaging/launcher.sha256` kapısı kurallarına aykırı değişiklik yapılmaz.
 

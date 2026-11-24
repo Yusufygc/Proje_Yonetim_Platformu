@@ -26,10 +26,22 @@ Rectangle {
         decisionTextInput.text = existing ? existing.decision : "";
         decisionStatusCombo.selectedValue = existing ? existing.status : "ACCEPTED";
         visible = true;
+        decisionTitleInput.focusInput();
     }
 
     function close() {
         visible = false;
+    }
+
+    function submitDecision() {
+        if (decisionTitleInput.text.trim() && decisionTextInput.text.trim()) {
+            var st = decisionStatusCombo.selectedValue || "ACCEPTED";
+            if (root.editId !== 0)
+                projectSubitemsViewModel.updateDecision(root.editId, decisionTitleInput.text, decisionTextInput.text, st);
+            else
+                projectSubitemsViewModel.createDecision(decisionTitleInput.text.trim(), decisionTextInput.text.trim(), st);
+            root.close();
+        }
     }
 
     MouseArea {
@@ -41,6 +53,12 @@ Rectangle {
         sequence: "Escape"
         enabled: root.visible
         onActivated: root.close()
+    }
+
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: root.visible && !decisionTextInput.hasTextFocus
+        onActivated: root.submitDecision()
     }
 
     AppCard {
@@ -97,6 +115,7 @@ Rectangle {
                 placeholder: i18nBridge.tr("decision_title_placeholder", "Örn: Mimari Seçim Kararı")
                 Layout.fillWidth: true
                 showVoiceInput: true
+                onAccepted: root.submitDecision()
             }
 
             AppTextInput {
@@ -107,6 +126,7 @@ Rectangle {
                 inputHeight: 80
                 Layout.fillWidth: true
                 showVoiceInput: true
+                onAccepted: root.submitDecision()
             }
 
             AppComboBox {
@@ -145,16 +165,7 @@ Rectangle {
                     text: root.editId !== 0 ? i18nBridge.tr("action_save", "Kaydet") : i18nBridge.tr("action_add", "Ekle")
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: {
-                        if (decisionTitleInput.text.trim() && decisionTextInput.text.trim()) {
-                            var st = decisionStatusCombo.selectedValue || "ACCEPTED";
-                            if (root.editId !== 0)
-                                projectSubitemsViewModel.updateDecision(root.editId, decisionTitleInput.text, decisionTextInput.text, st);
-                            else
-                                projectSubitemsViewModel.createDecision(decisionTitleInput.text.trim(), decisionTextInput.text.trim(), st);
-                            root.close();
-                        }
-                    }
+                    onClicked: root.submitDecision()
                 }
             }
         }

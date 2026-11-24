@@ -11,10 +11,28 @@ RowLayout {
     Layout.fillWidth: true
     spacing: Theme.spacing.md
 
+    function syncSelectedProject() {
+        if (taskViewModel && taskViewModel.selectedProjectId > 0) {
+            if (projectSelector.selectedValue !== taskViewModel.selectedProjectId) {
+                projectSelector.selectedValue = taskViewModel.selectedProjectId
+            }
+        }
+    }
+
+    Component.onCompleted: syncSelectedProject()
+
+    Connections {
+        target: taskViewModel
+        function onSelectedProjectChanged(projectId) {
+            root.syncSelectedProject()
+        }
+    }
+
     // Proje Seçici Dropdown
     AppComboBox {
         id: projectSelector
         Layout.preferredWidth: 240
+        selectedValue: taskViewModel ? taskViewModel.selectedProjectId : 0
         model: {
             if (!taskViewModel || !taskViewModel.projects) return []
             var list = []
@@ -24,9 +42,10 @@ RowLayout {
             }
             return list
         }
-        onSelectedValueChanged: {
-            if (taskViewModel && selectedValue !== undefined && selectedValue !== 0) {
-                taskViewModel.selectProject(selectedValue)
+        onModelChanged: root.syncSelectedProject()
+        onValueSelected: function(val) {
+            if (taskViewModel && val !== undefined && val !== null && val !== 0) {
+                taskViewModel.selectProject(val)
             }
         }
     }

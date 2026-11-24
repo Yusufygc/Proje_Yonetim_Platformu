@@ -46,7 +46,7 @@ import "../../components"
 
             AppIcon {
                 name: projMenu.opened ? "chevron-up" : "chevron-down"
-                size: 12
+                size: 14
                 color: themeBridge.textMuted
                 Layout.alignment: Qt.AlignVCenter
             }

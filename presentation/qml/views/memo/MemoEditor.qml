@@ -10,15 +10,23 @@ AppCard {
     property var memo: memoViewModel ? memoViewModel.selectedMemo : ({})
     property bool hasMemo: memo && memo.id !== undefined && memo.id !== 0
     property int currentTab: 0
+    property int loadedMemoId: 0
+    property bool _isLoadingMemo: false
+
+    Timer {
+        id: autoSaveTimer
+        interval: 800
+        repeat: false
+        onTriggered: root.autoSaveCurrentMemo()
+    }
+
+    Component.onCompleted: root.loadMemoFromViewModel()
+    Component.onDestruction: root.flushPendingAutoSave()
 
     Connections {
         target: memoViewModel
         function onSelectedMemoChanged() {
-            if (memoViewModel && root.hasMemo) {
-                titleInput.text = root.memo.title || ""
-                bodyInput.text = root.memo.body || ""
-                drawingCanvas.loadDrawingJson(root.memo.drawingData || "")
-            }
+            root.loadMemoFromViewModel()
         }
     }
 
@@ -80,6 +88,11 @@ AppCard {
                     placeholder: i18nBridge.tr("memo_title_placeholder", "Not Başlığı...")
                     Layout.fillWidth: true
                     showVoiceInput: true
+                    onTextChanged: root.scheduleAutoSave()
+                    onAccepted: {
+                        autoSaveTimer.stop()
+                        root.saveCurrentMemo()
+                    }
                 }
 
                 // Sekme Butonları (Düzenle / Önizleme / Çizim)
@@ -115,7 +128,10 @@ AppCard {
                     text: i18nBridge.tr("action_save", "Kaydet")
                     iconName: "check"
                     btnVariant: "primary"
-                    onClicked: root.saveCurrentMemo()
+                    onClicked: {
+                        autoSaveTimer.stop()
+                        root.saveCurrentMemo()
+                    }
                 }
 
                 // Sil Butonu
@@ -124,6 +140,8 @@ AppCard {
                     btnVariant: "danger"
                     implicitWidth: 34
                     onClicked: {
+                        autoSaveTimer.stop()
+                        root.loadedMemoId = 0
                         if (memoViewModel && root.hasMemo) {
                             memoViewModel.deleteMemo(root.memo.id)
                         }
@@ -221,7 +239,9 @@ AppCard {
                     Item { Layout.fillWidth: true }
 
                     Text {
-                        text: root.memo.updatedAt ? (i18nBridge.tr("label_last_modified", "Son Değişiklik:") + " " + root.memo.updatedAt) : ""
+                        text: memoViewModel && memoViewModel.selectedMemoUpdatedAt
+                              ? (i18nBridge.tr("label_last_modified", "Son Değişiklik:") + " " + memoViewModel.selectedMemoUpdatedAt)
+                              : ""
                         font.pixelSize: Theme.typography.sizeSmall
                         color: themeBridge.textMuted
                     }
@@ -248,6 +268,7 @@ AppCard {
                         background: Rectangle {
                             color: "transparent"
                         }
+                        onTextChanged: root.scheduleAutoSave()
 
                         Keys.onPressed: function(event) {
                             if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_V) {
@@ -294,6 +315,7 @@ AppCard {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 visible: root.currentTab === 2
+                onDrawingModified: root.scheduleAutoSave()
             }
         }
     }
@@ -312,6 +334,50 @@ AppCard {
             bodyInput.cursorPosition = pos + prefix.length
         }
         bodyInput.forceActiveFocus()
+    }
+
+    function scheduleAutoSave() {
+        if (!root._isLoadingMemo && root.hasMemo && root.loadedMemoId > 0) {
+            autoSaveTimer.restart()
+        }
+    }
+
+    function flushPendingAutoSave() {
+        if (autoSaveTimer.running && memoViewModel && root.loadedMemoId > 0) {
+            autoSaveTimer.stop()
+            memoViewModel.autoSaveMemo(root.loadedMemoId, titleInput.text, bodyInput.text, drawingCanvas.getDrawingJson())
+        }
+    }
+
+    function loadMemoFromViewModel() {
+        var nextId = root.hasMemo ? root.memo.id : 0
+        if (nextId === root.loadedMemoId) {
+            return
+        }
+        if (root.loadedMemoId > 0) {
+            root.flushPendingAutoSave()
+        }
+        root._isLoadingMemo = true
+        if (memoViewModel && root.hasMemo) {
+            root.loadedMemoId = root.memo.id
+            titleInput.text = root.memo.title || ""
+            bodyInput.text = root.memo.body || ""
+            drawingCanvas.loadDrawingJson(root.memo.drawingData || "")
+        } else {
+            autoSaveTimer.stop()
+            root.loadedMemoId = 0
+            titleInput.text = ""
+            bodyInput.text = ""
+            drawingCanvas.loadDrawingJson("")
+        }
+        root._isLoadingMemo = false
+    }
+
+    function autoSaveCurrentMemo() {
+        if (!root._isLoadingMemo && memoViewModel && root.hasMemo && root.loadedMemoId > 0) {
+            var drawingJson = drawingCanvas.getDrawingJson()
+            memoViewModel.autoSaveMemo(root.loadedMemoId, titleInput.text, bodyInput.text, drawingJson)
+        }
     }
 
     function saveCurrentMemo() {

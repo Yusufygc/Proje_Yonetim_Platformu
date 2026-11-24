@@ -4,12 +4,15 @@ Her test bağımsız, temiz bir veritabanıyla başlar.
 """
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QSettings
+
+os.environ.setdefault("PROJE_TAKIP_NO_UPDATE_CHECK", "1")
 
 # Test çalışmasında proje kökünü path'e ekle
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -40,6 +43,7 @@ def _redirect_data_dir(root: Path) -> None:
     config.LOGS_DIR = root / "logs"
     config.LOG_FILE = config.LOGS_DIR / "app.log"
     config.MEMO_IMAGES_DIR = root / "memo_images"
+    config.UPDATE_PREFERENCES_PATH = root / "updates.json"
 
 
 _redirect_data_dir(Path(tempfile.mkdtemp(prefix="proje_takip_test_data_")))

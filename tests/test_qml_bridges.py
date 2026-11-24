@@ -108,8 +108,10 @@ def test_i18n_bridge_translation_and_language_switch(qapp: QApplication, contain
 
 def test_navigation_bridge_routing_and_sidebar_toggle(qapp: QApplication, container: DIContainer) -> None:
     setup_modules(container)
+    container.prefs.save_sidebar_collapsed(True)
     bridge = NavigationBridge(container.prefs, container.event_bus, parent=qapp)
 
+    assert bridge.sidebarCollapsed is False
     assert bridge.currentPage == "dashboard"
     bridge.navigateTo("projects")
     assert bridge.currentPage == "projects"
@@ -930,6 +932,7 @@ def test_qml_main_window_loads_successfully(qapp: QApplication, container: DICon
         "presentation/qml/dialogs/ProjectDialog.qml",
         "presentation/qml/dialogs/TaskDialog.qml",
         "presentation/qml/dialogs/IdeaDialog.qml",
+        "presentation/qml/dialogs/UpdateDialog.qml",
         "presentation/qml/components/GlobalSearchModal.qml",
     ]:
         comp = QQmlComponent(engine, view_file)
@@ -1073,11 +1076,7 @@ def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContaine
     assert len(json.loads(canvas.getDrawingJson())) == 0
     assert canvas.property("canUndo") is True
 
-    # 4. Mod ve renk seçimi: mod değişince uyumsuz araç sıfırlanır, renk seçmek silgiden çıkarır
-    canvas.selectMode("flowchart")
-    assert canvas.property("activeTool") == "flow_process"
-    canvas.selectMode("draw")
-    assert canvas.property("activeTool") == "pen"
+    # 4. Renk seçimi silgiden çıkarır
     canvas.setProperty("activeTool", "eraser")
     canvas.selectColor("#3B82F6")
     assert canvas.property("activeTool") == "pen"
@@ -1087,25 +1086,17 @@ def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContaine
     assert len(json.loads(canvas.getDrawingJson())) == 5
     assert canvas.property("canRedo") is True
 
+    # 5. Şekil metni güncelleme testi
+    canvas.openTextEditor(2)
+    canvas.applyBlockText("Kutu Etiketi")
+    updated = json.loads(canvas.getDrawingJson())
+    assert updated[2]["text"] == "Kutu Etiketi"
+
+    canvas.loadDrawingJson(json.dumps(shapes))
+    canvas.clearCanvas()
+    canvas.undo()
     canvas.redo()
     assert len(json.loads(canvas.getDrawingJson())) == 0
-
-    # 4. Akış şeması şablonu (Flowchart Template) ve blok metinleri testi
-    canvas.insertFlowchartTemplate()
-    template_items = json.loads(canvas.getDrawingJson())
-    assert len(template_items) >= 10
-    types = [it["type"] for it in template_items]
-    assert "flow_start" in types
-    assert "flow_process" in types
-    assert "flow_decision" in types
-    assert "flow_io" in types
-    assert "arrow" in types
-
-    # 5. Blok metni güncelleme ve etiket testi
-    canvas.openTextEditor(0)
-    canvas.applyBlockText("Program Başlangıcı")
-    updated = json.loads(canvas.getDrawingJson())
-    assert updated[0]["text"] == "Program Başlangıcı"
 
     # 6. Arka plan görseli testi
     test_img_url = "file:///C:/path/to/test.png"
@@ -1135,14 +1126,12 @@ def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContaine
                 return found
         return None
 
-    flow_button = find_button(canvas, ib.tr("tab_tools_flowchart", "Akış Şeması"))
-    assert flow_button is not None
-    QMetaObject.invokeMethod(flow_button, "click")
-    assert canvas.property("toolMode") == "flowchart"
-    assert canvas.property("activeTool") == "flow_process"
-    draw_button = find_button(canvas, ib.tr("tab_tools_draw", "Çizim"))
-    QMetaObject.invokeMethod(draw_button, "click")
-    assert canvas.property("toolMode") == "draw"
+    rect_button = find_button(canvas, ib.tr("tool_rect", "Kutu"))
+    assert rect_button is not None
+    QMetaObject.invokeMethod(rect_button, "click")
+    assert canvas.property("activeTool") == "rect"
+    pen_button = find_button(canvas, ib.tr("tool_pen", "Kalem"))
+    QMetaObject.invokeMethod(pen_button, "click")
     assert canvas.property("activeTool") == "pen"
 
     # Asenkron Image bir görsel okuyucu iş parçacığı başlatır; motor süreç çıkışına kadar yaşarsa
@@ -1152,6 +1141,118 @@ def test_qml_drawing_canvas_operations(qapp: QApplication, container: DIContaine
     canvas.deleteLater()
     engine.deleteLater()
     QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
+def test_idea_conversion_when_triggered_should_refresh_projects_tasks_and_dashboard(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool  # noqa: PLC0415
+
+    pvm = ProjectViewModel(container, parent=qapp)
+    tvm = TaskViewModel(container, parent=qapp)
+    dvm = DashboardViewModel(container.dashboard_controller, parent=qapp)
+    ivm = IdeaViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    initial_projects = pvm.model.rowCount()
+
+    idea = container.services.idea.create_idea("Dönüşecek Fikir", problem="Sorun")
+    ivm.convertToProject(idea.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert pvm.model.rowCount() == initial_projects + 1
+    assert any(p["title"] == "Dönüşecek Fikir" for p in tvm.projects)
+    assert any(i["title"] == "Dönüşecek Fikir" and i["status"] == "CONVERTED" for i in dvm.recentIdeas)
+
+
+def test_task_viewmodel_and_toolbar_when_project_selected_should_persist_and_keep_selection(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QCoreApplication, QEvent, QThreadPool  # noqa: PLC0415
+    from PySide6.QtQml import QQmlComponent  # noqa: PLC0415
+
+    p1 = container.services.project.create_project("Birinci Proje")
+    p2 = container.services.project.create_project("İkinci Proje")
+    container.prefs.save_last_task_project_id(0)
+
+    tvm1 = TaskViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert tvm1.selectedProjectId == p1.id
+
+    tvm1.selectProject(p2.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert container.prefs.load_last_task_project_id() == p2.id
+
+    # Yeni TaskViewModel açılışta en son seçili p2 projesini yüklemeli
+    tvm2 = TaskViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert tvm2.selectedProjectId == p2.id
+
+    # TaskToolbar QML bileşeni yüklendiğinde seçili projeyi ilk projeye sıfırlamamalı
+    engine = QQmlApplicationEngine(parent=qapp)
+    engine.addImageProvider("icons", IconImageProvider(container.icons))
+    tb = ThemeBridge(container.theme, container.prefs, parent=qapp)
+    ib = I18nBridge(container.strings, parent=qapp)
+    engine.rootContext().setContextProperty("themeBridge", tb)
+    engine.rootContext().setContextProperty("i18nBridge", ib)
+    engine.rootContext().setContextProperty("taskViewModel", tvm2)
+    engine.rootContext().setContextProperty("taskDialogViewModel", TaskDialogViewModel(container, tvm2, parent=qapp))
+
+    comp = QQmlComponent(engine, "presentation/qml/views/tasks/TaskToolbar.qml")
+    assert comp.isReady(), [e.toString() for e in comp.errors()]
+    toolbar = comp.create()
+    assert toolbar is not None
+    qapp.processEvents()
+
+    assert tvm2.selectedProjectId == p2.id
+
+    toolbar.deleteLater()
+    engine.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
+def test_memo_viewmodel_auto_save_should_persist_silently_without_toast_or_reset(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool  # noqa: PLC0415
+
+    mvm = MemoViewModel(container, parent=qapp)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    mvm.createMemo("Oto Kayıt Notu")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    memo_id = mvm.selectedMemoId
+
+    toasts: list[dict[str, object]] = []
+    selected_signals: list[int] = []
+    container.event_bus.subscribe("toast.show", lambda **kw: toasts.append(kw))
+    mvm.selectedMemoChanged.connect(lambda: selected_signals.append(1))
+
+    mvm.autoSaveMemo(memo_id, "Oto Kayıt Notu Güncel", "Otomatik içerik", "")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    assert toasts == []
+    assert selected_signals == []
+    assert mvm.selectedMemo.get("title") == "Oto Kayıt Notu Güncel"
+    assert mvm.selectedMemo.get("body") == "Otomatik içerik"
+    saved = container.memo_controller.get_sync(memo_id)
+    assert saved is not None and saved.title == "Oto Kayıt Notu Güncel" and saved.body == "Otomatik içerik"
+
+    # Değişiklik yoksa autoSaveMemo DB'ye gereksiz yazmamalı; silinmiş notta sessizce dönmeli
+    mvm.autoSaveMemo(memo_id, "Oto Kayıt Notu Güncel", "Otomatik içerik", "")
+    mvm.deleteMemo(memo_id)
+    mvm.autoSaveMemo(memo_id, "Silinmiş", "İçerik", "")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
 
 
 

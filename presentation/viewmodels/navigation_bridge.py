@@ -33,7 +33,9 @@ class NavigationBridge(QObject):
         self._prefs = prefs
         self._event_bus = event_bus
         self._current_page = "dashboard"
-        self._sidebar_collapsed = self._prefs.load_sidebar_collapsed()
+        # Uygulama her açılışta kenar çubuğu açık başlar.
+        self._sidebar_collapsed = False
+        self._prefs.save_sidebar_collapsed(False)
         self._search_modal_open = False
 
         self._event_bus.subscribe("toast.show", self._on_bus_toast)

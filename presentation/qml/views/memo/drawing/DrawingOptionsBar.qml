@@ -9,7 +9,6 @@ Flickable {
     id: bar
 
     // Seçili renk, kalınlık ve dolgu üst bileşende tutulur; çubuk yalnızca değişiklik ister.
-    property string toolMode: "draw"
     property string activeTool: "pen"
     property string currentColor: "#FFFFFF"
     property int currentLineWidth: 3
@@ -128,17 +127,6 @@ Flickable {
         }
     }
     function helpText() {
-        if (bar.toolMode === "flowchart") {
-            switch (bar.activeTool) {
-                case "flow_start": return i18nBridge.tr("hint_flow_start", "Başla/Bitir bloğu için sürükleyin (Çift tıkla düzenle)")
-                case "flow_process": return i18nBridge.tr("hint_flow_process", "İşlem bloğu için sürükleyin (Çift tıkla düzenle)")
-                case "flow_decision": return i18nBridge.tr("hint_flow_decision", "Karar/koşul bloğu için sürükleyin (Çift tıkla düzenle)")
-                case "flow_io": return i18nBridge.tr("hint_flow_io", "Girdi/çıktı bloğu için sürükleyin (Çift tıkla düzenle)")
-                case "arrow": return i18nBridge.tr("hint_flow_arrow", "Blokları bağlamak için akış oku çekin (Çift tıkla etiketle)")
-                default: return ""
-            }
-        }
-
         switch (bar.activeTool) {
             case "pen": return i18nBridge.tr("hint_tool_pen", "Serbest el çizim yapın")
             case "line": return i18nBridge.tr("hint_tool_line", "Düz çizgi için sürükleyip bırakın")

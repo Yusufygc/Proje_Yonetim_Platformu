@@ -105,3 +105,17 @@ class PreferenceManager:
     def load_font_family(self) -> str:
         return str(self._settings.value("ui/font_family", ""))
 
+    # ── Görevler (WBS) Seçili Proje ──────────────────────────────────────────
+
+    def save_last_task_project_id(self, project_id: int) -> None:
+        self._settings.setValue("ui/last_task_project_id", int(project_id))
+
+    def load_last_task_project_id(self) -> int:
+        value = self._settings.value("ui/last_task_project_id")
+        if value is None or value == "":
+            return 0
+        try:
+            return int(str(value))
+        except (ValueError, TypeError):
+            return 0
+

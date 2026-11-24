@@ -241,7 +241,7 @@ Rectangle {
 
                                     AppIcon {
                                         name: "corner-down-left"
-                                        size: 14
+                                        size: 13
                                         color: themeBridge.textMuted
                                         anchors.verticalCenter: parent.verticalCenter
                                         visible: resMouse.containsMouse

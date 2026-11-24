@@ -34,7 +34,12 @@ ColumnLayout {
             iconName: "external-link"
             text: i18nBridge.tr("tab_tasks_wbs_page", "WBS Sayfasında Aç")
             implicitHeight: 28
-            onClicked: navBridge.navigateTo("tasks")
+            onClicked: {
+                if (taskViewModel && projectViewModel && projectViewModel.selectedProjectId > 0) {
+                    taskViewModel.selectProject(projectViewModel.selectedProjectId);
+                }
+                navBridge.navigateTo("tasks");
+            }
         }
     }
 
@@ -123,7 +128,7 @@ ColumnLayout {
                 AppIcon {
                     visible: modelData.parent_id > 0
                     name: "corner-down-right"
-                    size: 14
+                    size: 13
                     color: themeBridge.textMuted
                 }
 

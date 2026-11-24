@@ -67,10 +67,13 @@ class ProjectViewModel(QObject):
     def _subscribe_events(self) -> None:
         self._event_bus.subscribe(NEW_PROJECT_REQUESTED, self._on_new_project_requested)
         self._event_bus.subscribe(PROJECT_DETAIL_REQUESTED, self._on_detail_requested)
-        for evt in ("project.archived", "project.restored", "project.deleted"):
-            self._event_bus.subscribe(evt, lambda **_kw: self.loadProjects())
+        for evt in ("project.created", "project.archived", "project.restored", "project.deleted", "idea.converted"):
+            self._event_bus.subscribe(evt, self._on_project_list_changed)
         for evt in ("task.created", "task.updated", "task.completed", "task.reopened", "task.deleted", "task.moved"):
             self._event_bus.subscribe(evt, self._on_task_event)
+
+    def _on_project_list_changed(self, **_kw: Any) -> None:
+        self.loadProjects()
 
     def _on_new_project_requested(self, **_kw: Any) -> None:
         self.openCreateDialog()

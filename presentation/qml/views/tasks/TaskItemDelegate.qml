@@ -64,7 +64,7 @@ Rectangle {
             AppIcon {
                 anchors.centerIn: parent
                 name: model.isExpanded ? "chevron-down" : "chevron-right"
-                size: 12
+                size: 13
                 color: themeBridge.textSecondary
             }
 

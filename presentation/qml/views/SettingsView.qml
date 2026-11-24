@@ -281,12 +281,69 @@ ScrollView {
             }
         }
 
-        // Güncelleme denetimi
-        AppButton {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: i18nBridge.tr("settings_update_check", "Güncellemeleri Denetle")
-            variant: "secondary"
-            onClicked: updateViewModel.checkForUpdates()
+        // ── 5. Güncellemeler Bölümü ──────────────────────────────────────────
+        AppCard {
+            width: parent.width - 48
+            height: 130
+
+            Column {
+                anchors.fill: parent
+                spacing: 14
+
+                Text {
+                    text: i18nBridge.tr("settings_update_section", "Güncellemeler")
+                    font.pixelSize: 15
+                    font.weight: Font.DemiBold
+                    color: themeBridge.textPrimary
+                }
+
+                Row {
+                    spacing: 10
+
+                    Rectangle {
+                        width: 18
+                        height: 18
+                        radius: 4
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: updateViewModel.checkOnStartup ? themeBridge.accentStart : "transparent"
+                        border.width: 1.5
+                        border.color: updateViewModel.checkOnStartup ? themeBridge.accentStart : themeBridge.border
+
+                        AppIcon {
+                            anchors.centerIn: parent
+                            name: "check"
+                            size: 12
+                            color: "#FFFFFF"
+                            visible: updateViewModel.checkOnStartup
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: updateViewModel.setCheckOnStartup(!updateViewModel.checkOnStartup)
+                        }
+                    }
+
+                    Text {
+                        text: i18nBridge.tr("settings_update_auto_check", "Açılışta güncellemeleri otomatik kontrol et")
+                        font.pixelSize: 13
+                        color: themeBridge.textSecondary
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: updateViewModel.setCheckOnStartup(!updateViewModel.checkOnStartup)
+                        }
+                    }
+                }
+
+                AppButton {
+                    text: i18nBridge.tr("settings_update_check", "Güncellemeleri Denetle")
+                    variant: "secondary"
+                    onClicked: updateViewModel.checkForUpdates(false)
+                }
+            }
         }
 
         // Sürüm Bilgisi

@@ -1,10 +1,11 @@
 name: Release
 
-# `v0.2.0` gibi bir etiket gönderilince installer derlenir ve GitHub Releases'e yüklenir.
-# Uygulama açılışta bu yayını denetleyip kullanıcıya güncelleme teklif eder (services/update_service.py).
+# vX.Y.Z etiketi itilince: etiket/sürüm denetimi -> lint + test -> kararlı exe kapısı + kurulum dosyası -> GitHub Release.
+# Etiketi yalnızca sürüm sahibi iter (docs/wiki/surum-yayinlama.md).
 on:
   push:
-    tags: ["v*"]
+    tags:
+      - "v*"
 
 permissions:
   contents: write
@@ -12,53 +13,62 @@ permissions:
 jobs:
   release:
     runs-on: windows-latest
+    timeout-minutes: 40
     env:
+      PYTHONIOENCODING: utf-8
       QT_QPA_PLATFORM: offscreen
+      TAG: ${{ github.ref_name }}  # betiğe doğrudan gömülmez: komut enjeksiyonu olmasın
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.10"  # yerelle aynı: exe özeti Python sürümüne bağlıdır
           cache: pip
+          cache-dependency-path: requirements-lock.txt
 
-      - name: Bağımlılıkları kur
-        run: python -m pip install -r requirements.txt
-
-      - name: Etiket ve uygulama sürümü aynı mı
+      - name: Etiket ile version.py uyumunu denetle
         shell: pwsh
-        run: |
-          $tagVersion = "${{ github.ref_name }}".TrimStart("v")
-          $appVersion = python -c "from app import config; print(config.APP_VERSION)"
-          if ($tagVersion -ne $appVersion) {
-            throw "Etiket v$tagVersion ama app/config.py sürümü $appVersion. Önce: python scripts/set_version.py $tagVersion"
-          }
+        run: python tools/release.py --check-tag "$env:TAG"
 
-      - name: Testler
+      - name: Bağımlılıklar
+        run: python -m pip install -r requirements-build.txt -c requirements-lock.txt  # geçişli sürümler sabit: exe özeti kaymasın
+
+      - name: Ruff (lint)
+        run: python -m ruff check .
+
+      - name: Pytest
         run: python -m pytest tests/ -q
 
       # Ses tanıma modeli boyut nedeniyle depoda yok (.gitignore); pakete girmesi için indirilir.
       - name: Vosk Türkçe modelini indir
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip" -OutFile model.zip
-          New-Item -ItemType Directory -Force resources/models | Out-Null
-          Expand-Archive model.zip -DestinationPath resources/models
-          Remove-Item model.zip
+          if (-not (Test-Path "resources/models/vosk-model-small-tr-0.3")) {
+            Invoke-WebRequest -Uri "https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip" -OutFile model.zip
+            New-Item -ItemType Directory -Force resources/models | Out-Null
+            Expand-Archive model.zip -DestinationPath resources/models
+            Remove-Item model.zip
+          }
 
-      - name: PyInstaller ile derle
-        run: python -m PyInstaller --noconfirm --clean packaging/proje_takip_platformu_dir.spec
-
-      - name: Inno Setup ile installer oluştur
+      - name: Inno Setup
         shell: pwsh
         run: |
-          choco install innosetup -y --no-progress
-          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\windows.iss
+          if (-not (Get-Command ISCC -ErrorAction SilentlyContinue) -and -not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
 
-      - name: Yayınla
+      # Kararlı exe özeti onaylananla (packaging/launcher.sha256) aynı değilse bu adım yayını durdurur
+      - name: Kurulum dosyasını derle
+        run: python build_installer.py
+
+      - name: GitHub Release oluştur
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ github.ref_name }}" "dist/installer/ProjeTakipPlatformuSetup.exe" `
-            --title "Proje Takip Platformu ${{ github.ref_name }}" --generate-notes
+          $flags = @()
+          if ($env:TAG -like "*-*") { $flags += "--prerelease" }
+          gh release create $env:TAG dist/installer/* --title "Proje Takip Platformu $env:TAG" --generate-notes --verify-tag @flags

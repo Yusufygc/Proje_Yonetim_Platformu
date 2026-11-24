@@ -18,12 +18,13 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve QML `IconImageProvider`.
 - [[analitik-sayfasi]] — Analitik ve Metrikler: KPI, zaman serisi, açılan/biten akışı, aktivite ısı haritası, durum halkası; veri kaynakları ve kararlar.
 - [[gorevler-modulu]] — QML Görev Ağacı (WBS): filtreler, kopyalama/çoğaltma, akıllı daraltma, scroll koruma ve üst görev durum kuralı.
-- [[notlar-modulu]] — Markdown notlar, zengin serbest çizim tuvali, geometrik şekiller, algoritma akış şemaları ve resim ekleme.
+- [[notlar-modulu]] — Otomatik kaydedilen Markdown notlar, serbest çizim tuvali, geometrik şekiller ve resim ekleme.
 - [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton.qml` + `VoiceBridge` + `TranscriptionWorker` + `SpeechToTextService`.
-- [[guncelleme-sistemi]] — Açılışta GitHub Releases denetimi, güncelleme penceresi, doğrulamalı indirme ve sessiz kurulum; etiketle yayın akışı.
+- [[guncelleme-sistemi]] — Açılışta GitHub Releases denetimi, güncelleme penceresi, SHA-256 doğrulamalı indirme, SAC kurtarma ve sessiz kurulum.
 - [[liste-siralama]] — Liste sıralama altyapısı (`sort_order`/`display_order`, `reorder` zinciri); QML'de sürükle-bırak arayüzü şu an yok.
 
 ## Kurallar ve Süreç
-- [[surum-yayinlama]] — Etiketle sürüm yayınlama: `set_version.py`, release iş akışı, kontrol listesi, hata/geri alma tablosu ve asistan kısıtı.
+- [[exe-dagitim-rehberi]] — Kararlı exe mimarisi, `packaging/launcher.sha256` kapısı, `build_exe.py`, `build_installer.py` ve `build_verify.py` doğrulamaları.
+- [[surum-yayinlama]] — Etiketle sürüm yayınlama: `tools/release.py`, release iş akışı, kontrol listesi, hata/geri alma tablosu ve asistan kısıtı.
 - [[kurallar-ve-sozlesmeler]] — RULES.md limitleri, bellek yönetimi, tema/L10N sözleşmeleri ve commit kuralları.
 - [[yol-haritasi]] — Tamamlanan P0-P2 işleri ve bekleyen P3 + L10N migrasyon kuyruğu.

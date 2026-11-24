@@ -23,6 +23,25 @@ Rectangle {
         onActivated: taskDialogViewModel.closeDialog()
     }
 
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: root.visible && !descInput.hasTextFocus && !blockedReasonInput.hasTextFocus && !newChecklistInput.hasTextFocus
+        onActivated: root.submitTask()
+    }
+
+    function submitTask() {
+        if (!taskDialogViewModel) return
+        taskDialogViewModel.saveTask({
+            "title": titleInput.text,
+            "description": descInput.text,
+            "status": statusCombo.selectedValue,
+            "priority": priorityCombo.selectedValue,
+            "task_type": typeCombo.selectedValue,
+            "blocked_reason": blockedReasonInput.text,
+            "checklist_items": root.checklistItems
+        })
+    }
+
     property var checklistItems: []
     property bool hasChildren: false
 
@@ -63,6 +82,7 @@ Rectangle {
                     }
                 }
                 root.checklistItems = chk
+                titleInput.focusInput()
             }
         }
     }
@@ -138,6 +158,7 @@ Rectangle {
                         placeholder: i18nBridge.tr("task_dialog_title_placeholder", "Görevin adını girin...")
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: root.submitTask()
                     }
 
                     // Açıklama
@@ -148,6 +169,7 @@ Rectangle {
                         isTextArea: true
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: root.submitTask()
                     }
 
                     // Seçimler Satırı (Durum, Öncelik, Tip)
@@ -204,6 +226,7 @@ Rectangle {
                         isTextArea: true
                         visible: statusCombo.selectedValue === "BLOCKED"
                         Layout.fillWidth: true
+                        onAccepted: root.submitTask()
                     }
 
                     // Checklist Bölümü
@@ -223,7 +246,10 @@ Rectangle {
                             id: newChecklistInput
                             placeholder: i18nBridge.tr("task_checklist_placeholder", "Yeni kontrol maddesi ekle...")
                             Layout.fillWidth: true
-                            onAccepted: addChecklistItem()
+                            onAccepted: {
+                                if (newChecklistInput.text.trim().length > 0) addChecklistItem()
+                                else root.submitTask()
+                            }
                         }
 
                         AppButton {
@@ -337,19 +363,7 @@ Rectangle {
                     btnVariant: "primary"
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: {
-                        if (taskDialogViewModel) {
-                            taskDialogViewModel.saveTask({
-                                "title": titleInput.text,
-                                "description": descInput.text,
-                                "status": statusCombo.selectedValue,
-                                "priority": priorityCombo.selectedValue,
-                                "task_type": typeCombo.selectedValue,
-                                "blocked_reason": blockedReasonInput.text,
-                                "checklist_items": root.checklistItems
-                            })
-                        }
-                    }
+                    onClicked: root.submitTask()
                 }
             }
         }

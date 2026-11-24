@@ -68,14 +68,6 @@ def test_create_item_when_rect_dragged_backwards_should_normalize_box(harness: Q
     assert item["fill"] == "fill:#EF4444"
 
 
-def test_create_item_when_flow_block_small_should_use_minimum_size_and_default_text(harness: QObject) -> None:
-    item = call(harness, "create", "flow_decision", _state(currentX=15, currentY=15))
-
-    assert (item["w"], item["h"]) == (50, 36)
-    assert item["text"] == "Koşul ?"
-    assert item["fill"] == "fill:#EF4444"
-
-
 def test_find_item_at_when_overlapping_should_prefer_topmost(harness: QObject) -> None:
     items = [
         {"type": "rect", "x": 0, "y": 0, "w": 100, "h": 100},

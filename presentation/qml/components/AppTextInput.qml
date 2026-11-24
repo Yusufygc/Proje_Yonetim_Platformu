@@ -12,8 +12,13 @@ Column {
     property bool readOnly: false
     property bool showVoiceInput: false
     property int inputHeight: isTextArea ? 80 : 38
+    readonly property bool hasTextFocus: inputField.activeFocus
 
     signal accepted()
+
+    function focusInput() {
+        inputField.forceActiveFocus();
+    }
 
     Layout.fillWidth: true
     width: parent ? parent.width : 200
@@ -102,13 +107,13 @@ Column {
                 }
 
                 Keys.onReturnPressed: function(event) {
-                    if (!root.isTextArea) {
+                    if (!root.isTextArea || (event.modifiers & Qt.ControlModifier)) {
                         root.accepted();
                         event.accepted = true;
                     }
                 }
                 Keys.onEnterPressed: function(event) {
-                    if (!root.isTextArea) {
+                    if (!root.isTextArea || (event.modifiers & Qt.ControlModifier)) {
                         root.accepted();
                         event.accepted = true;
                     }

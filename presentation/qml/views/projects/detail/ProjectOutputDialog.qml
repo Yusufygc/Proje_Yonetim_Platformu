@@ -21,10 +21,18 @@ Rectangle {
         outputTitleInput.text = "";
         outputPathInput.text = "";
         visible = true;
+        outputTitleInput.focusInput();
     }
 
     function close() {
         visible = false;
+    }
+
+    function submitOutput() {
+        if (outputTitleInput.text.trim()) {
+            projectSubitemsViewModel.addOutput(outputTitleInput.text.trim(), outputPathInput.text.trim());
+            root.close();
+        }
     }
 
     MouseArea {
@@ -36,6 +44,12 @@ Rectangle {
         sequence: "Escape"
         enabled: root.visible
         onActivated: root.close()
+    }
+
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: root.visible
+        onActivated: root.submitOutput()
     }
 
     AppCard {
@@ -90,6 +104,7 @@ Rectangle {
                 placeholder: i18nBridge.tr("output_title_placeholder", "Rapor, doküman veya dosya adı")
                 Layout.fillWidth: true
                 showVoiceInput: true
+                onAccepted: root.submitOutput()
             }
 
             AppTextInput {
@@ -97,6 +112,7 @@ Rectangle {
                 label: i18nBridge.tr("field_output_path", "Dosya Yolu / URL")
                 placeholder: i18nBridge.tr("output_path_placeholder", "C:/docs/rapor.pdf veya https://...")
                 Layout.fillWidth: true
+                onAccepted: root.submitOutput()
             }
 
             Rectangle {
@@ -123,12 +139,7 @@ Rectangle {
                     text: i18nBridge.tr("action_add", "Ekle")
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: {
-                        if (outputTitleInput.text.trim()) {
-                            projectSubitemsViewModel.addOutput(outputTitleInput.text.trim(), outputPathInput.text.trim());
-                            root.close();
-                        }
-                    }
+                    onClicked: root.submitOutput()
                 }
             }
         }

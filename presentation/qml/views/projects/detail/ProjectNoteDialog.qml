@@ -25,10 +25,21 @@ Rectangle {
         noteTitleInput.text = existing ? existing.title : "";
         noteBodyInput.text = existing ? existing.body : "";
         visible = true;
+        noteTitleInput.focusInput();
     }
 
     function close() {
         visible = false;
+    }
+
+    function submitNote() {
+        if (noteTitleInput.text.trim() && noteBodyInput.text.trim()) {
+            if (root.editId !== 0)
+                projectSubitemsViewModel.updateNote(root.editId, noteTitleInput.text, noteBodyInput.text.trim());
+            else
+                projectSubitemsViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
+            root.close();
+        }
     }
 
     MouseArea {
@@ -40,6 +51,12 @@ Rectangle {
         sequence: "Escape"
         enabled: root.visible
         onActivated: root.close()
+    }
+
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: root.visible && !noteBodyInput.hasTextFocus
+        onActivated: root.submitNote()
     }
 
     AppCard {
@@ -96,6 +113,7 @@ Rectangle {
                 placeholder: i18nBridge.tr("note_title_placeholder", "Örn: Toplantı Notu")
                 Layout.fillWidth: true
                 showVoiceInput: true
+                onAccepted: root.submitNote()
             }
 
             AppTextInput {
@@ -106,6 +124,7 @@ Rectangle {
                 inputHeight: 100
                 Layout.fillWidth: true
                 showVoiceInput: true
+                onAccepted: root.submitNote()
             }
 
             Rectangle {
@@ -132,15 +151,7 @@ Rectangle {
                     text: root.editId !== 0 ? i18nBridge.tr("action_save", "Kaydet") : i18nBridge.tr("action_add", "Ekle")
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: {
-                        if (noteTitleInput.text.trim() && noteBodyInput.text.trim()) {
-                            if (root.editId !== 0)
-                                projectSubitemsViewModel.updateNote(root.editId, noteTitleInput.text, noteBodyInput.text.trim());
-                            else
-                                projectSubitemsViewModel.createNote(noteTitleInput.text.trim(), noteBodyInput.text.trim());
-                            root.close();
-                        }
-                    }
+                    onClicked: root.submitNote()
                 }
             }
         }

@@ -27,6 +27,7 @@ class MemoViewModel(QObject):
     """Notlarım (Memo) modülünün QML kullanıcı arayüzü ile iş katmanı arasındaki köprüsü."""
 
     selectedMemoChanged = Signal()
+    lastModifiedChanged = Signal()
     statsChanged = Signal()
 
     def __init__(self, container: DIContainer, parent: Optional[QObject] = None) -> None:
@@ -39,6 +40,7 @@ class MemoViewModel(QObject):
         self._selected_memo_id: int = 0
         self._selected_memo_data: dict[str, Any] = {}
         self._memos_cache: list[Memo] = []
+        self._last_save_silent: bool = False
 
         self._connect_signals()
         self.loadMemos()
@@ -64,6 +66,10 @@ class MemoViewModel(QObject):
     def selectedMemo(self) -> dict[str, Any]:
         return self._selected_memo_data
 
+    @Property(str, notify=lastModifiedChanged)
+    def selectedMemoUpdatedAt(self) -> str:
+        return str(self._selected_memo_data.get("updatedAt", ""))
+
     @Property(int, notify=statsChanged)
     def totalMemos(self) -> int:
         return len(self._memos_cache)
@@ -84,17 +90,46 @@ class MemoViewModel(QObject):
             self._refresh_selected_memo()
 
     def _on_memo_created(self, memo: Memo) -> None:
+        self._memos_cache.append(memo)
         self.loadMemos()
         self.selectMemo(memo.id)
         self._event_bus.publish("toast.show", message="Yeni not oluşturuldu", type_="success")  # l10n: data
 
     def _on_memo_updated(self, memo: Memo) -> None:
-        self.loadMemos()
+        silent = self._last_save_silent
+        self._last_save_silent = False
+        if memo.body:
+            memo.body = _clean_body_markdown(memo.body)
+        self._replace_cached_memo(memo)
+        self._memo_model.set_memos(self._memos_cache)
+
         if self._selected_memo_id == memo.id:
-            self._refresh_selected_memo()
-        self._event_bus.publish("toast.show", message="Not kaydedildi", type_="success")  # l10n: data
+            self._selected_memo_data = self._build_memo_dict(memo)
+            self.lastModifiedChanged.emit()
+            if not silent:
+                self.selectedMemoChanged.emit()
+        if not silent:
+            self._event_bus.publish("toast.show", message="Not kaydedildi", type_="success")  # l10n: data
+
+    def _replace_cached_memo(self, memo: Memo) -> None:
+        for idx, existing in enumerate(self._memos_cache):
+            if existing.id == memo.id:
+                self._memos_cache[idx] = memo
+                return
+        self._memos_cache.append(memo)
+
+    @staticmethod
+    def _build_memo_dict(m: Memo) -> dict[str, Any]:
+        return {
+            "id": m.id,
+            "title": m.title,
+            "body": _clean_body_markdown(m.body),
+            "drawingData": m.drawing_data or "",
+            "updatedAt": m.updated_at.strftime("%d.%m.%Y %H:%M") if m.updated_at else "",
+        }
 
     def _on_memo_deleted(self, memo_id: int) -> None:
+        self._memos_cache = [m for m in self._memos_cache if m.id != memo_id]
         if self._selected_memo_id == memo_id:
             self._selected_memo_id = 0
             self._refresh_selected_memo()
@@ -114,17 +149,9 @@ class MemoViewModel(QObject):
 
     def _refresh_selected_memo(self) -> None:
         m = next((x for x in self._memos_cache if x.id == self._selected_memo_id), None)
-        if not m:
-            self._selected_memo_data = {}
-        else:
-            self._selected_memo_data = {
-                "id": m.id,
-                "title": m.title,
-                "body": _clean_body_markdown(m.body),
-                "drawingData": m.drawing_data or "",
-                "updatedAt": m.updated_at.strftime("%d.%m.%Y %H:%M") if m.updated_at else "",
-            }
+        self._selected_memo_data = self._build_memo_dict(m) if m else {}
         self.selectedMemoChanged.emit()
+        self.lastModifiedChanged.emit()
 
     @Slot()
     @Slot(str)
@@ -134,6 +161,9 @@ class MemoViewModel(QObject):
 
     @Slot(int, str, str, str)
     def saveMemo(self, memo_id: int, title: str, body: str, drawing_data: str = "") -> None:
+        if memo_id <= 0:
+            return
+        self._last_save_silent = False
         t = title.strip() or "İsimsiz Not"  # l10n: data
         self._controller.update(
             memo_id,
@@ -141,6 +171,24 @@ class MemoViewModel(QObject):
             body=body,
             drawing_data=drawing_data if drawing_data else None,
         )
+
+    @Slot(int, str, str, str)
+    def autoSaveMemo(self, memo_id: int, title: str, body: str, drawing_data: str = "") -> None:
+        """Düzenleyicideki değişiklikleri sessizce ve yalnızca değişiklik varsa kaydeder."""
+        if memo_id <= 0:
+            return
+        cached = next((x for x in self._memos_cache if x.id == memo_id), None)
+        if cached is None:
+            return
+        t = title.strip() or "İsimsiz Not"  # l10n: data
+        norm_drawing = drawing_data if drawing_data else None
+        same_title = cached.title == t
+        same_body = _clean_body_markdown(cached.body) == body
+        same_drawing = (cached.drawing_data or None) == norm_drawing
+        if same_title and same_body and same_drawing:
+            return
+        self._last_save_silent = True
+        self._controller.update(memo_id, title=t, body=body, drawing_data=norm_drawing)
 
     @Slot(int)
     def deleteMemo(self, memo_id: int) -> None:

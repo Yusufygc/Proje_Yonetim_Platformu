@@ -26,10 +26,22 @@ Rectangle {
         resourceUrlInput.text = existing ? existing.url : "";
         resourceTypeCombo.selectedValue = existing ? existing.resource_type : "DOCUMENT";
         visible = true;
+        resourceTitleInput.focusInput();
     }
 
     function close() {
         visible = false;
+    }
+
+    function submitResource() {
+        if (resourceTitleInput.text.trim() && resourceUrlInput.text.trim()) {
+            var rType = resourceTypeCombo.selectedValue || "DOCUMENT";
+            if (root.editId !== 0)
+                projectSubitemsViewModel.updateResource(root.editId, resourceTitleInput.text, resourceUrlInput.text, rType);
+            else
+                projectSubitemsViewModel.createResource(resourceTitleInput.text.trim(), resourceUrlInput.text.trim(), rType);
+            root.close();
+        }
     }
 
     MouseArea {
@@ -41,6 +53,12 @@ Rectangle {
         sequence: "Escape"
         enabled: root.visible
         onActivated: root.close()
+    }
+
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: root.visible
+        onActivated: root.submitResource()
     }
 
     AppCard {
@@ -97,6 +115,7 @@ Rectangle {
                 placeholder: i18nBridge.tr("resource_title_placeholder", "Örn: API Dokümantasyonu")
                 Layout.fillWidth: true
                 showVoiceInput: true
+                onAccepted: root.submitResource()
             }
 
             AppTextInput {
@@ -104,6 +123,7 @@ Rectangle {
                 label: i18nBridge.tr("resource_dialog_url_label", "Kaynak Bağlantısı (URL / Yol) *")
                 placeholder: i18nBridge.tr("resource_url_placeholder", "https://api.example.com veya dosya yolu")
                 Layout.fillWidth: true
+                onAccepted: root.submitResource()
             }
 
             AppComboBox {
@@ -146,16 +166,7 @@ Rectangle {
                     text: root.editId !== 0 ? i18nBridge.tr("action_save", "Kaydet") : i18nBridge.tr("action_add", "Ekle")
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: {
-                        if (resourceTitleInput.text.trim() && resourceUrlInput.text.trim()) {
-                            var rType = resourceTypeCombo.selectedValue || "DOCUMENT";
-                            if (root.editId !== 0)
-                                projectSubitemsViewModel.updateResource(root.editId, resourceTitleInput.text, resourceUrlInput.text, rType);
-                            else
-                                projectSubitemsViewModel.createResource(resourceTitleInput.text.trim(), resourceUrlInput.text.trim(), rType);
-                            root.close();
-                        }
-                    }
+                    onClicked: root.submitResource()
                 }
             }
         }

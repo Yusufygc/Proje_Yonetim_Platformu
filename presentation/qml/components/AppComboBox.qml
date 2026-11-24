@@ -48,7 +48,6 @@ Column {
         var val = _getItemValue(item);
         if (selectedValue !== val) {
             selectedValue = val;
-            valueSelected(val);
         }
     }
 
@@ -102,7 +101,7 @@ Column {
             anchors.rightMargin: 12
             anchors.verticalCenter: parent.verticalCenter
             name: menuPopup.opened ? "chevron-up" : "chevron-down"
-            size: 12
+            size: 14
             color: themeBridge.textMuted
         }
 

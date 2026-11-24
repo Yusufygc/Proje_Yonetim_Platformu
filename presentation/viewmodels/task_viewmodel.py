@@ -32,10 +32,12 @@ class TaskViewModel(QObject):
         self._task_controller = container.task_controller
         self._project_controller = container.project_controller
         self._event_bus = container.event_bus
+        self._prefs = container.prefs
 
         self._task_model = TaskListModel(parent=self)
         self._projects: list[dict[str, Any]] = []
-        self._selected_project_id: int = 0
+        self._selected_project_id: int = self._prefs.load_last_task_project_id()
+        self._loaded_tasks_project_id: int = 0
         self._selected_task_id: int = 0
 
         self._tasks_cache: list[Task] = []
@@ -55,8 +57,8 @@ class TaskViewModel(QObject):
         self._event_bus.subscribe("task.created", self._on_bus_task_changed)
         self._event_bus.subscribe("task.updated", self._on_bus_task_changed)
         self._event_bus.subscribe("task.deleted", self._on_bus_task_changed)
-        self._event_bus.subscribe("project.created", self._on_bus_project_changed)
-        self._event_bus.subscribe("project.deleted", self._on_bus_project_changed)
+        for evt in ("project.created", "project.archived", "project.restored", "project.deleted", "idea.converted"):
+            self._event_bus.subscribe(evt, self._on_bus_project_changed)
 
     # ── Properties ──────────────────────────────────────────────────────────
 
@@ -98,14 +100,22 @@ class TaskViewModel(QObject):
         self._projects = [{"id": p.id, "title": p.title} for p in projects]
         self.projectsChanged.emit()
 
-        if self._projects and self._selected_project_id == 0:
-            self.selectProject(self._projects[0]["id"])
-        elif not self._projects:
+        if not self._projects:
             self._selected_project_id = 0
+            self._loaded_tasks_project_id = 0
             self.selectedProjectChanged.emit(0)
             self._tasks_cache = []
             self._task_model.set_tasks([])
             self.statsChanged.emit()
+            return
+
+        if any(p["id"] == self._selected_project_id for p in self._projects):
+            if self._loaded_tasks_project_id != self._selected_project_id:
+                self._loaded_tasks_project_id = self._selected_project_id
+                self.selectedProjectChanged.emit(self._selected_project_id)
+                self._task_controller.load_tasks(self._selected_project_id)
+        else:
+            self.selectProject(self._projects[0]["id"])
 
     def _on_tasks_loaded(self, project_id: int, tasks: list[Task]) -> None:
         if project_id != self._selected_project_id:
@@ -149,12 +159,15 @@ class TaskViewModel(QObject):
 
     @Slot(int)
     def selectProject(self, project_id: int) -> None:
-        if self._selected_project_id == project_id:
+        if self._selected_project_id == project_id and self._loaded_tasks_project_id == project_id:
             return
         self._selected_project_id = project_id
+        if project_id != 0:
+            self._prefs.save_last_task_project_id(project_id)
         self._task_model.clear_overrides()
         self.selectedProjectChanged.emit(project_id)
         if project_id != 0:
+            self._loaded_tasks_project_id = project_id
             self._task_controller.load_tasks(project_id)
 
     @Slot(int)

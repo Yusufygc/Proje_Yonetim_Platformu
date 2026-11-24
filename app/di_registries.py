@@ -218,9 +218,9 @@ class ServiceRegistry:
 
     @cached_property
     def update(self) -> UpdateService:
-        from app.config import APP_VERSION, UPDATE_ASSET_NAME, UPDATE_REPOSITORY
+        from app.config import APP_VERSION, UPDATE_REPOSITORY
         from services.update_service import UpdateService
-        return UpdateService(APP_VERSION, UPDATE_REPOSITORY, UPDATE_ASSET_NAME)
+        return UpdateService(APP_VERSION, UPDATE_REPOSITORY)
 
     @cached_property
     def speech_to_text(self) -> SpeechToTextService:

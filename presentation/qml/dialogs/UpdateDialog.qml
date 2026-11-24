@@ -4,9 +4,12 @@ import QtQuick.Layouts
 import "../components"
 import "../theme"
 
-// Yeni sürüm bulunduğunda çıkan güncelleme penceresi; indirirken kapatılamaz.
+// Güncelleme penceresi; denetim, indirme, kurulum ve SAC engeli bekleme akışını yönetir.
 Rectangle {
     id: root
+
+    readonly property string st: updateViewModel ? updateViewModel.state : "idle"
+    readonly property bool isBusy: st === "checking" || st === "downloading" || st === "installing"
 
     visible: updateViewModel ? updateViewModel.isDialogOpen : false
     anchors.fill: parent
@@ -15,19 +18,33 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: { /* modal diyalog dışı tıklamayı engeller */ }
+        onClicked: {
+            if (!root.isBusy) {
+                updateViewModel.dismiss()
+            }
+        }
     }
 
     Shortcut {
         sequence: "Escape"
-        enabled: root.visible
+        enabled: root.visible && !root.isBusy
         onActivated: updateViewModel.dismiss()
     }
 
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: root.visible && root.st === "available"
+        onActivated: updateViewModel.startUpdate()
+    }
+
     AppCard {
-        width: Math.min(parent.width - 48, 460)
+        width: Math.min(parent.width - 48, 500)
         height: content.implicitHeight + 2 * Theme.spacing.xl
         anchors.centerIn: parent
+
+        MouseArea {
+            anchors.fill: parent
+        }
 
         ColumnLayout {
             id: content
@@ -40,13 +57,17 @@ Rectangle {
                 spacing: Theme.spacing.sm
 
                 AppIcon {
-                    name: "circle-info"
+                    name: root.st === "error" || root.st === "blocked" ? "triangle-alert" : "circle-info"
                     size: 22
-                    color: Theme.accent(themeBridge.currentTheme)
+                    color: root.st === "error" || root.st === "blocked"
+                        ? themeBridge.warning
+                        : Theme.accent(themeBridge.currentTheme)
                 }
 
                 Text {
-                    text: i18nBridge.tr("update_dialog_title", "Yeni güncelleme var")
+                    text: root.st === "available"
+                        ? i18nBridge.tr("update_dialog_title", "Yeni güncelleme var")
+                        : i18nBridge.tr("update_dialog_status_title", "Güncelleme")
                     font.pixelSize: Theme.typography.sizeH3
                     font.weight: Theme.typography.weightBold
                     color: themeBridge.textPrimary
@@ -55,9 +76,12 @@ Rectangle {
             }
 
             Text {
-                text: i18nBridge.tr("update_dialog_message", "Yeni bir sürüm yayınlandı. Şimdi güncellemek ister misiniz?")
+                visible: text.length > 0
+                text: root.st === "available"
+                    ? i18nBridge.tr("update_dialog_message", "Yeni bir sürüm yayınlandı. Şimdi güncellemek ister misiniz?")
+                    : (updateViewModel ? updateViewModel.statusMessage : "")
                 font.pixelSize: Theme.typography.sizeBody
-                color: themeBridge.textSecondary
+                color: root.st === "error" || root.st === "blocked" ? themeBridge.danger : themeBridge.textSecondary
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -65,6 +89,7 @@ Rectangle {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: Theme.spacing.sm
+                visible: updateViewModel && updateViewModel.latestVersion !== ""
 
                 Text {
                     text: i18nBridge.tr("update_dialog_current", "Mevcut sürüm") + ": v" + updateViewModel.currentVersion
@@ -75,7 +100,7 @@ Rectangle {
 
                 AppIcon {
                     name: "arrow-right"
-                    size: 14
+                    size: 13
                     color: themeBridge.textMuted
                 }
 
@@ -92,65 +117,74 @@ Rectangle {
             ScrollView {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.min(notesText.implicitHeight, 160)
-                visible: updateViewModel.releaseNotes !== "" && !updateViewModel.isDownloading
+                visible: root.st === "available" && updateViewModel.releaseNotes !== ""
                 contentWidth: availableWidth
                 clip: true
 
                 Text {
                     id: notesText
                     width: parent.width
-                    text: updateViewModel.releaseNotes
+                    text: updateViewModel ? updateViewModel.releaseNotes : ""
+                    textFormat: Text.PlainText
                     font.pixelSize: 12
                     color: themeBridge.textMuted
                     wrapMode: Text.Wrap
                 }
             }
 
-            ColumnLayout {
+            AppProgressBar {
                 Layout.fillWidth: true
-                spacing: Theme.spacing.xs
-                visible: updateViewModel.isDownloading
-
-                Text {
-                    text: i18nBridge.tr("update_downloading", "İndiriliyor... Kurulum sırasında uygulama kapanıp yeniden açılır.")
-                    font.pixelSize: 12
-                    color: themeBridge.textMuted
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
-
-                AppProgressBar {
-                    Layout.fillWidth: true
-                    value: updateViewModel.downloadProgress
-                    showLabel: true
-                }
+                visible: root.st === "downloading"
+                value: updateViewModel ? updateViewModel.downloadProgress : 0
+                showLabel: true
             }
 
-            Text {
-                visible: updateViewModel.errorMessage !== ""
-                text: updateViewModel.errorMessage
-                font.pixelSize: 12
-                color: themeBridge.danger
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
+            BusyIndicator {
+                Layout.alignment: Qt.AlignHCenter
+                running: root.st === "checking" || root.st === "installing" || root.st === "waiting"
+                visible: running
             }
 
-            RowLayout {
-                Layout.alignment: Qt.AlignRight
+            Flow {
+                Layout.fillWidth: true
+                layoutDirection: Qt.RightToLeft
                 spacing: Theme.spacing.sm
 
                 AppButton {
-                    text: i18nBridge.tr("update_action_later", "Sonra")
-                    btnVariant: "secondary"
-                    enabled: !updateViewModel.isDownloading
-                    onClicked: updateViewModel.dismiss()
+                    visible: root.st === "available"
+                    text: i18nBridge.tr("update_action_now", "Güncelle")
+                    btnVariant: "primary"
+                    onClicked: updateViewModel.startUpdate()
                 }
 
                 AppButton {
-                    text: i18nBridge.tr("update_action_now", "Güncelle")
-                    btnVariant: "primary"
-                    enabled: !updateViewModel.isDownloading
-                    onClicked: updateViewModel.startUpdate()
+                    visible: root.st === "available"
+                    text: i18nBridge.tr("update_action_skip", "Bu Sürümü Atla")
+                    btnVariant: "secondary"
+                    onClicked: updateViewModel.skipVersion()
+                }
+
+                AppButton {
+                    visible: root.st === "waiting"
+                    text: i18nBridge.tr("update_action_stop_waiting", "Beklemeyi Bırak")
+                    btnVariant: "secondary"
+                    onClicked: updateViewModel.stopWaitingForBlock()
+                }
+
+                AppButton {
+                    visible: root.st === "blocked" || root.st === "error"
+                    text: i18nBridge.tr("update_action_release_page", "Sürüm Sayfası")
+                    btnVariant: "secondary"
+                    onClicked: updateViewModel.openReleasePage()
+                }
+
+                AppButton {
+                    visible: !root.isBusy
+                    text: root.st === "available"
+                        ? i18nBridge.tr("update_action_later", "Sonra")
+                        : i18nBridge.tr("update_action_close", "Kapat")
+                    btnVariant: "secondary"
+                    onClicked: updateViewModel.dismiss()
                 }
             }
         }

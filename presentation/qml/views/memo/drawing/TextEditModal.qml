@@ -20,6 +20,19 @@ Item {
     function open(title, text) {
         modalTitleText.text = title
         blockTextInput.text = text
+        blockTextInput.focusInput()
+    }
+
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: modal.active
+        onActivated: modal.applied(blockTextInput.text)
+    }
+
+    Shortcut {
+        sequence: "Escape"
+        enabled: modal.active
+        onActivated: modal.canceled()
     }
 
     Rectangle {

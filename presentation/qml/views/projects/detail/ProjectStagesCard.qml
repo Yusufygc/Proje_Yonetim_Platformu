@@ -35,7 +35,7 @@ AppCard {
 
                 AppIcon {
                     name: root.stagesExpanded ? "chevron-down" : "chevron-right"
-                    size: 16
+                    size: 15
                     color: themeBridge.accentStart
                     Layout.alignment: Qt.AlignVCenter
                 }

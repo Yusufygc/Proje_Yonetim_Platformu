@@ -5,7 +5,7 @@ function findItemAt(items, x, y) {
     for (var i = items.length - 1; i >= 0; i--) {
         var it = items[i]
         if (!it) continue
-        if (it.type === "flow_start" || it.type === "flow_process" || it.type === "flow_decision" || it.type === "flow_io" || it.type === "rect" || it.type === "round_rect") {
+        if (it.type === "rect" || it.type === "round_rect") {
             if (x >= it.x && x <= it.x + it.w && y >= it.y && y <= it.y + it.h) {
                 return i
             }

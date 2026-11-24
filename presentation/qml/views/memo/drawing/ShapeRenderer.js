@@ -72,66 +72,6 @@ function renderItem(ctx, item, palette) {
         if (item.text) drawCenteredText(ctx, item.text, item.cx, item.cy, item.color, palette.text)
         return
     }
-
-    // 7. Akış Şeması: Başla / Bitir (Kapsül)
-    if (item.type === "flow_start") {
-        var r = Math.min(item.w, item.h) / 2
-        drawRoundRect(ctx, item.x, item.y, item.w, item.h, r, item.color, item.width || 2, item.fill)
-        drawCenteredText(ctx, item.text || "Başla", item.x + item.w / 2, item.y + item.h / 2, item.color, palette.text)
-        return
-    }
-
-    // 8. Akış Şeması: İşlem (Dikdörtgen)
-    if (item.type === "flow_process") {
-        if (item.fill && item.fill !== "") {
-            ctx.fillStyle = item.fill
-            ctx.fillRect(item.x, item.y, item.w, item.h)
-        }
-        ctx.strokeStyle = item.color
-        ctx.lineWidth = item.width || 2
-        ctx.strokeRect(item.x, item.y, item.w, item.h)
-        drawCenteredText(ctx, item.text || "İşlem", item.x + item.w / 2, item.y + item.h / 2, item.color, palette.text)
-        return
-    }
-
-    // 9. Akış Şeması: Karar / Koşul (Baklava / Diamond)
-    if (item.type === "flow_decision") {
-        ctx.beginPath()
-        ctx.moveTo(item.x + item.w / 2, item.y)
-        ctx.lineTo(item.x + item.w, item.y + item.h / 2)
-        ctx.lineTo(item.x + item.w / 2, item.y + item.h)
-        ctx.lineTo(item.x, item.y + item.h / 2)
-        ctx.closePath()
-        if (item.fill && item.fill !== "") {
-            ctx.fillStyle = item.fill
-            ctx.fill()
-        }
-        ctx.strokeStyle = item.color
-        ctx.lineWidth = item.width || 2
-        ctx.stroke()
-        drawCenteredText(ctx, item.text || "Koşul ?", item.x + item.w / 2, item.y + item.h / 2, item.color, palette.text)
-        return
-    }
-
-    // 10. Akış Şeması: Girdi / Çıktı (Paralelkenar)
-    if (item.type === "flow_io") {
-        var skew = Math.min(18, item.w * 0.18)
-        ctx.beginPath()
-        ctx.moveTo(item.x + skew, item.y)
-        ctx.lineTo(item.x + item.w, item.y)
-        ctx.lineTo(item.x + item.w - skew, item.y + item.h)
-        ctx.lineTo(item.x, item.y + item.h)
-        ctx.closePath()
-        if (item.fill && item.fill !== "") {
-            ctx.fillStyle = item.fill
-            ctx.fill()
-        }
-        ctx.strokeStyle = item.color
-        ctx.lineWidth = item.width || 2
-        ctx.stroke()
-        drawCenteredText(ctx, item.text || "Girdi/Çıktı", item.x + item.w / 2, item.y + item.h / 2, item.color, palette.text)
-        return
-    }
 }
 
 // Çizim sürerken gösterilen canlı önizleme. `s`: araç, renk ve sürükleme koordinatları.
@@ -165,8 +105,6 @@ function renderLivePreview(ctx, s, palette) {
         drawRoundRect(ctx, box.x, box.y, box.w, box.h, 8, col, lw, fill)
     } else if (s.tool === "circle") {
         drawEllipse(ctx, (s.startX + s.currentX) / 2, (s.startY + s.currentY) / 2, box.w / 2, box.h / 2, col, lw, fill)
-    } else if (s.tool.indexOf("flow_") === 0) {
-        previewFlowBlock(ctx, s, palette)
     }
 }
 
@@ -190,56 +128,6 @@ function previewStroke(ctx, points, color, width) {
     for (var k = 1; k < points.length; k++) {
         ctx.lineTo(points[k].x, points[k].y)
     }
-    ctx.stroke()
-}
-
-// Akış şeması blokları, bırakıldığındaki asgari boyutlarla önizlenir.
-var FLOW_MIN_SIZE = {
-    flow_start: [40, 26],
-    flow_process: [50, 30],
-    flow_decision: [50, 36],
-    flow_io: [50, 30]
-}
-
-function previewFlowBlock(ctx, s, palette) {
-    var min = FLOW_MIN_SIZE[s.tool]
-    var box = normalizedBox(s)
-    var x = box.x
-    var y = box.y
-    var w = Math.max(min[0], box.w)
-    var h = Math.max(min[1], box.h)
-    var fill = fillColor(s.color, palette.pen)
-
-    if (s.tool === "flow_start") {
-        drawRoundRect(ctx, x, y, w, h, Math.min(w, h) / 2, s.color, s.lineWidth, fill)
-        return
-    }
-    if (s.tool === "flow_process") {
-        ctx.fillStyle = fill
-        ctx.fillRect(x, y, w, h)
-        ctx.strokeStyle = s.color
-        ctx.lineWidth = s.lineWidth
-        ctx.strokeRect(x, y, w, h)
-        return
-    }
-    ctx.beginPath()
-    if (s.tool === "flow_decision") {
-        ctx.moveTo(x + w / 2, y)
-        ctx.lineTo(x + w, y + h / 2)
-        ctx.lineTo(x + w / 2, y + h)
-        ctx.lineTo(x, y + h / 2)
-    } else {
-        var skew = Math.min(18, w * 0.18)
-        ctx.moveTo(x + skew, y)
-        ctx.lineTo(x + w, y)
-        ctx.lineTo(x + w - skew, y + h)
-        ctx.lineTo(x, y + h)
-    }
-    ctx.closePath()
-    ctx.fillStyle = fill
-    ctx.fill()
-    ctx.strokeStyle = s.color
-    ctx.lineWidth = s.lineWidth
     ctx.stroke()
 }
 

@@ -4,14 +4,6 @@
 // `s`: { color, lineWidth, startX, startY, currentX, currentY, points, fillEnabled }
 // `fill`: çizgi renginden dolgu rengi üreten fonksiyon.
 
-// Akış şeması blokları: asgari boyut ve varsayılan metin.
-var FLOW_BLOCKS = {
-    flow_start: { minW: 40, minH: 26, text: "Başla" },
-    flow_process: { minW: 50, minH: 30, text: "İşlem" },
-    flow_decision: { minW: 50, minH: 36, text: "Koşul ?" },
-    flow_io: { minW: 50, minH: 30, text: "Girdi / Çıktı" }
-}
-
 function createItem(tool, s, fill) {
     var dx = Math.abs(s.currentX - s.startX)
     var dy = Math.abs(s.currentY - s.startY)
@@ -46,16 +38,7 @@ function createItem(tool, s, fill) {
             text: ""
         })
     }
-    var block = FLOW_BLOCKS[tool]
-    if (!block) return null
-    return withStyle(tool, style, {
-        x: x,
-        y: y,
-        w: Math.max(block.minW, dx),
-        h: Math.max(block.minH, dy),
-        fill: fill(s.color),
-        text: block.text
-    })
+    return null
 }
 
 // Her öğe tür, renk ve kalınlıkla başlar; şekle özgü alanlar arkasından gelir.

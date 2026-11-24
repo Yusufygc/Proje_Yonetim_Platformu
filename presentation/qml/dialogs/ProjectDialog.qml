@@ -23,6 +23,29 @@ Rectangle {
         onActivated: projectViewModel.closeDialog()
     }
 
+    Shortcut {
+        sequences: ["Return", "Enter"]
+        enabled: dialogRoot.visible && !descInput.hasTextFocus
+        onActivated: dialogRoot.submitProject()
+    }
+
+    function submitProject() {
+        if (!projectViewModel) return;
+        var data = {
+            "title": titleInput.text,
+            "description": descInput.text,
+            "status": statusCombo.selectedValue || "PLANNED",
+            "priority": priorityCombo.selectedValue || "MEDIUM",
+            "health": healthCombo.selectedValue || "GOOD",
+            "project_type": typeInput.text,
+            "target_audience": audienceInput.text,
+            "problem_statement": problemInput.text,
+            "github_repo": githubInput.text,
+            "local_path": localPathInput.text
+        };
+        projectViewModel.saveProject(data);
+    }
+
     AppCard {
         id: formCard
         width: Math.min(680, parent.width - 48)
@@ -93,6 +116,7 @@ Rectangle {
                         placeholder: i18nBridge.tr("project_dialog_title_placeholder", "Projenizin adını yazın...")
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: dialogRoot.submitProject()
                     }
 
                     AppTextInput {
@@ -102,6 +126,7 @@ Rectangle {
                         isTextArea: true
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: dialogRoot.submitProject()
                     }
 
                     RowLayout {
@@ -160,6 +185,7 @@ Rectangle {
                             Layout.preferredWidth: 1
                             label: i18nBridge.tr("field_project_type", "Proje Türü")
                             placeholder: "Yazılım, Tasarım, Araştırma..."
+                            onAccepted: dialogRoot.submitProject()
                         }
 
                         AppTextInput {
@@ -168,6 +194,7 @@ Rectangle {
                             Layout.preferredWidth: 1
                             label: i18nBridge.tr("field_target_audience", "Hedef Kitle")
                             placeholder: "Hedef kullanıcı kitlesi"
+                            onAccepted: dialogRoot.submitProject()
                         }
                     }
 
@@ -177,6 +204,7 @@ Rectangle {
                         placeholder: "Bu proje hangi sorunu çözüyor?"
                         Layout.fillWidth: true
                         showVoiceInput: true
+                        onAccepted: dialogRoot.submitProject()
                     }
 
                     RowLayout {
@@ -189,6 +217,7 @@ Rectangle {
                             Layout.preferredWidth: 1
                             label: "GitHub Deposu"
                             placeholder: "https://github.com/..."
+                            onAccepted: dialogRoot.submitProject()
                         }
 
                         AppTextInput {
@@ -197,6 +226,7 @@ Rectangle {
                             Layout.preferredWidth: 1
                             label: "Yerel Klasör Yolu"
                             placeholder: "C:/projeler/..."
+                            onAccepted: dialogRoot.submitProject()
                         }
                     }
                 }
@@ -240,21 +270,7 @@ Rectangle {
                     text: i18nBridge.tr("action_save", "Kaydet")
                     implicitWidth: 120
                     implicitHeight: 40
-                    onClicked: {
-                        var data = {
-                            "title": titleInput.text,
-                            "description": descInput.text,
-                            "status": statusCombo.selectedValue || "PLANNED",
-                            "priority": priorityCombo.selectedValue || "MEDIUM",
-                            "health": healthCombo.selectedValue || "GOOD",
-                            "project_type": typeInput.text,
-                            "target_audience": audienceInput.text,
-                            "problem_statement": problemInput.text,
-                            "github_repo": githubInput.text,
-                            "local_path": localPathInput.text
-                        };
-                        projectViewModel.saveProject(data);
-                    }
+                    onClicked: dialogRoot.submitProject()
                 }
             }
         }
@@ -286,6 +302,7 @@ Rectangle {
                 priorityCombo.selectedValue = "MEDIUM";
                 healthCombo.selectedValue = "GOOD";
             }
+            titleInput.focusInput();
         }
     }
 }

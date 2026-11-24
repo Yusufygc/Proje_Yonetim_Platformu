@@ -1,5 +1,37 @@
 # Wiki Kayıt Defteri
 
+## [2026-11-24] FEATURE+INFRA | Orta Boyutlu Yön Okları ve Prod Hazırlığı (Kararlı EXE, Kurulum, Yayın ve Güncelleme)
+- **Orta Boyutlu Yön Okları (`resources/icons/` & QML):**
+  - `chevron-down`, `chevron-up`, `chevron-right`, `chevron-left`, `arrow-right`, `corner-down-left`, `corner-down-right` SVG ikonları `stroke="currentColor"` korunarak `stroke-width="1.8"` ve `viewBox="0 0 24 24"` içinde `5.5..18.5` yayılımına getirildi.
+  - `AppComboBox.qml` / `ProjectFilter.qml` (`14px`), `ProjectStagesCard.qml` (`15px`), `TaskItemDelegate.qml` / `ProjectTasksTab.qml` / `GlobalSearchModal.qml` / `UpdateDialog.qml` (`13px`) boyutlarına ayarlandı; [[ikon-yonetimi]] güncellendi.
+- **Kararlı EXE ve Inno Setup Dağıtım Hattı ([[exe-dagitim-rehberi]]):**
+  - Tek sürüm kaynağı `version.py` (`__version__ = "0.1.4"`, `APP_NAME = "ProjeTakipPlatformu"`, `RELEASE_REPO = "Yusufygc/Proje_Yonetim_Platformu"`) oluşturuldu ve `app/config.py` (`PROJE_TAKIP_HOME` izolasyonu ve `UPDATE_PREFERENCES_PATH`) buna bağlandı.
+  - Sabit giriş betiği `packaging/launcher.py`, sabit sürüm kaynağı `packaging/launcher_version_info.txt` (`1.0.0.0`), `.gitattributes` (`eol=lf`), `requirements-build.txt` ve `requirements-lock.txt` eklendi.
+  - `build_exe.py` (`--onedir --debug=noarchive`, `LAUNCHER_EPOCH = 1700000000`, Qt budaması `prune`, `packaging/launcher.sha256` özet kapısı), `build_verify.py` (`launch_check`, `installer_check` ve gerçek kurulum kaydını koruyan `save_registration`/`restore_registration`) ve `build_installer.py` ile `packaging/ProjeTakipPlatformu.iss` kuruldu.
+  - Eski değişken paketleme dosyaları (`packaging/*.spec`, `packaging/version_info.txt`, `scripts/{set_version.py,build_*.ps1}`, `installer/windows.iss`) kaldırıldı.
+- **Sürüm Yayınlama ve Güncelleme Sistemi ([[surum-yayinlama]], [[guncelleme-sistemi]]):**
+  - `tools/release.py` ve `.github/workflows/release.yml` (`TAG` enjeksiyon koruması, `-c requirements-lock.txt`, `--check-tag`, `--verify-tag`) eklendi/güncellendi.
+  - `services/update_security.py` ve `services/update_service.py`: güvenli yönlendirme handler'ı, zorunlu SHA-256 doğrulaması (asset `digest` veya `.sha256` yan dosyası), 400 MB boyut sınırı, HTTP 404 boş yayın toleransı, `%LOCALAPPDATA%\ProjeTakip\updates.json` tercihleri ve `ShellExecuteW` SAC kurtarmalı `launch_installer` eklendi.
+  - `UpdateViewModel`, `UpdateController`, `UpdateDialog.qml` ve `SettingsView.qml`: `STATE_WAITING` (15 sn × 40 yeniden deneme + "Beklemeyi Bırak"), `STATE_BLOCKED` (Gezgin'de seçili gösterme + "Sürüm Sayfası"), "Bu Sürümü Atla" ve Ayarlar'da açılış denetimi seçeneği eklendi; `strings.{tr,en}.json` güncellendi.
+- **Doğrulama (yerel makine):**
+  - `build_installer.py` iki ayrı derlemede aynı EXE özetini üretti (`9a73770e1e28573dbad29153c884cba41b39f42b83671ab5ee1ce644226e7623`), `ProjeTakipPlatformu-Setup-0.1.4.exe` (84.2 MB) + `.sha256` oluştu, 5 sn açılış denemesi ve sessiz kurulum/kaldırma (`unins000.exe`) başarıyla geçti.
+  - Gerçek GitHub Release üzerinden uçtan uca indirme/kurulum akışı henüz etiket itilmediği için birim testleriyle kapsamlı doğrulandı (`tests/test_release_packaging.py`, `tests/test_build_verify.py`, `tests/test_update.py`).
+
+## [2026-11-24] FEATURE+FIX | Notlarım Otomatik Kayıt, WBS Proje Hafızası, Fikir Dönüşüm Senkronizasyonu ve UX İyileştirmeleri
+- **Notlarım (Memo) Sadeleştirme ve Otomatik Kayıt:**
+  - Akış şeması modu, hazır şema (`FlowchartTemplate.js`) ve ilgili akış şeması blokları/ikonları (`capsule`, `diamond`, `parallelogram`, `workflow`) kaldırıldı; serbest çizim ve geometrik şekil araçları korundu.
+  - `MemoViewModel.autoSaveMemo` ve `MemoEditor.qml` içindeki 800 ms debounce'lu `autoSaveTimer` + not/sayfa geçişinde `flushPendingAutoSave()` ile otomatik kayıt eklendi; değişiklikler toast spam'i olmadan ve imleç/geri al yığını sıfırlanmadan kaydediliyor.
+- **Fikir Dönüşümü Senkronizasyonu:**
+  - `ProjectViewModel`, `TaskViewModel` ve `DashboardViewModel` artık `idea.converted` olayını dinliyor; fikir projeye dönüştürüldüğünde yeni proje projeler listesine, görevler seçicisine ve dashboard istatistiklerine anında ekleniyor.
+- **Görevler (WBS) Seçili Proje Kalıcılığı ve Geçiş Düzeltmesi:**
+  - `PreferenceManager` `save_last_task_project_id` / `load_last_task_project_id` metotlarıyla son seçilen WBS projesini saklıyor.
+  - `TaskToolbar.qml` içinde `AppComboBox` varsayılan indeksten ilk projeyi zorla seçmek yerine `taskViewModel.selectedProjectId` ile senkronize edildi (`AppComboBox.valueSelected` yalnızca kullanıcı tıklamasında tetikleniyor).
+  - `ProjectTasksTab.qml` "WBS Sayfasında Aç" düğmesi artık `taskViewModel.selectProject(projectViewModel.selectedProjectId)` çağırarak doğrudan ilgili projenin görevler sayfasını açıyor.
+- **Kenar Çubuğu, İkonlar ve Klavye Kısayolları:**
+  - `NavigationBridge` açılışta kenar çubuğunu (`sidebarCollapsed = False`) her zaman açık başlatıyor.
+  - `chevron-down/up/left/right`, `arrow-right`, `corner-down-left/right` SVG ikonları daha ince (1.6 çizgi) ve zarif boyutlara çekildi.
+  - Tüm modal diyaloglara (`ProjectDialog`, `TaskDialog`, `IdeaDialog`, `ProjectNoteDialog`, `ProjectDecisionDialog`, `ProjectResourceDialog`, `ProjectOutputDialog`, `TextEditModal`) Enter/Return ile kaydetme/ekleme desteği eklendi (`isTextArea` alanlarında Ctrl+Enter).
+
 ## [2026-10-10] FEATURE | Violet, Emerald ve Slate Tema Paketlerinde Kenar Çubuğu Desenleri
 - **Kenar Çubuğu Arka Plan Görselleri:**
   - Violet paketi için mor damask gül deseni (`resources/images/violet_sidebar.jpg`),

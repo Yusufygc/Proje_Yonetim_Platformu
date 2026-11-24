@@ -180,7 +180,7 @@ def run_qml_app() -> int:
 
     QTimer.singleShot(200, container.run_deferred_startup_tasks)
     # Açılış yavaşlamasın diye arayüz yerleştikten sonra denetlenir.
-    QTimer.singleShot(3000, update_viewmodel.checkOnStartup)
+    QTimer.singleShot(3000, lambda: update_viewmodel.checkForUpdates(True))
     exit_code = app.exec()
     # Fonksiyon dönerken Python yerel nesneleri belirsiz sırayla siler; motorun QApplication'dan önce,
     # arka plan işleri bittikten sonra yıkılması kapanışı belirli hale getirir.

@@ -1,0 +1,14 @@
+# Kararlı exe için satır sonu disiplini: packaging/launcher.py her makinede LF olmalı
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.iss text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.pdf binary
+*.woff2 binary
+*.ttf binary

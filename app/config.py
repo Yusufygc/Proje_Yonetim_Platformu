@@ -6,6 +6,9 @@ import os
 import shutil
 from pathlib import Path
 
+from version import APP_NAME as PACKAGE_APP_NAME
+from version import DISPLAY_NAME, RELEASE_REPO, __version__
+
 logger = logging.getLogger(__name__)
 
 # --- Uygulama Kök Dizini ---
@@ -14,26 +17,27 @@ APP_DIR = Path(__file__).parent.parent
 PROJECT_ROOT = APP_DIR.parent
 
 # --- Uygulama Kimliği ---
-APP_NAME = "Proje Takip Platformu"
-APP_VERSION = "0.1.4"
+APP_NAME = DISPLAY_NAME
+APP_VERSION = __version__
 APP_ORGANIZATION = "ProjeTakip"
 
 # --- Güncelleme ---
 # Sürümler GitHub Releases üzerinden dağıtılır; depo public olduğundan token gerekmez.
-UPDATE_REPOSITORY = "Yusufygc/Proje_Yonetim_Platformu"
-UPDATE_ASSET_NAME = "ProjeTakipPlatformuSetup.exe"
+UPDATE_REPOSITORY = os.getenv("PROJE_TAKIP_UPDATE_REPO", RELEASE_REPO)
+UPDATE_ASSET_NAME = os.getenv("PROJE_TAKIP_UPDATE_ASSET", f"{PACKAGE_APP_NAME}-Setup-{__version__}.exe")
 
 
 def _resolve_data_dir() -> Path:
-    """Windows'ta %LOCALAPPDATA%\\ProjeTakip; env değişkeni yoksa eski konuma düşer.
+    """Kullanıcı veri dizinini çözer (%LOCALAPPDATA%\\ProjeTakip veya PROJE_TAKIP_HOME).
 
-    Önceki sürümler veriyi doğrudan Path.home() / ".proje_takip" içinde
-    tutuyordu — Windows Gezgini nokta-prefiksli klasörleri gizlemediği için
-    bu konvansiyon burada yanlış (Unix işi) ve kullanıcı home dizinini
-    kirletiyordu. Gerçek dosya taşıma işlemi (veri kaybı olmadan) tek
-    seferlik olarak app/di_container.py::_migrate_legacy_data_dir() içinde
-    yapılır; burada sadece hedef yol hesaplanır.
+    Test ve derleme sonrası doğrulamalarda PROJE_TAKIP_HOME gerçek kullanıcı
+    verisini izole etmek için kullanılır. Önceki sürümler ~/.proje_takip
+    konumunu kullanıyordu; gerçek taşıma app/config.py::migrate_legacy_data_dir()
+    tarafından tek seferlik yapılır.
     """
+    env_home = os.getenv("PROJE_TAKIP_HOME", "").strip()
+    if env_home:
+        return Path(env_home).expanduser().resolve()
     local_app_data = os.getenv("LOCALAPPDATA")
     if local_app_data:
         return Path(local_app_data) / APP_ORGANIZATION
@@ -47,6 +51,7 @@ DATABASE_PATH = DATA_DIR / "proje_takip.db"
 BACKUPS_DIR = DATA_DIR / ".backups"
 LOGS_DIR = DATA_DIR / "logs"
 MEMO_IMAGES_DIR = DATA_DIR / "memo_images"
+UPDATE_PREFERENCES_PATH = DATA_DIR / "updates.json"
 
 # --- Kaynak Dizinleri ---
 RESOURCES_DIR = APP_DIR / "resources"
@@ -142,10 +147,13 @@ def _perform_move(legacy_dir: Path) -> None:
 
 def _fall_back_to_legacy_dir() -> None:
     """Taşıma başarısız olduğunda bu oturumun eski veri konumunu kullanmasını sağlar."""
-    global DATA_DIR, DATABASE_PATH, BACKUPS_DIR, LOGS_DIR, DATABASE_URL, LOG_FILE
+    global DATA_DIR, DATABASE_PATH, BACKUPS_DIR, LOGS_DIR, MEMO_IMAGES_DIR
+    global UPDATE_PREFERENCES_PATH, DATABASE_URL, LOG_FILE
     DATA_DIR = LEGACY_DATA_DIR
     DATABASE_PATH = DATA_DIR / "proje_takip.db"
     BACKUPS_DIR = DATA_DIR / ".backups"
     LOGS_DIR = DATA_DIR / "logs"
+    MEMO_IMAGES_DIR = DATA_DIR / "memo_images"
+    UPDATE_PREFERENCES_PATH = DATA_DIR / "updates.json"
     DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
     LOG_FILE = LOGS_DIR / "app.log"
