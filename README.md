@@ -1,6 +1,6 @@
 # Proje Yönetim ve Takip Platformu
 
-![Sürüm](https://img.shields.io/badge/s%C3%BCr%C3%BCm-0.1.4-38BDF8)
+![Sürüm](https://img.shields.io/badge/s%C3%BCr%C3%BCm-0.1.5-38BDF8)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PySide6](https://img.shields.io/badge/PySide6-6.6+-41CD52?logo=qt&logoColor=white)](https://doc.qt.io/qtforpython/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-D71F00)](https://www.sqlalchemy.org/)
