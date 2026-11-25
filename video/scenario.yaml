@@ -1,0 +1,132 @@
+# Tanıtım videosunun tek yapılandırma dosyası. Metin ve süreler yalnızca buradan değiştirilir.
+# sure: en az saniye. Kayıt veya seslendirme daha uzunsa sahne uzar.
+# eylem: yalnızca açıklama; gerçek adımlar video/capture/scenes.py içindedir.
+# ses: okunacak metin. altyazi: yalnızca okunuş yazımdan farklıysa verilir.
+
+video:
+  genislik: 1920
+  yukseklik: 1080
+  fps: 30
+  cikti: out/demo.mp4
+  altyazi_gomulu: true   # false: altyazı yalnızca .srt dosyasında
+  baglanti: github.com/Yusufygc/Proje_Yonetim_Platformu
+
+yakalama:
+  pencere: [1280, 720]   # mantıksal piksel
+  olcek: 3               # 3840x2160 kare; yakınlaştırmada bulanıklık olmaz
+  tema: dark             # slate paletinin koyu hali
+
+seslendirme:
+  motor: supertonic
+  ses: M3                # F1-F5 veya M1-M5; örnek: python video/voice.py
+  hiz: 1.05
+  yapay_zeka_notu: "Seslendirme yapay zekâ ile üretilmiştir."   # kapanış kartında gösterilir
+
+muzik:
+  kaynak: uretilen       # "uretilen" ya da video/assets/ altındaki bir dosya adı
+  seviye_db: -22
+  hedef_lufs: -14
+
+sahneler:
+  - id: kanca
+    baslik: "Hepsi tek pencerede"
+    tur: kart
+    sure: 6
+    ekran: "Dağınık not, görev ve fikir kartları ekrana düşer, tek pencerede toplanır; logo belirir."
+    eylem: []
+    ses: "Fikirler bir yerde, görevler başka yerde mi? Hepsini tek ekranda toplayın."
+
+  - id: ana_panel
+    baslik: "Güne tek bakış"
+    tur: uygulama
+    sure: 5
+    ekran: "Ana panel. Kamera istatistik kartlarından yüksek öncelikli görevlere kayar."
+    eylem: ["ana panel açılır"]
+    ses: "Proje Takip Platformu'nda gününüz ana panelde başlar. Bekleyen işler karşınızda."
+
+  - id: fikir_proje
+    baslik: "Fikirden projeye"
+    tur: uygulama
+    sure: 8
+    ekran: "Fikir havuzu. Bir fikir seçilir, projeye dönüştürülür. Kamera düğmeye yaklaşır."
+    eylem:
+      - "Fikirler menüsü, fikri seç, 'Projeye Dönüştür'"
+      - "Projeler menüsü, yeni projeyi aç, taşınan problemi göster"
+    ses: "Fikirlerinizi havuzda biriktirin. Biri olgunlaştığında tek tıkla projeye dönüştürün. Çözdüğü problem de projeye taşınır."
+
+  - id: asamalar
+    baslik: "Süreç hazır"
+    tur: uygulama
+    sure: 6
+    ekran: "Proje detayı, süreç aşamaları. Bir aşama tamamlanır, sıradaki etkinleşir."
+    eylem:
+      - "Projeler menüsü, 'Mobil Bankacılık Arayüzü'"
+      - "Etkin aşamada iki kez 'Tamamla'"
+    ses: "Her projede aşamalar hazır. Birini tamamlayın, sıradakine geçin."
+
+  - id: gorev_agaci
+    baslik: "Böl ve ilerle"
+    tur: uygulama
+    sure: 8
+    ekran: "Hiyerarşik görev ağacı. Hızlı ekleme alanına yazı yazılır, bir görev işaretlenir."
+    eylem:
+      - "İlk grubu kapat, 'Geliştirme' altına 'Giriş ekranı testleri' ekle"
+      - "Bir görevi tamamlandı işaretle"
+    ses: "Büyük işi küçük parçalara bölün. Yeni görevi yazın, biteni işaretleyin."
+
+  - id: kontrol_listesi
+    baslik: "Adım adım"
+    tur: uygulama
+    sure: 7
+    ekran: "Satırda kontrol listesi açılır, bir madde işaretlenir; bir görev sürüklenerek taşınır."
+    eylem:
+      - "2/4 rozetini aç, bir maddeyi işaretle, paneli kapat"
+      - "Bir görevi sürükleyip üste bırak"
+    ses: "Adımları kontrol listesiyle izleyin. Sırayı sürükleyerek değiştirin."
+
+  - id: arama
+    baslik: "Anında bul"
+    tur: uygulama
+    sure: 6
+    ekran: "Ctrl+K tuş görseli büyür, arama penceresi açılır, sonuca gidilir."
+    eylem:
+      - "Fikirler sayfasında Ctrl+K"
+      - "'transfer' yaz, sonuca tıkla"
+    ses: "Aradığınızı bulamıyor musunuz? Kontrol K'ya basın, yazın, gidin."
+    altyazi: "Aradığınızı bulamıyor musunuz? Ctrl+K'ya basın, yazın, gidin."
+
+  - id: notlar
+    baslik: "Yaz ve çiz"
+    tur: uygulama
+    sure: 6
+    ekran: "Notlarım: biçimli not ve çizim tuvaline eklenen bir şekil."
+    eylem:
+      - "Notlarım, notu seç, Çizim sekmesi"
+      - "İki kutu ve bir ok çiz"
+    ses: "Notunuzu yazın, fikrinizi aynı yerde çizin."
+
+  - id: analitik
+    baslik: "İlerlemeni gör"
+    tur: uygulama
+    sure: 6
+    ekran: "Analitik: sayaçlar, haftalık grafik, aktivite haritası. Kamera yavaşça aşağı kayar."
+    eylem: ["Analitik menüsüne tıkla", "Aşağı kaydır"]
+    ses: "Tamamlanan işleri grafiklerde görün. İlerlemenizi tahmine bırakmayın."
+
+  - id: tema
+    baslik: "Senin tarzın"
+    tur: uygulama
+    sure: 6
+    ekran: "Açık temaya geçiş, ardından renk paletleri hızlı kesmelerle değişir."
+    eylem:
+      - "Tema anahtarıyla açık temaya geç"
+      - "Ayarlar'da Emerald, Violet, Koyu, Rose; ana panele dön"
+    ses: "Koyu ya da açık tema, altı renk paleti. Seçim sizin."
+
+  - id: kapanis
+    baslik: "Hemen dene"
+    tur: kart
+    sure: 6
+    ekran: "Uygulama penceresi geriye çekilir; logo, ad ve GitHub adresi belirir."
+    eylem: []
+    ses: "Verileriniz kendi bilgisayarınızda kalır. Proje Takip Platformu'nu GitHub'dan indirin."

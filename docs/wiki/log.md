@@ -1,5 +1,8 @@
 # Wiki Kayıt Defteri
 
+## [2026-11-26] UPDATE | Tanıtım videosu hattı eklendi
+`video/` altında kare yakalama (PySide6), Supertonic seslendirme ve Remotion kurgusu kuruldu; `pyproject.toml` içine `demo` bağımlılık grubu eklendi. Uygulama kodu değişmedi. Detay: [[tanitim-videosu]].
+
 ## [2026-11-25] FIX | SQLite `foreign_keys` Her Bağlantıda Açık
 - Ayar yalnızca tek bağlantıya uygulanıyordu; artık `connect` olayında havuzdaki her bağlantıda açılıyor.
 - Denetlenen yollar: Alembic ayrı motor kullandığı için tablo yeniden kurma adımları etkilenmiyor; eski yetim referanslar güncelleme ve silmeyi engellemiyor.

@@ -24,6 +24,7 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[liste-siralama]] — Liste sıralama altyapısı (`sort_order`/`display_order`, `reorder` zinciri); bu listeler için QML'de sürükle-bırak arayüzü yok (görev ağacı için bkz. [[gorevler-modulu]]).
 
 ## Kurallar ve Süreç
+- [[tanitim-videosu]] — `video/` altındaki otomatik tanıtım videosu hattı: kare yakalama, seslendirme, Remotion kurgusu, denetim ve lisanslar.
 - [[exe-dagitim-rehberi]] — Kararlı exe mimarisi, `packaging/launcher.sha256` kapısı, `build_exe.py`, `build_installer.py` ve `build_verify.py` doğrulamaları.
 - [[surum-yayinlama]] — Etiketle sürüm yayınlama: `tools/release.py`, release iş akışı, kontrol listesi, hata/geri alma tablosu ve asistan kısıtı.
 - [[kurallar-ve-sozlesmeler]] — RULES.md limitleri, bellek yönetimi, tema/L10N sözleşmeleri ve commit kuralları.
