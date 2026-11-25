@@ -2,7 +2,7 @@
 
 > **Not (2026-10-07):** Aşağıdaki geçmiş kayıtlar eski Qt Widgets arayüzünü (`presentation/pages|widgets|dialogs|shell`, QSS) anar; bu arayüz kaldırıldı. Güncel arayüz yalnızca QML'dir ([[mimari-genel-bakis]]).
 
-Kaynak analiz: `Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu §9).
+Kaynak analiz: `docs/Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu §9).
 
 ## Tamamlandı (2026-06-12)
 - **P0**: [[event-bus]] WeakMethod + RuntimeError prune; WBS render fix (döngü içi import, `setUpdatesEnabled`).
@@ -39,8 +39,11 @@ Kaynak analiz: `Project_docs/SENIOR_ANALIZ_RAPORU_2026-06-12.md` (durum tablosu 
   (`TaskRepository.next_order_index`), önceden `order_index` hesaplanmadığı için başa
   düşüyordu.
 
+## P7 — Tamamlandı (2026-11-25)
+- ✅ **Görev ağacında sürükle-bırak ve satır içi checklist** ([[gorevler-modulu]]).
+
 ## Sürekli kuyruk
-- L10N migrasyonu: 21 dosya allowlist'te ([[l10n-string-yonetimi]]).
+- ✅ L10N migrasyonu tamamlandı; allowlist boş ([[l10n-string-yonetimi]]).
 - ✅ Tamamlandı (2026-06-13): UI'daki Service Locator çağrıları (Theme/Icon/String/Pref/EventBus) constructor injection'a çevrildi; factory'ler `di.<manager>` ile besler ([[di-container]]).
 
 İlgili: [[kurallar-ve-sozlesmeler]], [[log]]

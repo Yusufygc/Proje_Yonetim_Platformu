@@ -465,3 +465,25 @@ def test_project_auto_completed_when_all_stages_completed(service_stack):
     updated_project = service_stack["project_service"].get_project(project.id)
     assert updated_project.status == "COMPLETED"
     assert updated_project.progress_percent == 100
+
+
+def test_move_task_reorders_siblings_accurately(service_stack):
+    project = service_stack["project_service"].create_project("Taşıma Sırası Testi")
+    tasks = service_stack["task_service"]
+    a = tasks.create_task(project.id, "Görev A")
+    b = tasks.create_task(project.id, "Görev B")
+    c = tasks.create_task(project.id, "Görev C")
+    # İlk görsel sıra: [C (-2), B (-1), A (0)]
+    assert [t.id for t in tasks.get_tasks(project.id)] == [c.id, b.id, a.id]
+
+    # A'yı 0. sıraya (en başa) taşı -> [A, C, B]
+    tasks.move_task(a.id, None, 0)
+    assert [t.id for t in tasks.get_tasks(project.id)] == [a.id, c.id, b.id]
+
+    # C'yi B'nin alt görevi olarak taşı
+    tasks.move_task(c.id, b.id, 0)
+    all_after = tasks.get_tasks(project.id)
+    roots = [t for t in all_after if t.parent_task_id is None]
+    children_of_b = [t for t in all_after if t.parent_task_id == b.id]
+    assert [t.id for t in roots] == [a.id, b.id]
+    assert [t.id for t in children_of_b] == [c.id]

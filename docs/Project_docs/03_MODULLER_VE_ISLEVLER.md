@@ -48,9 +48,8 @@ Temel alanlar:
 - Portfolyoya eklensin mi?
 - Arşivlendi mi?
 
-Liste görünümü (Uygulandı, 2026-07-01): kullanıcı sol panelde projeleri sürükleyerek
-kendi sırasını (`display_order`) belirleyebilir; kartlar soluk dolgu zeminli, ayrık
-görünümdedir. Detay: `07_TEKNIK_MIMARI.md`, `docs/wiki/liste-siralama.md`.
+Liste görünümü (güncel): listedeki sürükle-bırak sıralama arayüzü eski arayüzle birlikte
+2026-10-07'de kaldırıldı; `reorder` altyapısı korunuyor (`docs/wiki/liste-siralama.md`).
 
 Önerilen proje türleri:
 
@@ -96,8 +95,8 @@ Fikir durumları:
 - "Projeye dönüştür" butonu.
 - Bu aksiyon yeni proje oluşturur ve fikri kaynak fikir olarak bağlar.
 
-Liste görünümü (Uygulandı, 2026-07-01): fikirler sürükle-bırak ile yeniden
-sıralanabilir (`sort_order`). Detay: `docs/wiki/liste-siralama.md`.
+Liste görünümü (güncel): listedeki sürükle-bırak sıralama arayüzü eski arayüzle birlikte
+2026-10-07'de kaldırıldı; `reorder` altyapısı korunuyor (`docs/wiki/liste-siralama.md`).
 
 ## 4. Süreç İzleme
 
@@ -155,10 +154,10 @@ Görev türleri:
 - Tasarım.
 - Test.
 
-Sıralama (Düzeltildi, 2026-07-01): yeni görev oluşturulurken `order_index`
-otomatik hesaplanır (`TaskRepository.next_order_index`, kardeş grubunun
-`max+1`'i); "Hızlı Ekle" ile eklenen görev artık listenin başına değil
-sonuna düşer.
+Sıralama (güncel): yeni görev kardeş grubunun başına eklenir
+(`TaskRepository.first_order_index`); tamamlanan görev grubun sonuna iner.
+Kullanıcı görevi sürükle-bırak ile başka bir görevin önüne, arkasına veya
+altına taşıyabilir; görev kendi alt soyuna taşınamaz.
 
 Görev görünümleri:
 
@@ -181,6 +180,11 @@ Alanlar:
 - Sıralama.
 - Oluşturulma tarihi.
 - Tamamlanma tarihi.
+
+Arayüz (Uygulandı, 2026-11-25):
+
+- Görev satırının altında açılan panelde madde işaretlenir ve silinir.
+- Yeni madde görev diyaloğundan eklenir; düzenlemedeki değişiklikler Kaydet ile uygulanır.
 
 Avantaj:
 
@@ -231,8 +235,8 @@ Not türleri:
 
 Notlar Markdown desteklemeli. İlk sürümde basit plain text yeterli olabilir, ama veri modeli Markdown'a uygun tutulmalı.
 
-Liste görünümü (Uygulandı, 2026-07-01): notlar sürükle-bırak ile yeniden
-sıralanabilir (`sort_order`). Detay: `docs/wiki/liste-siralama.md`.
+Liste görünümü (güncel): listedeki sürükle-bırak sıralama arayüzü eski arayüzle birlikte
+2026-10-07'de kaldırıldı; `reorder` altyapısı korunuyor (`docs/wiki/liste-siralama.md`).
 
 ## 9. Kaynaklar
 

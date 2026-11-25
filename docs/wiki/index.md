@@ -17,11 +17,11 @@ detay için ilgili sayfaya inilir. Kronolojik kayıt: [[log]].
 - [[l10n-string-yonetimi]] — StringManager, `tr()` / `I18nBridge.tr()`, dil değişimi ve ratchet testi.
 - [[ikon-yonetimi]] — IconManager SVG renklendirme/cache mekanizması ve QML `IconImageProvider`.
 - [[analitik-sayfasi]] — Analitik ve Metrikler: KPI, zaman serisi, açılan/biten akışı, aktivite ısı haritası, durum halkası; veri kaynakları ve kararlar.
-- [[gorevler-modulu]] — QML Görev Ağacı (WBS): filtreler, kopyalama/çoğaltma, akıllı daraltma, scroll koruma ve üst görev durum kuralı.
+- [[gorevler-modulu]] — QML Görev Ağacı (WBS): filtreler, kopyalama/çoğaltma, akıllı daraltma, scroll koruma, sürükle-bırak taşıma, satır içi checklist ve üst görev durum kuralı.
 - [[notlar-modulu]] — Otomatik kaydedilen Markdown notlar, serbest çizim tuvali, geometrik şekiller ve resim ekleme.
 - [[sesli-komut]] — Vosk tabanlı çevrimdışı sesli dikte; `VoiceInputButton.qml` + `VoiceBridge` + `TranscriptionWorker` + `SpeechToTextService`.
 - [[guncelleme-sistemi]] — Açılışta GitHub Releases denetimi, güncelleme penceresi, SHA-256 doğrulamalı indirme, SAC kurtarma ve sessiz kurulum.
-- [[liste-siralama]] — Liste sıralama altyapısı (`sort_order`/`display_order`, `reorder` zinciri); QML'de sürükle-bırak arayüzü şu an yok.
+- [[liste-siralama]] — Liste sıralama altyapısı (`sort_order`/`display_order`, `reorder` zinciri); bu listeler için QML'de sürükle-bırak arayüzü yok (görev ağacı için bkz. [[gorevler-modulu]]).
 
 ## Kurallar ve Süreç
 - [[exe-dagitim-rehberi]] — Kararlı exe mimarisi, `packaging/launcher.sha256` kapısı, `build_exe.py`, `build_installer.py` ve `build_verify.py` doğrulamaları.

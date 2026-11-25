@@ -58,6 +58,8 @@ class TaskListModel(QAbstractListModel):
     DueDateRole = Qt.ItemDataRole.UserRole + 15
     EstimatedMinutesRole = Qt.ItemDataRole.UserRole + 16
     SpentMinutesRole = Qt.ItemDataRole.UserRole + 17
+    ChecklistItemsRole = Qt.ItemDataRole.UserRole + 18
+    IsChecklistExpandedRole = Qt.ItemDataRole.UserRole + 19
 
     countChanged = Signal()
 
@@ -66,6 +68,7 @@ class TaskListModel(QAbstractListModel):
         self._raw_tasks: list[Task] = []
         self._flattened: list[TaskItemData] = []
         self._expanded_overrides: dict[int, bool] = {}
+        self._checklist_expanded: set[int] = set()
         self._search_query: str = ""
         self._status_filter: str = "ALL"
         self._priority_filter: str = "ALL"
@@ -90,6 +93,8 @@ class TaskListModel(QAbstractListModel):
             self.DueDateRole: QByteArray(b"dueDate"),
             self.EstimatedMinutesRole: QByteArray(b"estimatedMinutes"),
             self.SpentMinutesRole: QByteArray(b"spentMinutes"),
+            self.ChecklistItemsRole: QByteArray(b"checklistItems"),
+            self.IsChecklistExpandedRole: QByteArray(b"isChecklistExpanded"),
         }
 
     def rowCount(self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()) -> int:
@@ -135,6 +140,13 @@ class TaskListModel(QAbstractListModel):
             return len(items)
         if role == self.ChecklistDoneRole:
             return sum(1 for c in items if c.is_done)
+        if role == self.ChecklistItemsRole:
+            return [
+                {"id": c.id or 0, "text": c.text, "isDone": bool(c.is_done)}
+                for c in sorted(items, key=lambda c: (c.order_index or 0, c.id or 0))
+            ]
+        if role == self.IsChecklistExpandedRole:
+            return t.id in self._checklist_expanded
         if role == self.DueDateRole:
             return t.due_date.isoformat() if t.due_date else ""
         if role == self.EstimatedMinutesRole:
@@ -146,6 +158,20 @@ class TaskListModel(QAbstractListModel):
     def set_tasks(self, tasks: list[Task]) -> None:
         """Yeni görev listesini yükler ve WBS ağacını yeniden kurar."""
         self._raw_tasks = list(tasks)
+        self._rebuild_tree()
+
+    @Slot(int)
+    def toggleChecklistExpanded(self, task_id: int) -> None:
+        """Belirtilen görevin checklist alt panelini açar veya kapatır."""
+        if task_id in self._checklist_expanded:
+            self._checklist_expanded.remove(task_id)
+        else:
+            self._checklist_expanded.add(task_id)
+        for row, item in enumerate(self._flattened):
+            if item.task.id == task_id:
+                idx = self.index(row, 0)
+                self.dataChanged.emit(idx, idx, [self.IsChecklistExpandedRole])
+                return
         self._rebuild_tree()
 
     @Slot(int)
@@ -172,9 +198,14 @@ class TaskListModel(QAbstractListModel):
             return False
         return True
 
+    def expand_node(self, task_id: int) -> None:
+        """Belirtilen düğümün yeniden kurulumda açık görünmesini sağlar."""
+        self._expanded_overrides[task_id] = True
+
     def clear_overrides(self) -> None:
         """Kullanıcının açık/kapalı tercihlerini sıfırlar."""
         self._expanded_overrides.clear()
+        self._checklist_expanded.clear()
 
     @Slot(str)
     def setSearchQuery(self, query: str) -> None:

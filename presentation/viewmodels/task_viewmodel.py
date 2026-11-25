@@ -12,6 +12,7 @@ from presentation.viewmodels.error_reporting import forward_errors_to_toast
 from presentation.viewmodels.qt_properties import variant_list_property
 from presentation.viewmodels.task_clipboard import collect_task_copy_lines
 from presentation.viewmodels.task_list_model import TaskListModel
+from presentation.viewmodels.task_reorder import compute_relative_move
 
 if TYPE_CHECKING:
     from app.di_container import DIContainer
@@ -208,6 +209,17 @@ class TaskViewModel(QObject):
         )
         if created is not None:
             self._event_bus.publish("toast.show", message="Görev oluşturuldu", type_="success")  # l10n: data
+
+    @Slot(int, int, str)
+    def moveTaskRelative(self, dragged_id: int, target_id: int, position: str) -> None:
+        """Görev satırını hedef görevin önüne, arkasına veya alt görevi olarak taşır."""
+        move = compute_relative_move(self._tasks_cache, dragged_id, target_id, position)
+        if move is None:
+            return
+        new_parent_id, new_index = move
+        if position == "into":
+            self._task_model.expand_node(target_id)
+        self._task_controller.move_task(dragged_id, new_parent_id, new_index)
 
     @Slot(int)
     def deleteTask(self, task_id: int) -> None:

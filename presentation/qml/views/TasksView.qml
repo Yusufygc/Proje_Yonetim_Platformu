@@ -29,84 +29,8 @@ Item {
         }
 
         // Görev İstatistikleri Rozet Çubuğu
-        RowLayout {
+        TaskStatsBar {
             Layout.fillWidth: true
-            spacing: Theme.spacing.md
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 38
-                radius: Theme.radius.small
-                color: themeBridge.surface
-                border.color: themeBridge.border
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: Theme.spacing.md
-                    anchors.rightMargin: Theme.spacing.md
-                    spacing: Theme.spacing.lg
-
-                    RowLayout {
-                        spacing: Theme.spacing.xs
-                        Text {
-                            text: i18nBridge.tr("stat_total_tasks", "Toplam:")
-                            font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.textSecondary
-                        }
-                        Text {
-                            text: taskViewModel ? taskViewModel.totalTasks.toString() : "0"
-                            font.pixelSize: Theme.typography.sizeSmall
-                            font.weight: Theme.typography.weightBold
-                            color: themeBridge.textPrimary
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.spacing.xs
-                        Text {
-                            text: i18nBridge.tr("stat_completed_tasks", "Tamamlanan:")
-                            font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.textSecondary
-                        }
-                        Text {
-                            text: taskViewModel ? taskViewModel.completedTasks.toString() : "0"
-                            font.pixelSize: Theme.typography.sizeSmall
-                            font.weight: Theme.typography.weightBold
-                            color: themeBridge.success
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.spacing.xs
-                        Text {
-                            text: i18nBridge.tr("stat_in_progress_tasks", "Devam Eden:")
-                            font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.textSecondary
-                        }
-                        Text {
-                            text: taskViewModel ? taskViewModel.inProgressTasks.toString() : "0"
-                            font.pixelSize: Theme.typography.sizeSmall
-                            font.weight: Theme.typography.weightBold
-                            color: Theme.accent(themeBridge.currentTheme)
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.spacing.xs
-                        Text {
-                            text: i18nBridge.tr("stat_blocked_tasks", "Engellenen:")
-                            font.pixelSize: Theme.typography.sizeSmall
-                            color: themeBridge.textSecondary
-                        }
-                        Text {
-                            text: taskViewModel ? taskViewModel.blockedTasks.toString() : "0"
-                            font.pixelSize: Theme.typography.sizeSmall
-                            font.weight: Theme.typography.weightBold
-                            color: themeBridge.danger
-                        }
-                    }
-                }
-            }
         }
 
         // Ana Görev Ağacı (WBS)
@@ -121,6 +45,7 @@ Item {
                 target: taskViewModel ? taskViewModel.taskModel : null
 
                 function onModelAboutToBeReset() {
+                    taskListView.cancelDrag()
                     if (taskListView.contentY > 0) {
                         taskTreeCard.savedScrollY = taskListView.contentY
                     } else {
@@ -216,11 +141,120 @@ Item {
                     spacing: 2
                     boundsBehavior: Flickable.StopAtBounds
 
+                    property int draggedTaskId: 0
+                    property string draggedTaskTitle: ""
+                    property int dropTargetTaskId: 0
+                    property string dropPosition: "" // "before" | "after" | "into"
+                    property real ghostX: 0
+                    property real ghostY: 0
+
+                    function beginDrag(taskId, taskTitle, px, py) {
+                        draggedTaskId = taskId
+                        draggedTaskTitle = taskTitle
+                        updateDrag(px, py)
+                    }
+
+                    function updateDrag(px, py) {
+                        ghostX = px
+                        ghostY = py
+                        var clampedX = Math.max(12, Math.min(width - 24, px))
+                        var contentPos = mapToItem(contentItem, clampedX, py)
+                        var idx = indexAt(contentPos.x, contentPos.y)
+                        if (idx < 0) {
+                            dropTargetTaskId = 0
+                            dropPosition = ""
+                            return
+                        }
+                        var targetItem = itemAtIndex(idx)
+                        if (!targetItem || targetItem.itemTaskId === draggedTaskId) {
+                            dropTargetTaskId = 0
+                            dropPosition = ""
+                            return
+                        }
+                        var localPos = mapToItem(targetItem, px, py)
+                        dropTargetTaskId = targetItem.itemTaskId
+                        if (localPos.y < 14) {
+                            dropPosition = "before"
+                        } else if (localPos.y > 34) {
+                            dropPosition = "after"
+                        } else {
+                            dropPosition = "into"
+                        }
+                    }
+
+                    function finishDrag() {
+                        var srcId = draggedTaskId
+                        var dstId = dropTargetTaskId
+                        var pos = dropPosition
+                        cancelDrag()
+                        if (taskViewModel && srcId > 0 && dstId > 0 && srcId !== dstId && pos !== "") {
+                            taskViewModel.moveTaskRelative(srcId, dstId, pos)
+                        }
+                    }
+
+                    function cancelDrag() {
+                        draggedTaskId = 0
+                        draggedTaskTitle = ""
+                        dropTargetTaskId = 0
+                        dropPosition = ""
+                    }
+
+                    Timer {
+                        id: dragAutoScrollTimer
+                        interval: 35
+                        repeat: true
+                        running: taskListView.draggedTaskId > 0 && (taskListView.ghostY < 28 || taskListView.ghostY > taskListView.height - 28)
+                        onTriggered: {
+                            var step = taskListView.ghostY < 28 ? -10 : 10
+                            var maxY = Math.max(0, taskListView.contentHeight - taskListView.height)
+                            taskListView.contentY = Math.max(0, Math.min(maxY, taskListView.contentY + step))
+                            taskListView.updateDrag(taskListView.ghostX, taskListView.ghostY)
+                        }
+                    }
+
                     ScrollBar.vertical: AppScrollBar {
                         id: taskScrollBar
                     }
 
                     delegate: TaskItemDelegate {}
+
+                    // Sürükleme Hayalet Kartı (Drag Ghost)
+                    Rectangle {
+                        id: dragGhost
+                        visible: taskListView.draggedTaskId > 0
+                        z: 100
+                        x: Math.max(4, Math.min(taskListView.width - width - 20, taskListView.ghostX - 24))
+                        y: Math.max(0, Math.min(taskListView.height - height, taskListView.ghostY - height / 2))
+                        width: Math.min(340, Math.max(180, taskListView.width - 40))
+                        height: 36
+                        radius: Theme.radius.small
+                        color: themeBridge.surface
+                        border.color: Theme.accent(themeBridge.currentTheme)
+                        border.width: 1.5
+                        opacity: 0.92
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            spacing: 8
+
+                            AppIcon {
+                                name: "tasks"
+                                size: 14
+                                color: Theme.accent(themeBridge.currentTheme)
+                            }
+
+                            Text {
+                                text: taskListView.draggedTaskTitle
+                                font.pixelSize: Theme.typography.sizeSmall
+                                font.weight: Theme.typography.weightMedium
+                                color: themeBridge.textPrimary
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
 
                     // Boş Durum
                     Item {

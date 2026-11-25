@@ -13,14 +13,15 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 
 ## Özellikler
 
-- 📊 **Ana Panel** — İstatistik kartları, tıkanan projeler, son aktiviteler ve yüksek öncelikli açık görevler tek ekranda
-- 📁 **Proje Yönetimi** — Durum takibi (Planlandı, Aktif, Beklemede, Tamamlandı…), sağlık durumu, öncelik, karar kayıtları, notlar ve kaynak bağlantıları
-- 🗂️ **WBS Görev Ağacı** — Hiyerarşik iş kırılım yapısı; durum, öncelik ve türe göre filtreleme; checklist ve alt görev desteği
-- 💡 **Fikir Yönetimi** — Ham fikirden projeye dönüşüm akışını izleme; fikir puanlama ve kategorilendirme
+- 📊 **Ana Panel** — İstatistik kartları, hızlı eylemler, yüksek öncelikli açık görevler ve son eklenen fikirler tek ekranda
+- 📁 **Proje Yönetimi** — Durum takibi (Planlandı, Aktif, Beklemede, Tamamlandı…), süreç aşamaları, sağlık durumu, öncelik, karar kayıtları, notlar ve kaynak bağlantıları
+- 🗂️ **WBS Görev Ağacı** — Hiyerarşik iş kırılım yapısı; sürükle-bırak ile sıralama; durum, öncelik ve türe göre filtreleme; görev istatistik çubuğu; satırda açılan checklist; sağ tık menüsü
+- 💡 **Fikir Yönetimi** — Ham fikirden projeye dönüşüm akışını izleme; durum ve önceliğe göre takip
+- 🔎 **Hızlı Arama ve Arşiv** — `Ctrl+K` / `Ctrl+F` ile uygulama genelinde arama; arşivlenen projeleri geri yükleme; tüm veriyi JSON olarak dışa aktarma
 - 🎨 **Tema Desteği** — Koyu ve açık tema; 6 küratörlü renk paleti (Slate, Indigo, Emerald, Ocean, Rose, Violet), temalara özel desenli kenar çubuğu arka planları
 - 🌐 **Yerelleştirme** — Türkçe ve İngilizce arayüz; tüm metinler çeviri anahtarları üzerinden yönetilir
 - 🔔 **Toast Bildirimleri** — İşlem sonuçları için animasyonlu, otomatik kapanan bildirim sistemi
-- 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `~/.proje_takip/.backups/` altında saklanır
+- 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `%LOCALAPPDATA%\ProjeTakip\.backups\` altında saklanır
 - 🎤 **Sesli Komut (Çevrimdışı)** — Vosk Türkçe modeliyle mikrofondan görev/fikir başlığı, açıklama ve notları sese dönüştürerek girme; internet/API anahtarı gerektirmez
 - 📝 **Notlar ve Çizim Tuvali** — Markdown destekli otomatik kaydedilen notlar, serbest çizim, geometrik şekiller, resim ekleme ve kaydırılabilir tuval araç çubuğu
 - 📋 **Görev Kopyalama & Akıllı Ağaç** — Panoya kopyalama ve anında çoğaltma (duplicate), tamamlanan alt görevlerin otomatik daraltılması ve kaydırma konumu koruması
@@ -30,7 +31,39 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 
 ## Ekran Görüntüleri
 
-<!-- Ekran görüntüleri buraya eklenecek -->
+Görüntülerdeki tüm veriler örnektir.
+
+### Ana Panel
+
+![Ana Panel — koyu tema](docs/screenshots/dashboard.png)
+
+### Projeler
+
+![Proje listesi ve proje detayında süreç aşamaları](docs/screenshots/projects.png)
+
+### Görevler (WBS)
+
+![Hiyerarşik görev ağacı, istatistik çubuğu ve filtreler](docs/screenshots/tasks.png)
+
+### Fikir Havuzu
+
+![Fikir listesi ve fikir detayı](docs/screenshots/ideas.png)
+
+### Notlarım
+
+![Markdown not düzenleyici](docs/screenshots/memo.png)
+
+### Analitik
+
+![KPI kartları ve zaman serisi grafikleri](docs/screenshots/analytics.png)
+
+### Ayarlar ve Temalar
+
+![Tema paketi, yazı tipi, dil ve veri yönetimi ayarları](docs/screenshots/settings.png)
+
+### Açık Tema
+
+![Ana Panel — açık tema](docs/screenshots/dashboard-light.png)
 
 ---
 
@@ -52,7 +85,7 @@ Uygulama, katı bir katmanlı mimariye sahiptir; katmanlar arası doğrudan atla
 │            Repository Katmanı                   │
 │   SQLAlchemy ORM  ·  Alembic Migrations         │
 ├─────────────────────────────────────────────────┤
-│   SQLite  ·  ~/.proje_takip/proje_takip.db      │
+│   SQLite  ·  %LOCALAPPDATA%\ProjeTakip\         │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -102,7 +135,7 @@ Uygulama verileri `%LOCALAPPDATA%\ProjeTakip\` altında otomatik oluşturulur:
 
 ```bash
 git clone https://github.com/Yusufygc/Proje_Yonetim_Platformu.git
-cd proje_takip_platformu
+cd Proje_Yonetim_Platformu
 ```
 
 #### 2. Sanal ortam oluştur ve etkinleştir
@@ -201,7 +234,7 @@ proje_takip_platformu/
 │   └── workers/              # QThreadPool worker'ları (Worker, TranscriptionWorker)
 ├── domain/
 │   ├── enums/                # TaskStatus, Priority, TaskType, IdeaStatus…
-│   └── models/               # SQLAlchemy model tanımları (14 model)
+│   └── models/               # SQLAlchemy model tanımları (15 model)
 ├── infrastructure/
 │   ├── migrations/           # Alembic migrasyon scriptleri
 │   └── repositories/         # Veritabanı erişim katmanı
@@ -216,8 +249,9 @@ proje_takip_platformu/
 │   ├── locales/              # strings.tr.json, strings.en.json
 │   ├── models/               # Vosk STT modeli (depoya dahil değil — bkz. "Başlarken")
 │   └── themes/               # Renk paleti JSON dosyaları
-├── services/                 # İş mantığı katmanı (10 servis + speech/ — sesli komut)
+├── services/                 # İş mantığı katmanı (speech/ — sesli komut)
 ├── tests/                    # pytest test paketi
+├── docs/                     # Wiki, proje dokümanları ve ekran görüntüleri
 ├── icons/                    # Uygulama ikonu
 ├── packaging/                # Sabit launcher, sürüm kaynağı, onay hash'i ve Inno Setup betiği
 ├── tools/                    # Sürüm yayınlama aracı (release.py)
@@ -226,7 +260,8 @@ proje_takip_platformu/
 ├── build_installer.py        # Tek komutla exe + kurulum + doğrulama aracı
 ├── build_verify.py           # EXE ve sessiz kurulum/kaldırma doğrulayıcısı
 ├── version.py                # Tek uygulama sürüm kaynağı
-├── main.py                   # Uygulama giriş noktası (QML arayüzünü başlatır)
+├── main.py                   # Uygulama giriş noktası (main_qml.py'yi çağırır)
+├── main_qml.py               # QML motoru ve köprü nesnelerinin kurulumu
 ├── pyproject.toml            # Proje meta verisi ve bağımlılıklar
 └── alembic.ini               # Alembic yapılandırması
 ```
@@ -268,7 +303,7 @@ Yeni arayüz metni eklenirken her iki dosyaya da ilgili anahtar eklenmelidir.
 ## Geliştirme Notları
 
 - Doğrudan SQLite sorgusu yazılmaz; tüm veri erişimi repository katmanı üzerinden yapılır.
-- Tema renkleri `ThemeManager.color(key)` ve `ThemeBridge` üzerinden çözülür; QML dosyalarına sabit renk yazılmaz.
+- Tema renkleri QML'de `themeBridge` property'leri üzerinden alınır; QML dosyalarına sabit renk yazılmaz.
 - Tüm kullanıcıya görünen metinler `tr(key, varsayılan)` ile sarmalanır.
 - Python tarafında oluşturulan her `QObject`'e `parent=` verilir (bellek sızıntısını önlemek için).
 - Bileşenler arası iletişim `EventBus.publish()` / `EventBus.subscribe()` ile sağlanır.

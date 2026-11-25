@@ -169,10 +169,10 @@
   "info_flow_projects": "Projeler",
   "info_flow_tasks": "Görevler (WBS)",
   "info_features_title": "Sistem Bileşenleri",
-  "info_feat_dashboard_desc": "Proje sayısı, bekleyen ve tamamlanan görevler. Tıkanan projeler ile acil işler tek bakışta.",
-  "info_feat_projects_desc": "Aşama aşama takip: Planlandı → Geliştirme → Test → Tamamlandı. Kararlar, notlar, kaynak bağlantıları.",
-  "info_feat_ideas_desc": "Ham fikirleri kaydedin, puanlayın. Projeye Dönüştür ile veri kaybetmeden doğrudan projeye aktarın.",
-  "info_feat_tasks_desc": "Hiyerarşik iş kırılımı (WBS). Durum, öncelik ve tür filtreleriyle görev yoğunluğunu kontrol edin.",
+  "info_feat_dashboard_desc": "Aktif proje, görev ve fikir sayıları, yüksek öncelikli açık görevler ve son fikirler.",
+  "info_feat_projects_desc": "Fikirden bakıma süreç aşamaları, kararlar, notlar ve kaynak bağlantıları.",
+  "info_feat_ideas_desc": "Ham fikirleri kaydedin, durum ve önceliğini izleyin, tek tıkla projeye dönüştürün.",
+  "info_feat_tasks_desc": "Hiyerarşik görev ağacı, sürükle-bırak sıralama, kontrol listesi ve filtreler.",
   "info_tips_title": "Önemli İpuçları",
   "info_shortcuts_title": "Klavye Kısayolları",
   "analytics_period_daily": "Günlük",
@@ -264,5 +264,6 @@
   "analytics_wd_wed": "Çar",
   "analytics_wd_fri": "Cum",
   "analytics_panel_status_title": "Görev Durumları",
-  "analytics_status_total": "Toplam"
+  "analytics_status_total": "Toplam",
+  "task_checklist_toggle_tip": "Checklist maddelerini aç/kapat"
 }

@@ -1,5 +1,8 @@
 # 12. UI/UX ve Kaynak Yönetim Sistemleri
 
+> **Durum (2026-11-25):** Bu belge Qt Widgets/QSS dönemindeki planı anlatır; arayüz 2026-10-07'den beri QML'dir. Güncel davranış için `README.md` ve `docs/wiki/` esas alınır.
+
+
 Bu doküman, uygulamanın arayüz kalitesini, sürdürülebilirliğini ve profesyonel görünümünü sağlamak için Faz 1 (Proje Temeli) kapsamında kurulacak merkezi yönetim mekanizmalarını detaylandırır. 
 
 Uygulamanın ileride büyümesi, yeni temaların (örn. Dracula, Solarized) eklenmesi, farklı dillere çevrilmesi ve görsel bütünlüğünün korunması için bu altyapının baştan sağlam atılması kritik önem taşır.

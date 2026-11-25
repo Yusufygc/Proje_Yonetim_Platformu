@@ -1,5 +1,8 @@
 # NewProject Tasarım Dokümanları
 
+> **Durum (2026-11-25):** Bu klasör ilk tasarım paketi ile tarihli analiz raporlarını içerir. Güncel davranış için `README.md` ve `docs/wiki/` esas alınır.
+
+
 Bu klasör, mevcut portfolyo uygulamasındaki admin/projeler sekmesinden ilham alan fakat bağımsız bir "proje takip ve süreç izleme" ürünü için ilk tasarım paketidir.
 
 Amaç, kod yazmadan önce ürünün kapsamını, veri modelini, ekranlarını, iş kurallarını ve geliştirme yol haritasını netleştirmektir. Dokümanları okurken eksik, gereksiz veya yanlış gördüğün noktaları işaretleyebilirsin; sonraki adımda bunları revize edip uygulama tasarımını kesinleştirebiliriz.

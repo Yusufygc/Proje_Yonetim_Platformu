@@ -57,6 +57,12 @@ Kabul kriterleri:
 - Görev silinince checklist maddeleri silinir.
 - Görev filtreleri doğru sonuç döndürür.
 
+## Görev Taşıma Testleri
+
+- Görev hedefin önüne, arkasına ve altına taşınır; kardeş sırası korunur.
+- Görev kendi alt görevinin altına taşınamaz.
+- Düzenleme diyaloğunda eklenen, silinen ve işaretlenen checklist maddeleri kaydedilir.
+
 ## Checklist Testleri
 
 Kabul kriterleri:

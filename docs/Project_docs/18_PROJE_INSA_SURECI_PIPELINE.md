@@ -1,5 +1,8 @@
 # 18. Proje İnşa Süreci ve Geliştirme Pipeline'ı
 
+> **Durum (2026-11-25):** Bu belge Qt Widgets/QSS dönemindeki planı anlatır; arayüz 2026-10-07'den beri QML'dir. Güncel davranış için `README.md` ve `docs/wiki/` esas alınır.
+
+
 Bu doküman, tasarım ve planlama evresi (Faz 0) tamamlanan **Proje Yönetim ve Takip Platformu**'nun fiili kodlama sürecinin (Faz 1 ve sonrası) hangi adımlarla, hangi sırayla ve nasıl inşa edileceğini gösteren **adım adım geliştirme yol haritasıdır**.
 
 Geliştiriciler ve otonom sistemler kodlamaya bu sırayı takip ederek başlamalıdır.

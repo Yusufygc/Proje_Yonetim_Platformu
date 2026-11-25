@@ -1,3 +1,6 @@
+> **Durum (2026-11-25):** İlk tasarımdaki hedef yapıdır. Güncel klasör yapısı `README.md` içindedir.
+
+```text
 proje_takip_platformu/
 │
 ├── main.py                     # Uygulama giriş noktası (bootstrap ve global exception hook)
@@ -95,3 +98,4 @@ proje_takip_platformu/
     │   └── test_task_rollup.py # WBS ilerleme algoritması unit testi
     └── integration/            # Repository ve DB entegrasyon testleri
         └── test_project_repo.py
+```

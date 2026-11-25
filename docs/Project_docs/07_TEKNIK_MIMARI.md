@@ -1,5 +1,8 @@
 # Teknik Mimari
 
+> **Durum (2026-11-25):** Bu belge Qt Widgets/QSS dönemindeki planı anlatır; arayüz 2026-10-07'den beri QML'dir. Güncel davranış için `README.md` ve `docs/wiki/` esas alınır.
+
+
 ## Mimari Yaklaşım
 
 Mevcut uygulamadaki katmanlı yapı yeni proje için de uygundur:
@@ -160,6 +163,8 @@ PySide6 ile başlanırsa önerilen ekranlar:
 
 ## Sesli Komut (Speech-to-Text) Altyapısı — Uygulandı (2026-06-30)
 
+> Güncel UI bileşenleri `VoiceInputButton.qml` ve `VoiceBridge`'dir (`docs/wiki/sesli-komut.md`).
+
 Diğer bölümlerin aksine bu bir öneri değil, gerçekleştirilmiş bir mimari karardır.
 
 Sorumluluk zinciri (UI → arka plan iş → servis), mevcut Worker desenine sadık kalır:
@@ -185,7 +190,23 @@ Hata yönetimi mevcut istisna deseniyle uyumlu: `core/exceptions/speech_exceptio
 (`SpeechModelNotFoundError`, `MicrophoneUnavailableError`) → UI'da toast, stack trace
 kullanıcıya gösterilmez. Detay: `docs/wiki/sesli-komut.md`.
 
+## Görev Ağacında Sürükle-Bırak — Uygulandı (2026-11-25)
+
+```
+TasksView.qml / TaskItemDelegate.qml (sürükle)
+  → TaskViewModel.moveTaskRelative(dragged, target, before|after|into)
+    → task_reorder.compute_relative_move (saf: yeni üst görev + sıra indeksi)
+      → TaskController.move_task → TaskService.move_task
+        → TaskRepository.update_many (kardeş grupları yeniden numaralanır)
+```
+
+Döngü koruması hem hedef hesabında hem `TaskService._validate_parent` içinde
+yapılır. Detay: `docs/wiki/gorevler-modulu.md`.
+
 ## Liste Sıralama (Sürükle-Bırak) Altyapısı — Uygulandı (2026-07-01)
+
+> Güncel durum: aşağıda anlatılan widget tabanlı arayüz 2026-10-07'de eski
+> arayüzle birlikte kaldırıldı; yalnızca `reorder` altyapısı duruyor.
 
 Notlar, Fikirler ve Projeler listelerinde kullanıcı sıralaması eklendi:
 

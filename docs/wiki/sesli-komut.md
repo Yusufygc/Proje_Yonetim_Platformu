@@ -11,7 +11,7 @@ VoiceInputButton.qml + VoiceBridge (UI)
       → vosk + sounddevice
 ```
 
-- `presentation/qml/components/VoiceInputButton.qml` — mikrofon butonu; `AppTextInput` içinde `showVoiceInput: true` ile görünür. `presentation/viewmodels/voice_bridge.py::VoiceBridge` (`isListening`, `partialText`, `toggleListening()`, `textTranscribed`) worker'ı yönetir.
+- `presentation/qml/components/VoiceInputButton.qml` — mikrofon butonu; `AppTextInput` içinde `showVoiceInput: true` ile görünür. `presentation/viewmodels/voice_bridge.py::VoiceBridge` (`isListening`, `partialText`, `toggleListeningFor(ownerId)`, `activeOwner`, `textTranscribed`) worker'ı yönetir.
 - `core/workers/transcription_worker.py` — `TranscriptionWorker(QRunnable)` +
   `TranscriptionSignals(QObject)` (`started`, `partial`, `final`, `error`, `finished`).
   `Worker` (genel amaçlı, tek atış) yerine ayrı sınıf: bu worker `stop()` çağrılana kadar

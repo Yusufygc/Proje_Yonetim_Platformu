@@ -132,11 +132,20 @@ class TaskService:
 
     def move_task(self, task_id: int, new_parent_task_id: int | None, new_order_index: int) -> Task:
         task = self.get_task(task_id)
+        old_parent_id = task.parent_task_id
         if new_parent_task_id is not None:
             self._validate_parent(task.project_id, new_parent_task_id, task_id=task_id)
+        all_tasks = self._repo.get_by_project(task.project_id)
+        siblings = self._sorted_siblings(all_tasks, new_parent_task_id, exclude_id=task_id)
+        insert_idx = max(0, min(int(new_order_index), len(siblings)))
         task.parent_task_id = new_parent_task_id
-        task.order_index = max(0, int(new_order_index))
-        updated = self._repo.update(task)
+        siblings.insert(insert_idx, task)
+        to_update = self._reindex_siblings(siblings, force_task_id=task_id)
+        if old_parent_id != new_parent_task_id:
+            old_siblings = self._sorted_siblings(all_tasks, old_parent_id, exclude_id=task_id)
+            to_update.extend(self._reindex_siblings(old_siblings))
+        self._repo.update_many(to_update)
+        updated = self.get_task(task_id)
         self._log(
             updated.project_id,
             "TASK_MOVED",
@@ -146,7 +155,25 @@ class TaskService:
             {"parent_task_id": new_parent_task_id, "order_index": updated.order_index},
         )
         self.recalculate_hierarchy(updated.project_id)
-        return updated
+        return self.get_task(task_id)
+
+    @staticmethod
+    def _sorted_siblings(
+        tasks: list[Task], parent_task_id: int | None, *, exclude_id: int
+    ) -> list[Task]:
+        return sorted(
+            [t for t in tasks if t.parent_task_id == parent_task_id and t.id != exclude_id],
+            key=lambda item: (item.order_index, item.id),
+        )
+
+    @staticmethod
+    def _reindex_siblings(siblings: list[Task], force_task_id: int | None = None) -> list[Task]:
+        changed: list[Task] = []
+        for index, item in enumerate(siblings):
+            if item.id == force_task_id or item.order_index != index:
+                item.order_index = index
+                changed.append(item)
+        return changed
 
     def get_descendant_count(self, task_id: int) -> int:
         task = self.get_task(task_id)

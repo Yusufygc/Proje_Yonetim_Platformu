@@ -1,5 +1,8 @@
 # 14. Premium UI/UX Tasarım ve Animasyon Planı
 
+> **Durum (2026-11-25):** Bu belge Qt Widgets/QSS dönemindeki planı anlatır; arayüz 2026-10-07'den beri QML'dir. Güncel davranış için `README.md` ve `docs/wiki/` esas alınır.
+
+
 Bu doküman, uygulamanın geleneksel, sıkıcı ve donuk kurumsal masaüstü yazılımlarından (eski tip gri Qt ekranları) sıyrılarak; modern, premium, akıcı ve kullanıcıya "SaaS (Software as a Service)" veya "macOS native" kalitesinde hissettirecek tasarım standartlarını belirler.
 
 ---

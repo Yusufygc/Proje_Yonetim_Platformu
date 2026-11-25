@@ -98,7 +98,7 @@ ScrollView {
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: i18nBridge.tr("info_flow_ideas_sub", "Fikirleri topla ve puanla")
+                            text: i18nBridge.tr("info_flow_ideas_sub", "Fikirleri topla ve değerlendir")
                             font.pixelSize: 11
                             color: themeBridge.textSecondary
                         }
@@ -190,25 +190,25 @@ ScrollView {
                             icon: "home",
                             color: themeBridge.accentStart,
                             title: i18nBridge.tr("nav_dashboard", "Dashboard"),
-                            desc: i18nBridge.tr("info_feat_dashboard_desc", "Proje sayıları, bekleyen ve tamamlanan görevler, tıkanan işler tek bakışta.")
+                            desc: i18nBridge.tr("info_feat_dashboard_desc", "Aktif proje, görev ve fikir sayıları, yüksek öncelikli açık görevler ve son fikirler.")
                         },
                         {
                             icon: "folder",
                             color: themeBridge.accentStart,
                             title: i18nBridge.tr("nav_projects", "Projeler"),
-                            desc: i18nBridge.tr("info_feat_projects_desc", "Planlandı → Geliştirme → Test → Tamamlandı aşamaları, kararlar ve kaynaklar.")
+                            desc: i18nBridge.tr("info_feat_projects_desc", "Fikirden bakıma süreç aşamaları, kararlar, notlar ve kaynak bağlantıları.")
                         },
                         {
                             icon: "check-square",
                             color: themeBridge.success,
                             title: i18nBridge.tr("nav_tasks", "Görevler (WBS)"),
-                            desc: i18nBridge.tr("info_feat_tasks_desc", "Hiyerarşik iş kırılımı, ilerleme çubukları, durum ve öncelik filtreleri.")
+                            desc: i18nBridge.tr("info_feat_tasks_desc", "Hiyerarşik görev ağacı, sürükle-bırak sıralama, kontrol listesi ve filtreler.")
                         },
                         {
                             icon: "lightbulb",
                             color: themeBridge.warning,
                             title: i18nBridge.tr("nav_ideas", "Fikir Havuzu"),
-                            desc: i18nBridge.tr("info_feat_ideas_desc", "Ham fikirleri kaydedin, puanlayın ve tek tıkla doğrudan projeye dönüştürün.")
+                            desc: i18nBridge.tr("info_feat_ideas_desc", "Ham fikirleri kaydedin, durum ve önceliğini izleyin, tek tıkla projeye dönüştürün.")
                         },
                         {
                             icon: "note-sticky",
@@ -299,7 +299,7 @@ ScrollView {
                     Repeater {
                         model: [
                             { key: "Ctrl + F  /  Ctrl + K", desc: i18nBridge.tr("info_sc_search", "Küresel arama kutusunu açar") },
-                            { key: "Ctrl + N", desc: i18nBridge.tr("info_sc_new", "Yeni proje veya görev oluşturur") },
+                            { key: "Ctrl + N", desc: i18nBridge.tr("info_sc_new", "Yeni proje oluşturur") },
                             { key: "ESC", desc: i18nBridge.tr("info_sc_esc", "Açık pencereleri ve aramayı kapatır") }
                         ]
 
@@ -356,7 +356,7 @@ ScrollView {
                         width: parent.width
 
                         Text {
-                            text: "• " + i18nBridge.tr("info_tip_1", "Sol alttaki ay düğmesi ile tek tıkla açık/koyu modlar arasında geçiş yapabilirsiniz.")
+                            text: "• " + i18nBridge.tr("info_tip_1", "Sol alttaki tema anahtarı ile tek tıkla açık/koyu modlar arasında geçiş yapabilirsiniz.")
                             font.pixelSize: 12
                             color: themeBridge.textSecondary
                             wrapMode: Text.WordWrap

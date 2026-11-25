@@ -6,6 +6,8 @@
 > sırayı değiştiremez. Altyapı (kolonlar, `reorder` zinciri) bilinçli olarak korunuyor; QML'de
 > sürükle-bırak yeniden eklenirse doğrudan kullanılabilir.
 
+Görevler (WBS) ağacındaki sürükle-bırak bu altyapıyı kullanmaz; `TaskService.move_task` ile çalışır ([[gorevler-modulu]]).
+
 ## Mimari zincir (backend, hâlâ geçerli)
 
 ```
