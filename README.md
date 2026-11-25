@@ -219,6 +219,18 @@ Etiket push edilince `.github/workflows/release.yml` kalite kapılarını koşar
 
 ---
 
+## Tanıtım videosu
+
+`video/` klasörü uygulamanın kullanımını gösteren tanıtım videosunu tek komutla üretir:
+
+```powershell
+.venv\Scripts\python.exe videouild.py
+```
+
+Kurulum ve ayrıntılar: [docs/wiki/tanitim-videosu.md](docs/wiki/tanitim-videosu.md).
+
+---
+
 ## Klasör Yapısı
 
 ```
@@ -255,6 +267,7 @@ proje_takip_platformu/
 ├── icons/                    # Uygulama ikonu
 ├── packaging/                # Sabit launcher, sürüm kaynağı, onay hash'i ve Inno Setup betiği
 ├── tools/                    # Sürüm yayınlama aracı (release.py)
+├── video/                    # Otomatik tanıtım videosu üretimi (kurulum dosyasına girmez)
 ├── scripts/                  # Yardımcı scriptler (font indirme, kalite)
 ├── build_exe.py              # Kararlı exe PyInstaller derleyicisi ve özet kapısı
 ├── build_installer.py        # Tek komutla exe + kurulum + doğrulama aracı
