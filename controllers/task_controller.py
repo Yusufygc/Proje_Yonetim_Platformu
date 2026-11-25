@@ -13,6 +13,7 @@ from core.events.event_bus import EventBus
 from core.exceptions.base_exception import AppBaseException
 from core.workers.worker import Worker
 from domain.dtos.forms import TaskCreateDTO, TaskUpdateDTO
+from domain.models.checklist_item import ChecklistItem
 from domain.models.task import Task
 from services.task_service import TaskService
 
@@ -93,13 +94,15 @@ class TaskController(QObject):
             logger.error("Görev silinemedi: %s", exc)
             self.error_occurred.emit(str(exc))
 
-    def add_checklist_item(self, task_id: int, text: str) -> None:
+    def add_checklist_item(self, task_id: int, text: str) -> ChecklistItem | None:
         try:
-            self._service.add_checklist_item(task_id, text)
+            created = self._service.add_checklist_item(task_id, text)
             self.task_updated.emit(self.get_task_sync(task_id))
+            return created
         except AppBaseException as exc:
             logger.error("Checklist öğesi eklenemedi: %s", exc)
             self.error_occurred.emit(str(exc))
+            return None
 
     def move_task(self, task_id: int, new_parent_task_id: int | None, new_order_index: int) -> None:
         try:

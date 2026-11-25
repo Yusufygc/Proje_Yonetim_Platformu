@@ -1254,6 +1254,102 @@ def test_memo_viewmodel_auto_save_should_persist_silently_without_toast_or_reset
     qapp.processEvents()
 
 
+def test_task_list_model_checklist_items_and_expand_toggle(qapp: QApplication) -> None:
+    from domain.models.checklist_item import ChecklistItem  # noqa: PLC0415
+
+    model = TaskListModel(parent=qapp)
+    task = Task(id=1, project_id=1, parent_task_id=None, order_index=0, title="Kontrollü", status="TODO", priority="MEDIUM", task_type="TASK")
+    task.checklist_items = [
+        ChecklistItem(id=10, task_id=1, text="Birinci", is_done=False, order_index=0),
+        ChecklistItem(id=11, task_id=1, text="İkinci", is_done=True, order_index=1),
+    ]
+    model.set_tasks([task])
+
+    idx = model.index(0, 0)
+    assert model.data(idx, TaskListModel.IsChecklistExpandedRole) is False
+    items = model.data(idx, TaskListModel.ChecklistItemsRole)
+    assert items == [
+        {"id": 10, "text": "Birinci", "isDone": False},
+        {"id": 11, "text": "İkinci", "isDone": True},
+    ]
+
+    model.toggleChecklistExpanded(1)
+    assert model.data(idx, TaskListModel.IsChecklistExpandedRole) is True
+    model.toggleChecklistExpanded(1)
+    assert model.data(idx, TaskListModel.IsChecklistExpandedRole) is False
+
+
+def test_task_viewmodel_move_task_relative_and_dialog_checklist_sync(
+    qapp: QApplication, container: DIContainer
+) -> None:
+    from PySide6.QtCore import QThreadPool  # noqa: PLC0415
+
+    project = container.services.project.create_project("Sürükle Bırak Projesi")
+    first = container.services.task.create_task(project.id, "İlk")
+    second = container.services.task.create_task(project.id, "İkinci")
+    third = container.services.task.create_task(project.id, "Üçüncü")
+
+    tvm = TaskViewModel(container, parent=qapp)
+    tvm.selectProject(project.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    # İlk görsel sıra: Üçüncü, İkinci, İlk -> İlk'i Üçüncü'nün önüne al
+    tvm.moveTaskRelative(first.id, third.id, "before")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert [t.id for t in tvm.cached_tasks()] == [first.id, third.id, second.id]
+
+    # Üçüncü'yü İkinci'nin arkasına al -> İlk, İkinci, Üçüncü
+    tvm.moveTaskRelative(third.id, second.id, "after")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert [t.id for t in tvm.cached_tasks()] == [first.id, second.id, third.id]
+
+    # Üçüncü'yü İlk'in alt görevi yap
+    tvm.moveTaskRelative(third.id, first.id, "into")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    reloaded_third = container.services.task.get_task(third.id)
+    assert reloaded_third.parent_task_id == first.id
+
+    # Döngüsel taşıma engellenmeli (İlk'i kendi alt görevi Üçüncü'nün içine bırakma)
+    tvm.moveTaskRelative(first.id, third.id, "into")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    assert container.services.task.get_task(first.id).parent_task_id is None
+
+    # TaskDialog düzenleme ekranında checklist ekleme/silme/durum güncelleme senkronizasyonu
+    item_a = container.services.task.add_checklist_item(second.id, "Adım A")
+    container.services.task.add_checklist_item(second.id, "Adım B")
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    dialog = TaskDialogViewModel(container, tvm, parent=qapp)
+    tvm.selectProject(project.id)
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+    dialog.openEditDialog(second.id)
+    dialog.saveTask({
+        "title": "İkinci",
+        "status": "TODO",
+        "priority": "MEDIUM",
+        "task_type": "TASK",
+        "checklist_items": [
+            {"id": item_a.id, "text": "Adım A", "isDone": True},
+            {"id": 0, "text": "Adım C", "isDone": False},
+        ],
+    })
+    QThreadPool.globalInstance().waitForDone(2000)
+    qapp.processEvents()
+
+    updated_second = container.services.task.get_task(second.id)
+    assert [(c.text, c.is_done) for c in updated_second.checklist_items] == [
+        ("Adım A", True),
+        ("Adım C", False),
+    ]
+
+
 
 
 

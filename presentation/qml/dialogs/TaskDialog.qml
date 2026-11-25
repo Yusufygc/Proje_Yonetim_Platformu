@@ -25,7 +25,7 @@ Rectangle {
 
     Shortcut {
         sequences: ["Return", "Enter"]
-        enabled: root.visible && !descInput.hasTextFocus && !blockedReasonInput.hasTextFocus && !newChecklistInput.hasTextFocus
+        enabled: root.visible && !descInput.hasTextFocus && !blockedReasonInput.hasTextFocus && !checklistSection.hasInputFocus
         onActivated: root.submitTask()
     }
 
@@ -38,11 +38,10 @@ Rectangle {
             "priority": priorityCombo.selectedValue,
             "task_type": typeCombo.selectedValue,
             "blocked_reason": blockedReasonInput.text,
-            "checklist_items": root.checklistItems
+            "checklist_items": checklistSection.checklistItems
         })
     }
 
-    property var checklistItems: []
     property bool hasChildren: false
 
     readonly property var leafStatusModel: [
@@ -73,15 +72,19 @@ Rectangle {
                 priorityCombo.selectedValue = init.priority || "MEDIUM"
                 typeCombo.selectedValue = init.task_type || "TASK"
                 blockedReasonInput.text = init.blocked_reason || ""
-                newChecklistInput.text = ""
+                checklistSection.clearInput()
 
                 var chk = []
                 if (init.checklist && Array.isArray(init.checklist)) {
                     for (var i = 0; i < init.checklist.length; i++) {
-                        chk.push(init.checklist[i].text)
+                        chk.push({
+                            "id": init.checklist[i].id || 0,
+                            "text": init.checklist[i].text || "",
+                            "isDone": init.checklist[i].isDone === true
+                        })
                     }
                 }
-                root.checklistItems = chk
+                checklistSection.checklistItems = chk
                 titleInput.focusInput()
             }
         }
@@ -230,97 +233,10 @@ Rectangle {
                     }
 
                     // Checklist Bölümü
-                    Text {
-                        text: i18nBridge.tr("label_checklist", "Kontrol Listesi (Checklist)")
-                        font.pixelSize: Theme.typography.sizeSmall
-                        font.weight: Theme.typography.weightMedium
-                        color: themeBridge.textSecondary
-                        Layout.topMargin: Theme.spacing.xs
-                    }
-
-                    RowLayout {
+                    TaskChecklistSection {
+                        id: checklistSection
                         Layout.fillWidth: true
-                        spacing: Theme.spacing.sm
-
-                        AppTextInput {
-                            id: newChecklistInput
-                            placeholder: i18nBridge.tr("task_checklist_placeholder", "Yeni kontrol maddesi ekle...")
-                            Layout.fillWidth: true
-                            onAccepted: {
-                                if (newChecklistInput.text.trim().length > 0) addChecklistItem()
-                                else root.submitTask()
-                            }
-                        }
-
-                        AppButton {
-                            text: i18nBridge.tr("action_add", "Ekle")
-                            btnVariant: "secondary"
-                            Layout.preferredHeight: 38
-                            Layout.alignment: Qt.AlignVCenter
-                            onClicked: addChecklistItem()
-                        }
-                    }
-
-                    // Eklenen Checklist Maddeleri Listesi
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: Theme.spacing.xs
-
-                        Repeater {
-                            model: root.checklistItems
-
-                            Rectangle {
-                                Layout.fillWidth: true
-                                height: 32
-                                radius: Theme.radius.small
-                                color: themeBridge.surfaceAlt
-
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: Theme.spacing.sm
-                                    anchors.rightMargin: Theme.spacing.sm
-                                    spacing: Theme.spacing.sm
-
-                                    AppIcon {
-                                        name: "check"
-                                        size: 14
-                                        color: Theme.accent(themeBridge.currentTheme)
-                                    }
-
-                                    Text {
-                                        id: chkItemText
-                                        text: modelData
-                                        font.pixelSize: Theme.typography.sizeSmall
-                                        color: themeBridge.textPrimary
-                                        Layout.fillWidth: true
-                                        elide: Text.ElideRight
-
-                                        ToolTip.visible: chkHoverArea.containsMouse && chkItemText.truncated
-                                        ToolTip.text: modelData
-                                        ToolTip.delay: 400
-
-                                        MouseArea {
-                                            id: chkHoverArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            acceptedButtons: Qt.NoButton
-                                        }
-                                    }
-
-                                    AppButton {
-                                        iconName: "x"
-                                        btnVariant: "secondary"
-                                        implicitWidth: 24
-                                        implicitHeight: 24
-                                        onClicked: {
-                                            var arr = root.checklistItems.slice()
-                                            arr.splice(index, 1)
-                                            root.checklistItems = arr
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        onSubmitRequested: root.submitTask()
                     }
                 }
             }
@@ -366,16 +282,6 @@ Rectangle {
                     onClicked: root.submitTask()
                 }
             }
-        }
-    }
-
-    function addChecklistItem() {
-        var txt = newChecklistInput.text.trim()
-        if (txt.length > 0) {
-            var arr = root.checklistItems.slice()
-            arr.push(txt)
-            root.checklistItems = arr
-            newChecklistInput.text = ""
         }
     }
 }

@@ -264,5 +264,6 @@
   "analytics_wd_wed": "Çar",
   "analytics_wd_fri": "Cum",
   "analytics_panel_status_title": "Görev Durumları",
-  "analytics_status_total": "Toplam"
+  "analytics_status_total": "Toplam",
+  "task_checklist_toggle_tip": "Checklist maddelerini aç/kapat"
 }

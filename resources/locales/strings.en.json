@@ -264,5 +264,6 @@
   "analytics_wd_wed": "Wed",
   "analytics_wd_fri": "Fri",
   "analytics_panel_status_title": "Task Status",
-  "analytics_status_total": "Total"
+  "analytics_status_total": "Total",
+  "task_checklist_toggle_tip": "Toggle checklist items"
 }
