@@ -35,6 +35,7 @@ class DatabaseManager:
             connect_args={"check_same_thread": False},
         )
         event.listen(self._engine, "connect", self._register_sql_functions)
+        event.listen(self._engine, "connect", self._enable_foreign_keys)
         self._session_factory = sessionmaker(bind=self._engine, expire_on_commit=False)
         self._scoped_session = scoped_session(self._session_factory)
         self._enable_wal_mode()
@@ -43,6 +44,11 @@ class DatabaseManager:
     def _register_sql_functions(dbapi_connection: Any, _record: Any) -> None:
         """Arama sorgularının kullandığı Türkçe uyumlu katlama fonksiyonunu her bağlantıya ekler."""
         dbapi_connection.create_function(SQL_FOLD_FUNCTION, 1, normalize_search_text, deterministic=True)
+
+    @staticmethod
+    def _enable_foreign_keys(dbapi_connection: Any, _record: Any) -> None:
+        """SQLite'ta foreign_keys bağlantı bazındadır; kapalı kalan bağlantıda ondelete kuralları işlemez."""
+        dbapi_connection.execute("PRAGMA foreign_keys=ON")
 
     @classmethod
     def instance(cls, database_url: str | None = None) -> "DatabaseManager":
@@ -56,7 +62,6 @@ class DatabaseManager:
         """Eşzamanlı okuma performansı için SQLite WAL modunu etkinleştirir."""
         with self._engine.connect() as conn:
             conn.execute(text("PRAGMA journal_mode=WAL"))
-            conn.execute(text("PRAGMA foreign_keys=ON"))
             conn.commit()
 
     def create_all_tables(self) -> None:

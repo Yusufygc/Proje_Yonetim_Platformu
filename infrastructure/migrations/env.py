@@ -38,6 +38,8 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
+    # Uygulama motoru bilerek kullanılmaz: foreign_keys açıkken batch_alter_table'ın DROP TABLE adımı
+    # alt kayıtları CASCADE ile siler.
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
