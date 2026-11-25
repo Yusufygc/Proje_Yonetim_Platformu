@@ -1,5 +1,25 @@
 # Wiki Kayıt Defteri
 
+## [2026-11-25] FIX | SQLite `foreign_keys` Her Bağlantıda Açık
+- Ayar yalnızca tek bağlantıya uygulanıyordu; artık `connect` olayında havuzdaki her bağlantıda açılıyor.
+- Denetlenen yollar: Alembic ayrı motor kullandığı için tablo yeniden kurma adımları etkilenmiyor; eski yetim referanslar güncelleme ve silmeyi engellemiyor.
+- `tests/test_foreign_keys.py` eklendi; [[veritabani-katmani]] ve [[yol-haritasi]] güncellendi.
+
+## [2026-11-25] FEATURE+DOCS | Görev Ağacında Sürükle-Bırak ve Satır İçi Checklist
+- Görevler sürüklenerek hedefin önüne, arkasına veya altına taşınıyor; hedef hesabı `presentation/viewmodels/task_reorder.py` saf fonksiyonunda.
+- `TaskService.move_task` yeni ve eski kardeş grubunun `order_index` değerlerini yeniden diziyor.
+- Checklist satır altında açılıp işaretlenebiliyor ve silinebiliyor; düzenleme diyaloğundaki checklist değişiklikleri artık kaydediliyor.
+- İstatistik çubuğu, sağ tık menüsü ve checklist bölümleri ayrı QML bileşenlerine ayrıldı.
+- [[gorevler-modulu]] güncellendi; çoğaltmanın alt görevleri kopyaladığını söyleyen hatalı ifade düzeltildi.
+- README ekran görüntüleri ve özellik listesi güncellendi.
+
+## [2026-11-25] LINT | Wiki Sağlık Kontrolü
+- Kırık `[[bağlantı]]`, yetim sayfa ve dizinde eksik sayfa bulunmadı.
+- Kodla uyuşmayan bilgiler düzeltildi: [[di-container]] (bootstrap sırası, sayılar), [[veritabani-katmani]], [[mimari-genel-bakis]], [[event-bus]], [[l10n-string-yonetimi]], [[sesli-komut]], [[yol-haritasi]].
+- Bulunan kod hatası: `PRAGMA foreign_keys=ON` yalnızca tek bağlantıya uygulanıyor ([[veritabani-katmani]]).
+- README veri yolları, `CLAUDE.md`/`AGENTS.md`/`RULES.md` belge yolları ve uygulama içi Bilgilendirme metinleri düzeltildi; eski arayüzü anlatan tasarım belgelerine durum notu eklendi.
+- Bu kayıt defterindeki ve tarihli denetim raporlarındaki eski dosya adları tarihsel olduğu için korundu.
+
 ## [2026-11-24] FEATURE+INFRA | Orta Boyutlu Yön Okları ve Prod Hazırlığı (Kararlı EXE, Kurulum, Yayın ve Güncelleme)
 - **Orta Boyutlu Yön Okları (`resources/icons/` & QML):**
   - `chevron-down`, `chevron-up`, `chevron-right`, `chevron-left`, `arrow-right`, `corner-down-left`, `corner-down-right` SVG ikonları `stroke="currentColor"` korunarak `stroke-width="1.8"` ve `viewBox="0 0 24 24"` içinde `5.5..18.5` yayılımına getirildi.

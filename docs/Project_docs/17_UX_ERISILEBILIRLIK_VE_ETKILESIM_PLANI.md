@@ -54,10 +54,10 @@ Görevleri veya aşamaları sıralarken görsel geri bildirimler net olmalıdır
 
 * **Sürükleme Hissiyatı (Ghosting):** Bir görev tutulup sürüklendiğinde, farenin ucunda o görevin %70 opaklığında bir kopyası (Ghost) gelmeli, asıl liste üzerindeki yerinde ise hafif soluk veya kesik çizgili bir boşluk (Placeholder) kalmalıdır.
 * **Bırakma Alanları (Drop Zones):** Sürüklenen öğe, hedefin üzerine geldiğinde hedefin arka plan rengi çok hafif değişmeli veya iki öğe arasına net bir yatay/dikey çizgi (Insertion Indicator) çizilerek öğenin tam olarak nereye düşeceği gösterilmelidir.
-* **Kapsam:** WBS görev ağacının yanı sıra artık Notlar, Fikirler ve Projeler
-  listelerinde de sürükle-bırak sıralama var; %70 opaklık ghost uygulandı,
-  insertion-indicator çizgisi MVP kapsamı dışında bırakıldı (bırakma anında sıra
-  görsel olarak güncelleniyor). Teknik detay: `docs/wiki/liste-siralama.md`.
+* **Kapsam (güncel, 2026-11-25):** QML arayüzünde sürükle-bırak yalnızca WBS görev
+  ağacında var: hayalet kart, soluklaşan kaynak satır, araya bırakma çizgisi ve
+  alta bırakmada hedef vurgusu. Notlar, Fikirler ve Projeler listelerindeki eski
+  sürükle-bırak arayüzü kaldırıldı. Teknik detay: `docs/wiki/gorevler-modulu.md`.
 
 ---
 
@@ -68,9 +68,8 @@ not almak isteyenler için erişilebilirlik kazandıran bir giriş yöntemidir.
 
 * **Çevrimdışı çalışır:** Konuşma tanıma cihaz üzerinde (Vosk, Türkçe model) gerçekleşir;
   ses verisi ağa çıkmaz, internet bağlantısı gerekmez — gizlilik ve erişilebilirlik bir arada.
-* **Tutarlı yerleşim:** Mikrofon ikonu her zaman ilgili metin alanının sağında, mevcut
-  `IconActionButton` görsel diline uygun (28×28, hover'da renk değişimi) — yeni bir etkileşim
-  paterni öğrenmeyi gerektirmez.
+* **Tutarlı yerleşim:** Mikrofon ikonu her zaman ilgili metin alanının sağında, `VoiceInputButton.qml`
+  bileşeniyle her alanda aynı görünür — yeni bir etkileşim paterni öğrenmeyi gerektirmez.
 * **Net durum geri bildirimi:** Dinleme sırasında buton kırmızımsı arka plana döner ve
   tooltip "Dinleniyor… durdurmak için tıkla" olarak değişir; sistem asla sessizce ne
   yaptığını belirsiz bırakmaz (bkz. madde 3, Sistem Geri Bildirimi ilkesiyle tutarlı).

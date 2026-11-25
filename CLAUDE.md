@@ -1,6 +1,6 @@
 # AI Asistan Geliştirme Yönergeleri (CLAUDE.md)
 
-Bu dosya, **Proje Yönetim ve Takip Platformu** deposunda çalışacak tüm yapay zeka asistanları için bağlayıcı kuralları içerir. Kod yazmadan veya mimari değişiklik önermeden önce bu dosyayı **ve** `Project_docs/RULES.md` dosyasını okumak **ZORUNLUDUR**.
+Bu dosya, **Proje Yönetim ve Takip Platformu** deposunda çalışacak tüm yapay zeka asistanları için bağlayıcı kuralları içerir. Kod yazmadan veya mimari değişiklik önermeden önce bu dosyayı **ve** `docs/Project_docs/RULES.md` dosyasını okumak **ZORUNLUDUR**.
 
 ---
 
@@ -12,9 +12,9 @@ Bu dosya, **Proje Yönetim ve Takip Platformu** deposunda çalışacak tüm yapa
 
 ---
 
-## 1. Temel Anayasa: Project_docs/RULES.md
+## 1. Temel Anayasa: docs/Project_docs/RULES.md
 
-- Geliştirilecek her kod parçası `Project_docs/RULES.md` dosyasındaki standartlara uymak zorundadır.
+- Geliştirilecek her kod parçası `docs/Project_docs/RULES.md` dosyasındaki standartlara uymak zorundadır.
 - **Asla "God Object" yaratma:** Bir dosya 400 satırı, bir sınıf 15 metodu aşıyorsa, mevcut koda ekleme yapmak yerine refactoring öner.
 - SOLID prensiplerini ve Single Responsibility kuralını her fonksiyonda gözet.
 
@@ -38,7 +38,7 @@ Bu dosya, **Proje Yönetim ve Takip Platformu** deposunda çalışacak tüm yapa
 
 ### 3.2 Hata Yönetimi
 - Bare `except:` veya `except Exception as e: pass` YASAKTIR.
-- İş katmanı hataları `exceptions.py` içinde tanımlı özel istisnalar fırlatacak (örn. `ProjectValidationError`, `TaskNotFoundError`).
+- İş katmanı hataları `core/exceptions/` içinde tanımlı özel istisnalar fırlatacak (örn. `ProjectValidationError`, `TaskNotFoundError`).
 - UI katmanı bu istisnaları yakalayıp kullanıcıya anlamlı mesaj gösterecek; stack trace kullanıcıya asla gösterilmeyecek.
 - Her `try/except` bloğu yalnızca beklenen istisna tipini yakalayacak.
 
@@ -120,8 +120,8 @@ Kod teslim edilmeden önce şu sorular cevaplanmış olmalı:
 5. N+1 sorgu riski var mı?
 6. Test eklendi mi? Kritik yol kapsandı mı?
 7. `parent` atanmamış PySide6 nesnesi var mı?
-8. Commit mesajı `Project_docs/RULES.md §6` formatına uygun mu?
-9. Yeni özellik veya davranış değişikliği varsa `README.md`, `docs/wiki/` ve `Project_docs/` ilgili dosyaları güncellendi mi?
+8. Commit mesajı `docs/Project_docs/RULES.md §6` formatına uygun mu?
+9. Yeni özellik veya davranış değişikliği varsa `README.md`, `docs/wiki/` ve `docs/Project_docs/` ilgili dosyaları güncellendi mi?
 
 ---
 

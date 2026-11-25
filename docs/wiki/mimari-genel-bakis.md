@@ -20,13 +20,13 @@ infrastructure/database/ (DatabaseManager)       ← engine, scoped_session, WAL
 - Ham SQL yasak; tüm erişim ORM üzerinden ([[veritabani-katmani]]).
 
 ## Ana bileşenler
-- Bağımlılık kurulumu: [[di-container]] (`di_container.py` bootstrap).
+- Bağımlılık kurulumu: [[di-container]] (`app/di_container.py` bootstrap).
 - Modüller arası gevşek bağ: [[event-bus]] (`core/events/event_bus.py`).
 - UI kilitlenmesini önleme: [[worker-altyapisi]] (`core/workers/`).
 - Görsel katman: [[tema-sistemi]], [[ikon-yonetimi]], [[l10n-string-yonetimi]].
 - Navigasyon kaydı: `presentation/modules.py` + `core/module_registry.py` yalnızca sayfa anahtarı, etiket ve ikon meta-verisini tutar (`FeaturePlugin`); `NavigationBridge.modules` bunu QML kenar çubuğuna açar. Sayfaların kendisi `presentation/qml/main.qml` içinde yüklenir.
 
-## Boyut metrikleri (2026-06-12)
-~142 .py dosyası, ~11.400 satır. RULES.md limitleri: dosya ≤400 satır, sınıf ≤15 metod ([[kurallar-ve-sozlesmeler]]). Bilinen istisna: `DIContainer` (factory yoğun, P3'te bölünecek — [[yol-haritasi]]).
+## Boyut sınırları
+RULES.md limitleri: dosya ≤400 satır, sınıf ≤15 metod ([[kurallar-ve-sozlesmeler]]). 2026-11-25 itibarıyla 400 satırı aşan `.py`/`.qml` dosyaları yalnızca testlerdir: `tests/test_mvp_core.py`, `tests/test_qml_bridges.py`.
 
 İlgili: [[gorevler-modulu]], [[log]]

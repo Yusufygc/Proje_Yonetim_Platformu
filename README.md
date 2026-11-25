@@ -21,7 +21,7 @@ Masaüstü tabanlı proje, görev ve fikir yönetim uygulaması. PySide6 ile olu
 - 🎨 **Tema Desteği** — Koyu ve açık tema; 6 küratörlü renk paleti (Slate, Indigo, Emerald, Ocean, Rose, Violet), temalara özel desenli kenar çubuğu arka planları
 - 🌐 **Yerelleştirme** — Türkçe ve İngilizce arayüz; tüm metinler çeviri anahtarları üzerinden yönetilir
 - 🔔 **Toast Bildirimleri** — İşlem sonuçları için animasyonlu, otomatik kapanan bildirim sistemi
-- 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `~/.proje_takip/.backups/` altında saklanır
+- 💾 **Otomatik Yedekleme** — Başlangıçta arka planda veritabanı yedeği; `%LOCALAPPDATA%\ProjeTakip\.backups\` altında saklanır
 - 🎤 **Sesli Komut (Çevrimdışı)** — Vosk Türkçe modeliyle mikrofondan görev/fikir başlığı, açıklama ve notları sese dönüştürerek girme; internet/API anahtarı gerektirmez
 - 📝 **Notlar ve Çizim Tuvali** — Markdown destekli otomatik kaydedilen notlar, serbest çizim, geometrik şekiller, resim ekleme ve kaydırılabilir tuval araç çubuğu
 - 📋 **Görev Kopyalama & Akıllı Ağaç** — Panoya kopyalama ve anında çoğaltma (duplicate), tamamlanan alt görevlerin otomatik daraltılması ve kaydırma konumu koruması
@@ -85,7 +85,7 @@ Uygulama, katı bir katmanlı mimariye sahiptir; katmanlar arası doğrudan atla
 │            Repository Katmanı                   │
 │   SQLAlchemy ORM  ·  Alembic Migrations         │
 ├─────────────────────────────────────────────────┤
-│   SQLite  ·  ~/.proje_takip/proje_takip.db      │
+│   SQLite  ·  %LOCALAPPDATA%\ProjeTakip\         │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -135,7 +135,7 @@ Uygulama verileri `%LOCALAPPDATA%\ProjeTakip\` altında otomatik oluşturulur:
 
 ```bash
 git clone https://github.com/Yusufygc/Proje_Yonetim_Platformu.git
-cd proje_takip_platformu
+cd Proje_Yonetim_Platformu
 ```
 
 #### 2. Sanal ortam oluştur ve etkinleştir
@@ -303,7 +303,7 @@ Yeni arayüz metni eklenirken her iki dosyaya da ilgili anahtar eklenmelidir.
 ## Geliştirme Notları
 
 - Doğrudan SQLite sorgusu yazılmaz; tüm veri erişimi repository katmanı üzerinden yapılır.
-- Tema renkleri `ThemeManager.color(key)` ve `ThemeBridge` üzerinden çözülür; QML dosyalarına sabit renk yazılmaz.
+- Tema renkleri QML'de `themeBridge` property'leri üzerinden alınır; QML dosyalarına sabit renk yazılmaz.
 - Tüm kullanıcıya görünen metinler `tr(key, varsayılan)` ile sarmalanır.
 - Python tarafında oluşturulan her `QObject`'e `parent=` verilir (bellek sızıntısını önlemek için).
 - Bileşenler arası iletişim `EventBus.publish()` / `EventBus.subscribe()` ile sağlanır.

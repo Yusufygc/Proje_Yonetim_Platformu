@@ -84,7 +84,7 @@ Bu doküman, **Proje Yönetim ve Takip Platformu** projesinde geliştirilecek t�
 * **Dokümantasyon Güncelleme Zorunluluğu:** Yeni bir özellik eklendiğinde veya mevcut davranış değiştirildiğinde aşağıdaki belgeler aynı commit kapsamında güncellenmelidir; güncellenmemişse commit kabul edilmez:
     * `README.md` — Özellikler, kullanım talimatları veya ekran görüntüleri bölümü.
     * `docs/wiki/` — Değişikliği ilgilendiren wiki sayfası (yoksa yeni sayfa oluşturulur).
-    * `Project_docs/` — Etkilenen modül veya mimari dokümanı.
+    * `docs/Project_docs/` — Etkilenen modül veya mimari dokümanı.
     * Uygulama içi **Bilgilendirme / Hakkında** sayfası (varsa) — Sürüm notu veya özellik listesi.
 
 ---

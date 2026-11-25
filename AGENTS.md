@@ -1,9 +1,9 @@
 # Otonom Ajan Protokolleri (AGENTS.md)
 
-Bu doküman, projede görev alacak otonom yazılım ajanları, CI/CD pipeline scriptleri ve otomatik kod üreticileri için kesin davranış sınırlarını belirler. Otonom ajanlar, bu repository üzerinde işlem yaparken aşağıdaki yaşam döngüsüne ve `RULES.md` kurallarına uymak zorundadır.
+Bu doküman, projede görev alacak otonom yazılım ajanları, CI/CD pipeline scriptleri ve otomatik kod üreticileri için kesin davranış sınırlarını belirler. Otonom ajanlar, bu repository üzerinde işlem yaparken aşağıdaki yaşam döngüsüne ve `docs/Project_docs/RULES.md` kurallarına uymak zorundadır.
 
 ## 1. İşlem Öncesi Durum (State) Kontrolü
-- Kod yazmaya başlamadan önce mevcut mimariyi anlamak için `docs/wiki/index.md` ve `RULES.md` dosyalarını oku.
+- Kod yazmaya başlamadan önce mevcut mimariyi anlamak için `docs/wiki/index.md` ve `docs/Project_docs/RULES.md` dosyalarını oku.
 - Ortam bağımlılıklarının (`requirements.txt` / sanal ortam) tam yüklendiğinden ve `pytest` testlerinin mevcut durumda başarılı olduğundan emin ol. Hatalı (failing) bir state üzerine yeni özellik inşa etme.
 
 ## 2. Geliştirme Sınırları ve Kuralları

@@ -9,7 +9,9 @@
 - Yayın kopya liste üzerinde gezer (yayın sırasında subscribe/unsubscribe güvenli).
 
 ## Olay isimlendirme
-`varlık.eylem` formatı: `task.created`, `task.completed`, `task.moved`, `task.deleted`, `toast.show`, `NEW_PROJECT_REQUESTED` (sabit üzerinden).
+`varlık.eylem` formatı: `task.created`, `task.updated`, `task.moved`, `task.deleted`, `project.created`, `idea.converted`, `toast.show`. Sayfalar arası istekler `core/events/app_events.py` sabitleriyle yayınlanır (`NEW_PROJECT_REQUESTED`, `PROJECT_DETAIL_REQUESTED`).
+
+`DashboardController` `task.completed` olayına abonedir ancak kodda bu adla yayın yapılmıyor.
 
 ## Kullanım kuralı
 - Yayın: controller katmanından (`EventBus.instance().publish(...)`).

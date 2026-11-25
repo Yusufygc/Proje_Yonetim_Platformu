@@ -1,5 +1,8 @@
 # 15. Altyapı, Veritabanı ve Dağıtım Planı
 
+> **Durum (2026-11-25):** Bu belge ilk dağıtım planıdır. Güncel paketleme `.spec` dosyası kullanmaz (`docs/wiki/exe-dagitim-rehberi.md`); veriler ve yedekler `%LOCALAPPDATA%\ProjeTakip\` altındadır.
+
+
 Bu doküman, **Proje Yönetim ve Takip Platformu**'nun platform bağımsızlığını (database-agnostic), veri güvenliğini, kullanıcı tercihlerinin sürekliliğini ve son kullanıcıya sorunsuz bir şekilde paketlenip dağıtılmasını sağlayacak mimari altyapı standartlarını belirler.
 
 ---

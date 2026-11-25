@@ -34,10 +34,10 @@ Bu yapıyı kurmanın en esnek ve modern yolu, `tasks` (görevler) tablosuna **S
 
 ## UX ve UI Akışları (PySide6 Yansımaları)
 1. **Ağaç Görünümü (Tree View):** Görevler sayfası artık düz bir liste değil, yanındaki ok (chevron) ile daraltılıp genişletilebilir (collapsible) bir ağaç yapısında tasarlanmalıdır. PySide6'daki `QTreeView` veya iç içe tasarlanmış `QFrame` widget'ları bu iş için idealdir.
-2. **Sürükle-Bırak (Drag & Drop):** Kullanıcı bir görevi tutup (örneğin "Renk değiştir") başka bir başlığın altına sürükleyebilmelidir.
+2. **Sürükle-Bırak (Drag & Drop):** Kullanıcı bir görevi tutup (örneğin "Renk değiştir") başka bir başlığın altına sürükleyebilmelidir. **(Uygulandı, 2026-11-25: önüne, arkasına veya altına bırakma.)**
 3. **Satır İçi Ekleme (Inline Add):** Bir başlığın yanındaki `[+]` ikonuna tıklandığında, anında o başlığın altına yeni bir boş satır açılıp hızlıca alt görev yazılabilmelidir.
 
 ## İş Kuralları (Business Rules)
 - **Yukarı Doğru İlerleme Hesabı (Roll-up Progress):** Bir başlığın (örneğin 1. Sekme) tamamlanma yüzdesi, altındaki görevlerin bitme oranına göre otomatik hesaplanır. Projenin genel ilerlemesi de ağacın en üstündeki başlıkların ağırlığına göre hesaplanır.
-- **Otomatik Durum Değişimi:** Bir başlığın altındaki tüm görevler `DONE` (Tamamlandı) durumuna geçerse, üst başlığın durumu da otomatik olarak `DONE` yapılır.
+- **Üst Görev Durumu:** Alt görevlerin tümü `DONE` olsa bile üst görev kendiliğinden `DONE` olmaz; kullanıcı onaylayarak kapatır (bkz. `docs/wiki/gorevler-modulu.md`, Durum kuralı).
 - **Silme Kuralı (Cascade Delete):** Bir üst başlık (örneğin "Ana Sayfa") silinirse, yazılım kullanıcıya "Altındaki 15 görev de silinecek, emin misiniz?" diye uyarı verir.
